@@ -1,4 +1,5 @@
 # GiveawayDiscordBot
+[![Build Status](https://travis-ci.com/megoRU/GiveawayDiscordBot.svg?branch=master)](https://travis-ci.com/megoRU/GiveawayDiscordBot)
 
 ## LICENSE
 
