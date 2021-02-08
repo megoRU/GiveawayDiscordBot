@@ -30,7 +30,7 @@ public class BotStart {
     jdaBuilder.setAutoReconnect(true);
     jdaBuilder.enableIntents(GatewayIntent.GUILD_MEMBERS); // also enable privileged intent
     jdaBuilder.setStatus(OnlineStatus.ONLINE);
-    jdaBuilder.setActivity(Activity.playing("—>!help"));
+    jdaBuilder.setActivity(Activity.playing("—> !help"));
     jdaBuilder.setBulkDeleteSplittingEnabled(false);
     jdaBuilder.addEventListeners(new MessageWhenBotLeaveJoinToGuild());
     jdaBuilder.addEventListeners(new MessageGift());

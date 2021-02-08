@@ -7,6 +7,6 @@
 
 
 ## Add bot to your server
-[![Discord Bots](https://top.gg/api/widget/servers/.svg)](https://top.gg/bot/)
+[![Discord Bots](https://top.gg/api/widget/servers/808277484524011531.svg)](https://top.gg/bot/808277484524011531)
 
-[![Discord Bots](https://top.gg/api/widget/.svg)](https://top.gg/bot/)
+[![Discord Bots](https://top.gg/api/widget/808277484524011531.svg)](https://top.gg/bot/808277484524011531)

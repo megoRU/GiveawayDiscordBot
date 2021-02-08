@@ -48,11 +48,11 @@ public class MessageInfoHelp extends ListenerAdapter {
 
       info.addField("Giveaway:", "`"
           + p + "gift start` - Run Giveaway.\n`"
-          + p + "gift stop` - Stop Giveaway.\n"
+          + p + "gift stop` - Stop Giveaway.\n`"
           + p + "gift stop <number>` - Stop Giveaway with more winners.\n", false);
 
       info.addField("Links:", ":zap: [megoru.ru](https://megoru.ru)\n" +
-              ":robot: [Add me to other guilds](https://discord.com/api/oauth2/authorize?client_id=808277484524011531&permissions=10240&scope=bot)",
+              ":robot: [Add me to other guilds](https://discord.com/oauth2/authorize?client_id=808277484524011531&scope=bot&permissions=3072)",
           false);
       info.addField("Bot creator", ":tools: [mego](https://steamcommunity.com/id/megoRU)", false);
       info.addField("License",
