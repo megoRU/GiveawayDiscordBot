@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import startbot.BotStart;
 
 public class Gift {
 
@@ -40,9 +39,7 @@ public class Gift {
         + "\nWrite `" + guildPrefixStop + "` to stop the giveaway"
         + "\nUsers: `" + count + "`");
 
-    BotStart.jda.getGuildById(guild.getId())
-        .getTextChannelById(channel.getId())
-        .sendMessage(start.build()).queue(m -> messageId.put(guild.getIdLong(), m.getId()));
+    channel.sendMessage(start.build()).queue(m -> messageId.put(guild.getIdLong(), m.getId()));
     start.clear();
   }
 
@@ -61,12 +58,8 @@ public class Gift {
     addUser.setAuthor(user.getName(), null, avatarUrl);
     addUser.setDescription("You are now on the list");
     //Add user to list
-    BotStart.jda.getGuildById(guild.getId())
-        .getTextChannelById(channel.getId())
-        .sendMessage(addUser.build()).queue(null, (exception) ->
-        BotStart.jda.getGuildById(guild.getIdLong())
-            .getTextChannelById(channel.getIdLong())
-            .sendMessage(removeGiftExceptions(guild.getIdLong())).queue());
+    channel.sendMessage(addUser.build()).queue(null, (exception) ->
+        channel.sendMessage(removeGiftExceptions(guild.getIdLong())).queue());
 
     EmbedBuilder edit = new EmbedBuilder();
     edit.setColor(0x00FF00);
@@ -75,24 +68,27 @@ public class Gift {
         + "\nWrite `" + guildPrefixStop + "` to stop the giveaway"
         + "\nUsers: `" + count + "`");
 
-    BotStart.jda.getGuildById(guild.getId()).getTextChannelById(channel.getId())
-        .editMessageById(messageId.get(guild.getIdLong()), edit.build()).queue(null, (exception) ->
-        BotStart.jda.getGuildById(guild.getIdLong())
-            .getTextChannelById(channel.getIdLong())
-            .sendMessage(removeGiftExceptions(guild.getIdLong())).queue());
+    channel.editMessageById(messageId.get(guild.getIdLong()), edit.build())
+        .queue(null,
+            (exception) -> channel.sendMessage(removeGiftExceptions(guild.getIdLong())).queue());
     addUser.clear();
     edit.clear();
   }
 
   public void stopGift(Guild guild, TextChannel channel, Integer countWinner) {
     if (listUsers.size() < 2 || listUsers.size() < countWinner) {
-      BotStart.jda.getGuildById(guild.getId())
-          .getTextChannelById(channel.getId())
-          .sendMessage("Not enough users \nThe giveaway deleted").queue();
+      channel.sendMessage("Not enough users \nThe giveaway deleted").queue();
       listUsersHash.clear();
       listUsers.clear();
       messageId.remove(guild.getIdLong());
       removeGift(guild.getIdLong());
+      return;
+    }
+
+    if (countWinner == listUsers.size()) {
+      channel.sendMessage(
+          "The number of winners must be less than the number of participants!"
+              + "\nTry to reduce the number.").queue();
       return;
     }
 
@@ -108,9 +104,7 @@ public class Gift {
       stopWithMoreWiner.setTitle("Giveaway the end");
       stopWithMoreWiner.setDescription("Winners: " + Arrays.toString(usersWhoWinSet.toArray()));
       //Add user to list
-      BotStart.jda.getGuildById(guild.getId())
-          .getTextChannelById(channel.getId())
-          .sendMessage(stopWithMoreWiner.build()).queue();
+      channel.sendMessage(stopWithMoreWiner.build()).queue();
       stopWithMoreWiner.clear();
       listUsersHash.clear();
       listUsers.clear();
@@ -126,9 +120,7 @@ public class Gift {
     stop.setTitle("Giveaway the end");
     stop.setDescription("Winner: <@" + winUser + ">");
     //Add user to list
-    BotStart.jda.getGuildById(guild.getId())
-        .getTextChannelById(channel.getId())
-        .sendMessage(stop.build()).queue();
+    channel.sendMessage(stop.build()).queue();
     stop.clear();
     listUsersHash.clear();
     listUsers.clear();
@@ -138,10 +130,6 @@ public class Gift {
 
   public String getListUsersHash(String id) {
     return listUsersHash.get(id);
-  }
-
-  protected HashMap<Long, Gift> getGuilds() {
-    return guilds;
   }
 
   public void setGift(long guildId, Gift game) {
@@ -168,10 +156,6 @@ public class Gift {
 
   public Guild getGuild() {
     return guild;
-  }
-
-  public void setGuild(Guild guild) {
-    this.guild = guild;
   }
 
 }
