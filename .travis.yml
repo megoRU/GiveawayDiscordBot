@@ -1,0 +1,6 @@
+dist: focal
+language: java
+
+jdk:
+  - oraclejdk11
+  - openjdk11
