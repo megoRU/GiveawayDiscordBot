@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -14,10 +15,10 @@ import net.dv8tion.jda.api.entities.User;
 
 public class Gift {
 
-  private final ArrayList<String> listUsers = new ArrayList<>();
-  private static final HashMap<Long, String> messageId = new HashMap<>();
+  private final List<String> listUsers = new ArrayList<>();
+  private static final Map<Long, String> messageId = new HashMap<>();
   private final Map<String, String> listUsersHash = new HashMap<>();
-  private static final HashMap<Long, Gift> guilds = new HashMap<>();
+  private static final Map<Long, Gift> guilds = new HashMap<>();
   private final Random random = new Random();
   private final Set<String> usersWhoWinSet = new HashSet<>();
   private int count;
