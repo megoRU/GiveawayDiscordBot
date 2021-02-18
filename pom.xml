@@ -45,31 +45,38 @@
   </build>
 
   <dependencies>
-  <dependency>
-    <groupId>net.dv8tion</groupId>
-    <artifactId>JDA</artifactId>
-    <version>4.2.0_227</version>
-  </dependency>
+    <dependency>
+      <groupId>net.dv8tion</groupId>
+      <artifactId>JDA</artifactId>
+      <version>4.2.0_228</version>
+    </dependency>
 
-  <dependency>
-    <groupId>org.discordbots</groupId>
-    <artifactId>DBL-Java-Library</artifactId>
-    <version>2.0.1</version>
-  </dependency>
+    <!-- https://mvnrepository.com/artifact/com.github.oshi/oshi-core -->
+    <dependency>
+      <groupId>com.github.oshi</groupId>
+      <artifactId>oshi-core</artifactId>
+      <version>5.5.0</version>
+    </dependency>
 
-  <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
-  <dependency>
-    <groupId>org.slf4j</groupId>
-    <artifactId>slf4j-simple</artifactId>
-    <version>1.7.30</version>
-  </dependency>
+    <dependency>
+      <groupId>org.discordbots</groupId>
+      <artifactId>DBL-Java-Library</artifactId>
+      <version>2.0.1</version>
+    </dependency>
 
-  <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
-  <dependency>
-    <groupId>mysql</groupId>
-    <artifactId>mysql-connector-java</artifactId>
-    <version>8.0.23</version>
-  </dependency>
+    <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.7.30</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>8.0.23</version>
+    </dependency>
 
   </dependencies>
 

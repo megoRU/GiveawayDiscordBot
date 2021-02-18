@@ -55,14 +55,15 @@ public class BotStart {
       e.printStackTrace();
     }
 
-//    TOP_GG_API = new DiscordBotListAPI.Builder()
-//            .token(Config.getTopGgApiToken())
-//            .botId(Config.getBotId())
-//            .build();
-//    int serverCount = (int) jda.getGuildCache().size();
-//    TOP_GG_API.setStats(serverCount);
+    TOP_GG_API = new DiscordBotListAPI.Builder()
+            .token(Config.getTopGgApiToken())
+            .botId(Config.getBotId())
+            .build();
+    int serverCount = (int) jda.getGuildCache().size();
+    TOP_GG_API.setStats(serverCount);
 
-    //Statcord.start(jda.getSelfUser().getId(), Config.getStatcrord(), jda, true, 5);
+
+    Statcord.start(jda.getSelfUser().getId(), Config.getStatcrord(), jda, true, 5);
 
   }
 
