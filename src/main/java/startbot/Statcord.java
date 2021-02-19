@@ -46,7 +46,7 @@ public class Statcord {
 
 
   private static int time = 5; // autopost timer in min
-  private static int count;
+  private static int count = -1;
 
   //TODO create start void for ShardManager or generally for sharding
   public static void start(String id, String key, JDA jda, boolean autopost, int timerInMin)
