@@ -48,7 +48,8 @@ public class MessageGift extends ListenerAdapter {
         || message.equals(prefix2)
         || message.equals(prefix3)
         || messageWithOutPrefix.matches(GIFT_STOP_COUNT))) {
-      Statcord.commandPost(message.substring(1, message.length() - 1), event.getAuthor().getId());
+
+      Statcord.commandPost(message.substring(1), event.getAuthor().getId());
       if (message.equals(prefix)) {
         long guild = event.getGuild().getIdLong();
         Gift gift;
