@@ -1,19 +1,20 @@
 package startbot;
 
+import com.sun.management.OperatingSystemMXBean;
+import java.lang.management.ManagementFactory;
+import java.util.Enumeration;
 import net.dv8tion.jda.api.JDA;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import oshi.SystemInfo;
-import oshi.hardware.CentralProcessor;
-
 import java.io.IOException;
 import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
+import oshi.hardware.NetworkIF;
 
 public class Statcord {
 
@@ -26,11 +27,11 @@ public class Statcord {
 
   private static int memactive = 0;
   private static int memload = 0;
-  private static int cpuload = 0;
+  private static long cpuload = 0;
 
   private static long bandwidth;
-  private static long bandwidthOld;
   public static SystemInfo si = new SystemInfo(); // is public because maybe user wants some information
+  private static final OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
 
   private static String custom1 = "empty";
   private static String custom2 = "empty";
@@ -39,14 +40,17 @@ public class Statcord {
   private static JSONArray popcmd = new JSONArray();
   private static JSONArray activeuser = new JSONArray();
   private static boolean autopost = false;
-  private static String ip;
+  private static String NetworkName = "";
+  private static long down;
+  private static long up;
+
 
   private static int time = 5; // autopost timer in min
-
+  private static int count;
 
   //TODO create start void for ShardManager or generally for sharding
-
-  public static void start(String id, String key, JDA jda, boolean autopost, int timerInMin) {
+  public static void start(String id, String key, JDA jda, boolean autopost, int timerInMin)
+      throws Exception {
     System.out.println("\u001B[33mStatcord started with this: "
         + id + " "
         + key + " "
@@ -57,27 +61,20 @@ public class Statcord {
     Statcord.jda = jda;
     Statcord.key = key;
     Statcord.id = id;
-
+    getNetworkName();
 
     // get ip which is mainly used and test connection
-    try (final DatagramSocket socket = new DatagramSocket()) {
-      socket.connect(InetAddress.getByName("statcord.com"), 443);
-      ip = socket.getLocalAddress().getHostAddress();
-    } catch (SocketException | UnknownHostException e) {
-      e.printStackTrace();
-      System.out.println("[Statcord] Statcord is not reachable! Deactivating the wrapper..");
-      return;
-    }
 
     for (int i = 0; i < si.getHardware().getNetworkIFs().size(); i++) {
-      if (Arrays.toString(si.getHardware().getNetworkIFs().get(i).getIPv4addr()).contains(ip)) {
-        System.out.println(si.getHardware().getNetworkIFs().get(i));
-        long down = si.getHardware().getNetworkIFs().get(i).getBytesRecv();
-        long up = si.getHardware().getNetworkIFs().get(i).getBytesSent();
-        bandwidthOld = down + up;
+      count++;
+      if (si.getHardware().getNetworkIFs().get(i).getName().equals(NetworkName)) {
         break;
       }
     }
+
+    getNetworkSpeed();
+
+    bandwidth = down + up;
 
     //make it active
     statcordActive = true;
@@ -116,7 +113,6 @@ public class Statcord {
           "\u001B[33m[Statcord]You can not use 'updateStats' because Statcord is not active!\u001B[0m");
       return;
     }
-    long[] prevTicks = new long[CentralProcessor.TickType.values().length];
     System.out.println("\u001B[33m[Statcord] Updating Statcord!\u001B[0m");
 
     servers = jda.getGuilds().size();
@@ -126,26 +122,18 @@ public class Statcord {
     double mem = ((double) memload / (double) memactive) * (double) 100;
     int memperc = (int) Math.round(mem);
 
-
-    //bandwidth should work
-    long bandwidthTemp = 0;
-    for (int i = 0; i < si.getHardware().getNetworkIFs().size(); i++) {
-      if (Arrays.toString(si.getHardware().getNetworkIFs().get(i).getIPv4addr()).contains(ip)) {
-        System.out.println(si.getHardware().getNetworkIFs().get(i));
-        long down = si.getHardware().getNetworkIFs().get(i).getBytesRecv();
-        long up = si.getHardware().getNetworkIFs().get(i).getBytesSent();
-        bandwidthTemp = down + up;
-        break;
-      }
-    }
-    //only need new information
-    bandwidth = bandwidthTemp - bandwidthOld;
-    bandwidthOld = bandwidthTemp;
-
     //cpu
-    CentralProcessor cpu = si.getHardware().getProcessor();
-    cpuload = (int) (cpu.getSystemCpuLoadBetweenTicks(prevTicks) * 100);
+    long nanoBefore = System.nanoTime();
+    long cpuBefore = osBean.getProcessCpuTime();
 
+    long cpuAfter = osBean.getProcessCpuTime();
+    long nanoAfter = System.nanoTime();
+
+    if (nanoAfter > nanoBefore) {
+      cpuload = ((cpuAfter - cpuBefore) * 100L) / (nanoAfter - nanoBefore);
+    } else {
+      cpuload = 0;
+    }
 
     JSONObject post = new JSONObject();
     post.put("id", id);
@@ -253,6 +241,59 @@ public class Statcord {
       System.out.println("[Statcord] An error happened");
       System.out.println(response.body());
     }
+  }
+
+  public static void getNetworkName() throws Exception {
+
+    final Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+
+    // get hostname
+    InetAddress myAddr = InetAddress.getByName(si.getOperatingSystem().getNetworkParams().getHostName());
+
+    while (networkInterfaces.hasMoreElements()) {
+      NetworkInterface networkInterface = networkInterfaces.nextElement();
+      Enumeration<InetAddress> inAddrs = networkInterface.getInetAddresses();
+      while (inAddrs.hasMoreElements()) {
+        InetAddress inAddr = inAddrs.nextElement();
+        if (inAddr.equals(myAddr)) {
+          NetworkName = networkInterface.getName();
+          return;
+        }
+      }
+    }
+    System.out.println("Not found network hostname");
+  }
+
+  public static void getNetworkSpeed() {
+
+    NetworkIF[] networkIFs = si.getHardware().getNetworkIFs().toArray(new NetworkIF[count]);
+    int i = 0;
+    NetworkIF net = networkIFs[count];
+    try {
+      while (!networkIFs[i].getName().equals(NetworkName)) {
+        net = networkIFs[i];
+        i++;
+      }
+    } catch (ArrayIndexOutOfBoundsException e) {
+      e.printStackTrace();
+    }
+
+    long download1 = net.getBytesRecv();
+    long upload1 = net.getBytesSent();
+    long timestamp1 = net.getTimeStamp();
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    net.updateAttributes(); //Updating network stats
+    long download2 = net.getBytesRecv();
+    long upload2 = net.getBytesSent();
+    long timestamp2 = net.getTimeStamp();
+
+    down = (download2 - download1) / (timestamp2 - timestamp1);
+    up = (upload2 - upload1) / (timestamp2 - timestamp1);
+
   }
 
   //autorun set to 5min or custom

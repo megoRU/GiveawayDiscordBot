@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import startbot.BotStart;
+import startbot.Statcord;
 
 public class MessageGift extends ListenerAdapter {
 
@@ -47,7 +48,7 @@ public class MessageGift extends ListenerAdapter {
         || message.equals(prefix2)
         || message.equals(prefix3)
         || messageWithOutPrefix.matches(GIFT_STOP_COUNT))) {
-
+      Statcord.commandPost(message.substring(1, message.length() - 1), event.getAuthor().getId());
       if (message.equals(prefix)) {
         long guild = event.getGuild().getIdLong();
         Gift gift;

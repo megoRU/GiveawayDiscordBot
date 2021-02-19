@@ -17,14 +17,12 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
-import org.discordbots.api.client.DiscordBotListAPI;
 
 public class BotStart {
 
   public static JDA jda;
   private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
   public static final Map<String, String> mapPrefix = new HashMap<>();
-  public static DiscordBotListAPI TOP_GG_API;
 
   public void startBot() throws Exception {
     jdaBuilder.setAutoReconnect(true);
@@ -54,17 +52,6 @@ public class BotStart {
     } catch (SQLException e) {
       e.printStackTrace();
     }
-
-    TOP_GG_API = new DiscordBotListAPI.Builder()
-            .token(Config.getTopGgApiToken())
-            .botId(Config.getBotId())
-            .build();
-    int serverCount = (int) jda.getGuildCache().size();
-    TOP_GG_API.setStats(serverCount);
-
-
-    Statcord.start(jda.getSelfUser().getId(), Config.getStatcrord(), jda, true, 5);
-
   }
 
   public JDA getJda() {
