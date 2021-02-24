@@ -1,7 +1,7 @@
 package startbot;
 
 import config.Config;
-import events.MessageWhenBotLeaveJoinToGuild;
+import events.MessageWhenBotJoinToGuild;
 import giftaway.MessageGift;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -30,7 +30,7 @@ public class BotStart {
     jdaBuilder.setStatus(OnlineStatus.ONLINE);
     jdaBuilder.setActivity(Activity.playing("—> !help"));
     jdaBuilder.setBulkDeleteSplittingEnabled(false);
-    jdaBuilder.addEventListeners(new MessageWhenBotLeaveJoinToGuild());
+    jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild());
     jdaBuilder.addEventListeners(new MessageGift());
     jdaBuilder.addEventListeners(new PrefixChange());
     jdaBuilder.addEventListeners(new MessageInfoHelp());

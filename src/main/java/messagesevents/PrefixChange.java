@@ -32,6 +32,11 @@ public class PrefixChange extends ListenerAdapter {
       return;
     }
 
+    if (message.matches(PREFIX) && messages[1].equals("!")) {
+      event.getChannel().sendMessage("This is the standard prefix!").queue();
+      return;
+    }
+
     if (message.matches(PREFIX) && event.getMember().hasPermission(Permission.MANAGE_SERVER)
         && BotStart.mapPrefix.get(event.getMessage().getGuild().getId()) != null) {
       BotStart.mapPrefix.put(event.getGuild().getId(), messages[1]);

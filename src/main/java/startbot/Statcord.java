@@ -2,6 +2,7 @@ package startbot;
 
 import com.sun.management.OperatingSystemMXBean;
 import java.lang.management.ManagementFactory;
+import java.text.DecimalFormat;
 import java.util.Enumeration;
 import net.dv8tion.jda.api.JDA;
 import org.json.JSONArray;
@@ -27,11 +28,10 @@ public class Statcord {
 
   private static int memactive = 0;
   private static int memload = 0;
-  private static long cpuload = 0;
+  private static int cpuload = 0;
 
   private static long bandwidth;
   public static SystemInfo si = new SystemInfo(); // is public because maybe user wants some information
-  private static final OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
 
   private static String custom1 = "empty";
   private static String custom2 = "empty";
@@ -123,17 +123,13 @@ public class Statcord {
     int memperc = (int) Math.round(mem);
 
     //cpu
-    long nanoBefore = System.nanoTime();
-    long cpuBefore = osBean.getProcessCpuTime();
 
-    long cpuAfter = osBean.getProcessCpuTime();
-    long nanoAfter = System.nanoTime();
+    OperatingSystemMXBean bean = (com.sun.management.OperatingSystemMXBean) ManagementFactory
+        .getOperatingSystemMXBean();
 
-    if (nanoAfter > nanoBefore) {
-      cpuload = ((cpuAfter - cpuBefore) * 100L) / (nanoAfter - nanoBefore);
-    } else {
-      cpuload = 0;
-    }
+    DecimalFormat formatter = new DecimalFormat("#0");
+
+    cpuload = Integer.parseInt(formatter.format(bean.getCpuLoad() * 100));
 
     JSONObject post = new JSONObject();
     post.put("id", id);

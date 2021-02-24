@@ -11,7 +11,7 @@ public class StatcordThread extends Thread {
     try {
       Statcord.start(
           BotStart.jda.getSelfUser().getId(),
-          Config.getStatcrord(),
+          Config.getStatcord(),
           BotStart.jda,
           true,
           5);
