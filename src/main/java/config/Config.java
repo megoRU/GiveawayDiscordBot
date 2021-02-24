@@ -9,8 +9,8 @@ public class Config {
   private static final String USER = "";
   private static final String PASS = "";
   private static final String TOP_GG_API_TOKEN = "";
-  private static final String BOT_ID = "";
-  private static final String STATCRORD = "";
+  private static final String BOT_ID = "808277484524011531"; //megoDev: 780145910764142613 //giveaway: 808277484524011531
+  private static final String STATCORD = "";
 
   public static String getTOKEN() {
     return TOKEN;
@@ -36,7 +36,7 @@ public class Config {
     return BOT_ID;
   }
 
-  public static String getStatcrord() {
-    return STATCRORD;
+  public static String getStatcord() {
+    return STATCORD;
   }
 }
