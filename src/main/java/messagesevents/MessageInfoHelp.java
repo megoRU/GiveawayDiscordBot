@@ -43,7 +43,8 @@ public class MessageInfoHelp extends ListenerAdapter {
       EmbedBuilder info = new EmbedBuilder();
       info.setColor(0xa224db);
       info.setAuthor(event.getAuthor().getName(), null, avatarUrl);
-      info.addField("Prefix:", """
+      info.addField("Prefix:",
+              """
               `*prefix <symbol>` - Changes the prefix.
               `*prefix reset` - Reset the prefix.
               """
@@ -67,7 +68,8 @@ public class MessageInfoHelp extends ListenerAdapter {
       event.getMember().getUser().openPrivateChannel()
           .flatMap(m -> event.getMember().getUser().openPrivateChannel())
           .flatMap(channel -> channel.sendMessage(info.build()))
-          .queue(null, error -> event.getChannel().sendMessage("Failed to send message!").queue());
+          .queue(null, error -> event.getChannel().sendMessage("Failed to send message. "
+              + "Maybe I'm on your blacklist!").queue());
     }
   }
 }
