@@ -77,7 +77,7 @@ public class Gift {
   }
 
   public void stopGift(Guild guild, TextChannel channel, Integer countWinner) {
-    if (listUsers.size() < 2 || listUsers.size() < countWinner) {
+    if (listUsers.size() < 2) {
       EmbedBuilder notEnoughUsers = new EmbedBuilder();
       notEnoughUsers.setColor(0xFF0000);
       notEnoughUsers.setTitle("Not enough users");
@@ -94,12 +94,22 @@ public class Gift {
       return;
     }
 
-    if (countWinner == listUsers.size()) {
-      channel.sendMessage(
-          """
+    if (countWinner >= listUsers.size()) {
+      EmbedBuilder fewParticipants = new EmbedBuilder();
+      fewParticipants.setColor(0xFF8000);
+      fewParticipants.setTitle(":warning: Invalid number");
+      fewParticipants.setDescription(
+              """
               The number of winners must be less than the number of participants!
-              Try to reduce the number.
-              """).queue();
+              """ +
+              "You entered a number: `" + countWinner + "`\n" +
+              "Now for the participants: `" + count + "`\n" +
+              """ 
+              This action did not cause the deletion: **Giveaway**!
+              """
+      );
+      channel.sendMessage(fewParticipants.build()).queue();
+      fewParticipants.clear();
       return;
     }
 
