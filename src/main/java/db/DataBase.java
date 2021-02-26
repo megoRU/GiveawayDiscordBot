@@ -8,13 +8,13 @@ import java.sql.SQLException;
 
 public class DataBase {
 
-  private final Connection conn = DriverManager.getConnection(Config.getCONN(), Config.getUSER(), Config.getPASS());
+  private final Connection conn = DriverManager
+      .getConnection(Config.getCONN(), Config.getUSER(), Config.getPASS());
 
-  public DataBase() throws SQLException {
-  }
+  public DataBase() throws SQLException {}
 
-  //Добавление префекса
-  public void addDB(String serverId, String prefix) {
+  //Добавление префикса
+  public void addPrefixToDB(String serverId, String prefix) {
     try {
       String sql = "INSERT INTO prefixs (serverId, prefix) VALUES (?, ?)";
       PreparedStatement preparedStatement = conn.prepareStatement(sql);
@@ -26,8 +26,8 @@ public class DataBase {
     }
   }
 
-  //Удаление префекса
-  public void removeDB(String serverId) {
+  //Удаление префикса
+  public void removePrefixFromDB(String serverId) {
     try {
       String sql = "DELETE FROM prefixs WHERE serverId='" + serverId + "'";
       PreparedStatement preparedStatement = conn.prepareStatement(sql);
@@ -38,4 +38,3 @@ public class DataBase {
   }
 
 }
-

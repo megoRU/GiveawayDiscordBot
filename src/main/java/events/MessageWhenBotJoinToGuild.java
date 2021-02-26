@@ -34,6 +34,7 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
           , false);
 
       event.getGuild().getDefaultChannel().sendMessage(welcome.build()).queue();
+      welcome.clear();
     } catch (Exception e) {
       e.printStackTrace();
     }

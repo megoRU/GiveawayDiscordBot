@@ -78,7 +78,15 @@ public class Gift {
 
   public void stopGift(Guild guild, TextChannel channel, Integer countWinner) {
     if (listUsers.size() < 2 || listUsers.size() < countWinner) {
-      channel.sendMessage("Not enough users \nThe giveaway deleted").queue();
+      EmbedBuilder notEnoughUsers = new EmbedBuilder();
+      notEnoughUsers.setColor(0xFF0000);
+      notEnoughUsers.setTitle("Not enough users");
+      notEnoughUsers.setDescription(
+              """
+              :x: The giveaway deleted!
+              """);
+      channel.sendMessage(notEnoughUsers.build()).queue();
+      notEnoughUsers.clear();
       listUsersHash.clear();
       listUsers.clear();
       messageId.remove(guild.getIdLong());
@@ -88,8 +96,10 @@ public class Gift {
 
     if (countWinner == listUsers.size()) {
       channel.sendMessage(
-          "The number of winners must be less than the number of participants!"
-              + "\nTry to reduce the number.").queue();
+          """
+              The number of winners must be less than the number of participants!
+              Try to reduce the number.
+              """).queue();
       return;
     }
 
@@ -151,8 +161,10 @@ public class Gift {
 
   public String removeGiftExceptions(long guildId) {
     guilds.remove(guildId);
-    return "The giveaway was canceled because the bot was unable to get the ID\n" +
-        "your post for editing. Please try again.";
+    return """
+        The giveaway was canceled because the bot was unable to get the ID
+        your post for editing. Please try again.
+        """;
   }
 
   public Guild getGuild() {

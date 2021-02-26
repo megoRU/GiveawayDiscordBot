@@ -42,8 +42,8 @@ public class PrefixChange extends ListenerAdapter {
       BotStart.mapPrefix.put(event.getGuild().getId(), messages[1]);
       try {
         DataBase dataBase = new DataBase();
-        dataBase.removeDB(event.getGuild().getId());
-        dataBase.addDB(event.getGuild().getId(), messages[1]);
+        dataBase.removePrefixFromDB(event.getGuild().getId());
+        dataBase.addPrefixToDB(event.getGuild().getId(), messages[1]);
       } catch (SQLException e) {
         e.printStackTrace();
       }
@@ -55,7 +55,7 @@ public class PrefixChange extends ListenerAdapter {
       BotStart.mapPrefix.put(event.getGuild().getId(), messages[1]);
       try {
         DataBase dataBase = new DataBase();
-        dataBase.addDB(event.getGuild().getId(), messages[1]);
+        dataBase.addPrefixToDB(event.getGuild().getId(), messages[1]);
       } catch (SQLException e) {
         e.printStackTrace();
       }
@@ -67,7 +67,7 @@ public class PrefixChange extends ListenerAdapter {
       BotStart.mapPrefix.remove(event.getGuild().getId());
       try {
         DataBase dataBase = new DataBase();
-        dataBase.removeDB(event.getGuild().getId());
+        dataBase.removePrefixFromDB(event.getGuild().getId());
       } catch (SQLException e) {
         e.printStackTrace();
       }
