@@ -22,6 +22,7 @@ public class Gift {
   private final Random random = new Random();
   private final Set<String> usersWhoWinSet = new HashSet<>();
   private int count;
+  private static int giveawayCount;
   private Guild guild;
 
   public Gift(Guild guild) {
@@ -39,7 +40,7 @@ public class Gift {
     start.setDescription("Write to participate: `" + guildPrefix + "`"
         + "\nWrite `" + guildPrefixStop + "` to stop the giveaway"
         + "\nUsers: `" + count + "`");
-
+    setGiveawayCount(getGiveawayCount() + 1);
     channel.sendMessage(start.build()).queue(m -> messageId.put(guild.getIdLong(), m.getId()));
     start.clear();
   }
@@ -91,6 +92,7 @@ public class Gift {
       listUsers.clear();
       messageId.remove(guild.getIdLong());
       removeGift(guild.getIdLong());
+      setGiveawayCount(getGiveawayCount() - 1);
       return;
     }
 
@@ -131,6 +133,7 @@ public class Gift {
       listUsers.clear();
       messageId.clear();
       removeGift(guild.getIdLong());
+      setGiveawayCount(getGiveawayCount() - 1);
       return;
     }
 
@@ -147,6 +150,7 @@ public class Gift {
     listUsers.clear();
     messageId.clear();
     removeGift(guild.getIdLong());
+    setGiveawayCount(getGiveawayCount() - 1);
   }
 
   public String getListUsersHash(String id) {
@@ -179,6 +183,14 @@ public class Gift {
 
   public Guild getGuild() {
     return guild;
+  }
+
+  public synchronized int getGiveawayCount() {
+    return giveawayCount;
+  }
+
+  public synchronized void setGiveawayCount(int giveawayCount) {
+    Gift.giveawayCount = giveawayCount;
   }
 
 }
