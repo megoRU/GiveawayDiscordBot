@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -22,7 +23,7 @@ public class Gift {
   private final Random random = new Random();
   private final Set<String> usersWhoWinSet = new HashSet<>();
   private int count;
-  private static int giveawayCount;
+  private static final AtomicInteger giveawayCount = new AtomicInteger(0);
   private Guild guild;
 
   public Gift(Guild guild) {
@@ -40,7 +41,7 @@ public class Gift {
     start.setDescription("Write to participate: `" + guildPrefix + "`"
         + "\nWrite `" + guildPrefixStop + "` to stop the giveaway"
         + "\nUsers: `" + count + "`");
-    setGiveawayCount(getGiveawayCount() + 1);
+    incrementGiveAwayCount();
     channel.sendMessage(start.build()).queue(m -> messageId.put(guild.getIdLong(), m.getId()));
     start.clear();
   }
@@ -92,7 +93,7 @@ public class Gift {
       listUsers.clear();
       messageId.remove(guild.getIdLong());
       removeGift(guild.getIdLong());
-      setGiveawayCount(getGiveawayCount() - 1);
+      decrementGiveAwayCount();
       return;
     }
 
@@ -133,7 +134,7 @@ public class Gift {
       listUsers.clear();
       messageId.clear();
       removeGift(guild.getIdLong());
-      setGiveawayCount(getGiveawayCount() - 1);
+      decrementGiveAwayCount();
       return;
     }
 
@@ -150,7 +151,7 @@ public class Gift {
     listUsers.clear();
     messageId.clear();
     removeGift(guild.getIdLong());
-    setGiveawayCount(getGiveawayCount() - 1);
+    decrementGiveAwayCount();
   }
 
   public String getListUsersHash(String id) {
@@ -185,12 +186,16 @@ public class Gift {
     return guild;
   }
 
-  public synchronized int getGiveawayCount() {
-    return giveawayCount;
+  public synchronized void incrementGiveAwayCount() {
+    giveawayCount.getAndIncrement();
   }
 
-  public synchronized void setGiveawayCount(int giveawayCount) {
-    Gift.giveawayCount = giveawayCount;
+  public synchronized void decrementGiveAwayCount() {
+    giveawayCount.decrementAndGet();
+  }
+
+  public synchronized Integer getGiveAwayCount() {
+    return giveawayCount.get();
   }
 
 }

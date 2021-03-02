@@ -114,7 +114,7 @@ public class MessageGift extends ListenerAdapter {
         EmbedBuilder getCount = new EmbedBuilder();
         getCount.setTitle("Giveaway count");
         getCount.setColor(0x00FF00);
-        getCount.setDescription("Active: `" + gift.getGiveawayCount() + "`");
+        getCount.setDescription("Active: `" + gift.getGiveAwayCount() + "`");
         event.getChannel().sendMessage(getCount.build()).queue();
         getCount.clear();
       }
