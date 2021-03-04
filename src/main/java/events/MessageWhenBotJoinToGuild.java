@@ -21,7 +21,9 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
       EmbedBuilder welcome = new EmbedBuilder();
       welcome.setColor(Color.GREEN);
       welcome.addField("Giveaway",
-          "Thanks for adding " + "**Giveaway**" + " to " + event.getGuild().getName() + "!\n"
+          "Thanks for adding " + "**" +
+              event.getGuild().getSelfMember().getUser().getName()
+              + "** " + "**bot**" + " to " + event.getGuild().getName() + "!\n"
           , false);
       welcome.addField("List of commands",
           "Use **!help** for a list of commands."
