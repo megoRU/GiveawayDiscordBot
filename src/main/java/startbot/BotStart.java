@@ -16,7 +16,6 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.requests.GatewayIntent;
 
 public class BotStart {
 
@@ -26,7 +25,6 @@ public class BotStart {
 
   public void startBot() throws Exception {
     jdaBuilder.setAutoReconnect(true);
-    jdaBuilder.enableIntents(GatewayIntent.GUILD_MEMBERS); // also enable privileged intent
     jdaBuilder.setStatus(OnlineStatus.ONLINE);
     jdaBuilder.setActivity(Activity.playing("—> !help"));
     jdaBuilder.setBulkDeleteSplittingEnabled(false);
