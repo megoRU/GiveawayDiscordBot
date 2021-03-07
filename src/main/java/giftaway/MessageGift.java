@@ -11,6 +11,7 @@ import startbot.Statcord;
 public class MessageGift extends ListenerAdapter {
 
   private static final String GIFT_START = "!gift start";
+  private static final String GIFT_START_TITLE = "gift start\\s.{10,255}$";
   private static final String GIFT_STOP = "!gift stop";
   private static final String GIFT_STOP_COUNT = "gift stop\\s[0-9]+";
   private static final String GIFT_COUNT = "!gift count";
@@ -31,7 +32,7 @@ public class MessageGift extends ListenerAdapter {
       return;
     }
 
-    String[] messageSplit = message.split(" ");
+    String[] messageSplit = message.split(" ", 3);
     int length = message.length();
     String messageWithOutPrefix = message.substring(1, length);
 
@@ -45,29 +46,50 @@ public class MessageGift extends ListenerAdapter {
       prefix4 = BotStart.getMapPrefix().get(event.getGuild().getId()) + "gift count";
     }
 
+    //TODO: Нужно всё тестировать!
+    if ((message.contains("!gift start ") && (message.length() - 11) >= 256)) {
+      event.getChannel().sendMessage("The title must not be longer than 255 characters!").queue();
+      return;
+    }
+
     if (message.equals(prefix2)
         || message.equals(prefix3)
         || messageWithOutPrefix.matches(GIFT_STOP_COUNT)
-        || message.equals(prefix4)) {
+        || message.equals(prefix4)
+        || messageWithOutPrefix.matches(GIFT_START_TITLE)) {
 
-      Statcord.commandPost(message.substring(1), event.getAuthor().getId());
+      if (!messageWithOutPrefix.matches(GIFT_START_TITLE)) {
+        Statcord.commandPost(message.substring(1), event.getAuthor().getId());
+      }
+
+      if (messageWithOutPrefix.matches(GIFT_START_TITLE)) {
+        Statcord.commandPost("gift start", event.getAuthor().getId());
+      }
 
       if (message.equals(prefix2)
           || message.equals(prefix3)
-          || messageWithOutPrefix.matches(GIFT_STOP_COUNT)) {
+          || messageWithOutPrefix.matches(GIFT_STOP_COUNT)
+          || messageWithOutPrefix.matches(GIFT_START_TITLE)) {
         long guild = event.getGuild().getIdLong();
         Gift gift;
         gift = new Gift();
 
-        if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+        if (!event.getMember().hasPermission(event.getChannel(), Permission.ADMINISTRATOR)) {
           event.getChannel().sendMessage("You are not Admin").queue();
           return;
         }
 
-        if (message.equals(prefix2) && !gift.hasGift(guild)) {
-          gift.setGift(guild, new Gift(event.getGuild()));
-          gift.startGift(event.getGuild(), event.getChannel(), prefix3);
+        if ((message.equals(prefix2)
+            || messageWithOutPrefix.matches(GIFT_START_TITLE))
+            && !gift.hasGift(guild)) {
 
+          gift.setGift(guild, new Gift(event.getGuild()));
+          if (messageSplit.length >= 3) {
+            gift.startGift(event.getGuild(), event.getChannel(), messageSplit[2]);
+            return;
+          } else {
+            gift.startGift(event.getGuild(), event.getChannel(), null);
+          }
         }
 
         if ((message.equals(prefix3)
@@ -81,6 +103,7 @@ public class MessageGift extends ListenerAdapter {
             return;
           }
           gift.stopGift(event.getGuild(), event.getChannel(), Integer.parseInt("1"));
+          return;
         }
       }
 

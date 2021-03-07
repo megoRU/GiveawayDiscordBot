@@ -21,6 +21,7 @@ public class Gift {
 
   private final List<String> listUsers = new ArrayList<>();
   private static final Map<Long, String> messageId = new HashMap<>();
+  private static final Map<Long, String> title = new HashMap<>();
   private final Map<String, String> listUsersHash = new HashMap<>();
   private static final Map<Long, Gift> guilds = new HashMap<>();
   private final Random random = new Random();
@@ -37,12 +38,12 @@ public class Gift {
   public Gift() {
   }
 
-  public void startGift(Guild guild, TextChannel channel, String guildPrefixStop) {
+  public void startGift(Guild guild, TextChannel channel, String newTitle) {
+    title.put(guild.getIdLong(), newTitle == null ? "Giveaway" : newTitle);
     EmbedBuilder start = new EmbedBuilder();
     start.setColor(0x00FF00);
-    start.setTitle("Giveaway starts");
-    start.setDescription("To participate click on the emoji: :gift:"
-        + "\nWrite `" + guildPrefixStop + "` to stop the giveaway"
+    start.setTitle(title.get(guild.getIdLong()));
+    start.setDescription("React with :gift: to enter!"
         + "\nUsers: `" + count + "`");
     incrementGiveAwayCount();
     channel.sendMessage(start.build()).queue(m -> {
@@ -59,17 +60,14 @@ public class Gift {
     start.clear();
   }
 
-  public void addUserToPoll(User user, Guild guild, String guildPrefixStop,
-      TextChannel channel) {
+  public void addUserToPoll(User user, Guild guild, TextChannel channel) {
     count++;
     listUsers.add(user.getId());
     listUsersHash.put(user.getId(), user.getId());
-
     EmbedBuilder edit = new EmbedBuilder();
     edit.setColor(0x00FF00);
-    edit.setTitle("Giveaway");
-    edit.setDescription("To participate click on the emoji: :gift:"
-        + "\nWrite `" + guildPrefixStop + "gift stop` to stop the giveaway"
+    edit.setTitle(title.get(guild.getIdLong()));
+    edit.setDescription("React with :gift: to enter!"
         + "\nUsers: `" + count + "`");
 
     channel.editMessageById(messageId.get(guild.getIdLong()), edit.build())
@@ -92,6 +90,7 @@ public class Gift {
       listUsersHash.clear();
       listUsers.clear();
       messageId.remove(guild.getIdLong());
+      title.remove(guild.getIdLong());
       removeGift(guild.getIdLong());
       decrementGiveAwayCount();
       return;
@@ -134,6 +133,7 @@ public class Gift {
       listUsers.clear();
       messageId.clear();
       removeGift(guild.getIdLong());
+      title.remove(guild.getIdLong());
       decrementGiveAwayCount();
       return;
     }

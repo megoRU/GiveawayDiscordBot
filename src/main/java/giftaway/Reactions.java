@@ -22,9 +22,6 @@ public class Reactions extends ListenerAdapter {
         return;
       }
 
-      String prefix = BotStart.getMapPrefix().get(event.getGuild().getId()) == null ? "!"
-          : BotStart.getMapPrefix().get(event.getGuild().getId());
-
       if (!event.getGuild().getSelfMember()
           .hasPermission(event.getChannel(), Permission.MESSAGE_MANAGE)) {
         event.getChannel().sendMessage("Bot don\\`t have: `Permission.MESSAGE_MANAGE`").queue();
@@ -54,7 +51,7 @@ public class Reactions extends ListenerAdapter {
           && gift.hasGift(guild)) {
         gift = gift.getGift(event.getGuild().getIdLong());
         if (gift.getListUsersHash(event.getUser().getId()) == null) {
-          gift.addUserToPoll(event.getMember().getUser(), event.getGuild(), prefix, event.getChannel());
+          gift.addUserToPoll(event.getMember().getUser(), event.getGuild(), event.getChannel());
         }
       }
 
