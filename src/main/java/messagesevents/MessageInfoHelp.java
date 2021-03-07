@@ -51,7 +51,8 @@ public class MessageInfoHelp extends ListenerAdapter {
           , false);
 
       info.addField("Giveaway:", "`"
-          + p + "gift start` - Run Giveaway.\n`"
+          + p + "gift start` - Start Giveaway.\n`"
+          + p + "gift start <text>` - Start Giveaway with special text.\n`"
           + p + "gift stop` - Stop Giveaway.\n`"
           + p + "gift stop <number>` - Stop Giveaway with more winners.\n", false);
 
