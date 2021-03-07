@@ -1,5 +1,7 @@
 package giftaway;
 
+import db.DataBase;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,11 +15,13 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import startbot.BotStart;
 
 public class Gift {
 
   private final List<String> listUsers = new ArrayList<>();
   private static final Map<Long, String> messageId = new HashMap<>();
+  private static final Map<Long, String> title = new HashMap<>();
   private final Map<String, String> listUsersHash = new HashMap<>();
   private static final Map<Long, Gift> guilds = new HashMap<>();
   private final Random random = new Random();
@@ -25,6 +29,7 @@ public class Gift {
   private int count;
   private static final AtomicInteger giveawayCount = new AtomicInteger(0);
   private Guild guild;
+  private static final String emojiPresent = "\uD83C\uDF81";
 
   public Gift(Guild guild) {
     this.guild = guild;
@@ -33,48 +38,41 @@ public class Gift {
   public Gift() {
   }
 
-  public void startGift(Guild guild, TextChannel channel, String guildPrefix,
-      String guildPrefixStop) {
+  public void startGift(Guild guild, TextChannel channel, String newTitle) {
+    title.put(guild.getIdLong(), newTitle == null ? "Giveaway" : newTitle);
     EmbedBuilder start = new EmbedBuilder();
     start.setColor(0x00FF00);
-    start.setTitle("Giveaway starts");
-    start.setDescription("Write to participate: `" + guildPrefix + "`"
-        + "\nWrite `" + guildPrefixStop + "` to stop the giveaway"
+    start.setTitle(title.get(guild.getIdLong()));
+    start.setDescription("React with :gift: to enter!"
         + "\nUsers: `" + count + "`");
     incrementGiveAwayCount();
-    channel.sendMessage(start.build()).queue(m -> messageId.put(guild.getIdLong(), m.getId()));
+    channel.sendMessage(start.build()).queue(m -> {
+      messageId.put(guild.getIdLong(), m.getId());
+      BotStart.getIdMessagesWithGiveawayEmoji().put(m.getId(), m.getId());
+      m.addReaction(emojiPresent).queue();
+      try {
+        DataBase dataBase = new DataBase();
+        dataBase.insertIdMessagesWithPollEmoji(m.getId());
+      } catch (SQLException troubles) {
+        troubles.printStackTrace();
+      }
+    });
     start.clear();
   }
 
-  public void addUserToPoll(User user, Guild guild, String guildPrefix, String guildPrefixStop,
-      TextChannel channel) {
+  public void addUserToPoll(User user, Guild guild, TextChannel channel) {
     count++;
     listUsers.add(user.getId());
     listUsersHash.put(user.getId(), user.getId());
-    String avatarUrl = null;
-    String avatarFromEvent = user.getAvatarUrl();
-    if (avatarFromEvent != null) {
-      avatarUrl = avatarFromEvent;
-    }
-    EmbedBuilder addUser = new EmbedBuilder();
-    addUser.setColor(0x00FF00);
-    addUser.setAuthor(user.getName(), null, avatarUrl);
-    addUser.setDescription("You are now on the list");
-    //Add user to list
-    channel.sendMessage(addUser.build()).queue(null, (exception) ->
-        channel.sendMessage(removeGiftExceptions(guild.getIdLong())).queue());
-
     EmbedBuilder edit = new EmbedBuilder();
     edit.setColor(0x00FF00);
-    edit.setTitle("Giveaway");
-    edit.setDescription("Write to participate: `" + guildPrefix + "`"
-        + "\nWrite `" + guildPrefixStop + "` to stop the giveaway"
+    edit.setTitle(title.get(guild.getIdLong()));
+    edit.setDescription("React with :gift: to enter!"
         + "\nUsers: `" + count + "`");
 
     channel.editMessageById(messageId.get(guild.getIdLong()), edit.build())
         .queue(null,
             (exception) -> channel.sendMessage(removeGiftExceptions(guild.getIdLong())).queue());
-    addUser.clear();
     edit.clear();
   }
 
@@ -92,6 +90,7 @@ public class Gift {
       listUsersHash.clear();
       listUsers.clear();
       messageId.remove(guild.getIdLong());
+      title.remove(guild.getIdLong());
       removeGift(guild.getIdLong());
       decrementGiveAwayCount();
       return;
@@ -134,6 +133,7 @@ public class Gift {
       listUsers.clear();
       messageId.clear();
       removeGift(guild.getIdLong());
+      title.remove(guild.getIdLong());
       decrementGiveAwayCount();
       return;
     }

@@ -37,4 +37,18 @@ public class DataBase {
     }
   }
 
+  //Добавляем id сообщения с реакцией
+  public void insertIdMessagesWithPollEmoji(String messageId) {
+    try {
+      String query = "INSERT IGNORE INTO `idMessagesWithGiveawayEmoji` (idMessagesWithGiveawayEmoji) values (?)";
+      PreparedStatement preparedStatement = conn.prepareStatement(query);
+      preparedStatement.setString(1, messageId);
+      preparedStatement.executeUpdate();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+
+
 }
