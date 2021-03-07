@@ -32,7 +32,6 @@ public class Reactions extends ListenerAdapter {
       }
 
       //Что делает этот код...:
-      System.out.println(event.getReactionEmote().isEmoji());
       if (!event.getReactionEmote().isEmoji()) {
         event.getReaction().removeReaction(event.getUser()).queue();
         return;

@@ -42,7 +42,7 @@ public class Gift {
     start.setColor(0x00FF00);
     start.setTitle("Giveaway starts");
     start.setDescription("To participate click on the emoji: :gift:"
-        + "\nWrite `" + guildPrefixStop + "gift stop` to stop the giveaway"
+        + "\nWrite `" + guildPrefixStop + "` to stop the giveaway"
         + "\nUsers: `" + count + "`");
     incrementGiveAwayCount();
     channel.sendMessage(start.build()).queue(m -> {
