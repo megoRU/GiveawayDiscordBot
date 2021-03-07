@@ -3,6 +3,7 @@ package startbot;
 import config.Config;
 import events.MessageWhenBotJoinToGuild;
 import giftaway.MessageGift;
+import giftaway.Reactions;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -21,7 +22,8 @@ public class BotStart {
 
   public static JDA jda;
   private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
-  public static final Map<String, String> mapPrefix = new HashMap<>();
+  private static final Map<String, String> mapPrefix = new HashMap<>();
+  private static final Map<String, String> idMessagesWithGiveawayEmoji = new HashMap<>();
 
   public void startBot() throws Exception {
     jdaBuilder.setAutoReconnect(true);
@@ -32,7 +34,7 @@ public class BotStart {
     jdaBuilder.addEventListeners(new MessageGift());
     jdaBuilder.addEventListeners(new PrefixChange());
     jdaBuilder.addEventListeners(new MessageInfoHelp());
-
+    jdaBuilder.addEventListeners(new Reactions());
 
     jda = jdaBuilder.build();
     jda.awaitReady();
@@ -42,14 +44,32 @@ public class BotStart {
       Statement statement = conn.createStatement();
       String sql = "select * from prefixs";
       ResultSet rs = statement.executeQuery(sql);
+      Statement statementSecond = conn.createStatement();
+
+      String sqlIdMessagesWithPollEmoji = "select * from idMessagesWithGiveawayEmoji";
+      ResultSet rsIdMessages = statementSecond.executeQuery(sqlIdMessagesWithPollEmoji);
 
       while (rs.next()) {
         mapPrefix.put(rs.getString("serverId"), rs.getString("prefix"));
       }
 
+      while (rsIdMessages.next()) {
+        idMessagesWithGiveawayEmoji.put(
+            rsIdMessages.getString("idMessagesWithGiveawayEmoji"),
+            rsIdMessages.getString("idMessagesWithGiveawayEmoji"));
+      }
+
     } catch (SQLException e) {
       e.printStackTrace();
     }
+  }
+
+  public static Map<String, String> getMapPrefix() {
+    return mapPrefix;
+  }
+
+  public static Map<String, String> getIdMessagesWithGiveawayEmoji() {
+    return idMessagesWithGiveawayEmoji;
   }
 
   public JDA getJda() {

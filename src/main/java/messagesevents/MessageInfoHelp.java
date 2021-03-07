@@ -26,9 +26,9 @@ public class MessageInfoHelp extends ListenerAdapter {
 
     String p = "!";
 
-    if (BotStart.mapPrefix.containsKey(event.getGuild().getId())) {
-      prefix = BotStart.mapPrefix.get(event.getGuild().getId()) + "help";
-      p = BotStart.mapPrefix.get(event.getGuild().getId());
+    if (BotStart.getMapPrefix().containsKey(event.getGuild().getId())) {
+      prefix = BotStart.getMapPrefix().get(event.getGuild().getId()) + "help";
+      p = BotStart.getMapPrefix().get(event.getGuild().getId());
     }
 
     if (message.equals(prefix)) {

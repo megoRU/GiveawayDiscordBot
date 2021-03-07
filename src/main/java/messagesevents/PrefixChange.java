@@ -38,8 +38,8 @@ public class PrefixChange extends ListenerAdapter {
     }
 
     if (message.matches(PREFIX) && event.getMember().hasPermission(Permission.MANAGE_SERVER)
-        && BotStart.mapPrefix.get(event.getMessage().getGuild().getId()) != null) {
-      BotStart.mapPrefix.put(event.getGuild().getId(), messages[1]);
+        && BotStart.getMapPrefix().get(event.getMessage().getGuild().getId()) != null) {
+      BotStart.getMapPrefix().put(event.getGuild().getId(), messages[1]);
       try {
         DataBase dataBase = new DataBase();
         dataBase.removePrefixFromDB(event.getGuild().getId());
@@ -52,7 +52,7 @@ public class PrefixChange extends ListenerAdapter {
     }
 
     if (message.matches(PREFIX) && event.getMember().hasPermission(Permission.MANAGE_SERVER)) {
-      BotStart.mapPrefix.put(event.getGuild().getId(), messages[1]);
+      BotStart.getMapPrefix().put(event.getGuild().getId(), messages[1]);
       try {
         DataBase dataBase = new DataBase();
         dataBase.addPrefixToDB(event.getGuild().getId(), messages[1]);
@@ -64,7 +64,7 @@ public class PrefixChange extends ListenerAdapter {
     }
 
     if (message.equals(PREFIX_RESET) && event.getMember().hasPermission(Permission.MANAGE_SERVER)) {
-      BotStart.mapPrefix.remove(event.getGuild().getId());
+      BotStart.getMapPrefix().remove(event.getGuild().getId());
       try {
         DataBase dataBase = new DataBase();
         dataBase.removePrefixFromDB(event.getGuild().getId());

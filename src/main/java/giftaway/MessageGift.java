@@ -10,7 +10,6 @@ import startbot.Statcord;
 
 public class MessageGift extends ListenerAdapter {
 
-  private static final String GIFT = "!gift";
   private static final String GIFT_START = "!gift start";
   private static final String GIFT_STOP = "!gift stop";
   private static final String GIFT_STOP_COUNT = "gift stop\\s[0-9]+";
@@ -36,49 +35,26 @@ public class MessageGift extends ListenerAdapter {
     int length = message.length();
     String messageWithOutPrefix = message.substring(1, length);
 
-    String prefix = GIFT;
     String prefix2 = GIFT_START;
     String prefix3 = GIFT_STOP;
     String prefix4 = GIFT_COUNT;
 
-    if (BotStart.mapPrefix.containsKey(event.getGuild().getId())) {
-      prefix = BotStart.mapPrefix.get(event.getGuild().getId()) + "gift";
-      prefix2 = BotStart.mapPrefix.get(event.getGuild().getId()) + "gift start";
-      prefix3 = BotStart.mapPrefix.get(event.getGuild().getId()) + "gift stop";
-      prefix4 = BotStart.mapPrefix.get(event.getGuild().getId()) + "gift count";
+    if (BotStart.getMapPrefix().containsKey(event.getGuild().getId())) {
+      prefix2 = BotStart.getMapPrefix().get(event.getGuild().getId()) + "gift start";
+      prefix3 = BotStart.getMapPrefix().get(event.getGuild().getId()) + "gift stop";
+      prefix4 = BotStart.getMapPrefix().get(event.getGuild().getId()) + "gift count";
     }
 
-    if ((message.equals(prefix)
-        || message.equals(prefix2)
+    if (message.equals(prefix2)
         || message.equals(prefix3)
-        || messageWithOutPrefix.matches(GIFT_STOP_COUNT))
+        || messageWithOutPrefix.matches(GIFT_STOP_COUNT)
         || message.equals(prefix4)) {
 
       Statcord.commandPost(message.substring(1), event.getAuthor().getId());
-      if (message.equals(prefix)) {
-        long guild = event.getGuild().getIdLong();
-        Gift gift;
-        gift = new Gift();
 
-        if (!gift.hasGift(guild)) {
-          return;
-        }
-
-        //Исключает повторных
-        if (gift.hasGift(guild)) {
-          gift = gift.getGift(event.getGuild().getIdLong());
-          if (gift.getListUsersHash(event.getAuthor().getId()) == null) {
-            gift.addUserToPoll(event.getMember().getUser(), event.getGuild(), prefix, prefix3,
-                event.getChannel());
-            return;
-          }
-        }
-        return;
-      }
-
-      if ((message.equals(prefix2)
+      if (message.equals(prefix2)
           || message.equals(prefix3)
-          || messageWithOutPrefix.matches(GIFT_STOP_COUNT))) {
+          || messageWithOutPrefix.matches(GIFT_STOP_COUNT)) {
         long guild = event.getGuild().getIdLong();
         Gift gift;
         gift = new Gift();
@@ -90,7 +66,7 @@ public class MessageGift extends ListenerAdapter {
 
         if (message.equals(prefix2) && !gift.hasGift(guild)) {
           gift.setGift(guild, new Gift(event.getGuild()));
-          gift.startGift(event.getGuild(), event.getChannel(), prefix, prefix3);
+          gift.startGift(event.getGuild(), event.getChannel(), prefix3);
 
         }
 
