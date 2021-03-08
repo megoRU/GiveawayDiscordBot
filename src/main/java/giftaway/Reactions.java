@@ -24,7 +24,8 @@ public class Reactions extends ListenerAdapter {
 
       if (!event.getGuild().getSelfMember()
           .hasPermission(event.getChannel(), Permission.MESSAGE_MANAGE)) {
-        event.getChannel().sendMessage("Bot don\\`t have: `Permission.MESSAGE_MANAGE`").queue();
+        event.getChannel().sendMessage("Bot: `" + event.getGuild().getSelfMember().getUser().getName()
+            +"` don\\`t have: `Permission.MESSAGE_MANAGE` \nTo work correctly, add the specified permission to it!").queue();
         return;
       }
 

@@ -11,7 +11,7 @@ import startbot.Statcord;
 public class MessageGift extends ListenerAdapter {
 
   private static final String GIFT_START = "!gift start";
-  private static final String GIFT_START_TITLE = "gift start\\s.{10,255}$";
+  private static final String GIFT_START_TITLE = "gift start\\s.{0,255}$";
   private static final String GIFT_STOP = "!gift stop";
   private static final String GIFT_STOP_COUNT = "gift stop\\s[0-9]+";
   private static final String GIFT_COUNT = "!gift count";
@@ -79,8 +79,13 @@ public class MessageGift extends ListenerAdapter {
           return;
         }
 
-        if ((message.equals(prefix2)
-            || messageWithOutPrefix.matches(GIFT_START_TITLE))
+        if ((message.equals(prefix2) || messageWithOutPrefix.matches(GIFT_START_TITLE))
+            && gift.hasGift(guild)) {
+          event.getChannel().sendMessage("First you need to stop Giveaway").queue();
+          return;
+        }
+
+        if ((message.equals(prefix2) || messageWithOutPrefix.matches(GIFT_START_TITLE))
             && !gift.hasGift(guild)) {
 
           gift.setGift(guild, new Gift(event.getGuild()));
