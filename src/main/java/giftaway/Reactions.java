@@ -17,6 +17,10 @@ public class Reactions extends ListenerAdapter {
         return;
       }
 
+      if (BotStart.getIdMessagesWithGiveawayEmoji().get(event.getMessageId()) == null) {
+        return;
+      }
+
       if (!event.getGuild().getSelfMember()
           .hasPermission(event.getChannel(), Permission.MESSAGE_WRITE)) {
         return;
