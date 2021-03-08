@@ -14,3 +14,7 @@
 [![Discord Bots](https://top.gg/api/widget/servers/808277484524011531.svg)](https://top.gg/bot/808277484524011531)
 
 [![Discord Bots](https://top.gg/api/widget/808277484524011531.svg)](https://top.gg/bot/808277484524011531)
+
+## Copyright Notice
+
+1.  The bot is made using the library: [JDA](https://github.com/DV8FromTheWorld/JDA)
