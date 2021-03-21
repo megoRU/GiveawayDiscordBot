@@ -20,16 +20,17 @@ import startbot.BotStart;
 public class Gift {
 
   private final List<String> listUsers = new ArrayList<>();
+  private final Map<String, String> listUsersHash = new HashMap<>();
+  private final Set<String> uniqueWinners = new HashSet<>();
+
+  private static final AtomicInteger giveawayCount = new AtomicInteger(0);
   private static final Map<Long, String> messageId = new HashMap<>();
   private static final Map<Long, String> title = new HashMap<>();
-  private final Map<String, String> listUsersHash = new HashMap<>();
   private static final Map<Long, Gift> guilds = new HashMap<>();
-  private final Random random = new Random();
-  private final Set<String> usersWhoWinSet = new HashSet<>();
-  private int count;
-  private static final AtomicInteger giveawayCount = new AtomicInteger(0);
+  private static final Random random = new Random();
+
   private Guild guild;
-  private static final String emojiPresent = "\uD83C\uDF81";
+  private int count;
 
   public Gift(Guild guild) {
     this.guild = guild;
@@ -43,13 +44,12 @@ public class Gift {
     EmbedBuilder start = new EmbedBuilder();
     start.setColor(0x00FF00);
     start.setTitle(title.get(guild.getIdLong()));
-    start.setDescription("React with :gift: to enter!"
-        + "\nUsers: `" + count + "`");
+    start.setDescription("React with :gift: to enter!" + "\nUsers: `" + count + "`");
     incrementGiveAwayCount();
     channel.sendMessage(start.build()).queue(m -> {
       messageId.put(guild.getIdLong(), m.getId());
       BotStart.getIdMessagesWithGiveawayEmoji().put(m.getId(), m.getId());
-      m.addReaction(emojiPresent).queue();
+      m.addReaction(Reactions.emojiPresent).queue();
       try {
         DataBase dataBase = new DataBase();
         dataBase.insertIdMessagesWithPollEmoji(m.getId());
@@ -96,6 +96,24 @@ public class Gift {
       return;
     }
 
+    if (countWinner == 0) {
+      EmbedBuilder zero = new EmbedBuilder();
+      zero.setColor(0xFF8000);
+      zero.setTitle(":warning: Invalid number");
+      zero.setDescription(
+          """
+              The number of winners must be greater than zero!
+              """ +
+              "You entered a number: `" + countWinner + "`\n" +
+              "Number of participants: `" + count + "`\n" +
+              """ 
+              This action did not cause the deletion: **Giveaway**!
+              """);
+      channel.sendMessage(zero.build()).queue();
+      zero.clear();
+      return;
+    }
+
     if (countWinner >= listUsers.size()) {
       EmbedBuilder fewParticipants = new EmbedBuilder();
       fewParticipants.setColor(0xFF8000);
@@ -105,7 +123,7 @@ public class Gift {
               The number of winners must be less than the number of participants!
               """ +
               "You entered a number: `" + countWinner + "`\n" +
-              "Now for the participants: `" + count + "`\n" +
+              "Number of participants: `" + count + "`\n" +
               """ 
               This action did not cause the deletion: **Giveaway**!
               """
@@ -115,20 +133,20 @@ public class Gift {
       return;
     }
 
-    if (countWinner != 1) {
+    if (countWinner > 1) {
       for (int i = 0; i < countWinner; i++) {
         int randomNumber = random.nextInt(listUsers.size());
-        usersWhoWinSet.add("<@" + listUsers.get(randomNumber) + ">");
+        uniqueWinners.add("<@" + listUsers.get(randomNumber) + ">");
         listUsers.remove(randomNumber);
       }
 
-      EmbedBuilder stopWithMoreWiner = new EmbedBuilder();
-      stopWithMoreWiner.setColor(0x00FF00);
-      stopWithMoreWiner.setTitle("Giveaway the end");
-      stopWithMoreWiner.setDescription("Winners: " + Arrays.toString(usersWhoWinSet.toArray()));
-      //Add user to list
-      channel.sendMessage(stopWithMoreWiner.build()).queue();
-      stopWithMoreWiner.clear();
+      EmbedBuilder stopWithMoreWinner = new EmbedBuilder();
+      stopWithMoreWinner.setColor(0x00FF00);
+      stopWithMoreWinner.setTitle("Giveaway the end");
+      stopWithMoreWinner.setDescription("Winners: " + Arrays.toString(uniqueWinners.toArray())
+          .replaceAll("\\[", "").replaceAll("]", ""));
+      channel.sendMessage(stopWithMoreWinner.build()).queue();
+      stopWithMoreWinner.clear();
       listUsersHash.clear();
       listUsers.clear();
       messageId.clear();
@@ -138,13 +156,10 @@ public class Gift {
       return;
     }
 
-    int randomWord = (int) Math.floor(Math.random() * listUsers.size());
-    String winUser = listUsers.get(randomWord);
     EmbedBuilder stop = new EmbedBuilder();
     stop.setColor(0x00FF00);
     stop.setTitle("Giveaway the end");
-    stop.setDescription("Winner: <@" + winUser + ">");
-    //Add user to list
+    stop.setDescription("Winner: <@" + listUsers.get(random.nextInt(listUsers.size())) + ">");
     channel.sendMessage(stop.build()).queue();
     stop.clear();
     listUsersHash.clear();
