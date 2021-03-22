@@ -15,7 +15,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import startbot.BotStart;
 
 public class Gift {
 
@@ -25,6 +24,7 @@ public class Gift {
 
   private static final AtomicInteger giveawayCount = new AtomicInteger(0);
   private static final Map<Long, String> messageId = new HashMap<>();
+  private static final Map<String, String> idMessagesWithGiveawayEmoji = new HashMap<>();
   private static final Map<Long, String> title = new HashMap<>();
   private static final Map<Long, Gift> guilds = new HashMap<>();
   private static final Random random = new Random();
@@ -48,7 +48,7 @@ public class Gift {
     incrementGiveAwayCount();
     channel.sendMessage(start.build()).queue(m -> {
       messageId.put(guild.getIdLong(), m.getId());
-      BotStart.getIdMessagesWithGiveawayEmoji().put(m.getId(), m.getId());
+      idMessagesWithGiveawayEmoji.put(m.getId(), m.getId());
       m.addReaction(Reactions.emojiPresent).queue();
       try {
         DataBase dataBase = new DataBase();
@@ -195,6 +195,10 @@ public class Gift {
         The giveaway was canceled because the bot was unable to get the ID
         your post for editing. Please try again.
         """;
+  }
+
+  public static Map<String, String> getIdMessagesWithGiveawayEmoji() {
+    return idMessagesWithGiveawayEmoji;
   }
 
   public Guild getGuild() {

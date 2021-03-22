@@ -6,7 +6,7 @@
 
 ## TODO
 
--   [ ]   Stop tracking completed giveaways.
+-   [x]   Stop tracking completed giveaways.
 -   [ ]   Make a separate class for storing guilds and instances of classes with giveaway.
 -   [ ]   Use a database to store active giveaways.
 

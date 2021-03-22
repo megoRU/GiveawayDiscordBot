@@ -18,7 +18,7 @@ public class Reactions extends ListenerAdapter {
       return;
     }
 
-    if (BotStart.getIdMessagesWithGiveawayEmoji().get(event.getMessageId()) == null) {
+    if (Gift.getIdMessagesWithGiveawayEmoji().get(event.getMessageId()) == null) {
       return;
     }
 
@@ -44,7 +44,7 @@ public class Reactions extends ListenerAdapter {
       String emoji = event.getReactionEmote().getEmoji();
 
       if (!(emoji.equals(emojiPresent))
-          && BotStart.getIdMessagesWithGiveawayEmoji().get(event.getMessageId()) != null) {
+          && Gift.getIdMessagesWithGiveawayEmoji().get(event.getMessageId()) != null) {
         event.getReaction().removeReaction(event.getUser()).queue();
       }
 
@@ -53,7 +53,7 @@ public class Reactions extends ListenerAdapter {
       gift = new Gift();
 
       if (emoji.equals(emojiPresent)
-          && BotStart.getIdMessagesWithGiveawayEmoji().get(event.getMessageId()) != null
+          && Gift.getIdMessagesWithGiveawayEmoji().get(event.getMessageId()) != null
           && gift.hasGift(guild)) {
         gift = gift.getGift(event.getGuild().getIdLong());
         if (gift.getListUsersHash(event.getUser().getId()) == null) {
