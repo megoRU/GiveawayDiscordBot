@@ -24,7 +24,7 @@ public class Gift {
 
   private static final AtomicInteger giveawayCount = new AtomicInteger(0);
   private static final Map<Long, String> messageId = new HashMap<>();
-  private static final Map<String, String> idMessagesWithGiveawayEmoji = new HashMap<>();
+  private static final Map<Long, String> idMessagesWithGiveawayEmoji = new HashMap<>();
   private static final Map<Long, String> title = new HashMap<>();
   private static final Map<Long, Gift> guilds = new HashMap<>();
   private static final Random random = new Random();
@@ -48,7 +48,7 @@ public class Gift {
     incrementGiveAwayCount();
     channel.sendMessage(start.build()).queue(m -> {
       messageId.put(guild.getIdLong(), m.getId());
-      idMessagesWithGiveawayEmoji.put(m.getId(), m.getId());
+      idMessagesWithGiveawayEmoji.put(guild.getIdLong(), m.getId());
       m.addReaction(Reactions.emojiPresent).queue();
       try {
         DataBase dataBase = new DataBase();
@@ -90,6 +90,7 @@ public class Gift {
       listUsersHash.clear();
       listUsers.clear();
       messageId.remove(guild.getIdLong());
+      idMessagesWithGiveawayEmoji.remove(guild.getIdLong());
       title.remove(guild.getIdLong());
       removeGift(guild.getIdLong());
       decrementGiveAwayCount();
@@ -150,6 +151,7 @@ public class Gift {
       listUsersHash.clear();
       listUsers.clear();
       messageId.clear();
+      idMessagesWithGiveawayEmoji.remove(guild.getIdLong());
       removeGift(guild.getIdLong());
       title.remove(guild.getIdLong());
       decrementGiveAwayCount();
@@ -165,6 +167,7 @@ public class Gift {
     listUsersHash.clear();
     listUsers.clear();
     messageId.clear();
+    idMessagesWithGiveawayEmoji.remove(guild.getIdLong());
     removeGift(guild.getIdLong());
     decrementGiveAwayCount();
   }
@@ -197,7 +200,7 @@ public class Gift {
         """;
   }
 
-  public static Map<String, String> getIdMessagesWithGiveawayEmoji() {
+  public static Map<Long, String> getIdMessagesWithGiveawayEmoji() {
     return idMessagesWithGiveawayEmoji;
   }
 

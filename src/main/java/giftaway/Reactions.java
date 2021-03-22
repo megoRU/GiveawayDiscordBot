@@ -4,7 +4,6 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import startbot.BotStart;
 import startbot.Statcord;
 
 public class Reactions extends ListenerAdapter {
@@ -18,7 +17,7 @@ public class Reactions extends ListenerAdapter {
       return;
     }
 
-    if (Gift.getIdMessagesWithGiveawayEmoji().get(event.getMessageId()) == null) {
+    if (Gift.getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong()) == null) {
       return;
     }
 
@@ -44,7 +43,7 @@ public class Reactions extends ListenerAdapter {
       String emoji = event.getReactionEmote().getEmoji();
 
       if (!(emoji.equals(emojiPresent))
-          && Gift.getIdMessagesWithGiveawayEmoji().get(event.getMessageId()) != null) {
+          && Gift.getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong()) != null) {
         event.getReaction().removeReaction(event.getUser()).queue();
       }
 
@@ -53,7 +52,7 @@ public class Reactions extends ListenerAdapter {
       gift = new Gift();
 
       if (emoji.equals(emojiPresent)
-          && Gift.getIdMessagesWithGiveawayEmoji().get(event.getMessageId()) != null
+          && Gift.getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong()) != null
           && gift.hasGift(guild)) {
         gift = gift.getGift(event.getGuild().getIdLong());
         if (gift.getListUsersHash(event.getUser().getId()) == null) {
