@@ -1,7 +1,5 @@
 package giftaway;
 
-import db.DataBase;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,8 +34,7 @@ public class Gift {
     this.guild = guild;
   }
 
-  public Gift() {
-  }
+  public Gift() {}
 
   public void startGift(Guild guild, TextChannel channel, String newTitle) {
     title.put(guild.getIdLong(), newTitle == null ? "Giveaway" : newTitle);
@@ -50,12 +47,6 @@ public class Gift {
       messageId.put(guild.getIdLong(), m.getId());
       idMessagesWithGiveawayEmoji.put(guild.getIdLong(), m.getId());
       m.addReaction(Reactions.emojiPresent).queue();
-      try {
-        DataBase dataBase = new DataBase();
-        dataBase.insertIdMessagesWithPollEmoji(m.getId());
-      } catch (SQLException troubles) {
-        troubles.printStackTrace();
-      }
     });
     start.clear();
   }
