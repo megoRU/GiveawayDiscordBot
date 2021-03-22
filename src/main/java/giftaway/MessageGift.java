@@ -71,8 +71,11 @@ public class MessageGift extends ListenerAdapter {
           || messageWithOutPrefix.matches(GIFT_STOP_COUNT)
           || messageWithOutPrefix.matches(GIFT_START_TITLE)) {
         long guild = event.getGuild().getIdLong();
-        Gift gift;
-        gift = new Gift();
+//        Gift gift;
+//        gift = new Gift();
+
+        GiveawayRegistry giveawayRegistry;
+        giveawayRegistry = new GiveawayRegistry();
 
         if (!event.getMember().hasPermission(event.getChannel(), Permission.ADMINISTRATOR)) {
           event.getChannel().sendMessage("You are not Admin").queue();
@@ -80,34 +83,52 @@ public class MessageGift extends ListenerAdapter {
         }
 
         if ((message.equals(prefix2) || messageWithOutPrefix.matches(GIFT_START_TITLE))
-            && gift.hasGift(guild)) {
+            && giveawayRegistry.hasGift(guild)) {
           event.getChannel().sendMessage("First you need to stop Giveaway").queue();
           return;
         }
 
         if ((message.equals(prefix2) || messageWithOutPrefix.matches(GIFT_START_TITLE))
-            && !gift.hasGift(guild)) {
+            && !giveawayRegistry.hasGift(guild)) {
+//          giveawayRegistry.getGift(event.getGuild().getIdLong());
 
-          gift.setGift(guild, new Gift(event.getGuild()));
+            giveawayRegistry.setGift(event.getGuild().getIdLong(), new Gift(event.getGuild()));
+//          gift.setGift(guild, new Gift(event.getGuild()));
           if (messageSplit.length >= 3) {
-            gift.startGift(event.getGuild(), event.getChannel(), messageSplit[2]);
+//            gift = giveawayRegistry.getGiveaways().get(event.getGuild().getIdLong());
+
+            giveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
+                .startGift(event.getGuild(), event.getChannel(), messageSplit[2]);
+
+//            gift.startGift(event.getGuild(), event.getChannel(), messageSplit[2]);
             return;
           } else {
-            gift.startGift(event.getGuild(), event.getChannel(), null);
+            giveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
+                .startGift(event.getGuild(), event.getChannel(), null);
           }
         }
+        giveawayRegistry.getGift(event.getGuild().getIdLong());
 
         if ((message.equals(prefix3)
             || messageWithOutPrefix.matches(GIFT_STOP_COUNT))
-            && gift.hasGift(guild)) {
-          gift = gift.getGift(event.getGuild().getIdLong());
+            && giveawayRegistry.hasGift(guild)) {
+
+
+//          gift = giveawayRegistry.getGiveaways().get(event.getGuild().getIdLong());
 
           if (messageSplit.length == 3) {
-            gift.stopGift(event.getGuild(), event.getChannel(),
-                Integer.parseInt(messageSplit[messageSplit.length - 1]));
+            giveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
+                .stopGift(event.getGuild(), event.getChannel(),
+                    Integer.parseInt(messageSplit[messageSplit.length - 1]));
+
+//            gift.stopGift(event.getGuild(), event.getChannel(),
+//                Integer.parseInt(messageSplit[messageSplit.length - 1]));
             return;
           }
-          gift.stopGift(event.getGuild(), event.getChannel(), Integer.parseInt("1"));
+          giveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
+              .stopGift(event.getGuild(), event.getChannel(), Integer.parseInt("1"));
+
+//          gift.stopGift(event.getGuild(), event.getChannel(), Integer.parseInt("1"));
           return;
         }
       }
