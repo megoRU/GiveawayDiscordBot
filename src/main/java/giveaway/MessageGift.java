@@ -1,4 +1,4 @@
-package giftaway;
+package giveaway;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -71,8 +71,6 @@ public class MessageGift extends ListenerAdapter {
           || messageWithOutPrefix.matches(GIFT_STOP_COUNT)
           || messageWithOutPrefix.matches(GIFT_START_TITLE)) {
         long guild = event.getGuild().getIdLong();
-//        Gift gift;
-//        gift = new Gift();
 
         GiveawayRegistry giveawayRegistry;
         giveawayRegistry = new GiveawayRegistry();
@@ -90,17 +88,12 @@ public class MessageGift extends ListenerAdapter {
 
         if ((message.equals(prefix2) || messageWithOutPrefix.matches(GIFT_START_TITLE))
             && !giveawayRegistry.hasGift(guild)) {
-//          giveawayRegistry.getGift(event.getGuild().getIdLong());
 
-            giveawayRegistry.setGift(event.getGuild().getIdLong(), new Gift(event.getGuild()));
-//          gift.setGift(guild, new Gift(event.getGuild()));
+          giveawayRegistry.setGift(event.getGuild().getIdLong(), new Gift(event.getGuild()));
           if (messageSplit.length >= 3) {
-//            gift = giveawayRegistry.getGiveaways().get(event.getGuild().getIdLong());
 
             giveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
                 .startGift(event.getGuild(), event.getChannel(), messageSplit[2]);
-
-//            gift.startGift(event.getGuild(), event.getChannel(), messageSplit[2]);
             return;
           } else {
             giveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
@@ -113,22 +106,14 @@ public class MessageGift extends ListenerAdapter {
             || messageWithOutPrefix.matches(GIFT_STOP_COUNT))
             && giveawayRegistry.hasGift(guild)) {
 
-
-//          gift = giveawayRegistry.getGiveaways().get(event.getGuild().getIdLong());
-
           if (messageSplit.length == 3) {
             giveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
                 .stopGift(event.getGuild(), event.getChannel(),
                     Integer.parseInt(messageSplit[messageSplit.length - 1]));
-
-//            gift.stopGift(event.getGuild(), event.getChannel(),
-//                Integer.parseInt(messageSplit[messageSplit.length - 1]));
             return;
           }
           giveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
               .stopGift(event.getGuild(), event.getChannel(), Integer.parseInt("1"));
-
-//          gift.stopGift(event.getGuild(), event.getChannel(), Integer.parseInt("1"));
           return;
         }
       }

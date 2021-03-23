@@ -10,9 +10,9 @@ public class StatcordThread extends Thread {
   public void run() {
     try {
       Statcord.start(
-          BotStart.jda.getSelfUser().getId(),
+          BotStart.getJda().getSelfUser().getId(),
           Config.getStatcord(),
-          BotStart.jda,
+          BotStart.getJda(),
           true,
           5);
     } catch (Exception e) {

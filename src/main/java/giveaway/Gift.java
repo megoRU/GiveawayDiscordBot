@@ -1,4 +1,4 @@
-package giftaway;
+package giveaway;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,7 +24,6 @@ public class Gift {
   private static final Map<Long, String> messageId = new HashMap<>();
   private static final Map<Long, String> idMessagesWithGiveawayEmoji = new HashMap<>();
   private static final Map<Long, String> title = new HashMap<>();
-  private static final Map<Long, Gift> guilds = new HashMap<>();
   private static final Random random = new Random();
 
   private Guild guild;
@@ -60,14 +59,16 @@ public class Gift {
     edit.setTitle(title.get(guild.getIdLong()));
     edit.setDescription("React with :gift: to enter!"
         + "\nUsers: `" + count + "`");
-
+    GiveawayRegistry giveawayRegistry = new GiveawayRegistry();
     channel.editMessageById(messageId.get(guild.getIdLong()), edit.build())
-        .queue(null,
-            (exception) -> channel.sendMessage(removeGiftExceptions(guild.getIdLong())).queue());
+        .queue(null, (exception) -> channel
+                .sendMessage(giveawayRegistry.removeGiftExceptions(guild.getIdLong())).queue());
     edit.clear();
   }
 
   public void stopGift(Guild guild, TextChannel channel, Integer countWinner) {
+    GiveawayRegistry giveawayRegistry = new GiveawayRegistry();
+
     if (listUsers.size() < 2) {
       EmbedBuilder notEnoughUsers = new EmbedBuilder();
       notEnoughUsers.setColor(0xFF0000);
@@ -83,7 +84,8 @@ public class Gift {
       messageId.remove(guild.getIdLong());
       idMessagesWithGiveawayEmoji.remove(guild.getIdLong());
       title.remove(guild.getIdLong());
-      removeGift(guild.getIdLong());
+      giveawayRegistry.removeGift(guild.getIdLong());
+//      removeGift(guild.getIdLong());
       decrementGiveAwayCount();
       return;
     }
@@ -143,7 +145,7 @@ public class Gift {
       listUsers.clear();
       messageId.clear();
       idMessagesWithGiveawayEmoji.remove(guild.getIdLong());
-      removeGift(guild.getIdLong());
+      giveawayRegistry.removeGift(guild.getIdLong());
       title.remove(guild.getIdLong());
       decrementGiveAwayCount();
       return;
@@ -159,36 +161,12 @@ public class Gift {
     listUsers.clear();
     messageId.clear();
     idMessagesWithGiveawayEmoji.remove(guild.getIdLong());
-    removeGift(guild.getIdLong());
+    giveawayRegistry.removeGift(guild.getIdLong());
     decrementGiveAwayCount();
   }
 
   public String getListUsersHash(String id) {
     return listUsersHash.get(id);
-  }
-
-  public void setGift(long guildId, Gift game) {
-    guilds.put(guildId, game);
-  }
-
-  public boolean hasGift(long guildId) {
-    return guilds.containsKey(guildId);
-  }
-
-  public Gift getGift(long userId) {
-    return guilds.get(userId);
-  }
-
-  public void removeGift(long guildId) {
-    guilds.remove(guildId);
-  }
-
-  public String removeGiftExceptions(long guildId) {
-    guilds.remove(guildId);
-    return """
-        The giveaway was canceled because the bot was unable to get the ID
-        your post for editing. Please try again.
-        """;
   }
 
   public static Map<Long, String> getIdMessagesWithGiveawayEmoji() {

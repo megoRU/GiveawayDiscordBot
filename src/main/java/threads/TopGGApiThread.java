@@ -14,7 +14,7 @@ public class TopGGApiThread extends Thread {
             .token(Config.getTopGgApiToken())
             .botId(Config.getBotId())
             .build();
-        int serverCount = (int) BotStart.jda.getGuildCache().size();
+        int serverCount = (int) BotStart.getJda().getGuildCache().size();
         TOP_GG_API.setStats(serverCount);
         TopGGApiThread.sleep(1800000);
       }

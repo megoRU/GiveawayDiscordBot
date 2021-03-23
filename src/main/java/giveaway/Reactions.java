@@ -1,4 +1,4 @@
-package giftaway;
+package giveaway;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
@@ -48,36 +48,21 @@ public class Reactions extends ListenerAdapter {
       }
 
       long guild = event.getGuild().getIdLong();
-      Gift gift;
-      gift = new Gift();
 
       GiveawayRegistry giveawayRegistry;
       giveawayRegistry = new GiveawayRegistry();
 
-//      giveawayRegistry.setGift(event.getGuild().getIdLong(), new Gift(event.getGuild()));
-      giveawayRegistry.getActiveGiveaways().get(guild).hasGift(guild);
-
-
-      System.out.println("реакции: " + giveawayRegistry.getActiveGiveaways().get(guild).hasGift(guild));
-//      giveawayRegistry.setGift(event.getGuild().getIdLong(), new Gift(event.getGuild()));
       if (emoji.equals(emojiPresent)
           && Gift.getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong()) != null
           && giveawayRegistry.hasGift(guild)) {
 
-//        gift = giveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong());
-//        giveawayRegistry.setGift(event.getGuild().getIdLong(), new Gift(event.getGuild()));
-
-        giveawayRegistry.getGift(guild);
-
         if (giveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
             .getListUsersHash(event.getUser().getId()) == null) {
-          System.out.println(event.getMember().getUser().getName());
-//          gift.addUserToPoll(event.getMember().getUser(), event.getGuild(), event.getChannel());
 
           giveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
               .addUserToPoll(event.getMember().getUser(), event.getGuild(), event.getChannel());
 
-//          Statcord.commandPost("gift", event.getUser().getId());
+          Statcord.commandPost("gift", event.getUser().getId());
         }
       }
     } catch (Exception e) {
