@@ -85,7 +85,6 @@ public class Gift {
       idMessagesWithGiveawayEmoji.remove(guild.getIdLong());
       title.remove(guild.getIdLong());
       giveawayRegistry.removeGift(guild.getIdLong());
-//      removeGift(guild.getIdLong());
       decrementGiveAwayCount();
       return;
     }
