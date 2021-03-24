@@ -18,11 +18,7 @@ public class Gift {
   private final List<String> listUsers = new ArrayList<>();
   private final Map<String, String> listUsersHash = new HashMap<>();
   private final Set<String> uniqueWinners = new HashSet<>();
-
-  private static final Map<Long, String> messageId = new HashMap<>();
-  private static final Map<Long, String> title = new HashMap<>();
   private static final Random random = new Random();
-
   private Guild guild;
   private int count;
 
@@ -33,14 +29,14 @@ public class Gift {
   public Gift() {}
 
   public void startGift(Guild guild, TextChannel channel, String newTitle) {
-    title.put(guild.getIdLong(), newTitle == null ? "Giveaway" : newTitle);
+    GiveawayRegistry.getTitle().put(guild.getIdLong(), newTitle == null ? "Giveaway" : newTitle);
     EmbedBuilder start = new EmbedBuilder();
     start.setColor(0x00FF00);
-    start.setTitle(title.get(guild.getIdLong()));
+    start.setTitle(GiveawayRegistry.getTitle().get(guild.getIdLong()));
     start.setDescription("React with :gift: to enter!" + "\nUsers: `" + count + "`");
     GiveawayRegistry.incrementGiveAwayCount();
     channel.sendMessage(start.build()).queue(m -> {
-      messageId.put(guild.getIdLong(), m.getId());
+      GiveawayRegistry.getMessageId().put(guild.getIdLong(), m.getId());
       GiveawayRegistry.getIdMessagesWithGiveawayEmoji().put(guild.getIdLong(), m.getId());
       m.addReaction(Reactions.emojiPresent).queue();
     });
@@ -53,10 +49,10 @@ public class Gift {
     listUsersHash.put(user.getId(), user.getId());
     EmbedBuilder edit = new EmbedBuilder();
     edit.setColor(0x00FF00);
-    edit.setTitle(title.get(guild.getIdLong()));
+    edit.setTitle(GiveawayRegistry.getTitle().get(guild.getIdLong()));
     edit.setDescription("React with :gift: to enter!"
         + "\nUsers: `" + count + "`");
-    channel.editMessageById(messageId.get(guild.getIdLong()), edit.build())
+    channel.editMessageById(GiveawayRegistry.getMessageId().get(guild.getIdLong()), edit.build())
         .queue(null, (exception) -> channel
                 .sendMessage(GiveawayRegistry.removeGiftExceptions(guild.getIdLong())).queue());
     edit.clear();
@@ -76,9 +72,9 @@ public class Gift {
       notEnoughUsers.clear();
       listUsersHash.clear();
       listUsers.clear();
-      messageId.remove(guild.getIdLong());
+      GiveawayRegistry.getMessageId().remove(guild.getIdLong());
       GiveawayRegistry.getIdMessagesWithGiveawayEmoji().remove(guild.getIdLong());
-      title.remove(guild.getIdLong());
+      GiveawayRegistry.getTitle().remove(guild.getIdLong());
       GiveawayRegistry.removeGift(guild.getIdLong());
       GiveawayRegistry.decrementGiveAwayCount();
       return;
@@ -137,10 +133,10 @@ public class Gift {
       stopWithMoreWinner.clear();
       listUsersHash.clear();
       listUsers.clear();
-      messageId.clear();
+      GiveawayRegistry.getMessageId().clear();
       GiveawayRegistry.getIdMessagesWithGiveawayEmoji().remove(guild.getIdLong());
       GiveawayRegistry.removeGift(guild.getIdLong());
-      title.remove(guild.getIdLong());
+      GiveawayRegistry.getTitle().remove(guild.getIdLong());
       GiveawayRegistry.decrementGiveAwayCount();
       return;
     }
@@ -153,7 +149,7 @@ public class Gift {
     stop.clear();
     listUsersHash.clear();
     listUsers.clear();
-    messageId.clear();
+    GiveawayRegistry.getMessageId().clear();
     GiveawayRegistry.getIdMessagesWithGiveawayEmoji().remove(guild.getIdLong());
     GiveawayRegistry.removeGift(guild.getIdLong());
     GiveawayRegistry.decrementGiveAwayCount();

@@ -70,21 +70,22 @@ public class MessageGift extends ListenerAdapter {
           || message.equals(prefix3)
           || messageWithOutPrefix.matches(GIFT_STOP_COUNT)
           || messageWithOutPrefix.matches(GIFT_START_TITLE)) {
-        long guild = event.getGuild().getIdLong();
+        long guildLongId = event.getGuild().getIdLong();
 
-        if (!event.getMember().hasPermission(event.getChannel(), Permission.ADMINISTRATOR)) {
-          event.getChannel().sendMessage("You are not Admin").queue();
+        if (!event.getMember().hasPermission(event.getChannel(), Permission.ADMINISTRATOR)
+            && !event.getMember().hasPermission(event.getChannel(), Permission.MESSAGE_MANAGE)) {
+          event.getChannel().sendMessage("You are not Admin or you can't managed messages!").queue();
           return;
         }
 
         if ((message.equals(prefix2) || messageWithOutPrefix.matches(GIFT_START_TITLE))
-            && GiveawayRegistry.hasGift(guild)) {
+            && GiveawayRegistry.hasGift(guildLongId)) {
           event.getChannel().sendMessage("First you need to stop Giveaway").queue();
           return;
         }
 
         if ((message.equals(prefix2) || messageWithOutPrefix.matches(GIFT_START_TITLE))
-            && !GiveawayRegistry.hasGift(guild)) {
+            && !GiveawayRegistry.hasGift(guildLongId)) {
 
           GiveawayRegistry.setGift(event.getGuild().getIdLong(), new Gift(event.getGuild()));
           if (messageSplit.length >= 3) {
@@ -100,7 +101,7 @@ public class MessageGift extends ListenerAdapter {
 
         if ((message.equals(prefix3)
             || messageWithOutPrefix.matches(GIFT_STOP_COUNT))
-            && GiveawayRegistry.hasGift(guild)) {
+            && GiveawayRegistry.hasGift(guildLongId)) {
 
           if (messageSplit.length == 3) {
             GiveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())

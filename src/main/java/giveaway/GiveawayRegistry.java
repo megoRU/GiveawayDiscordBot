@@ -9,6 +9,8 @@ public class GiveawayRegistry {
   private static final Map<Long, Gift> activeGiveaways = new HashMap<>();
   private static final Map<Long, String> idMessagesWithGiveawayEmoji = new HashMap<>();
   private static final AtomicInteger giveawayCount = new AtomicInteger(0);
+  private static final Map<Long, String> messageId = new HashMap<>();
+  private static final Map<Long, String> title = new HashMap<>();
 
   public static Map<Long, Gift> getActiveGiveaways() {
     return activeGiveaways;
@@ -40,6 +42,14 @@ public class GiveawayRegistry {
         The giveaway was canceled because the bot was unable to get the ID
         your post for editing. Please try again.
         """;
+  }
+
+  public static Map<Long, String> getMessageId() {
+    return messageId;
+  }
+
+  public static Map<Long, String> getTitle() {
+    return title;
   }
 
   public synchronized static void incrementGiveAwayCount() {
