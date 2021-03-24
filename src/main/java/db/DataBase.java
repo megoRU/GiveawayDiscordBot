@@ -8,8 +8,10 @@ import java.sql.SQLException;
 
 public class DataBase {
 
-  private final Connection conn = DriverManager
-      .getConnection(Config.getCONN(), Config.getUSER(), Config.getPASS());
+  private final Connection conn = DriverManager.getConnection(
+      Config.getCONN(),
+      Config.getUSER(),
+      Config.getPASS());
 
   public DataBase() throws SQLException {}
 
@@ -36,19 +38,5 @@ public class DataBase {
       e.printStackTrace();
     }
   }
-
-  //Добавляем id сообщения с реакцией
-  public void insertIdMessagesWithPollEmoji(String messageId) {
-    try {
-      String query = "INSERT IGNORE INTO `idMessagesWithGiveawayEmoji` (idMessagesWithGiveawayEmoji) values (?)";
-      PreparedStatement preparedStatement = conn.prepareStatement(query);
-      preparedStatement.setString(1, messageId);
-      preparedStatement.executeUpdate();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-
 
 }

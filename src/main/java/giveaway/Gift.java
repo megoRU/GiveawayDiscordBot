@@ -1,7 +1,5 @@
-package giftaway;
+package giveaway;
 
-import db.DataBase;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,25 +8,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import startbot.BotStart;
 
 public class Gift {
 
   private final List<String> listUsers = new ArrayList<>();
   private final Map<String, String> listUsersHash = new HashMap<>();
   private final Set<String> uniqueWinners = new HashSet<>();
-
-  private static final AtomicInteger giveawayCount = new AtomicInteger(0);
-  private static final Map<Long, String> messageId = new HashMap<>();
-  private static final Map<Long, String> title = new HashMap<>();
-  private static final Map<Long, Gift> guilds = new HashMap<>();
   private static final Random random = new Random();
-
   private Guild guild;
   private int count;
 
@@ -36,26 +26,19 @@ public class Gift {
     this.guild = guild;
   }
 
-  public Gift() {
-  }
+  public Gift() {}
 
   public void startGift(Guild guild, TextChannel channel, String newTitle) {
-    title.put(guild.getIdLong(), newTitle == null ? "Giveaway" : newTitle);
+    GiveawayRegistry.getTitle().put(guild.getIdLong(), newTitle == null ? "Giveaway" : newTitle);
     EmbedBuilder start = new EmbedBuilder();
     start.setColor(0x00FF00);
-    start.setTitle(title.get(guild.getIdLong()));
+    start.setTitle(GiveawayRegistry.getTitle().get(guild.getIdLong()));
     start.setDescription("React with :gift: to enter!" + "\nUsers: `" + count + "`");
-    incrementGiveAwayCount();
+    GiveawayRegistry.incrementGiveAwayCount();
     channel.sendMessage(start.build()).queue(m -> {
-      messageId.put(guild.getIdLong(), m.getId());
-      BotStart.getIdMessagesWithGiveawayEmoji().put(m.getId(), m.getId());
+      GiveawayRegistry.getMessageId().put(guild.getIdLong(), m.getId());
+      GiveawayRegistry.getIdMessagesWithGiveawayEmoji().put(guild.getIdLong(), m.getId());
       m.addReaction(Reactions.emojiPresent).queue();
-      try {
-        DataBase dataBase = new DataBase();
-        dataBase.insertIdMessagesWithPollEmoji(m.getId());
-      } catch (SQLException troubles) {
-        troubles.printStackTrace();
-      }
     });
     start.clear();
   }
@@ -66,17 +49,17 @@ public class Gift {
     listUsersHash.put(user.getId(), user.getId());
     EmbedBuilder edit = new EmbedBuilder();
     edit.setColor(0x00FF00);
-    edit.setTitle(title.get(guild.getIdLong()));
+    edit.setTitle(GiveawayRegistry.getTitle().get(guild.getIdLong()));
     edit.setDescription("React with :gift: to enter!"
         + "\nUsers: `" + count + "`");
-
-    channel.editMessageById(messageId.get(guild.getIdLong()), edit.build())
-        .queue(null,
-            (exception) -> channel.sendMessage(removeGiftExceptions(guild.getIdLong())).queue());
+    channel.editMessageById(GiveawayRegistry.getMessageId().get(guild.getIdLong()), edit.build())
+        .queue(null, (exception) -> channel
+                .sendMessage(GiveawayRegistry.removeGiftExceptions(guild.getIdLong())).queue());
     edit.clear();
   }
 
   public void stopGift(Guild guild, TextChannel channel, Integer countWinner) {
+
     if (listUsers.size() < 2) {
       EmbedBuilder notEnoughUsers = new EmbedBuilder();
       notEnoughUsers.setColor(0xFF0000);
@@ -89,10 +72,11 @@ public class Gift {
       notEnoughUsers.clear();
       listUsersHash.clear();
       listUsers.clear();
-      messageId.remove(guild.getIdLong());
-      title.remove(guild.getIdLong());
-      removeGift(guild.getIdLong());
-      decrementGiveAwayCount();
+      GiveawayRegistry.getMessageId().remove(guild.getIdLong());
+      GiveawayRegistry.getIdMessagesWithGiveawayEmoji().remove(guild.getIdLong());
+      GiveawayRegistry.getTitle().remove(guild.getIdLong());
+      GiveawayRegistry.removeGift(guild.getIdLong());
+      GiveawayRegistry.decrementGiveAwayCount();
       return;
     }
 
@@ -149,10 +133,11 @@ public class Gift {
       stopWithMoreWinner.clear();
       listUsersHash.clear();
       listUsers.clear();
-      messageId.clear();
-      removeGift(guild.getIdLong());
-      title.remove(guild.getIdLong());
-      decrementGiveAwayCount();
+      GiveawayRegistry.getMessageId().clear();
+      GiveawayRegistry.getIdMessagesWithGiveawayEmoji().remove(guild.getIdLong());
+      GiveawayRegistry.removeGift(guild.getIdLong());
+      GiveawayRegistry.getTitle().remove(guild.getIdLong());
+      GiveawayRegistry.decrementGiveAwayCount();
       return;
     }
 
@@ -164,53 +149,18 @@ public class Gift {
     stop.clear();
     listUsersHash.clear();
     listUsers.clear();
-    messageId.clear();
-    removeGift(guild.getIdLong());
-    decrementGiveAwayCount();
+    GiveawayRegistry.getMessageId().clear();
+    GiveawayRegistry.getIdMessagesWithGiveawayEmoji().remove(guild.getIdLong());
+    GiveawayRegistry.removeGift(guild.getIdLong());
+    GiveawayRegistry.decrementGiveAwayCount();
   }
 
   public String getListUsersHash(String id) {
     return listUsersHash.get(id);
   }
 
-  public void setGift(long guildId, Gift game) {
-    guilds.put(guildId, game);
-  }
-
-  public boolean hasGift(long guildId) {
-    return guilds.containsKey(guildId);
-  }
-
-  public Gift getGift(long userId) {
-    return guilds.get(userId);
-  }
-
-  public void removeGift(long guildId) {
-    guilds.remove(guildId);
-  }
-
-  public String removeGiftExceptions(long guildId) {
-    guilds.remove(guildId);
-    return """
-        The giveaway was canceled because the bot was unable to get the ID
-        your post for editing. Please try again.
-        """;
-  }
-
   public Guild getGuild() {
     return guild;
-  }
-
-  public synchronized void incrementGiveAwayCount() {
-    giveawayCount.getAndIncrement();
-  }
-
-  public synchronized void decrementGiveAwayCount() {
-    giveawayCount.decrementAndGet();
-  }
-
-  public synchronized Integer getGiveAwayCount() {
-    return giveawayCount.get();
   }
 
 }

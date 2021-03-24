@@ -1,4 +1,4 @@
-package giftaway;
+package giveaway;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -70,55 +70,56 @@ public class MessageGift extends ListenerAdapter {
           || message.equals(prefix3)
           || messageWithOutPrefix.matches(GIFT_STOP_COUNT)
           || messageWithOutPrefix.matches(GIFT_START_TITLE)) {
-        long guild = event.getGuild().getIdLong();
-        Gift gift;
-        gift = new Gift();
+        long guildLongId = event.getGuild().getIdLong();
 
-        if (!event.getMember().hasPermission(event.getChannel(), Permission.ADMINISTRATOR)) {
-          event.getChannel().sendMessage("You are not Admin").queue();
+        if (!event.getMember().hasPermission(event.getChannel(), Permission.ADMINISTRATOR)
+            && !event.getMember().hasPermission(event.getChannel(), Permission.MESSAGE_MANAGE)) {
+          event.getChannel().sendMessage("You are not Admin or you can't managed messages!").queue();
           return;
         }
 
         if ((message.equals(prefix2) || messageWithOutPrefix.matches(GIFT_START_TITLE))
-            && gift.hasGift(guild)) {
+            && GiveawayRegistry.hasGift(guildLongId)) {
           event.getChannel().sendMessage("First you need to stop Giveaway").queue();
           return;
         }
 
         if ((message.equals(prefix2) || messageWithOutPrefix.matches(GIFT_START_TITLE))
-            && !gift.hasGift(guild)) {
+            && !GiveawayRegistry.hasGift(guildLongId)) {
 
-          gift.setGift(guild, new Gift(event.getGuild()));
+          GiveawayRegistry.setGift(event.getGuild().getIdLong(), new Gift(event.getGuild()));
           if (messageSplit.length >= 3) {
-            gift.startGift(event.getGuild(), event.getChannel(), messageSplit[2]);
+
+            GiveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
+                .startGift(event.getGuild(), event.getChannel(), messageSplit[2]);
             return;
           } else {
-            gift.startGift(event.getGuild(), event.getChannel(), null);
+            GiveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
+                .startGift(event.getGuild(), event.getChannel(), null);
           }
         }
 
         if ((message.equals(prefix3)
             || messageWithOutPrefix.matches(GIFT_STOP_COUNT))
-            && gift.hasGift(guild)) {
-          gift = gift.getGift(event.getGuild().getIdLong());
+            && GiveawayRegistry.hasGift(guildLongId)) {
 
           if (messageSplit.length == 3) {
-            gift.stopGift(event.getGuild(), event.getChannel(),
-                Integer.parseInt(messageSplit[messageSplit.length - 1]));
+            GiveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
+                .stopGift(event.getGuild(), event.getChannel(),
+                    Integer.parseInt(messageSplit[messageSplit.length - 1]));
             return;
           }
-          gift.stopGift(event.getGuild(), event.getChannel(), Integer.parseInt("1"));
+          GiveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
+              .stopGift(event.getGuild(), event.getChannel(), Integer.parseInt("1"));
           return;
         }
       }
 
       if (message.equals(prefix4) && event.getAuthor().getId().equals("250699265389625347")) {
-        Gift gift;
-        gift = new Gift();
         EmbedBuilder getCount = new EmbedBuilder();
         getCount.setTitle("Giveaway count");
         getCount.setColor(0x00FF00);
-        getCount.setDescription("Active: `" + gift.getGiveAwayCount() + "`");
+        getCount.setDescription("Active: `" + GiveawayRegistry.getGiveAwayCount() + "`");
         event.getChannel().sendMessage(getCount.build()).queue();
         getCount.clear();
       }
