@@ -114,7 +114,7 @@ public class MessageGift extends ListenerAdapter {
         }
       }
 
-      if (message.equals(prefix4) && !event.getAuthor().getId().equals("250699265389625347")) {
+      if (message.equals(prefix4) && event.getAuthor().getId().equals("250699265389625347")) {
         EmbedBuilder getCount = new EmbedBuilder();
         getCount.setTitle("Giveaway count");
         getCount.setColor(0x00FF00);
