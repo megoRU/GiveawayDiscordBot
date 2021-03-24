@@ -17,7 +17,8 @@ public class Reactions extends ListenerAdapter {
       return;
     }
 
-    if (Gift.getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong()) == null) {
+    if (GiveawayRegistry.getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong())
+        == null) {
       return;
     }
 
@@ -43,23 +44,22 @@ public class Reactions extends ListenerAdapter {
       String emoji = event.getReactionEmote().getEmoji();
 
       if (!(emoji.equals(emojiPresent))
-          && Gift.getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong()) != null) {
+          && GiveawayRegistry.getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong())
+          != null) {
         event.getReaction().removeReaction(event.getUser()).queue();
       }
 
       long guild = event.getGuild().getIdLong();
 
-      GiveawayRegistry giveawayRegistry;
-      giveawayRegistry = new GiveawayRegistry();
-
       if (emoji.equals(emojiPresent)
-          && Gift.getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong()) != null
-          && giveawayRegistry.hasGift(guild)) {
+          && GiveawayRegistry.getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong())
+          != null
+          && GiveawayRegistry.hasGift(guild)) {
 
-        if (giveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
+        if (GiveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
             .getListUsersHash(event.getUser().getId()) == null) {
 
-          giveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
+          GiveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
               .addUserToPoll(event.getMember().getUser(), event.getGuild(), event.getChannel());
 
           Statcord.commandPost("gift", event.getUser().getId());

@@ -7,8 +7,9 @@
 ## TODO
 
 -   [x]   Stop tracking completed giveaways.
--   [ ]   Make a separate class for storing guilds and instances of classes with giveaway.
+-   [x]   Make a separate class for storing guilds and instances of classes with giveaway.
 -   [ ]   Use a database to store active giveaways.
+-   [ ]   End of giveaway by a timer.
 
 ## Add bot to your guild
 [![Discord Bots](https://top.gg/api/widget/servers/808277484524011531.svg)](https://top.gg/bot/808277484524011531)

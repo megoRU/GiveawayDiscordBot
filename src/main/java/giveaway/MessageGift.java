@@ -72,59 +72,53 @@ public class MessageGift extends ListenerAdapter {
           || messageWithOutPrefix.matches(GIFT_START_TITLE)) {
         long guild = event.getGuild().getIdLong();
 
-        GiveawayRegistry giveawayRegistry;
-        giveawayRegistry = new GiveawayRegistry();
-
         if (!event.getMember().hasPermission(event.getChannel(), Permission.ADMINISTRATOR)) {
           event.getChannel().sendMessage("You are not Admin").queue();
           return;
         }
 
         if ((message.equals(prefix2) || messageWithOutPrefix.matches(GIFT_START_TITLE))
-            && giveawayRegistry.hasGift(guild)) {
+            && GiveawayRegistry.hasGift(guild)) {
           event.getChannel().sendMessage("First you need to stop Giveaway").queue();
           return;
         }
 
         if ((message.equals(prefix2) || messageWithOutPrefix.matches(GIFT_START_TITLE))
-            && !giveawayRegistry.hasGift(guild)) {
+            && !GiveawayRegistry.hasGift(guild)) {
 
-          giveawayRegistry.setGift(event.getGuild().getIdLong(), new Gift(event.getGuild()));
+          GiveawayRegistry.setGift(event.getGuild().getIdLong(), new Gift(event.getGuild()));
           if (messageSplit.length >= 3) {
 
-            giveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
+            GiveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
                 .startGift(event.getGuild(), event.getChannel(), messageSplit[2]);
             return;
           } else {
-            giveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
+            GiveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
                 .startGift(event.getGuild(), event.getChannel(), null);
           }
         }
-        giveawayRegistry.getGift(event.getGuild().getIdLong());
 
         if ((message.equals(prefix3)
             || messageWithOutPrefix.matches(GIFT_STOP_COUNT))
-            && giveawayRegistry.hasGift(guild)) {
+            && GiveawayRegistry.hasGift(guild)) {
 
           if (messageSplit.length == 3) {
-            giveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
+            GiveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
                 .stopGift(event.getGuild(), event.getChannel(),
                     Integer.parseInt(messageSplit[messageSplit.length - 1]));
             return;
           }
-          giveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
+          GiveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
               .stopGift(event.getGuild(), event.getChannel(), Integer.parseInt("1"));
           return;
         }
       }
 
-      if (message.equals(prefix4) && event.getAuthor().getId().equals("250699265389625347")) {
-        Gift gift;
-        gift = new Gift();
+      if (message.equals(prefix4) && !event.getAuthor().getId().equals("250699265389625347")) {
         EmbedBuilder getCount = new EmbedBuilder();
         getCount.setTitle("Giveaway count");
         getCount.setColor(0x00FF00);
-        getCount.setDescription("Active: `" + gift.getGiveAwayCount() + "`");
+        getCount.setDescription("Active: `" + GiveawayRegistry.getGiveAwayCount() + "`");
         event.getChannel().sendMessage(getCount.build()).queue();
         getCount.clear();
       }

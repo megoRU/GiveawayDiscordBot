@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -20,9 +19,7 @@ public class Gift {
   private final Map<String, String> listUsersHash = new HashMap<>();
   private final Set<String> uniqueWinners = new HashSet<>();
 
-  private static final AtomicInteger giveawayCount = new AtomicInteger(0);
   private static final Map<Long, String> messageId = new HashMap<>();
-  private static final Map<Long, String> idMessagesWithGiveawayEmoji = new HashMap<>();
   private static final Map<Long, String> title = new HashMap<>();
   private static final Random random = new Random();
 
@@ -41,10 +38,10 @@ public class Gift {
     start.setColor(0x00FF00);
     start.setTitle(title.get(guild.getIdLong()));
     start.setDescription("React with :gift: to enter!" + "\nUsers: `" + count + "`");
-    incrementGiveAwayCount();
+    GiveawayRegistry.incrementGiveAwayCount();
     channel.sendMessage(start.build()).queue(m -> {
       messageId.put(guild.getIdLong(), m.getId());
-      idMessagesWithGiveawayEmoji.put(guild.getIdLong(), m.getId());
+      GiveawayRegistry.getIdMessagesWithGiveawayEmoji().put(guild.getIdLong(), m.getId());
       m.addReaction(Reactions.emojiPresent).queue();
     });
     start.clear();
@@ -59,15 +56,13 @@ public class Gift {
     edit.setTitle(title.get(guild.getIdLong()));
     edit.setDescription("React with :gift: to enter!"
         + "\nUsers: `" + count + "`");
-    GiveawayRegistry giveawayRegistry = new GiveawayRegistry();
     channel.editMessageById(messageId.get(guild.getIdLong()), edit.build())
         .queue(null, (exception) -> channel
-                .sendMessage(giveawayRegistry.removeGiftExceptions(guild.getIdLong())).queue());
+                .sendMessage(GiveawayRegistry.removeGiftExceptions(guild.getIdLong())).queue());
     edit.clear();
   }
 
   public void stopGift(Guild guild, TextChannel channel, Integer countWinner) {
-    GiveawayRegistry giveawayRegistry = new GiveawayRegistry();
 
     if (listUsers.size() < 2) {
       EmbedBuilder notEnoughUsers = new EmbedBuilder();
@@ -82,10 +77,10 @@ public class Gift {
       listUsersHash.clear();
       listUsers.clear();
       messageId.remove(guild.getIdLong());
-      idMessagesWithGiveawayEmoji.remove(guild.getIdLong());
+      GiveawayRegistry.getIdMessagesWithGiveawayEmoji().remove(guild.getIdLong());
       title.remove(guild.getIdLong());
-      giveawayRegistry.removeGift(guild.getIdLong());
-      decrementGiveAwayCount();
+      GiveawayRegistry.removeGift(guild.getIdLong());
+      GiveawayRegistry.decrementGiveAwayCount();
       return;
     }
 
@@ -143,10 +138,10 @@ public class Gift {
       listUsersHash.clear();
       listUsers.clear();
       messageId.clear();
-      idMessagesWithGiveawayEmoji.remove(guild.getIdLong());
-      giveawayRegistry.removeGift(guild.getIdLong());
+      GiveawayRegistry.getIdMessagesWithGiveawayEmoji().remove(guild.getIdLong());
+      GiveawayRegistry.removeGift(guild.getIdLong());
       title.remove(guild.getIdLong());
-      decrementGiveAwayCount();
+      GiveawayRegistry.decrementGiveAwayCount();
       return;
     }
 
@@ -159,33 +154,17 @@ public class Gift {
     listUsersHash.clear();
     listUsers.clear();
     messageId.clear();
-    idMessagesWithGiveawayEmoji.remove(guild.getIdLong());
-    giveawayRegistry.removeGift(guild.getIdLong());
-    decrementGiveAwayCount();
+    GiveawayRegistry.getIdMessagesWithGiveawayEmoji().remove(guild.getIdLong());
+    GiveawayRegistry.removeGift(guild.getIdLong());
+    GiveawayRegistry.decrementGiveAwayCount();
   }
 
   public String getListUsersHash(String id) {
     return listUsersHash.get(id);
   }
 
-  public static Map<Long, String> getIdMessagesWithGiveawayEmoji() {
-    return idMessagesWithGiveawayEmoji;
-  }
-
   public Guild getGuild() {
     return guild;
-  }
-
-  public synchronized void incrementGiveAwayCount() {
-    giveawayCount.getAndIncrement();
-  }
-
-  public synchronized void decrementGiveAwayCount() {
-    giveawayCount.decrementAndGet();
-  }
-
-  public synchronized Integer getGiveAwayCount() {
-    return giveawayCount.get();
   }
 
 }
