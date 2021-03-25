@@ -17,7 +17,8 @@ public class Reactions extends ListenerAdapter {
       return;
     }
 
-    if (GiveawayRegistry.getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong())
+    if (GiveawayRegistry.getInstance()
+        .getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong())
         == null) {
       return;
     }
@@ -43,8 +44,9 @@ public class Reactions extends ListenerAdapter {
 
       String emoji = event.getReactionEmote().getEmoji();
 
-      if (!(emoji.equals(emojiPresent))
-          && GiveawayRegistry.getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong())
+      if (!emoji.equals(emojiPresent)
+          && GiveawayRegistry.getInstance()
+          .getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong())
           != null) {
         event.getReaction().removeReaction(event.getUser()).queue();
       }
@@ -52,14 +54,17 @@ public class Reactions extends ListenerAdapter {
       long guild = event.getGuild().getIdLong();
 
       if (emoji.equals(emojiPresent)
-          && GiveawayRegistry.getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong())
+          && GiveawayRegistry.getInstance()
+          .getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong())
           != null
-          && GiveawayRegistry.hasGift(guild)) {
+          && GiveawayRegistry.getInstance().hasGift(guild)) {
 
-        if (GiveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
-            .getListUsersHash(event.getUser().getId()) == null) {
+        if (GiveawayRegistry.getInstance()
+            .getActiveGiveaways().get(event.getGuild().getIdLong())
+            .getListUsersHash(event.getUser().getId())
+            == null) {
 
-          GiveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
+          GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
               .addUserToPoll(event.getMember().getUser(), event.getGuild(), event.getChannel());
 
           Statcord.commandPost("gift", event.getUser().getId());

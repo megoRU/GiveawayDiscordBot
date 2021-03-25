@@ -26,18 +26,21 @@ public class Gift {
     this.guild = guild;
   }
 
-  public Gift() {}
+  public Gift() {
+  }
 
   public void startGift(Guild guild, TextChannel channel, String newTitle) {
-    GiveawayRegistry.getTitle().put(guild.getIdLong(), newTitle == null ? "Giveaway" : newTitle);
+    GiveawayRegistry.getInstance().getTitle()
+        .put(guild.getIdLong(), newTitle == null ? "Giveaway" : newTitle);
     EmbedBuilder start = new EmbedBuilder();
     start.setColor(0x00FF00);
-    start.setTitle(GiveawayRegistry.getTitle().get(guild.getIdLong()));
+    start.setTitle(GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
     start.setDescription("React with :gift: to enter!" + "\nUsers: `" + count + "`");
-    GiveawayRegistry.incrementGiveAwayCount();
+    GiveawayRegistry.getInstance().incrementGiveAwayCount();
     channel.sendMessage(start.build()).queue(m -> {
-      GiveawayRegistry.getMessageId().put(guild.getIdLong(), m.getId());
-      GiveawayRegistry.getIdMessagesWithGiveawayEmoji().put(guild.getIdLong(), m.getId());
+      GiveawayRegistry.getInstance().getMessageId().put(guild.getIdLong(), m.getId());
+      GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji()
+          .put(guild.getIdLong(), m.getId());
       m.addReaction(Reactions.emojiPresent).queue();
     });
     start.clear();
@@ -49,12 +52,13 @@ public class Gift {
     listUsersHash.put(user.getId(), user.getId());
     EmbedBuilder edit = new EmbedBuilder();
     edit.setColor(0x00FF00);
-    edit.setTitle(GiveawayRegistry.getTitle().get(guild.getIdLong()));
-    edit.setDescription("React with :gift: to enter!"
-        + "\nUsers: `" + count + "`");
-    channel.editMessageById(GiveawayRegistry.getMessageId().get(guild.getIdLong()), edit.build())
+    edit.setTitle(GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
+    edit.setDescription("React with :gift: to enter!" + "\nUsers: `" + count + "`");
+    channel.editMessageById(GiveawayRegistry.getInstance().getMessageId().get(guild.getIdLong()),
+        edit.build())
         .queue(null, (exception) -> channel
-                .sendMessage(GiveawayRegistry.removeGiftExceptions(guild.getIdLong())).queue());
+            .sendMessage(GiveawayRegistry.getInstance().removeGiftExceptions(guild.getIdLong()))
+            .queue());
     edit.clear();
   }
 
@@ -72,11 +76,11 @@ public class Gift {
       notEnoughUsers.clear();
       listUsersHash.clear();
       listUsers.clear();
-      GiveawayRegistry.getMessageId().remove(guild.getIdLong());
-      GiveawayRegistry.getIdMessagesWithGiveawayEmoji().remove(guild.getIdLong());
-      GiveawayRegistry.getTitle().remove(guild.getIdLong());
-      GiveawayRegistry.removeGift(guild.getIdLong());
-      GiveawayRegistry.decrementGiveAwayCount();
+      GiveawayRegistry.getInstance().getMessageId().remove(guild.getIdLong());
+      GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().remove(guild.getIdLong());
+      GiveawayRegistry.getInstance().getTitle().remove(guild.getIdLong());
+      GiveawayRegistry.getInstance().removeGift(guild.getIdLong());
+      GiveawayRegistry.getInstance().decrementGiveAwayCount();
       return;
     }
 
@@ -85,7 +89,7 @@ public class Gift {
       zero.setColor(0xFF8000);
       zero.setTitle(":warning: Invalid number");
       zero.setDescription(
-          """
+              """
               The number of winners must be greater than zero!
               """ +
               "You entered a number: `" + countWinner + "`\n" +
@@ -133,11 +137,11 @@ public class Gift {
       stopWithMoreWinner.clear();
       listUsersHash.clear();
       listUsers.clear();
-      GiveawayRegistry.getMessageId().clear();
-      GiveawayRegistry.getIdMessagesWithGiveawayEmoji().remove(guild.getIdLong());
-      GiveawayRegistry.removeGift(guild.getIdLong());
-      GiveawayRegistry.getTitle().remove(guild.getIdLong());
-      GiveawayRegistry.decrementGiveAwayCount();
+      GiveawayRegistry.getInstance().getMessageId().clear();
+      GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().remove(guild.getIdLong());
+      GiveawayRegistry.getInstance().removeGift(guild.getIdLong());
+      GiveawayRegistry.getInstance().getTitle().remove(guild.getIdLong());
+      GiveawayRegistry.getInstance().decrementGiveAwayCount();
       return;
     }
 
@@ -149,10 +153,10 @@ public class Gift {
     stop.clear();
     listUsersHash.clear();
     listUsers.clear();
-    GiveawayRegistry.getMessageId().clear();
-    GiveawayRegistry.getIdMessagesWithGiveawayEmoji().remove(guild.getIdLong());
-    GiveawayRegistry.removeGift(guild.getIdLong());
-    GiveawayRegistry.decrementGiveAwayCount();
+    GiveawayRegistry.getInstance().getMessageId().clear();
+    GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().remove(guild.getIdLong());
+    GiveawayRegistry.getInstance().removeGift(guild.getIdLong());
+    GiveawayRegistry.getInstance().decrementGiveAwayCount();
   }
 
   public String getListUsersHash(String id) {

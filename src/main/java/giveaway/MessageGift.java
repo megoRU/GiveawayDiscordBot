@@ -79,37 +79,36 @@ public class MessageGift extends ListenerAdapter {
         }
 
         if ((message.equals(prefix2) || messageWithOutPrefix.matches(GIFT_START_TITLE))
-            && GiveawayRegistry.hasGift(guildLongId)) {
+            && GiveawayRegistry.getInstance().hasGift(guildLongId)) {
           event.getChannel().sendMessage("First you need to stop Giveaway").queue();
           return;
         }
 
         if ((message.equals(prefix2) || messageWithOutPrefix.matches(GIFT_START_TITLE))
-            && !GiveawayRegistry.hasGift(guildLongId)) {
-
-          GiveawayRegistry.setGift(event.getGuild().getIdLong(), new Gift(event.getGuild()));
+            && !GiveawayRegistry.getInstance().hasGift(guildLongId)) {
+          GiveawayRegistry.getInstance().setGift(event.getGuild().getIdLong(), new Gift(event.getGuild()));
           if (messageSplit.length >= 3) {
 
-            GiveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
+            GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
                 .startGift(event.getGuild(), event.getChannel(), messageSplit[2]);
             return;
           } else {
-            GiveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
+            GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
                 .startGift(event.getGuild(), event.getChannel(), null);
           }
         }
 
         if ((message.equals(prefix3)
             || messageWithOutPrefix.matches(GIFT_STOP_COUNT))
-            && GiveawayRegistry.hasGift(guildLongId)) {
+            && GiveawayRegistry.getInstance().hasGift(guildLongId)) {
 
           if (messageSplit.length == 3) {
-            GiveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
+            GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
                 .stopGift(event.getGuild(), event.getChannel(),
                     Integer.parseInt(messageSplit[messageSplit.length - 1]));
             return;
           }
-          GiveawayRegistry.getActiveGiveaways().get(event.getGuild().getIdLong())
+          GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
               .stopGift(event.getGuild(), event.getChannel(), Integer.parseInt("1"));
           return;
         }
@@ -119,7 +118,7 @@ public class MessageGift extends ListenerAdapter {
         EmbedBuilder getCount = new EmbedBuilder();
         getCount.setTitle("Giveaway count");
         getCount.setColor(0x00FF00);
-        getCount.setDescription("Active: `" + GiveawayRegistry.getGiveAwayCount() + "`");
+        getCount.setDescription("Active: `" + GiveawayRegistry.getInstance().getGiveAwayCount() + "`");
         event.getChannel().sendMessage(getCount.build()).queue();
         getCount.clear();
       }

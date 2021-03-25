@@ -11,32 +11,46 @@ public class GiveawayRegistry {
   private static final AtomicInteger giveawayCount = new AtomicInteger(0);
   private static final Map<Long, String> messageId = new HashMap<>();
   private static final Map<Long, String> title = new HashMap<>();
+  private static volatile GiveawayRegistry instance;
 
-  public static Map<Long, Gift> getActiveGiveaways() {
+  public static GiveawayRegistry getInstance() {
+    GiveawayRegistry localInstance = instance;
+    if (localInstance == null) {
+      synchronized (GiveawayRegistry.class) {
+        localInstance = instance;
+        if (localInstance == null) {
+          instance = localInstance = new GiveawayRegistry();
+        }
+      }
+    }
+    return localInstance;
+  }
+
+  public Map<Long, Gift> getActiveGiveaways() {
     return activeGiveaways;
   }
 
-  public static void getGift(long userId) {
+  public void getGift(long userId) {
     activeGiveaways.get(userId);
   }
 
-  public static void setGift(long guildId, Gift gift) {
+  public void setGift(long guildId, Gift gift) {
     activeGiveaways.put(guildId, gift);
   }
 
-  public static boolean hasGift(long guildId) {
+  public boolean hasGift(long guildId) {
     return activeGiveaways.containsKey(guildId);
   }
 
-  public static void removeGift(long guildId) {
+  public void removeGift(long guildId) {
     activeGiveaways.remove(guildId);
   }
 
-  public static Map<Long, String> getIdMessagesWithGiveawayEmoji() {
+  public Map<Long, String> getIdMessagesWithGiveawayEmoji() {
     return idMessagesWithGiveawayEmoji;
   }
 
-  public static String removeGiftExceptions(long guildId) {
+  public String removeGiftExceptions(long guildId) {
     activeGiveaways.remove(guildId);
     return """
         The giveaway was canceled because the bot was unable to get the ID
@@ -44,23 +58,23 @@ public class GiveawayRegistry {
         """;
   }
 
-  public static Map<Long, String> getMessageId() {
+  public Map<Long, String> getMessageId() {
     return messageId;
   }
 
-  public static Map<Long, String> getTitle() {
+  public Map<Long, String> getTitle() {
     return title;
   }
 
-  public synchronized static void incrementGiveAwayCount() {
+  public synchronized void incrementGiveAwayCount() {
     giveawayCount.getAndIncrement();
   }
 
-  public synchronized static void decrementGiveAwayCount() {
+  public synchronized void decrementGiveAwayCount() {
     giveawayCount.decrementAndGet();
   }
 
-  public synchronized static Integer getGiveAwayCount() {
+  public synchronized Integer getGiveAwayCount() {
     return giveawayCount.get();
   }
 
