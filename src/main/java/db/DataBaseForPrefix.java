@@ -6,23 +6,29 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class DataBase {
+public class DataBaseForPrefix {
 
-  private final Connection conn = DriverManager.getConnection(
-      Config.getCONN(),
-      Config.getUSER(),
-      Config.getPASS());
+  private static Connection connection;
 
-  public DataBase() throws SQLException {}
+  //Создаем один коннект на программу
+  public static Connection getConnection() throws SQLException {
+    if (connection == null) {
+      connection = DriverManager.getConnection(Config.getCONN(), Config.getUSER(), Config.getPASS());
+    }
+    return connection;
+  }
+
+  public DataBaseForPrefix() throws SQLException {}
 
   //Добавление префикса
   public void addPrefixToDB(String serverId, String prefix) {
     try {
       String sql = "INSERT INTO prefixs (serverId, prefix) VALUES (?, ?)";
-      PreparedStatement preparedStatement = conn.prepareStatement(sql);
+      PreparedStatement preparedStatement = getConnection().prepareStatement(sql);
       preparedStatement.setString(1, serverId);
       preparedStatement.setString(2, prefix);
       preparedStatement.execute();
+      preparedStatement.close();
     } catch (SQLException e) {
       e.printStackTrace();
     }
@@ -32,8 +38,9 @@ public class DataBase {
   public void removePrefixFromDB(String serverId) {
     try {
       String sql = "DELETE FROM prefixs WHERE serverId='" + serverId + "'";
-      PreparedStatement preparedStatement = conn.prepareStatement(sql);
+      PreparedStatement preparedStatement = getConnection().prepareStatement(sql);
       preparedStatement.execute(sql);
+      preparedStatement.close();
     } catch (SQLException e) {
       e.printStackTrace();
     }

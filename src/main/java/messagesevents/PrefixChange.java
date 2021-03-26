@@ -1,6 +1,6 @@
 package messagesevents;
 
-import db.DataBase;
+import db.DataBaseForPrefix;
 import java.sql.SQLException;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -41,9 +41,9 @@ public class PrefixChange extends ListenerAdapter {
         && BotStart.getMapPrefix().get(event.getMessage().getGuild().getId()) != null) {
       BotStart.getMapPrefix().put(event.getGuild().getId(), messages[1]);
       try {
-        DataBase dataBase = new DataBase();
-        dataBase.removePrefixFromDB(event.getGuild().getId());
-        dataBase.addPrefixToDB(event.getGuild().getId(), messages[1]);
+        DataBaseForPrefix dataBaseForPrefix = new DataBaseForPrefix();
+        dataBaseForPrefix.removePrefixFromDB(event.getGuild().getId());
+        dataBaseForPrefix.addPrefixToDB(event.getGuild().getId(), messages[1]);
       } catch (SQLException e) {
         e.printStackTrace();
       }
@@ -54,8 +54,8 @@ public class PrefixChange extends ListenerAdapter {
     if (message.matches(PREFIX) && event.getMember().hasPermission(Permission.MANAGE_SERVER)) {
       BotStart.getMapPrefix().put(event.getGuild().getId(), messages[1]);
       try {
-        DataBase dataBase = new DataBase();
-        dataBase.addPrefixToDB(event.getGuild().getId(), messages[1]);
+        DataBaseForPrefix dataBaseForPrefix = new DataBaseForPrefix();
+        dataBaseForPrefix.addPrefixToDB(event.getGuild().getId(), messages[1]);
       } catch (SQLException e) {
         e.printStackTrace();
       }
@@ -66,8 +66,8 @@ public class PrefixChange extends ListenerAdapter {
     if (message.equals(PREFIX_RESET) && event.getMember().hasPermission(Permission.MANAGE_SERVER)) {
       BotStart.getMapPrefix().remove(event.getGuild().getId());
       try {
-        DataBase dataBase = new DataBase();
-        dataBase.removePrefixFromDB(event.getGuild().getId());
+        DataBaseForPrefix dataBaseForPrefix = new DataBaseForPrefix();
+        dataBaseForPrefix.removePrefixFromDB(event.getGuild().getId());
       } catch (SQLException e) {
         e.printStackTrace();
       }
