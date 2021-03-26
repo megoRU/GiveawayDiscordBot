@@ -6,15 +6,17 @@ import threads.TopGGApiThread;
 public class Main {
 
   public static void main(String[] args) throws Exception {
+    //Загружаем данные в коллекции. Может лучше создать отдельный метод в классе BotStart
+
     BotStart botStart = new BotStart();
     botStart.startBot();
     GiveawayRegistry.getInstance();
 
-    StatcordThread statcordThread = new StatcordThread();
-    statcordThread.start();
-
-    TopGGApiThread topGGApiThread = new TopGGApiThread();
-    topGGApiThread.start();
+//    StatcordThread statcordThread = new StatcordThread();
+//    statcordThread.start();
+//
+//    TopGGApiThread topGGApiThread = new TopGGApiThread();
+//    topGGApiThread.start();
   }
 
 }

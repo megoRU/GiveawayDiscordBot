@@ -39,8 +39,8 @@ public class BotStart {
     jda.awaitReady();
 
     try {
-      Connection conn = DriverManager.getConnection(Config.getCONN(), Config.getUSER(), Config.getPASS());
-      Statement statement = conn.createStatement();
+      Connection connection = DriverManager.getConnection(Config.getPrefixConnection(), Config.getPrefixUser(), Config.getPrefixPass());
+      Statement statement = connection.createStatement();
       String sql = "select * from prefixs";
       ResultSet rs = statement.executeQuery(sql);
 
@@ -48,6 +48,8 @@ public class BotStart {
         mapPrefix.put(rs.getString("serverId"), rs.getString("prefix"));
       }
 
+      rs.close();
+      connection.close();
     } catch (SQLException e) {
       e.printStackTrace();
     }
