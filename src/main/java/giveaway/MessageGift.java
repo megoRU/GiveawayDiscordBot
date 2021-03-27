@@ -86,7 +86,7 @@ public class MessageGift extends ListenerAdapter {
 
         if ((message.equals(prefix2) || messageWithOutPrefix.matches(GIFT_START_TITLE))
             && !GiveawayRegistry.getInstance().hasGift(guildLongId)) {
-          GiveawayRegistry.getInstance().setGift(event.getGuild().getIdLong(), new Gift(event.getGuild()));
+          GiveawayRegistry.getInstance().setGift(event.getGuild().getIdLong(), new Gift(event.getGuild().getIdLong()));
           if (messageSplit.length >= 3) {
 
             GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())

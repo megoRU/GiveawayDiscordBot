@@ -26,11 +26,21 @@ public class DataBaseGiveaways {
   //Создаем таблицу когда кто-то создал Giveaway
   public void createTableWhenGiveawayStart(String guildLongId) {
     try {
-      String query = "CREATE TABLE `" + guildLongId + "` (`id` bigint(30) NOT NULL, `user_long_id` bigint(30) NOT NULL, "
-          + "PRIMARY KEY (`id`), "
-          + "UNIQUE KEY `id` (`id`)) "
-          + "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+      String query = "CREATE TABLE `" + guildLongId + "` (`user_long_id` bigint(30) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+      PreparedStatement preparedStmt = getConnection().prepareStatement(query);
+      preparedStmt.executeUpdate();
+      preparedStmt.close();
+    } catch (Exception e) {
+      dropTableWhenGiveawayStop(guildLongId);
+      createTableWhenGiveawayStart(guildLongId);
+      e.printStackTrace();
+    }
+  }
 
+  //Удаляем таблицу когда кто-то остановил Giveaway
+  public void dropTableWhenGiveawayStop(String guildLongId) {
+    try {
+      String query = "DROP TABLE `" + guildLongId + "`;";
       PreparedStatement preparedStmt = getConnection().prepareStatement(query);
       preparedStmt.executeUpdate();
       preparedStmt.close();
@@ -39,11 +49,11 @@ public class DataBaseGiveaways {
     }
   }
 
-  //Удаляем таблицу когда кто-то остановил Giveaway
-  public void dropTableWhenGiveawayStop(String guildLongId) {
+  public void insertUserToDB(String guildIdLong, long userIdLong) {
     try {
-      String query = "DROP TABLE " + guildLongId + ";";
+      String query = "INSERT IGNORE INTO `" + guildIdLong + "` (user_long_id) values (?)";
       PreparedStatement preparedStmt = getConnection().prepareStatement(query);
+      preparedStmt.setLong(1, userIdLong);
       preparedStmt.executeUpdate();
       preparedStmt.close();
     } catch (Exception e) {

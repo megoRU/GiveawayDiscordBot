@@ -59,16 +59,18 @@ public class DataBasePrefix {
   }
 
   //Добавляем в Бд данные о id long message
-  public void addPrefixToDB(long guildId, long messageId, String date) {
+  public void addMessageToDB(long guildId, long messageId, String date) {
     try {
       String sql = "INSERT INTO ActiveGiveaways (guild_long_id, message_id_long, date_end_giveaway) VALUES (?, ?, ?)";
       PreparedStatement preparedStatement = getConnection().prepareStatement(sql);
       preparedStatement.setLong(1, guildId);
       preparedStatement.setLong(2, messageId);
-      preparedStatement.setString(2, date);
+      preparedStatement.setString(3, date);
       preparedStatement.execute();
       preparedStatement.close();
     } catch (SQLException e) {
+      removeMessageFromDB(guildId);
+      addMessageToDB(guildId, messageId, date);
       e.printStackTrace();
     }
   }
