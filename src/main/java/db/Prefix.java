@@ -6,7 +6,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class DataBasePrefix {
+public class Prefix {
 
   private static Connection connection;
 
@@ -18,7 +18,7 @@ public class DataBasePrefix {
     return connection;
   }
 
-  public DataBasePrefix() throws SQLException {}
+  public Prefix() throws SQLException {}
 
   //Добавление префикса
   public void addPrefixToDB(String serverId, String prefix) {

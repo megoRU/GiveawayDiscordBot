@@ -6,7 +6,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class DataBaseGiveaways {
+public class Giveaways {
 
   //CREATE TABLE `guildId` (`id` bigint(30) NOT NULL, `user_long_id` bigint(30) NOT NULL,
   // PRIMARY KEY (`id`),
@@ -21,7 +21,7 @@ public class DataBaseGiveaways {
     return connection;
   }
 
-  public DataBaseGiveaways() throws SQLException {}
+  public Giveaways() throws SQLException {}
 
   //Создаем таблицу когда кто-то создал Giveaway
   public void createTableWhenGiveawayStart(String guildLongId) {

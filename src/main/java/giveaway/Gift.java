@@ -1,7 +1,7 @@
 package giveaway;
 
-import db.DataBaseGiveaways;
-import db.DataBasePrefix;
+import db.Giveaways;
+import db.Prefix;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,8 +42,8 @@ public class Gift {
     GiveawayRegistry.getInstance().incrementGiveAwayCount();
     channel.sendMessage(start.build()).queue(m -> {
       try {
-      DataBasePrefix dataBasePrefix = new DataBasePrefix();
-      dataBasePrefix.addMessageToDB(guild.getIdLong(), m.getIdLong(), null);
+      Prefix prefix = new Prefix();
+      prefix.addMessageToDB(guild.getIdLong(), m.getIdLong(), null);
       } catch (SQLException throwable) {
         throwable.printStackTrace();
       }
@@ -54,8 +54,8 @@ public class Gift {
     start.clear();
 
     try {
-      DataBaseGiveaways dataBaseGiveaways = new DataBaseGiveaways();
-      dataBaseGiveaways.createTableWhenGiveawayStart(guild.getId());
+      Giveaways giveaways = new Giveaways();
+      giveaways.createTableWhenGiveawayStart(guild.getId());
     } catch (SQLException throwable) {
       throwable.printStackTrace();
     }
@@ -77,8 +77,8 @@ public class Gift {
     edit.clear();
 
     try {
-      DataBaseGiveaways dataBaseGiveaways = new DataBaseGiveaways();
-      dataBaseGiveaways.insertUserToDB(guild.getId(), user.getIdLong());
+      Giveaways giveaways = new Giveaways();
+      giveaways.insertUserToDB(guild.getId(), user.getIdLong());
     } catch (SQLException throwable) {
       throwable.printStackTrace();
     }
@@ -105,10 +105,10 @@ public class Gift {
       GiveawayRegistry.getInstance().removeGift(guild.getIdLong());
       GiveawayRegistry.getInstance().decrementGiveAwayCount();
       try {
-        DataBasePrefix dataBasePrefix = new DataBasePrefix();
-        dataBasePrefix.removeMessageFromDB(guild.getIdLong());
-        DataBaseGiveaways dataBaseGiveaways = new DataBaseGiveaways();
-        dataBaseGiveaways.dropTableWhenGiveawayStop(guild.getId());
+        Prefix prefix = new Prefix();
+        prefix.removeMessageFromDB(guild.getIdLong());
+        Giveaways giveaways = new Giveaways();
+        giveaways.dropTableWhenGiveawayStop(guild.getId());
       } catch (SQLException throwable) {
         throwable.printStackTrace();
       }
@@ -174,10 +174,10 @@ public class Gift {
       GiveawayRegistry.getInstance().getTitle().remove(guild.getIdLong());
       GiveawayRegistry.getInstance().decrementGiveAwayCount();
       try {
-        DataBasePrefix dataBasePrefix = new DataBasePrefix();
-        dataBasePrefix.removeMessageFromDB(guild.getIdLong());
-        DataBaseGiveaways dataBaseGiveaways = new DataBaseGiveaways();
-        dataBaseGiveaways.dropTableWhenGiveawayStop(guild.getId());
+        Prefix prefix = new Prefix();
+        prefix.removeMessageFromDB(guild.getIdLong());
+        Giveaways giveaways = new Giveaways();
+        giveaways.dropTableWhenGiveawayStop(guild.getId());
       } catch (SQLException throwable) {
         throwable.printStackTrace();
       }
@@ -197,10 +197,10 @@ public class Gift {
     GiveawayRegistry.getInstance().removeGift(guild.getIdLong());
     GiveawayRegistry.getInstance().decrementGiveAwayCount();
     try {
-      DataBasePrefix dataBasePrefix = new DataBasePrefix();
-      dataBasePrefix.removeMessageFromDB(guild.getIdLong());
-      DataBaseGiveaways dataBaseGiveaways = new DataBaseGiveaways();
-      dataBaseGiveaways.dropTableWhenGiveawayStop(guild.getId());
+      Prefix prefix = new Prefix();
+      prefix.removeMessageFromDB(guild.getIdLong());
+      Giveaways giveaways = new Giveaways();
+      giveaways.dropTableWhenGiveawayStop(guild.getId());
     } catch (SQLException throwable) {
       throwable.printStackTrace();
     }
