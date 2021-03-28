@@ -1,6 +1,7 @@
 import giveaway.GiveawayRegistry;
 import startbot.BotStart;
 import threads.StatcordThread;
+import threads.StopGiveawayByTimer;
 import threads.TopGGApiThread;
 
 public class Main {
@@ -16,6 +17,9 @@ public class Main {
 //
 //    TopGGApiThread topGGApiThread = new TopGGApiThread();
 //    topGGApiThread.start();
+
+    StopGiveawayByTimer stopGiveawayByTimer = new StopGiveawayByTimer();
+    stopGiveawayByTimer.start();
   }
 
 }

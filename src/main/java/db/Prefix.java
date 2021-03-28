@@ -59,18 +59,26 @@ public class Prefix {
   }
 
   //Добавляем в Бд данные о id long message
-  public void addMessageToDB(long guildId, long messageId, String date) {
+  public void addMessageToDB(long guildId, long messageId, long channelId, String countWinners, String date) {
     try {
-      String sql = "INSERT INTO ActiveGiveaways (guild_long_id, message_id_long, date_end_giveaway) VALUES (?, ?, ?)";
+      String sql = "INSERT INTO ActiveGiveaways ("
+          + "guild_long_id, "
+          + "message_id_long, "
+          + "channel_id_long, "
+          + "count_winners, "
+          + "date_end_giveaway) "
+          + "VALUES (?, ?, ?, ?, ?)";
       PreparedStatement preparedStatement = getConnection().prepareStatement(sql);
       preparedStatement.setLong(1, guildId);
       preparedStatement.setLong(2, messageId);
-      preparedStatement.setString(3, date);
+      preparedStatement.setLong(3, channelId);
+      preparedStatement.setString(4, countWinners);
+      preparedStatement.setString(5, date);
       preparedStatement.execute();
       preparedStatement.close();
     } catch (SQLException e) {
       removeMessageFromDB(guildId);
-      addMessageToDB(guildId, messageId, date);
+      addMessageToDB(guildId, messageId, channelId, countWinners, date);
       e.printStackTrace();
     }
   }

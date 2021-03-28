@@ -11,7 +11,10 @@ import startbot.Statcord;
 public class MessageGift extends ListenerAdapter {
 
   private static final String GIFT_START = "!gift start";
+  private static final String GIFT_START_WITH_MINUTES = "gift start\\s[0-9]{1,2}$";
   private static final String GIFT_START_TITLE = "gift start\\s.{0,255}$";
+  private static final String GIFT_START_TITLE_WITH_MINUTES = "gift start\\s.{0,255}\\s[0-9]{1,2}$";
+  private static final String GIFT_START_COUNT_WITH_MINUTES = "gift start\s[0-9]{1,2}\s[0-9]{1,2}$";
   private static final String GIFT_STOP = "!gift stop";
   private static final String GIFT_STOP_COUNT = "gift stop\\s[0-9]+";
   private static final String GIFT_COUNT = "!gift count";
@@ -32,7 +35,7 @@ public class MessageGift extends ListenerAdapter {
       return;
     }
 
-    String[] messageSplit = message.split(" ", 3);
+    String[] messageSplit = message.split(" ", 4);
     int length = message.length();
     String messageWithOutPrefix = message.substring(1, length);
 
@@ -84,17 +87,37 @@ public class MessageGift extends ListenerAdapter {
           return;
         }
 
-        if ((message.equals(prefix2) || messageWithOutPrefix.matches(GIFT_START_TITLE))
+        if ((message.equals(prefix2)
+            || messageWithOutPrefix.matches(GIFT_START_TITLE)
+            || messageWithOutPrefix.matches(GIFT_START_TITLE_WITH_MINUTES))
             && !GiveawayRegistry.getInstance().hasGift(guildLongId)) {
           GiveawayRegistry.getInstance().setGift(event.getGuild().getIdLong(), new Gift(event.getGuild().getIdLong()));
-          if (messageSplit.length >= 3) {
 
+          if (messageSplit.length == 4 && messageWithOutPrefix.matches(GIFT_START_COUNT_WITH_MINUTES)) {
             GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
-                .startGift(event.getGuild(), event.getChannel(), messageSplit[2]);
+                .startGift(event.getGuild(), event.getChannel(), null, messageSplit[3], messageSplit[2]);
+            return;
+          }
+
+          if (messageSplit.length == 4) {
+            GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
+                .startGift(event.getGuild(), event.getChannel(), messageSplit[2], null, messageSplit[3]);
+            return;
+          }
+
+          if (messageSplit.length == 3 && messageWithOutPrefix.matches(GIFT_START_WITH_MINUTES)) {
+            GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
+                .startGift(event.getGuild(), event.getChannel(), null, null, messageSplit[2]);
+            return;
+          }
+
+          if (messageSplit.length == 3) {
+            GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
+                .startGift(event.getGuild(), event.getChannel(), messageSplit[2], null, null);
             return;
           } else {
             GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
-                .startGift(event.getGuild(), event.getChannel(), null);
+                .startGift(event.getGuild(), event.getChannel(), null, null, null);
           }
         }
 
@@ -104,12 +127,12 @@ public class MessageGift extends ListenerAdapter {
 
           if (messageSplit.length == 3) {
             GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
-                .stopGift(event.getGuild(), event.getChannel(),
+                .stopGift(event.getGuild().getIdLong(), event.getChannel().getIdLong(),
                     Integer.parseInt(messageSplit[messageSplit.length - 1]));
             return;
           }
           GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
-              .stopGift(event.getGuild(), event.getChannel(), Integer.parseInt("1"));
+              .stopGift(event.getGuild().getIdLong(), event.getChannel().getIdLong(), Integer.parseInt("1"));
           return;
         }
       }

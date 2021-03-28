@@ -47,15 +47,16 @@ public class Statcord {
 
   private static int time = 5; // autopost timer in min
   private static int count = -1;
+  public static final String ANSI_YELLOW = "\u001B[33m";
+  public static final String RESET = "\033[0m";
 
   //TODO create start void for ShardManager or generally for sharding
   public static void start(String id, String key, JDA jda, boolean autopost, int timerInMin)
       throws Exception {
-    System.out.println("\u001B[33mStatcord started with this: "
+    System.out.println(ANSI_YELLOW + "Statcord started with this: "
         + id + " "
         + key + " "
-        + jda.toString()
-        + "\u001B[0m");
+        + jda.toString() + RESET);
 
     //save important stuff
     Statcord.jda = jda;
@@ -83,7 +84,7 @@ public class Statcord {
 
     if (autopost) {
       autorun();
-      System.out.println("\u001B[33m!!! [Statcord] autorun activated!\u001B[0m");
+      System.out.println(ANSI_YELLOW +"!!! [Statcord] autorun activated!" + RESET);
       Statcord.autopost = true;
     }
 
@@ -109,11 +110,10 @@ public class Statcord {
   //manually updating Stats
   public static void updateStats() throws IOException, InterruptedException {
     if (!statcordActive) {
-      System.out.println(
-          "\u001B[33m[Statcord]You can not use 'updateStats' because Statcord is not active!\u001B[0m");
+      System.out.println(ANSI_YELLOW + "[Statcord]You can not use 'updateStats' because Statcord is not active!" + RESET);
       return;
     }
-    System.out.println("\u001B[33m[Statcord] Updating Statcord!\u001B[0m");
+    System.out.println(ANSI_YELLOW + "[Statcord] Updating Statcord!" + RESET);
 
     servers = jda.getGuilds().size();
     users = jda.getUsers().size();
@@ -164,7 +164,7 @@ public class Statcord {
 
   public static void customPost(int id, String content) {
     if (!statcordActive) {
-      System.out.println("\u001B[33m[Statcord]You can not use 'customPost' because Statcord is not active!\u001B[0m");
+      System.out.println(ANSI_YELLOW + "[Statcord]You can not use 'customPost' because Statcord is not active!" + RESET);
       return;
     }
     switch (id) {
@@ -182,7 +182,7 @@ public class Statcord {
   // command metrics with active users
   public static void commandPost(String command, String author) {
     if (!statcordActive) {
-      System.out.println("\u001B[33m[Statcord]You can not use 'commandPost' because Statcord is not active!\u001B[0m");
+      System.out.println(ANSI_YELLOW + "[Statcord]You can not use 'commandPost' because Statcord is not active!" + RESET);
       return;
     }
     System.out.println("Adding a command to Statcord");
@@ -232,7 +232,7 @@ public class Statcord {
         HttpResponse.BodyHandlers.ofString());
 
     if (response.body().contains("Success")) {
-      System.out.println("\u001B[33m[Statcord] Updated Stats on Statcord!\u001B[0m");
+      System.out.println(ANSI_YELLOW + "[Statcord] Updated Stats on Statcord!" + RESET);
     } else {
       System.out.println("[Statcord] An error happened");
       System.out.println(response.body());
@@ -298,7 +298,7 @@ public class Statcord {
 
     timer.schedule(new TimerTask() {
       public void run() throws NullPointerException {
-        System.out.println("\u001B[33m[Statcord] Automatic update!\u001B[0m");
+        System.out.println(ANSI_YELLOW + "[33m[Statcord] Automatic update!" + RESET);
         try {
           updateStats();
         } catch (IOException | InterruptedException e) {
