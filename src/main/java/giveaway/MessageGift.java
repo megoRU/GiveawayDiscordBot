@@ -36,7 +36,7 @@ public class MessageGift extends ListenerAdapter {
       return;
     }
 
-    String[] messageSplit = message.split(" ", 5);
+    String[] messageSplit = message.split(" ", 6);
     int length = message.length();
     String messageWithOutPrefix = message.substring(1, length);
 
@@ -92,16 +92,21 @@ public class MessageGift extends ListenerAdapter {
           event.getChannel().sendMessage("First you need to stop Giveaway").queue();
           return;
         }
-
         if ((message.equals(prefix2)
             || messageWithOutPrefix.matches(GIFT_START_TITLE)
             || messageWithOutPrefix.matches(GIFT_START_TITLE_WITH_MINUTES))
             && !GiveawayRegistry.getInstance().hasGift(guildLongId)) {
           GiveawayRegistry.getInstance().setGift(event.getGuild().getIdLong(), new Gift(event.getGuild().getIdLong()));
 
-          if (messageSplit.length == 5 && messageWithOutPrefix.matches(GIFT_START_TITLE_COUNT_WITH_MINUTES)) {
-            GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
-                .startGift(event.getGuild(), event.getChannel(), messageSplit[2], messageSplit[4], messageSplit[3]);
+          if (messageSplit.length == 6 && messageWithOutPrefix.matches(GIFT_START_TITLE_COUNT_WITH_MINUTES)) {
+            int len = messageSplit[messageSplit.length - 1].length() + messageSplit[messageSplit.length - 2].length();
+            GiveawayRegistry.getInstance()
+                .getActiveGiveaways().get(event.getGuild().getIdLong()).startGift(
+                    event.getGuild(),
+                    event.getChannel(),
+                    event.getMessage().getContentDisplay().substring(12, message.length() - len - 1),
+                    messageSplit[messageSplit.length - 1],
+                    messageSplit[messageSplit.length - 2]);
             return;
           }
 
