@@ -6,10 +6,12 @@
 
 ## TODO
 
--   [x]   Stop tracking completed giveaways.
+-   [x]   Stop tracking completed dataBase.
 -   [x]   Make a separate class for storing guilds and instances of classes with giveaway.
--   [ ]   Use a database to store active giveaways.
--   [ ]   End of giveaway by a timer.
+-   [x]   Use a database to store active dataBase.
+-   [X]   End of giveaway by a timer.
+-   [ ]   Perform optimization for queries.
+-   [X]   Use one DB.
 
 ## Add bot to your guild
 [![Discord Bots](https://top.gg/api/widget/servers/808277484524011531.svg)](https://top.gg/bot/808277484524011531)

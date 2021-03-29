@@ -1,6 +1,6 @@
 package messagesevents;
 
-import db.Prefix;
+import db.DataBase;
 import java.sql.SQLException;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -41,9 +41,9 @@ public class PrefixChange extends ListenerAdapter {
         && BotStart.getMapPrefix().get(event.getMessage().getGuild().getId()) != null) {
       BotStart.getMapPrefix().put(event.getGuild().getId(), messages[1]);
       try {
-        Prefix prefix = new Prefix();
-        prefix.removePrefixFromDB(event.getGuild().getId());
-        prefix.addPrefixToDB(event.getGuild().getId(), messages[1]);
+        DataBase dataBase = new DataBase();
+        dataBase.removePrefixFromDB(event.getGuild().getId());
+        dataBase.addPrefixToDB(event.getGuild().getId(), messages[1]);
       } catch (SQLException e) {
         e.printStackTrace();
       }
@@ -54,8 +54,8 @@ public class PrefixChange extends ListenerAdapter {
     if (message.matches(PREFIX) && event.getMember().hasPermission(Permission.MANAGE_SERVER)) {
       BotStart.getMapPrefix().put(event.getGuild().getId(), messages[1]);
       try {
-        Prefix prefix = new Prefix();
-        prefix.addPrefixToDB(event.getGuild().getId(), messages[1]);
+        DataBase dataBase = new DataBase();
+        dataBase.addPrefixToDB(event.getGuild().getId(), messages[1]);
       } catch (SQLException e) {
         e.printStackTrace();
       }
@@ -66,8 +66,8 @@ public class PrefixChange extends ListenerAdapter {
     if (message.equals(PREFIX_RESET) && event.getMember().hasPermission(Permission.MANAGE_SERVER)) {
       BotStart.getMapPrefix().remove(event.getGuild().getId());
       try {
-        Prefix prefix = new Prefix();
-        prefix.removePrefixFromDB(event.getGuild().getId());
+        DataBase dataBase = new DataBase();
+        dataBase.removePrefixFromDB(event.getGuild().getId());
       } catch (SQLException e) {
         e.printStackTrace();
       }

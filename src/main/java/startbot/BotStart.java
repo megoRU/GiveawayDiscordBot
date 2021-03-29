@@ -21,11 +21,11 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 
 public class BotStart {
-  //TODO: Реализовать авто-завершение Giveaways по таймеру, также под это реализовать логику в Gift и MessageGift
   private static JDA jda;
   private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
   private static final Map<String, String> mapPrefix = new HashMap<>();
   private static final Map<Integer, String> guildIdHashList = new HashMap<>();
+//  private static final Map<Long, ActiveGiveaways> activeGiveawaysHashMap = new HashMap<>();
 
   public void startBot() throws Exception {
     //Получаем id guild и id message
@@ -36,6 +36,9 @@ public class BotStart {
 
     //Получаем все префиксы из базы данных
     getPrefixFromDB();
+
+    //Создаем объекты из базы данных
+    //getAllData();
 
     jdaBuilder.setAutoReconnect(true);
     jdaBuilder.setStatus(OnlineStatus.ONLINE);
@@ -52,9 +55,39 @@ public class BotStart {
 
   }
 
+//  private void getAllData() {
+//    try {
+//      Connection connection = DriverManager.getConnection(Config.getGiveawayConnection(), Config.getGiveawayUser(), Config.getGiveawayPass());
+//      Statement statement = connection.createStatement();
+//      String sql = "select * from ActiveGiveaways";
+//      ResultSet rs = statement.executeQuery(sql);
+//      while (rs.next()) {
+//
+//        long guild_long_id = rs.getLong("guild_long_id");
+//        long message_id_long = rs.getLong("message_id_long");
+//        long channel_id_long = rs.getLong("channel_id_long");
+//        String count_winners = rs.getString("count_winners");
+//        String date_end_giveaway = rs.getString("date_end_giveaway");
+//
+//        activeGiveawaysHashMap.put(guild_long_id, new ActiveGiveaways(
+//            guild_long_id,
+//            message_id_long,
+//            channel_id_long,
+//            count_winners,
+//            date_end_giveaway));
+//      }
+//
+//      rs.close();
+//      statement.close();
+//      connection.close();
+//    } catch (SQLException e) {
+//      e.printStackTrace();
+//    }
+//  }
+
   private void getMessageIdFromDB() {
     try {
-      Connection connection = DriverManager.getConnection(Config.getPrefixConnection(), Config.getPrefixUser(), Config.getPrefixPass());
+      Connection connection = DriverManager.getConnection(Config.getGiveawayConnection(), Config.getGiveawayUser(), Config.getGiveawayPass());
       Statement statement = connection.createStatement();
       String sql = "select * from ActiveGiveaways";
       ResultSet rs = statement.executeQuery(sql);
@@ -125,7 +158,7 @@ public class BotStart {
 
   private void getPrefixFromDB() {
     try {
-      Connection connection = DriverManager.getConnection(Config.getPrefixConnection(), Config.getPrefixUser(), Config.getPrefixPass());
+      Connection connection = DriverManager.getConnection(Config.getGiveawayConnection(), Config.getGiveawayUser(), Config.getGiveawayPass());
       Statement statement = connection.createStatement();
       String sql = "select * from prefixs";
       ResultSet rs = statement.executeQuery(sql);

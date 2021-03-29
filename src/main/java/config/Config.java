@@ -3,13 +3,9 @@ package config;
 public class Config {
 
   private static final String DEV_BOT_TOKEN = "";
+  public static final String DEV_BOT_TOKEN2 = "";
   private static final String PRODUCTION_BOT_TOKEN = "";
   private static final String TOKEN = DEV_BOT_TOKEN;
-
-  //Данный от БД с префиксами
-  private static final String PREFIX_CONNECTION = ""; //utf8mb4
-  private static final String PREFIX_USER = "";
-  private static final String PREFIX_PASS = "";
 
   //Данный от БД с Giveaways
   private static final String GIVEAWAY_CONNECTION = ""; //utf8mb4
@@ -23,18 +19,6 @@ public class Config {
 
   public static String getTOKEN() {
     return TOKEN;
-  }
-
-  public static String getPrefixConnection() {
-    return PREFIX_CONNECTION;
-  }
-
-  public static String getPrefixUser() {
-    return PREFIX_USER;
-  }
-
-  public static String getPrefixPass() {
-    return PREFIX_PASS;
   }
 
   public static String getGiveawayConnection() {

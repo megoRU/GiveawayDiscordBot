@@ -14,7 +14,10 @@ public class StopGiveawayByTimer extends Thread {
   public void run() {
     try {
       while (true) {
-        Connection connection = DriverManager.getConnection(Config.getPrefixConnection(), Config.getPrefixUser(), Config.getPrefixPass());
+        Connection connection = DriverManager.getConnection(
+            Config.getGiveawayConnection(),
+            Config.getGiveawayUser(),
+            Config.getGiveawayPass());
         Statement statement = connection.createStatement();
         String sql = "select * from ActiveGiveaways";
         ResultSet rs = statement.executeQuery(sql);
@@ -27,7 +30,6 @@ public class StopGiveawayByTimer extends Thread {
             LocalDateTime localDateTime = LocalDateTime.now();
             LocalDateTime timeFormDB = LocalDateTime.parse(date_end_giveaway);
             if (localDateTime.isAfter(timeFormDB)) {
-              System.out.println(count_winners);
               GiveawayRegistry.getInstance()
                   .getActiveGiveaways()
                   .get(guild_long_id)

@@ -39,6 +39,11 @@ public class MessageGift extends ListenerAdapter {
     int length = message.length();
     String messageWithOutPrefix = message.substring(1, length);
 
+    if (messageSplit[2].equals("0")) {
+      event.getChannel().sendMessage("You set `0` minutes. We took care of this and increased it by `1` minute.").queue();
+      messageSplit[2] = "1";
+    }
+
     String prefix2 = GIFT_START;
     String prefix3 = GIFT_STOP;
     String prefix4 = GIFT_COUNT;
@@ -49,7 +54,7 @@ public class MessageGift extends ListenerAdapter {
       prefix4 = BotStart.getMapPrefix().get(event.getGuild().getId()) + "gift count";
     }
 
-    //TODO: Нужно всё тестировать!
+    //TODO: Нужно это тестировать!
     if ((message.contains("!gift start ") && (message.length() - 11) >= 256)) {
       event.getChannel().sendMessage("The title must not be longer than 255 characters!").queue();
       return;

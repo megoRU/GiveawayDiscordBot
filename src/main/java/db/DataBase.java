@@ -6,19 +6,60 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class Prefix {
+public class DataBase {
 
+  //CREATE TABLE `guildId` (`id` bigint(30) NOT NULL, `user_long_id` bigint(30) NOT NULL,
+  // PRIMARY KEY (`id`),
+  // UNIQUE KEY `id` (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   private static Connection connection;
 
   //Создаем один коннект на программу
   private static Connection getConnection() throws SQLException {
     if (connection == null) {
-      connection = DriverManager.getConnection(Config.getPrefixConnection(), Config.getPrefixUser(), Config.getPrefixPass());
+      connection = DriverManager.getConnection(Config.getGiveawayConnection(), Config.getGiveawayUser(), Config.getGiveawayPass());
     }
     return connection;
   }
 
-  public Prefix() throws SQLException {}
+  public DataBase() throws SQLException {}
+
+  //Создаем таблицу когда кто-то создал Giveaway
+  public void createTableWhenGiveawayStart(String guildLongId) {
+    try {
+      String query = "CREATE TABLE `" + guildLongId + "` (`user_long_id` bigint(30) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+      PreparedStatement preparedStmt = getConnection().prepareStatement(query);
+      preparedStmt.executeUpdate();
+      preparedStmt.close();
+    } catch (Exception e) {
+      dropTableWhenGiveawayStop(guildLongId);
+      createTableWhenGiveawayStart(guildLongId);
+      e.printStackTrace();
+    }
+  }
+
+  //Удаляем таблицу когда кто-то остановил Giveaway
+  public void dropTableWhenGiveawayStop(String guildLongId) {
+    try {
+      String query = "DROP TABLE `" + guildLongId + "`;";
+      PreparedStatement preparedStmt = getConnection().prepareStatement(query);
+      preparedStmt.executeUpdate();
+      preparedStmt.close();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void insertUserToDB(String guildIdLong, long userIdLong) {
+    try {
+      String query = "INSERT IGNORE INTO `" + guildIdLong + "` (user_long_id) values (?)";
+      PreparedStatement preparedStmt = getConnection().prepareStatement(query);
+      preparedStmt.setLong(1, userIdLong);
+      preparedStmt.executeUpdate();
+      preparedStmt.close();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
 
   //Добавление префикса
   public void addPrefixToDB(String serverId, String prefix) {
@@ -82,7 +123,5 @@ public class Prefix {
       e.printStackTrace();
     }
   }
-
-
 
 }

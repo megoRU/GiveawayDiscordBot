@@ -1,7 +1,6 @@
 package giveaway;
 
-import db.Giveaways;
-import db.Prefix;
+import db.DataBase;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,7 +18,6 @@ import net.dv8tion.jda.api.entities.User;
 import startbot.BotStart;
 
 public class Gift {
-  //TODO: Возможны исключения. Если кто-то удалит канал
   private final List<String> listUsers = new ArrayList<>();
   private final Map<String, String> listUsersHash = new HashMap<>();
   private final Set<String> uniqueWinners = new HashSet<>();
@@ -34,8 +32,7 @@ public class Gift {
   public Gift() {
   }
 
-  public void startGift(Guild guild, TextChannel channel,
-      String newTitle, String countWinners, String date) {
+  public void startGift(Guild guild, TextChannel channel, String newTitle, String countWinners, String date) {
     GiveawayRegistry.getInstance().getTitle().put(guild.getIdLong(), newTitle == null ? "Giveaway" : newTitle);
     EmbedBuilder start = new EmbedBuilder();
     start.setColor(0x00FF00);
@@ -47,9 +44,9 @@ public class Gift {
       GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().put(guild.getIdLong(), m.getId());
       m.addReaction(Reactions.emojiPresent).queue();
       try {
-        Prefix prefix = new Prefix();
+        DataBase dataBase = new DataBase();
         LocalDateTime now = LocalDateTime.now();
-        prefix.addMessageToDB(guild.getIdLong(),
+        dataBase.addMessageToDB(guild.getIdLong(),
             m.getIdLong(),
             m.getChannel().getIdLong(),
             countWinners,
@@ -61,8 +58,8 @@ public class Gift {
     start.clear();
 
     try {
-      Giveaways giveaways = new Giveaways();
-      giveaways.createTableWhenGiveawayStart(guild.getId());
+      DataBase dataBase = new DataBase();
+      dataBase.createTableWhenGiveawayStart(guild.getId());
     } catch (SQLException throwable) {
       throwable.printStackTrace();
     }
@@ -83,8 +80,8 @@ public class Gift {
     edit.clear();
 
     try {
-      Giveaways giveaways = new Giveaways();
-      giveaways.insertUserToDB(guild.getId(), user.getIdLong());
+      DataBase dataBase = new DataBase();
+      dataBase.insertUserToDB(guild.getId(), user.getIdLong());
     } catch (SQLException throwable) {
       throwable.printStackTrace();
     }
@@ -92,7 +89,6 @@ public class Gift {
   }
 
   public void stopGift(long guildIdLong, long channelIdLong, Integer countWinner) {
-    System.out.println(countWinner);
     if (listUsers.size() < 2) {
       EmbedBuilder notEnoughUsers = new EmbedBuilder();
       notEnoughUsers.setColor(0xFF0000);
@@ -102,9 +98,13 @@ public class Gift {
               :x: The giveaway deleted!
               """);
 
-      BotStart.getJda().getGuildById(guildId).getTextChannelById(channelIdLong)
-      .sendMessage(notEnoughUsers.build()).queue();
-      notEnoughUsers.clear();
+      try {
+        BotStart.getJda().getGuildById(guildId).getTextChannelById(channelIdLong)
+            .sendMessage(notEnoughUsers.build()).queue();
+        notEnoughUsers.clear();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
       listUsersHash.clear();
       listUsers.clear();
       GiveawayRegistry.getInstance().getMessageId().remove(guildIdLong);
@@ -113,10 +113,9 @@ public class Gift {
       GiveawayRegistry.getInstance().removeGift(guildIdLong);
       GiveawayRegistry.getInstance().decrementGiveAwayCount();
       try {
-        Prefix prefix = new Prefix();
-        prefix.removeMessageFromDB(guildIdLong);
-        Giveaways giveaways = new Giveaways();
-        giveaways.dropTableWhenGiveawayStop(String.valueOf(guildIdLong));
+        DataBase dataBase = new DataBase();
+        dataBase.removeMessageFromDB(guildIdLong);
+        dataBase.dropTableWhenGiveawayStop(String.valueOf(guildIdLong));
       } catch (SQLException throwable) {
         throwable.printStackTrace();
       }
@@ -136,9 +135,13 @@ public class Gift {
               """ 
               This action did not cause the deletion: **Giveaway**!
               """);
+      try {
       BotStart.getJda().getGuildById(guildId).getTextChannelById(channelIdLong)
           .sendMessage(zero.build()).queue();
       zero.clear();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
       return;
     }
 
@@ -156,10 +159,13 @@ public class Gift {
               This action did not cause the deletion: **Giveaway**!
               """
       );
-
+      try {
       BotStart.getJda().getGuildById(guildId).getTextChannelById(channelIdLong)
           .sendMessage(fewParticipants.build()).queue();
       fewParticipants.clear();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
       return;
     }
 
@@ -175,10 +181,13 @@ public class Gift {
       stopWithMoreWinner.setTitle("Giveaway the end");
       stopWithMoreWinner.setDescription("Winners: " + Arrays.toString(uniqueWinners.toArray())
           .replaceAll("\\[", "").replaceAll("]", ""));
-
+      try {
       BotStart.getJda().getGuildById(guildId).getTextChannelById(channelIdLong)
           .sendMessage(stopWithMoreWinner.build()).queue();
       stopWithMoreWinner.clear();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
       listUsersHash.clear();
       listUsers.clear();
       GiveawayRegistry.getInstance().getMessageId().remove(guildIdLong);
@@ -187,10 +196,9 @@ public class Gift {
       GiveawayRegistry.getInstance().removeGift(guildIdLong);
       GiveawayRegistry.getInstance().decrementGiveAwayCount();
       try {
-        Prefix prefix = new Prefix();
-        prefix.removeMessageFromDB(guildIdLong);
-        Giveaways giveaways = new Giveaways();
-        giveaways.dropTableWhenGiveawayStop(String.valueOf(guildIdLong));
+        DataBase dataBase = new DataBase();
+        dataBase.removeMessageFromDB(guildIdLong);
+        dataBase.dropTableWhenGiveawayStop(String.valueOf(guildIdLong));
       } catch (SQLException throwable) {
         throwable.printStackTrace();
       }
@@ -201,9 +209,13 @@ public class Gift {
     stop.setColor(0x00FF00);
     stop.setTitle("Giveaway the end");
     stop.setDescription("Winner: <@" + listUsers.get(random.nextInt(listUsers.size())) + ">");
+    try {
     BotStart.getJda().getGuildById(guildId).getTextChannelById(channelIdLong)
         .sendMessage(stop.build()).queue();
     stop.clear();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
     listUsersHash.clear();
     listUsers.clear();
     GiveawayRegistry.getInstance().getMessageId().remove(guildIdLong);
@@ -212,10 +224,9 @@ public class Gift {
     GiveawayRegistry.getInstance().removeGift(guildIdLong);
     GiveawayRegistry.getInstance().decrementGiveAwayCount();
     try {
-      Prefix prefix = new Prefix();
-      prefix.removeMessageFromDB(guildIdLong);
-      Giveaways giveaways = new Giveaways();
-      giveaways.dropTableWhenGiveawayStop(String.valueOf(guildIdLong));
+      DataBase dataBase = new DataBase();
+      dataBase.removeMessageFromDB(guildIdLong);
+      dataBase.dropTableWhenGiveawayStop(String.valueOf(guildIdLong));
     } catch (SQLException throwable) {
       throwable.printStackTrace();
     }
