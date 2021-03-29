@@ -11,6 +11,7 @@ public class GiveawayRegistry {
   private static final AtomicInteger giveawayCount = new AtomicInteger(0);
   private static final Map<Long, String> messageId = new HashMap<>();
   private static final Map<Long, String> title = new HashMap<>();
+  private static final Map<Long, String> endGiveawayDate = new HashMap<>();
   private static volatile GiveawayRegistry instance;
 
   public static GiveawayRegistry getInstance() {
@@ -77,6 +78,14 @@ public class GiveawayRegistry {
 
   public synchronized Integer getGiveAwayCount() {
     return giveawayCount.get();
+  }
+
+  public synchronized void setGiveAwayCount(Integer value) {
+    giveawayCount.set(value);
+  }
+
+  public Map<Long, String> getEndGiveawayDate() {
+    return endGiveawayDate;
   }
 
 }

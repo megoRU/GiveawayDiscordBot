@@ -32,25 +32,42 @@ public class Gift {
   public Gift() {
   }
 
-  public void startGift(Guild guild, TextChannel channel, String newTitle, String countWinners, String date) {
+  public void startGift(Guild guild, TextChannel channel, String newTitle, String countWinners, String time) {
     GiveawayRegistry.getInstance().getTitle().put(guild.getIdLong(), newTitle == null ? "Giveaway" : newTitle);
+    LocalDateTime now = LocalDateTime.now();
+    if (time != null) {
+      GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild.getIdLong(), now.minusHours(3).getHour()
+          + ":"
+          + now.plusMinutes(Long.parseLong(time)).getMinute()
+          + ":"
+          + now.plusMinutes(Long.parseLong(time)).getSecond());
+    }
     EmbedBuilder start = new EmbedBuilder();
     start.setColor(0x00FF00);
     start.setTitle(GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
-    start.setDescription("React with :gift: to enter!" + "\nUsers: `" + getCount() + "`");
+
+    if (time != null) {
+      start.setDescription("React with :gift: to enter!" + "\nUsers: `" + getCount() + "`"
+          + "\nEnds at: `" + GiveawayRegistry.getInstance().getEndGiveawayDate().get(guild.getIdLong()) + " UTC±0`");
+    }
+    if (time == null) {
+      start.setDescription("React with :gift: to enter!" + "\nUsers: `" + getCount() + "`");
+    }
     GiveawayRegistry.getInstance().incrementGiveAwayCount();
+
     channel.sendMessage(start.build()).queue(m -> {
       GiveawayRegistry.getInstance().getMessageId().put(guild.getIdLong(), m.getId());
       GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().put(guild.getIdLong(), m.getId());
       m.addReaction(Reactions.emojiPresent).queue();
       try {
         DataBase dataBase = new DataBase();
-        LocalDateTime now = LocalDateTime.now();
         dataBase.addMessageToDB(guild.getIdLong(),
             m.getIdLong(),
             m.getChannel().getIdLong(),
             countWinners,
-            date == null ? null : String.valueOf(now.plusMinutes(Long.parseLong(date))));
+            time == null ? null : String.valueOf(now.plusMinutes(Long.parseLong(time))),
+            GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()),
+            GiveawayRegistry.getInstance().getEndGiveawayDate().get(guild.getIdLong()));
       } catch (SQLException throwable) {
         throwable.printStackTrace();
       }
@@ -72,7 +89,13 @@ public class Gift {
     EmbedBuilder edit = new EmbedBuilder();
     edit.setColor(0x00FF00);
     edit.setTitle(GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
-    edit.setDescription("React with :gift: to enter!" + "\nUsers: `" + getCount() + "`");
+    if (GiveawayRegistry.getInstance().getEndGiveawayDate().get(guild.getIdLong()) != null) {
+      edit.setDescription("React with :gift: to enter!" + "\nUsers: `" + getCount() + "`"
+          + "\nEnds at: `" + GiveawayRegistry.getInstance().getEndGiveawayDate().get(guild.getIdLong()) + " UTC±0`");
+    }
+    if (GiveawayRegistry.getInstance().getEndGiveawayDate().get(guild.getIdLong()) == null) {
+      edit.setDescription("React with :gift: to enter!" + "\nUsers: `" + getCount() + "`");
+    }
     channel.editMessageById(GiveawayRegistry.getInstance().getMessageId().get(guild.getIdLong()),
         edit.build()).queue(null, (exception) -> channel
         .sendMessage(GiveawayRegistry.getInstance().removeGiftExceptions(guild.getIdLong()))

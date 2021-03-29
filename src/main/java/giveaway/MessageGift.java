@@ -13,6 +13,7 @@ public class MessageGift extends ListenerAdapter {
   private static final String GIFT_START = "!gift start";
   private static final String GIFT_START_WITH_MINUTES = "gift start\\s[0-9]{1,2}$";
   private static final String GIFT_START_TITLE = "gift start\\s.{0,255}$";
+  private static final String GIFT_START_TITLE_COUNT_WITH_MINUTES = "gift start\\s.{0,255}\\s[0-9]{1,2}\\s[0-9]{1,2}$";
   private static final String GIFT_START_TITLE_WITH_MINUTES = "gift start\\s.{0,255}\\s[0-9]{1,2}$";
   private static final String GIFT_START_COUNT_WITH_MINUTES = "gift start\s[0-9]{1,2}\s[0-9]{1,2}$";
   private static final String GIFT_STOP = "!gift stop";
@@ -35,11 +36,11 @@ public class MessageGift extends ListenerAdapter {
       return;
     }
 
-    String[] messageSplit = message.split(" ", 4);
+    String[] messageSplit = message.split(" ", 5);
     int length = message.length();
     String messageWithOutPrefix = message.substring(1, length);
 
-    if (messageSplit[2].equals("0")) {
+    if (messageSplit.length > 2 && messageSplit[2].equals("0")) {
       event.getChannel().sendMessage("You set `0` minutes. We took care of this and increased it by `1` minute.").queue();
       messageSplit[2] = "1";
     }
@@ -97,6 +98,12 @@ public class MessageGift extends ListenerAdapter {
             || messageWithOutPrefix.matches(GIFT_START_TITLE_WITH_MINUTES))
             && !GiveawayRegistry.getInstance().hasGift(guildLongId)) {
           GiveawayRegistry.getInstance().setGift(event.getGuild().getIdLong(), new Gift(event.getGuild().getIdLong()));
+
+          if (messageSplit.length == 5 && messageWithOutPrefix.matches(GIFT_START_TITLE_COUNT_WITH_MINUTES)) {
+            GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
+                .startGift(event.getGuild(), event.getChannel(), messageSplit[2], messageSplit[4], messageSplit[3]);
+            return;
+          }
 
           if (messageSplit.length == 4 && messageWithOutPrefix.matches(GIFT_START_COUNT_WITH_MINUTES)) {
             GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())

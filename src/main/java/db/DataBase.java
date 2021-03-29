@@ -34,6 +34,7 @@ public class DataBase {
       dropTableWhenGiveawayStop(guildLongId);
       createTableWhenGiveawayStart(guildLongId);
       e.printStackTrace();
+      System.err.println("Recursive call");
     }
   }
 
@@ -100,27 +101,32 @@ public class DataBase {
   }
 
   //Добавляем в Бд данные о id long message
-  public void addMessageToDB(long guildId, long messageId, long channelId, String countWinners, String date) {
+  public void addMessageToDB(long guildId, long messageId, long channelId, String countWinners, String date, String title, String endDate) {
     try {
       String sql = "INSERT INTO ActiveGiveaways ("
           + "guild_long_id, "
           + "message_id_long, "
           + "channel_id_long, "
           + "count_winners, "
-          + "date_end_giveaway) "
-          + "VALUES (?, ?, ?, ?, ?)";
+          + "date_end_giveaway, "
+          + "giveaway_title, "
+          + "end_time) "
+          + "VALUES (?, ?, ?, ?, ?, ?, ?)";
       PreparedStatement preparedStatement = getConnection().prepareStatement(sql);
       preparedStatement.setLong(1, guildId);
       preparedStatement.setLong(2, messageId);
       preparedStatement.setLong(3, channelId);
       preparedStatement.setString(4, countWinners);
       preparedStatement.setString(5, date);
+      preparedStatement.setString(6, title);
+      preparedStatement.setString(7, endDate);
       preparedStatement.execute();
       preparedStatement.close();
     } catch (SQLException e) {
       removeMessageFromDB(guildId);
-      addMessageToDB(guildId, messageId, channelId, countWinners, date);
+      addMessageToDB(guildId, messageId, channelId, countWinners, date, title, endDate);
       e.printStackTrace();
+      System.err.println("Recursive call");
     }
   }
 

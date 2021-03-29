@@ -95,6 +95,10 @@ public class BotStart {
 
         long guild_long_id = rs.getLong("guild_long_id");
         long message_id_long = rs.getLong("message_id_long");
+        String giveaway_title = rs.getString("giveaway_title");
+        String end_time = rs.getString("end_time");
+
+
 //        System.out.println("guild id:" + guild_long_id + " id: сообщения: " + message_id_long);
         //get end date
 
@@ -103,6 +107,9 @@ public class BotStart {
         GiveawayRegistry.getInstance().setGift(guild_long_id, new Gift(guild_long_id));
         GiveawayRegistry.getInstance().getMessageId().put(guild_long_id, String.valueOf(message_id_long));
         GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().put(guild_long_id, String.valueOf(message_id_long));
+        GiveawayRegistry.getInstance().getTitle().put(guild_long_id, giveaway_title);
+        GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild_long_id, end_time);
+
 
       }
       rs.close();
@@ -153,6 +160,7 @@ public class BotStart {
     } catch (SQLException e) {
       e.printStackTrace();
     }
+    GiveawayRegistry.getInstance().setGiveAwayCount(guildIdHashList.size());
     guildIdHashList.clear();
   }
 
