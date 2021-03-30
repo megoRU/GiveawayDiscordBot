@@ -1,5 +1,8 @@
 # GiveawayDiscordBot
-[![Build Status](https://travis-ci.com/megoRU/GiveawayDiscordBot.svg?branch=main)](https://travis-ci.com/megoRU/GiveawayDiscordBot)
+[![Build Status](https://travis-ci.com/megoRU/GiveawayDiscordBot.svg?branch=main)](https://travis-ci.com/megoRU/GiveawayDiscordBot)  [![Discord](https://img.shields.io/discord/779317239722672128?label=Discord)](https://discord.gg/UrWG3R683d)
+[![Add](https://img.shields.io/badge/BOT-ADD--TO--DISCORD-blue?logo=discord)](https://top.gg/bot/808277484524011531/invite/)
+[![top](https://img.shields.io/badge/TOP.GG-pink?logo=discord)](https://top.gg/bot/808277484524011531) [![Discord Bots](https://top.gg/api/widget/servers/808277484524011531.svg)](https://top.gg/bot/808277484524011531)
+
 ## LICENSE
 
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
@@ -14,8 +17,6 @@
 -   [ ]   Perform optimization for queries.
 
 ## Add bot to your guild
-[![Discord Bots](https://top.gg/api/widget/servers/808277484524011531.svg)](https://top.gg/bot/808277484524011531)
-
 [![Discord Bots](https://top.gg/api/widget/808277484524011531.svg)](https://top.gg/bot/808277484524011531)
 
 ## Copyright Notice
