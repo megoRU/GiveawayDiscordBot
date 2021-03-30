@@ -113,21 +113,6 @@ public class Gift {
   }
 
   public void stopGift(long guildIdLong, long channelIdLong, Integer countWinner) {
-    if (countWinner >= listUsers.size()
-        && GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildIdLong) != null) {
-      countWinner -= 1;
-      try {
-        EmbedBuilder equally = new EmbedBuilder();
-        equally.setColor(0xFF8000);
-        equally.setTitle(":warning: Invalid number");
-        equally.setDescription("In order not to get loop, we had to reduce the number "
-                + "of winners by one. Since their number was equal to the participants");
-        BotStart.getJda().getGuildById(guildId).getTextChannelById(channelIdLong)
-            .sendMessage(equally.build()).queue();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
 
     if (listUsers.size() < 2) {
       EmbedBuilder notEnoughUsers = new EmbedBuilder();
@@ -184,6 +169,22 @@ public class Gift {
         e.printStackTrace();
       }
       return;
+    }
+
+    if (countWinner == listUsers.size()
+        && GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildIdLong) != null) {
+      countWinner -= 1;
+      try {
+        EmbedBuilder equally = new EmbedBuilder();
+        equally.setColor(0xFF8000);
+        equally.setTitle(":warning: Invalid number");
+        equally.setDescription("In order not to get loop, we had to reduce the number "
+            + "of winners by one. Since their number was equal to the participants");
+        BotStart.getJda().getGuildById(guildId).getTextChannelById(channelIdLong)
+            .sendMessage(equally.build()).queue();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
 
     if (countWinner >= listUsers.size()) {

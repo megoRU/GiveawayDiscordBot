@@ -36,7 +36,7 @@ public class MessageGift extends ListenerAdapter {
       return;
     }
 
-    String[] messageSplit = message.split(" ", 6);
+    String[] messageSplit = message.split(" ");
     int length = message.length();
     String messageWithOutPrefix = message.substring(1, length);
 
@@ -98,7 +98,7 @@ public class MessageGift extends ListenerAdapter {
             && !GiveawayRegistry.getInstance().hasGift(guildLongId)) {
           GiveawayRegistry.getInstance().setGift(event.getGuild().getIdLong(), new Gift(event.getGuild().getIdLong()));
 
-          if (messageSplit.length == 6 && messageWithOutPrefix.matches(GIFT_START_TITLE_COUNT_WITH_MINUTES)) {
+          if (messageSplit.length >= 5 && messageWithOutPrefix.matches(GIFT_START_TITLE_COUNT_WITH_MINUTES)) {
             int len = messageSplit[messageSplit.length - 1].length() + messageSplit[messageSplit.length - 2].length();
             GiveawayRegistry.getInstance()
                 .getActiveGiveaways().get(event.getGuild().getIdLong()).startGift(
