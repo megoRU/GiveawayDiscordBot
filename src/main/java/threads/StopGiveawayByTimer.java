@@ -6,7 +6,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 
 public class StopGiveawayByTimer extends Thread {
 
@@ -27,9 +28,12 @@ public class StopGiveawayByTimer extends Thread {
           String count_winners = rs.getString("count_winners");
           String date_end_giveaway = rs.getString("date_end_giveaway");
           if (date_end_giveaway != null) {
-            LocalDateTime localDateTime = LocalDateTime.now();
-            LocalDateTime timeFormDB = LocalDateTime.parse(date_end_giveaway);
-            if (localDateTime.isAfter(timeFormDB)) {
+            Instant timestamp = Instant.now();
+            //Instant для timestamp
+            Instant specificTime = Instant.ofEpochMilli(timestamp.toEpochMilli());
+            OffsetDateTime timeFormDB = OffsetDateTime.parse(date_end_giveaway);
+
+            if (specificTime.isAfter(Instant.from(timeFormDB))) {
               GiveawayRegistry.getInstance()
                   .getActiveGiveaways()
                   .get(guild_long_id)

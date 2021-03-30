@@ -101,7 +101,7 @@ public class DataBase {
   }
 
   //Добавляем в Бд данные о id long message
-  public void addMessageToDB(long guildId, long messageId, long channelId, String countWinners, String date, String title, String endDate) {
+  public void addMessageToDB(long guildId, long messageId, long channelId, String countWinners, String date, String title) {
     try {
       String sql = "INSERT INTO ActiveGiveaways ("
           + "guild_long_id, "
@@ -109,9 +109,8 @@ public class DataBase {
           + "channel_id_long, "
           + "count_winners, "
           + "date_end_giveaway, "
-          + "giveaway_title, "
-          + "end_time) "
-          + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+          + "giveaway_title) "
+          + "VALUES (?, ?, ?, ?, ?, ?)";
       PreparedStatement preparedStatement = getConnection().prepareStatement(sql);
       preparedStatement.setLong(1, guildId);
       preparedStatement.setLong(2, messageId);
@@ -119,12 +118,11 @@ public class DataBase {
       preparedStatement.setString(4, countWinners);
       preparedStatement.setString(5, date);
       preparedStatement.setString(6, title);
-      preparedStatement.setString(7, endDate);
       preparedStatement.execute();
       preparedStatement.close();
     } catch (SQLException e) {
       removeMessageFromDB(guildId);
-      addMessageToDB(guildId, messageId, channelId, countWinners, date, title, endDate);
+      addMessageToDB(guildId, messageId, channelId, countWinners, date, title);
       e.printStackTrace();
       System.err.println("Recursive call");
     }
