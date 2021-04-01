@@ -1,13 +1,12 @@
 package startbot;
 
 import config.Config;
+import db.DataBase;
 import events.MessageWhenBotJoinToGuild;
 import giveaway.Gift;
 import giveaway.GiveawayRegistry;
 import giveaway.MessageGift;
 import giveaway.Reactions;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -21,11 +20,11 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 
 public class BotStart {
+
   private static JDA jda;
   private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
   private static final Map<String, String> mapPrefix = new HashMap<>();
   private static final Map<Integer, String> guildIdHashList = new HashMap<>();
-//  private static final Map<Long, ActiveGiveaways> activeGiveawaysHashMap = new HashMap<>();
 
   public void startBot() throws Exception {
     //Получаем id guild и id message
@@ -36,9 +35,6 @@ public class BotStart {
 
     //Получаем все префиксы из базы данных
     getPrefixFromDB();
-
-    //Создаем объекты из базы данных
-    //getAllData();
 
     jdaBuilder.setAutoReconnect(true);
     jdaBuilder.setStatus(OnlineStatus.ONLINE);
@@ -55,40 +51,9 @@ public class BotStart {
 
   }
 
-//  private void getAllData() {
-//    try {
-//      Connection connection = DriverManager.getConnection(Config.getGiveawayConnection(), Config.getGiveawayUser(), Config.getGiveawayPass());
-//      Statement statement = connection.createStatement();
-//      String sql = "select * from ActiveGiveaways";
-//      ResultSet rs = statement.executeQuery(sql);
-//      while (rs.next()) {
-//
-//        long guild_long_id = rs.getLong("guild_long_id");
-//        long message_id_long = rs.getLong("message_id_long");
-//        long channel_id_long = rs.getLong("channel_id_long");
-//        String count_winners = rs.getString("count_winners");
-//        String date_end_giveaway = rs.getString("date_end_giveaway");
-//
-//        activeGiveawaysHashMap.put(guild_long_id, new ActiveGiveaways(
-//            guild_long_id,
-//            message_id_long,
-//            channel_id_long,
-//            count_winners,
-//            date_end_giveaway));
-//      }
-//
-//      rs.close();
-//      statement.close();
-//      connection.close();
-//    } catch (SQLException e) {
-//      e.printStackTrace();
-//    }
-//  }
-
   private void getMessageIdFromDB() {
     try {
-      Connection connection = DriverManager.getConnection(Config.getGiveawayConnection(), Config.getGiveawayUser(), Config.getGiveawayPass());
-      Statement statement = connection.createStatement();
+      Statement statement = DataBase.getConnection().createStatement();
       String sql = "select * from ActiveGiveaways";
       ResultSet rs = statement.executeQuery(sql);
       while (rs.next()) {
@@ -100,7 +65,7 @@ public class BotStart {
 
         guildIdHashList.put(guildIdHashList.size() + 1, String.valueOf(guild_long_id));
         GiveawayRegistry.getInstance().setGift(guild_long_id, new Gift(guild_long_id));
-        GiveawayRegistry.getInstance().getActiveGiveaways().get(guild_long_id).autorun();
+        GiveawayRegistry.getInstance().getActiveGiveaways().get(guild_long_id).autoInsert();
         GiveawayRegistry.getInstance().getMessageId().put(guild_long_id, String.valueOf(message_id_long));
         GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().put(guild_long_id, String.valueOf(message_id_long));
         GiveawayRegistry.getInstance().getTitle().put(guild_long_id, giveaway_title);
@@ -108,7 +73,6 @@ public class BotStart {
       }
       rs.close();
       statement.close();
-      connection.close();
     } catch (SQLException e) {
       e.printStackTrace();
     }
@@ -116,8 +80,8 @@ public class BotStart {
 
   private void getUsersWhoTakePartFromDB() {
     try {
-      Connection conn = DriverManager.getConnection(Config.getGiveawayConnection(), Config.getGiveawayUser(), Config.getGiveawayPass());
-      Statement statement = conn.createStatement();
+      Statement statement = DataBase.getConnection().createStatement();
+      System.out.println("Получаем данные с БД и добавляем их в коллекции и экземпляры классов");
 
       for (int i = 1; i <= guildIdHashList.size(); i++) {
         String sql = "select * from `" + guildIdHashList.get(i) + "`;";
@@ -126,8 +90,7 @@ public class BotStart {
 
           long userIdLong = rs.getLong("user_long_id");
 
-          System.out.println("Получаем данные с БД и добавляем их в коллекции и экземпляры классов");
-//          System.out.println("Guild id: " + guildIdHashList.get(i) + " user id long: " + userIdLong);
+          //System.out.println("Guild id: " + guildIdHashList.get(i) + " user id long: " + userIdLong);
 
           //Добавляем пользователей в hashmap
           GiveawayRegistry.getInstance()
@@ -148,10 +111,8 @@ public class BotStart {
               .getActiveGiveaways()
               .get(Long.parseLong(guildIdHashList.get(i))).getListUsersHash().size());
         }
-
       }
       statement.close();
-      conn.close();
     } catch (SQLException e) {
       e.printStackTrace();
     }
@@ -161,8 +122,7 @@ public class BotStart {
 
   private void getPrefixFromDB() {
     try {
-      Connection connection = DriverManager.getConnection(Config.getGiveawayConnection(), Config.getGiveawayUser(), Config.getGiveawayPass());
-      Statement statement = connection.createStatement();
+      Statement statement = DataBase.getConnection().createStatement();
       String sql = "select * from prefixs";
       ResultSet rs = statement.executeQuery(sql);
 
@@ -170,7 +130,6 @@ public class BotStart {
         mapPrefix.put(rs.getString("serverId"), rs.getString("prefix"));
       }
 
-      connection.close();
       rs.close();
       statement.close();
     } catch (SQLException e) {

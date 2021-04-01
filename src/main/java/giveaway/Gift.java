@@ -74,8 +74,8 @@ public class Gift {
       }
     });
     start.clear();
-
-    autorun();
+    //Вот мы запускаем бесконечный поток.
+    autoInsert();
 
     try {
       DataBase dataBase = new DataBase();
@@ -129,7 +129,8 @@ public class Gift {
     insertQuery.append(insertQuery.length() == 0 ? "" : ",").append("('").append(userIdLong).append("')");
   }
 
-  public void autorun() {
+  //Автоматически отправляет в БД данные которые в буфере StringBuilder
+  public void autoInsert() {
     Timer timer = new Timer();
     timer.schedule(new TimerTask() {
       public void run() throws NullPointerException {

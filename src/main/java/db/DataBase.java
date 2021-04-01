@@ -8,9 +8,23 @@ import java.sql.SQLException;
 
 public class DataBase {
 
-  //CREATE TABLE `guildId` (`id` bigint(30) NOT NULL, `user_long_id` bigint(30) NOT NULL,
+  //CREATE TABLE `guildId`
+  // (`id` bigint(30) NOT NULL,
+  // `user_long_id` bigint(30) NOT NULL,
   // PRIMARY KEY (`id`),
-  // UNIQUE KEY `id` (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  // UNIQUE KEY `id` (`id`))
+  // ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+  //CREATE TABLE `ActiveGiveaways`
+  // (`guild_long_id` bigint(30) NOT NULL,
+  // `message_id_long` bigint(30) NOT NULL,
+  // `channel_id_long` bigint(30) NOT NULL,
+  // `count_winners` varchar(255),
+  // `date_end_giveaway` varchar(255),
+  // `giveaway_title` varchar(255),
+  // PRIMARY KEY (`guild_long_id`),
+  // UNIQUE KEY `guild_long_id` (`guild_long_id`))
+  // ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   private static Connection connection;
 
   //Создаем один коннект на программу
@@ -50,17 +64,17 @@ public class DataBase {
     }
   }
 
-  public void insertUserToDB(long guildIdLong, long userIdLong) {
-    try {
-      String query = "INSERT IGNORE INTO `" + guildIdLong + "` (user_long_id) VALUES (?)";
-      PreparedStatement preparedStmt = getConnection().prepareStatement(query);
-      preparedStmt.setLong(1, userIdLong);
-      preparedStmt.executeUpdate();
-      preparedStmt.close();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
+//  public void insertUserToDB(long guildIdLong, long userIdLong) {
+//    try {
+//      String query = "INSERT IGNORE INTO `" + guildIdLong + "` (user_long_id) VALUES (?)";
+//      PreparedStatement preparedStmt = getConnection().prepareStatement(query);
+//      preparedStmt.setLong(1, userIdLong);
+//      preparedStmt.executeUpdate();
+//      preparedStmt.close();
+//    } catch (Exception e) {
+//      e.printStackTrace();
+//    }
+//  }
 
   //Добавление префикса
   public void addPrefixToDB(String serverId, String prefix) {
@@ -127,7 +141,5 @@ public class DataBase {
       System.out.println("Recursive call");
     }
   }
-
-
 
 }
