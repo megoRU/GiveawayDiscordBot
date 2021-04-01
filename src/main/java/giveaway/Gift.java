@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -22,7 +24,8 @@ public class Gift {
   private final List<String> listUsers = new ArrayList<>();
   private final Map<String, String> listUsersHash = new HashMap<>();
   private final Set<String> uniqueWinners = new HashSet<>();
-  private static final Random random = new Random();
+  private final StringBuilder insertQuery = new StringBuilder();
+  private final Random random = new Random();
   private long guildId;
   private int count;
 
@@ -72,6 +75,8 @@ public class Gift {
     });
     start.clear();
 
+    autorun();
+
     try {
       DataBase dataBase = new DataBase();
       dataBase.createTableWhenGiveawayStart(guild.getId());
@@ -103,13 +108,39 @@ public class Gift {
         .queue());
     edit.clear();
 
-    try {
-      DataBase dataBase = new DataBase();
-      dataBase.insertUserToDB(guild.getId(), user.getIdLong());
-    } catch (SQLException throwable) {
-      throwable.printStackTrace();
-    }
+    addUserToInsertQuery(user.getIdLong());
 
+  }
+
+  //TODO: Возможно проблема с тем что данные будут не туда записываться так как static!
+  // Проверили вроде данные не пересекаются
+  public void executeMultiInsert(long guildIdLong) throws SQLException {
+    String sql = "INSERT IGNORE INTO `"
+        + guildIdLong
+        + "` (user_long_id) "
+        + "VALUES" + insertQuery.toString();
+    if (!insertQuery.isEmpty()) {
+      DataBase.getConnection().createStatement().execute(sql);
+      insertQuery.delete(0, insertQuery.length());
+    }
+  }
+
+  public void addUserToInsertQuery(long userIdLong) {
+    insertQuery.append(insertQuery.length() == 0 ? "" : ",").append("('").append(userIdLong).append("')");
+  }
+
+  public void autorun() {
+    Timer timer = new Timer();
+    timer.schedule(new TimerTask() {
+      public void run() throws NullPointerException {
+        try {
+          executeMultiInsert(guildId);
+        } catch (SQLException e) {
+          Thread.currentThread().interrupt();
+          e.printStackTrace();
+        }
+      }
+    }, 1, 5000);
   }
 
   public void stopGift(long guildIdLong, long channelIdLong, Integer countWinner) {
@@ -298,6 +329,10 @@ public class Gift {
 
   public List<String> getListUsers() {
     return listUsers;
+  }
+
+  public StringBuilder getInsertQuery() {
+    return insertQuery;
   }
 
 }

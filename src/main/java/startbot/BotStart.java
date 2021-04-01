@@ -100,6 +100,7 @@ public class BotStart {
 
         guildIdHashList.put(guildIdHashList.size() + 1, String.valueOf(guild_long_id));
         GiveawayRegistry.getInstance().setGift(guild_long_id, new Gift(guild_long_id));
+        GiveawayRegistry.getInstance().getActiveGiveaways().get(guild_long_id).autorun();
         GiveawayRegistry.getInstance().getMessageId().put(guild_long_id, String.valueOf(message_id_long));
         GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().put(guild_long_id, String.valueOf(message_id_long));
         GiveawayRegistry.getInstance().getTitle().put(guild_long_id, giveaway_title);
@@ -125,7 +126,8 @@ public class BotStart {
 
           long userIdLong = rs.getLong("user_long_id");
 
-          System.out.println("Guild id: " + guildIdHashList.get(i) + " user id long: " + userIdLong);
+          System.out.println("Получаем данные с БД и добавляем их в коллекции и экземпляры классов");
+//          System.out.println("Guild id: " + guildIdHashList.get(i) + " user id long: " + userIdLong);
 
           //Добавляем пользователей в hashmap
           GiveawayRegistry.getInstance()

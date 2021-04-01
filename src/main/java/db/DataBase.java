@@ -14,7 +14,7 @@ public class DataBase {
   private static Connection connection;
 
   //Создаем один коннект на программу
-  private static Connection getConnection() throws SQLException {
+  public static Connection getConnection() throws SQLException {
     if (connection == null) {
       connection = DriverManager.getConnection(Config.getGiveawayConnection(), Config.getGiveawayUser(), Config.getGiveawayPass());
     }
@@ -34,7 +34,7 @@ public class DataBase {
       dropTableWhenGiveawayStop(guildLongId);
       createTableWhenGiveawayStart(guildLongId);
       e.printStackTrace();
-      System.err.println("Recursive call");
+      System.out.println("Recursive call");
     }
   }
 
@@ -50,9 +50,9 @@ public class DataBase {
     }
   }
 
-  public void insertUserToDB(String guildIdLong, long userIdLong) {
+  public void insertUserToDB(long guildIdLong, long userIdLong) {
     try {
-      String query = "INSERT IGNORE INTO `" + guildIdLong + "` (user_long_id) values (?)";
+      String query = "INSERT IGNORE INTO `" + guildIdLong + "` (user_long_id) VALUES (?)";
       PreparedStatement preparedStmt = getConnection().prepareStatement(query);
       preparedStmt.setLong(1, userIdLong);
       preparedStmt.executeUpdate();
@@ -124,8 +124,10 @@ public class DataBase {
       removeMessageFromDB(guildId);
       addMessageToDB(guildId, messageId, channelId, countWinners, date, title);
       e.printStackTrace();
-      System.err.println("Recursive call");
+      System.out.println("Recursive call");
     }
   }
+
+
 
 }

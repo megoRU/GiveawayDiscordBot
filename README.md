@@ -14,7 +14,7 @@
 -   [x]   Use a database to store active dataBase.
 -   [X]   End of giveaway by a timer.
 -   [X]   Use one DB.
--   [ ]   Perform optimization for queries.
+-   [X]   Perform optimization for queries.
 
 ## Add bot to your guild
 [![Discord Bots](https://top.gg/api/widget/808277484524011531.svg)](https://top.gg/bot/808277484524011531)

@@ -56,7 +56,7 @@ public class GiveawayRegistry {
     return """
         The giveaway was canceled because the bot was unable to get the ID
         your post for editing. Please try again. **Write us what exactly happened. 
-        We are trying to fix this bug. Support guild**: https://discord.gg/UrWG3R683d
+        We are trying to fix this bug. Support guild:** https://discord.gg/UrWG3R683d
         """;
   }
 
