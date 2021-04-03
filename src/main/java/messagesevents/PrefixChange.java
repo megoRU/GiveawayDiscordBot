@@ -77,7 +77,7 @@ public class PrefixChange extends ListenerAdapter {
       BotStart.getMapPrefix().remove(event.getGuild().getId());
       try {
         DataBase dataBase = new DataBase();
-        dataBase.removePrefixFromDB(event.getGuild().getId());
+        dataBase.removeLangFromDB(event.getGuild().getId());
       } catch (SQLException e) {
         e.printStackTrace();
       }

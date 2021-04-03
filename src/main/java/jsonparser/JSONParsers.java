@@ -14,7 +14,6 @@ public class JSONParsers {
       if (BotStart.getMapLanguages().get(guildIdLong) != null) {
         language = BotStart.getMapLanguages().get(guildIdLong);
       }
-
       File file = new File("src/main/java/translations/" + language + ".json");
       JSONParser parser = new JSONParser();
       Object obj = parser.parse(new FileReader(file));
