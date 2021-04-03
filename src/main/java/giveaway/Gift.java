@@ -144,7 +144,7 @@ public class Gift {
     }, 1, 5000);
   }
 
-  public void stopGift(long guildIdLong, long channelIdLong, Integer countWinner) {
+  public void stopGift(long guildIdLong, long channelIdLong, int countWinner) {
 
     if (listUsers.size() < 2) {
       EmbedBuilder notEnoughUsers = new EmbedBuilder();
@@ -154,22 +154,11 @@ public class Gift {
               """
               :x: The giveaway deleted!
               """);
+      //Отправляет сообщение
+      sendMessage(notEnoughUsers, channelIdLong);
 
-      try {
-        BotStart.getJda().getGuildById(guildId).getTextChannelById(channelIdLong)
-            .sendMessage(notEnoughUsers.build()).queue();
-        notEnoughUsers.clear();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-      listUsersHash.clear();
-      listUsers.clear();
-      GiveawayRegistry.getInstance().getMessageId().remove(guildIdLong);
-      GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().remove(guildIdLong);
-      GiveawayRegistry.getInstance().getTitle().remove(guildIdLong);
-      GiveawayRegistry.getInstance().removeGift(guildIdLong);
-      GiveawayRegistry.getInstance().getEndGiveawayDate().remove(guildIdLong);
-      GiveawayRegistry.getInstance().decrementGiveAwayCount();
+      //Удаляет данные из коллекций
+      clearingCollections();
       try {
         DataBase dataBase = new DataBase();
         dataBase.removeMessageFromDB(guildIdLong);
@@ -193,30 +182,25 @@ public class Gift {
               """ 
               This action did not cause the deletion: **Giveaway**!
               """);
-      try {
-      BotStart.getJda().getGuildById(guildId).getTextChannelById(channelIdLong)
-          .sendMessage(zero.build()).queue();
-      zero.clear();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+      //Отправляет сообщение
+      sendMessage(zero, channelIdLong);
       return;
     }
 
     if (countWinner == listUsers.size()
         && GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildIdLong) != null) {
       countWinner -= 1;
-      try {
-        EmbedBuilder equally = new EmbedBuilder();
-        equally.setColor(0xFF8000);
-        equally.setTitle(":warning: Invalid number");
-        equally.setDescription("In order not to get loop, we had to reduce the number "
-            + "of winners by one. Since their number was equal to the participants");
-        BotStart.getJda().getGuildById(guildId).getTextChannelById(channelIdLong)
-            .sendMessage(equally.build()).queue();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+
+      EmbedBuilder equally = new EmbedBuilder();
+      equally.setColor(0xFF8000);
+      equally.setTitle(":warning: Invalid number");
+      equally.setDescription(
+          """
+          In order not to get loop, we had to reduce the number
+          of winners by one. Since their number was equal to the participants
+          """);
+      //Отправляет сообщение
+      sendMessage(equally, channelIdLong);
     }
 
     if (countWinner >= listUsers.size()) {
@@ -233,13 +217,9 @@ public class Gift {
               This action did not cause the deletion: **Giveaway**!
               """
       );
-      try {
-      BotStart.getJda().getGuildById(guildId).getTextChannelById(channelIdLong)
-          .sendMessage(fewParticipants.build()).queue();
-      fewParticipants.clear();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+      //Отправляет сообщение
+      sendMessage(fewParticipants, channelIdLong);
+
       return;
     }
 
@@ -255,21 +235,12 @@ public class Gift {
       stopWithMoreWinner.setTitle("Giveaway the end");
       stopWithMoreWinner.setDescription("Winners: " + Arrays.toString(uniqueWinners.toArray())
           .replaceAll("\\[", "").replaceAll("]", ""));
-      try {
-      BotStart.getJda().getGuildById(guildId).getTextChannelById(channelIdLong)
-          .sendMessage(stopWithMoreWinner.build()).queue();
-      stopWithMoreWinner.clear();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-      listUsersHash.clear();
-      listUsers.clear();
-      GiveawayRegistry.getInstance().getMessageId().remove(guildIdLong);
-      GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().remove(guildIdLong);
-      GiveawayRegistry.getInstance().getTitle().remove(guildIdLong);
-      GiveawayRegistry.getInstance().removeGift(guildIdLong);
-      GiveawayRegistry.getInstance().decrementGiveAwayCount();
-      GiveawayRegistry.getInstance().getEndGiveawayDate().remove(guildIdLong);
+
+      //Отправляет сообщение
+      sendMessage(stopWithMoreWinner, channelIdLong);
+
+      //Удаляет данные из коллекций
+      clearingCollections();
       try {
         DataBase dataBase = new DataBase();
         dataBase.removeMessageFromDB(guildIdLong);
@@ -284,21 +255,12 @@ public class Gift {
     stop.setColor(0x00FF00);
     stop.setTitle("Giveaway the end");
     stop.setDescription("Winner: <@" + listUsers.get(random.nextInt(listUsers.size())) + ">");
-    try {
-    BotStart.getJda().getGuildById(guildId).getTextChannelById(channelIdLong)
-        .sendMessage(stop.build()).queue();
-    stop.clear();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    listUsersHash.clear();
-    listUsers.clear();
-    GiveawayRegistry.getInstance().getMessageId().remove(guildIdLong);
-    GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().remove(guildIdLong);
-    GiveawayRegistry.getInstance().getTitle().remove(guildIdLong);
-    GiveawayRegistry.getInstance().removeGift(guildIdLong);
-    GiveawayRegistry.getInstance().decrementGiveAwayCount();
-    GiveawayRegistry.getInstance().getEndGiveawayDate().remove(guildIdLong);
+
+    //Отправляет сообщение
+    sendMessage(stop, channelIdLong);
+
+    //Удаляет данные из коллекций
+    clearingCollections();
     try {
       DataBase dataBase = new DataBase();
       dataBase.removeMessageFromDB(guildIdLong);
@@ -306,6 +268,30 @@ public class Gift {
     } catch (SQLException throwable) {
       throwable.printStackTrace();
     }
+  }
+
+  private void sendMessage(EmbedBuilder embedBuilder, long channelIdLong) {
+    try {
+      BotStart.getJda()
+          .getGuildById(guildId)
+          .getTextChannelById(channelIdLong)
+          .sendMessage(embedBuilder.build())
+          .queue();
+      embedBuilder.clear();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void clearingCollections() {
+    listUsersHash.clear();
+    listUsers.clear();
+    GiveawayRegistry.getInstance().getMessageId().remove(guildId);
+    GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().remove(guildId);
+    GiveawayRegistry.getInstance().getTitle().remove(guildId);
+    GiveawayRegistry.getInstance().removeGift(guildId);
+    GiveawayRegistry.getInstance().decrementGiveAwayCount();
+    GiveawayRegistry.getInstance().getEndGiveawayDate().remove(guildId);
   }
 
   public String getListUsersHash(String id) {

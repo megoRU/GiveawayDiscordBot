@@ -14,7 +14,7 @@ public class StatcordThread extends Thread {
           Config.getStatcord(),
           BotStart.getJda(),
           true,
-          5);
+          3);
     } catch (Exception e) {
       e.printStackTrace();
     }

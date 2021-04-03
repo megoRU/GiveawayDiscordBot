@@ -292,7 +292,7 @@ public class Statcord {
 
   }
 
-  //autorun set to 5min or custom
+  //autorun set to N min
   public static void autorun() {
     Timer timer = new Timer();
 
@@ -306,6 +306,6 @@ public class Statcord {
           e.printStackTrace();
         }
       }
-    }, 5000, time * 60000L);
+    }, 1000, time * 60000L);
   }
 }

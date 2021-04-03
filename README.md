@@ -11,7 +11,7 @@
 
 -   [x]   Stop tracking completed Giveaways.
 -   [x]   Make a separate class for storing guilds and instances of classes with giveaway.
--   [x]   Use a database to store active dataBase.
+-   [x]   Use a database to store active giveaways.
 -   [X]   End of giveaway by a timer.
 -   [X]   Use one DB.
 -   [X]   Perform optimization for queries.
