@@ -102,6 +102,33 @@ public class DataBase {
     }
   }
 
+  //Добавление префикса
+  public void addLangToDB(String serverId, String lang) {
+    try {
+      String sql = "INSERT INTO `language` (serverId, lang) VALUES (?, ?)";
+      PreparedStatement preparedStatement = getConnection().prepareStatement(sql);
+      preparedStatement.setString(1, serverId);
+      preparedStatement.setString(2, lang);
+      preparedStatement.execute();
+      preparedStatement.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+  }
+
+  //Удаление префикса
+  public void removeLangFromDB(String serverId) {
+    try {
+      String sql = "DELETE FROM `language` WHERE serverId='" + serverId + "'";
+      PreparedStatement preparedStatement = getConnection().prepareStatement(sql);
+      preparedStatement.execute(sql);
+      preparedStatement.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+  }
+
+
   //Удаление строки с id long message
   public void removeMessageFromDB(long guildId) {
     try {

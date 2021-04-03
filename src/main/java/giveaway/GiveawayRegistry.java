@@ -3,6 +3,7 @@ package giveaway;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import jsonparser.JSONParsers;
 
 public class GiveawayRegistry {
 
@@ -13,6 +14,7 @@ public class GiveawayRegistry {
   private static final Map<Long, String> title = new HashMap<>();
   private static final Map<Long, String> endGiveawayDate = new HashMap<>();
   private static volatile GiveawayRegistry instance;
+  private static final JSONParsers jsonParsers = new JSONParsers();
 
   public static GiveawayRegistry getInstance() {
     GiveawayRegistry localInstance = instance;
@@ -53,11 +55,7 @@ public class GiveawayRegistry {
 
   public String removeGiftExceptions(long guildId) {
     activeGiveaways.remove(guildId);
-    return """
-        The giveaway was canceled because the bot was unable to get the ID
-        your post for editing. Please try again. **Write us what exactly happened. 
-        We are trying to fix this bug. Support guild:** https://discord.gg/UrWG3R683d
-        """;
+    return jsonParsers.getLocale("giveaway_registry_Error", String.valueOf(guildId));
   }
 
   public Map<Long, String> getMessageId() {

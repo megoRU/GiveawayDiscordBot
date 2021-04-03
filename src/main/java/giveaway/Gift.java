@@ -14,6 +14,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -21,6 +22,7 @@ import net.dv8tion.jda.api.entities.User;
 import startbot.BotStart;
 
 public class Gift {
+  private final JSONParsers jsonParsers = new JSONParsers();
   private final List<String> listUsers = new ArrayList<>();
   private final Map<String, String> listUsersHash = new HashMap<>();
   private final Set<String> uniqueWinners = new HashSet<>();
@@ -46,14 +48,16 @@ public class Gift {
     start.setTitle(GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
 
     if (time != null) {
-      start.setDescription("React with :gift: to enter!" + "\nUsers: `" + getCount() + "`");
+
+
+      start.setDescription(jsonParsers.getLocale("gift_React_With_Gift", guild.getId()) + getCount() + "`");
       start.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(time)));
-      start.setFooter("Ends at:");
+      start.setFooter(jsonParsers.getLocale("gift_Ends_At", guild.getId()));
       GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild.getIdLong(),
           String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(time))));
     }
     if (time == null) {
-      start.setDescription("React with :gift: to enter!" + "\nUsers: `" + getCount() + "`");
+      start.setDescription(jsonParsers.getLocale("gift_React_With_Gift", guild.getId()) + getCount() + "`");
     }
     GiveawayRegistry.getInstance().incrementGiveAwayCount();
 
@@ -94,13 +98,13 @@ public class Gift {
     edit.setTitle(GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
 
     if (GiveawayRegistry.getInstance().getEndGiveawayDate().get(guild.getIdLong()) != null) {
-      edit.setDescription("React with :gift: to enter!" + "\nUsers: `" + getCount() + "`");
+      edit.setDescription(jsonParsers.getLocale("gift_React_With_Gift", guild.getId()) + getCount() + "`");
       edit.setTimestamp(OffsetDateTime.parse(String.valueOf(GiveawayRegistry.getInstance().getEndGiveawayDate().get(guild.getIdLong()))));
-      edit.setFooter("Ends at:");
+      edit.setFooter(jsonParsers.getLocale("gift_Ends_At", guild.getId()));
     }
 
     if (GiveawayRegistry.getInstance().getEndGiveawayDate().get(guild.getIdLong()) == null) {
-      edit.setDescription("React with :gift: to enter!" + "\nUsers: `" + getCount() + "`");
+      edit.setDescription(jsonParsers.getLocale("gift_React_With_Gift", guild.getId()) + getCount() + "`");
     }
     channel.editMessageById(GiveawayRegistry.getInstance().getMessageId().get(guild.getIdLong()),
         edit.build()).queue(null, (exception) -> channel
@@ -147,11 +151,9 @@ public class Gift {
     if (listUsers.size() < 2) {
       EmbedBuilder notEnoughUsers = new EmbedBuilder();
       notEnoughUsers.setColor(0xFF0000);
-      notEnoughUsers.setTitle("Not enough users");
-      notEnoughUsers.setDescription(
-              """
-              :x: The giveaway deleted!
-              """);
+      notEnoughUsers.setTitle(jsonParsers.getLocale("gift_Not_Enough_Users", String.valueOf(guildIdLong)));
+      notEnoughUsers.setDescription(jsonParsers
+          .getLocale("gift_Giveaway_Deleted", String.valueOf(guildIdLong)));
       //Отправляет сообщение
       sendMessage(notEnoughUsers, channelIdLong);
 
@@ -170,16 +172,11 @@ public class Gift {
     if (countWinner == 0) {
       EmbedBuilder zero = new EmbedBuilder();
       zero.setColor(0xFF8000);
-      zero.setTitle(":warning: Invalid number");
-      zero.setDescription(
-              """
-              The number of winners must be greater than zero!
-              """ +
-              "You entered a number: `" + countWinner + "`\n" +
-              "Number of participants: `" + getCount() + "`\n" +
-              """ 
-              This action did not cause the deletion: **Giveaway**!
-              """);
+      zero.setTitle(jsonParsers.getLocale("gift_Invalid_Number", String.valueOf(guildIdLong)));
+      zero.setDescription(jsonParsers
+              .getLocale("gift_Invalid_Number_Description", String.valueOf(guildIdLong))
+              .replaceAll("\\{0}", String.valueOf(countWinner))
+              .replaceAll("\\{1}", String.valueOf(getCount())));
       //Отправляет сообщение
       sendMessage(zero, channelIdLong);
       return;
@@ -191,12 +188,9 @@ public class Gift {
 
       EmbedBuilder equally = new EmbedBuilder();
       equally.setColor(0xFF8000);
-      equally.setTitle(":warning: Invalid number");
-      equally.setDescription(
-          """
-          In order not to get loop, we had to reduce the number
-          of winners by one. Since their number was equal to the participants
-          """);
+      equally.setTitle(jsonParsers.getLocale("gift_Invalid_Number", String.valueOf(guildIdLong)));
+      equally.setDescription(jsonParsers
+              .getLocale("gift_Invalid_Number_Description_Loop", String.valueOf(guildIdLong)));
       //Отправляет сообщение
       sendMessage(equally, channelIdLong);
     }
@@ -204,17 +198,11 @@ public class Gift {
     if (countWinner >= listUsers.size()) {
       EmbedBuilder fewParticipants = new EmbedBuilder();
       fewParticipants.setColor(0xFF8000);
-      fewParticipants.setTitle(":warning: Invalid number");
-      fewParticipants.setDescription(
-              """
-              The number of winners must be less than the number of participants!
-              """ +
-              "You entered a number: `" + countWinner + "`\n" +
-              "Number of participants: `" + getCount() + "`\n" +
-              """ 
-              This action did not cause the deletion: **Giveaway**!
-              """
-      );
+      fewParticipants.setTitle(jsonParsers.getLocale("gift_Invalid_Number", String.valueOf(guildIdLong)));
+      fewParticipants.setDescription(jsonParsers
+              .getLocale("gift_Invalid_Number_Description", String.valueOf(guildIdLong))
+              .replaceAll("\\{0}", String.valueOf(countWinner))
+              .replaceAll("\\{1}", String.valueOf(getCount())));
       //Отправляет сообщение
       sendMessage(fewParticipants, channelIdLong);
 
@@ -230,8 +218,10 @@ public class Gift {
 
       EmbedBuilder stopWithMoreWinner = new EmbedBuilder();
       stopWithMoreWinner.setColor(0x00FF00);
-      stopWithMoreWinner.setTitle("Giveaway the end");
-      stopWithMoreWinner.setDescription("Winners: " + Arrays.toString(uniqueWinners.toArray())
+      stopWithMoreWinner.setTitle(jsonParsers.getLocale("gift_Giveaway_End", String.valueOf(guildIdLong)));
+      stopWithMoreWinner.setDescription(jsonParsers
+          .getLocale("gift_Giveaway_Winners", String.valueOf(guildIdLong))
+          + Arrays.toString(uniqueWinners.toArray())
           .replaceAll("\\[", "").replaceAll("]", ""));
 
       //Отправляет сообщение
@@ -251,8 +241,12 @@ public class Gift {
 
     EmbedBuilder stop = new EmbedBuilder();
     stop.setColor(0x00FF00);
-    stop.setTitle("Giveaway the end");
-    stop.setDescription("Winner: <@" + listUsers.get(random.nextInt(listUsers.size())) + ">");
+    stop.setTitle(jsonParsers
+            .getLocale("gift_Giveaway_End", String.valueOf(guildIdLong)));
+
+    stop.setDescription(jsonParsers
+            .getLocale("gift_Giveaway_Winner_Mention", String.valueOf(guildIdLong))
+        + listUsers.get(random.nextInt(listUsers.size())) + ">");
 
     //Отправляет сообщение
     sendMessage(stop, channelIdLong);

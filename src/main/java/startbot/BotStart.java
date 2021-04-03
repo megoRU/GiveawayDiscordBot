@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
+import messagesevents.LanguageChange;
 import messagesevents.MessageInfoHelp;
 import messagesevents.PrefixChange;
 import net.dv8tion.jda.api.JDA;
@@ -24,6 +25,7 @@ public class BotStart {
   private static JDA jda;
   private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
   private static final Map<String, String> mapPrefix = new HashMap<>();
+  private static final Map<String, String> mapLanguages = new HashMap<>();
   private static final Map<Integer, String> guildIdHashList = new HashMap<>();
 
   public void startBot() throws Exception {
@@ -36,6 +38,10 @@ public class BotStart {
     //Получаем все префиксы из базы данных
     getPrefixFromDB();
 
+    //Получаем языки
+    mapLanguages.put("772388035944906793", "rus");
+
+
     jdaBuilder.setAutoReconnect(true);
     jdaBuilder.setStatus(OnlineStatus.ONLINE);
     jdaBuilder.setActivity(Activity.playing("—> !help"));
@@ -45,6 +51,7 @@ public class BotStart {
     jdaBuilder.addEventListeners(new PrefixChange());
     jdaBuilder.addEventListeners(new MessageInfoHelp());
     jdaBuilder.addEventListeners(new Reactions());
+    jdaBuilder.addEventListeners(new LanguageChange());
 
     jda = jdaBuilder.build();
     jda.awaitReady();
@@ -137,8 +144,29 @@ public class BotStart {
     }
   }
 
+  private void getLocalizationFromDB() {
+    try {
+      Statement statement = DataBase.getConnection().createStatement();
+      String sql = "select * from prefixs";
+      ResultSet rs = statement.executeQuery(sql);
+
+      while (rs.next()) {
+        mapLanguages.put(rs.getString("serverId"), rs.getString("localization"));
+      }
+
+      rs.close();
+      statement.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+  }
+
   public static Map<String, String> getMapPrefix() {
     return mapPrefix;
+  }
+
+  public static Map<String, String> getMapLanguages() {
+    return mapLanguages;
   }
 
   public static JDA getJda() {

@@ -2,6 +2,7 @@ package messagesevents;
 
 import db.DataBase;
 import java.sql.SQLException;
+import jsonparser.JSONParsers;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -12,6 +13,7 @@ public class PrefixChange extends ListenerAdapter {
 
   private static final String PREFIX = "\\*prefix\\s.";
   private static final String PREFIX_RESET = "*prefix reset";
+  private final JSONParsers jsonParsers = new JSONParsers();
 
   @Override
   public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
@@ -27,13 +29,15 @@ public class PrefixChange extends ListenerAdapter {
     if ((message.equals(PREFIX_RESET) || message.matches(PREFIX)) && !event.getMember()
         .hasPermission(Permission.MANAGE_SERVER)) {
       event.getChannel()
-          .sendMessage("You cannot change the prefix. You must have permission: `MANAGE_SERVER`")
+          .sendMessage(jsonParsers.getLocale("prefix_change_Must_have_Permission", event.getGuild().getId()))
           .queue();
       return;
     }
 
     if (message.matches(PREFIX) && messages[1].equals("!")) {
-      event.getChannel().sendMessage("This is the standard prefix!").queue();
+      event.getChannel()
+          .sendMessage(jsonParsers.getLocale("prefix_change_Its_Standard_Prefix", event.getGuild().getId()))
+          .queue();
       return;
     }
 
@@ -42,12 +46,16 @@ public class PrefixChange extends ListenerAdapter {
       BotStart.getMapPrefix().put(event.getGuild().getId(), messages[1]);
       try {
         DataBase dataBase = new DataBase();
-        dataBase.removePrefixFromDB(event.getGuild().getId());
-        dataBase.addPrefixToDB(event.getGuild().getId(), messages[1]);
+        dataBase.removeLangFromDB(event.getGuild().getId());
+        dataBase.addLangToDB(event.getGuild().getId(), messages[1]);
       } catch (SQLException e) {
         e.printStackTrace();
       }
-      event.getChannel().sendMessage("The prefix is now: `" + messages[1] + "`").queue();
+
+      event.getChannel()
+          .sendMessage(
+              jsonParsers.getLocale("prefix_change_Now_Prefix", event.getGuild().getId())
+                  .replaceAll("\\{0}","\\" + messages[1])).queue();
       return;
     }
 
@@ -59,7 +67,9 @@ public class PrefixChange extends ListenerAdapter {
       } catch (SQLException e) {
         e.printStackTrace();
       }
-      event.getChannel().sendMessage("The prefix is now: `" + messages[1] + "`").queue();
+      event.getChannel()
+          .sendMessage(jsonParsers.getLocale("prefix_change_Now_Prefix", event.getGuild().getId())
+              .replaceAll("\\{0}", "\\" + messages[1])).queue();
       return;
     }
 
@@ -71,7 +81,8 @@ public class PrefixChange extends ListenerAdapter {
       } catch (SQLException e) {
         e.printStackTrace();
       }
-      event.getChannel().sendMessage("The prefix is now standard: `!`").queue();
+      event.getChannel()
+          .sendMessage(jsonParsers.getLocale("prefix_change_Prefix_Now_Standard", event.getGuild().getId())).queue();
     }
   }
 }
