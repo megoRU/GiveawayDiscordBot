@@ -15,6 +15,8 @@
 -   [X]   End of giveaway by a timer.
 -   [X]   Use one DB.
 -   [X]   Perform optimization for queries.
+-   [ ]   Optimization code.
+-   [ ]   Make Russian language support available.
 
 ## Add bot to your guild
 [![Discord Bots](https://top.gg/api/widget/808277484524011531.svg)](https://top.gg/bot/808277484524011531)
@@ -22,3 +24,4 @@
 ## Copyright Notice
 
 1.  The bot is made using the library: [JDA](https://github.com/DV8FromTheWorld/JDA)
+2. Used the library and slightly rewritten: [Statcord wrapper](https://github.com/pvhil/unofficial-statcord-wrapper)

@@ -112,8 +112,6 @@ public class Gift {
 
   }
 
-  //TODO: Возможно проблема с тем что данные будут не туда записываться так как static!
-  // Проверили вроде данные не пересекаются
   public void executeMultiInsert(long guildIdLong) throws SQLException {
     String sql = "INSERT IGNORE INTO `"
         + guildIdLong
