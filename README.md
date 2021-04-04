@@ -25,3 +25,7 @@
 
 1.  The bot is made using the library: [JDA](https://github.com/DV8FromTheWorld/JDA)
 2. Used the library and slightly rewritten: [Statcord wrapper](https://github.com/pvhil/unofficial-statcord-wrapper)
+
+## Privacy Policy
+
+Here you can read more about what we store and how we store it. [Privacy Policy](https://github.com/megoRU/GiveawayDiscordBot/blob/database/privacy.md)
