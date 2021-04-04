@@ -1,7 +1,8 @@
 package jsonparser;
 
-import java.io.File;
-import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import startbot.BotStart;
@@ -14,9 +15,10 @@ public class JSONParsers {
       if (BotStart.getMapLanguages().get(guildIdLong) != null) {
         language = BotStart.getMapLanguages().get(guildIdLong);
       }
-      File file = new File("src/main/java/translations/" + language + ".json");
+      InputStream inputStream = getClass().getResourceAsStream("/json/" + language + ".json");
+      BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
       JSONParser parser = new JSONParser();
-      Object obj = parser.parse(new FileReader(file));
+      Object obj = parser.parse(reader);
       JSONObject jsonObject = (JSONObject) obj;
       return jsonObject.get(key).toString();
     } catch (Exception e) {
@@ -24,5 +26,4 @@ public class JSONParsers {
     }
     return "NO_FOUND_LOCALIZATION";
   }
-
 }
