@@ -29,7 +29,7 @@ public class DataBase {
 
   //Создаем один коннект на программу
   public static Connection getConnection() throws SQLException {
-    if (connection == null) {
+    if (connection == null || connection.isClosed()) {
       connection = DriverManager.getConnection(Config.getGiveawayConnection(), Config.getGiveawayUser(), Config.getGiveawayPass());
     }
     return connection;

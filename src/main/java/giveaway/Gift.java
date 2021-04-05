@@ -134,7 +134,7 @@ public class Gift {
       public void run() throws NullPointerException {
         try {
           executeMultiInsert(guildId);
-        } catch (SQLException e) {
+        } catch (Exception e) {
           Thread.currentThread().interrupt();
           e.printStackTrace();
         }

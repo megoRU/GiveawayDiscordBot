@@ -18,8 +18,7 @@ public class Reactions extends ListenerAdapter {
     }
 
     if (GiveawayRegistry.getInstance()
-        .getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong())
-        == null) {
+        .getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong()) == null) {
       return;
     }
 
