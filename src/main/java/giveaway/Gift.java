@@ -26,7 +26,7 @@ public class Gift {
   private final List<String> listUsers = new ArrayList<>();
   private final Map<String, String> listUsersHash = new HashMap<>();
   private final Set<String> uniqueWinners = new HashSet<>();
-  private final StringBuilder insertQuery = new StringBuilder();
+  private StringBuilder insertQuery = new StringBuilder();
   private final Random random = new Random();
   private long guildId;
   private int count;
@@ -123,7 +123,7 @@ public class Gift {
         + "VALUES" + insertQuery.toString();
     if (!insertQuery.isEmpty()) {
       DataBase.getConnection().createStatement().execute(sql);
-      insertQuery.delete(0, insertQuery.length());
+      insertQuery = new StringBuilder();
     }
   }
 
@@ -308,10 +308,6 @@ public class Gift {
 
   public List<String> getListUsers() {
     return listUsers;
-  }
-
-  public StringBuilder getInsertQuery() {
-    return insertQuery;
   }
 
 }
