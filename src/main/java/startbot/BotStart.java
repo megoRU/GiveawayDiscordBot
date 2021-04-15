@@ -39,12 +39,12 @@ public class BotStart {
     getPrefixFromDB();
 
     //Получаем языки
-    mapLanguages.put("772388035944906793", "rus");
+    getLocalizationFromDB();
 
 
     jdaBuilder.setAutoReconnect(true);
     jdaBuilder.setStatus(OnlineStatus.ONLINE);
-    jdaBuilder.setActivity(Activity.playing("—> !help"));
+    jdaBuilder.setActivity(Activity.playing("!help"));
     jdaBuilder.setBulkDeleteSplittingEnabled(false);
     jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild());
     jdaBuilder.addEventListeners(new MessageGift());
@@ -147,11 +147,11 @@ public class BotStart {
   private void getLocalizationFromDB() {
     try {
       Statement statement = DataBase.getConnection().createStatement();
-      String sql = "select * from prefixs";
+      String sql = "select * from language";
       ResultSet rs = statement.executeQuery(sql);
 
       while (rs.next()) {
-        mapLanguages.put(rs.getString("serverId"), rs.getString("localization"));
+        mapLanguages.put(rs.getString("serverId"), rs.getString("lang"));
       }
 
       rs.close();
