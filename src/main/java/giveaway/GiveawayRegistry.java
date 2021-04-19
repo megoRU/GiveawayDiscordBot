@@ -27,6 +27,8 @@ public class GiveawayRegistry {
     return localInstance;
   }
 
+  private GiveawayRegistry() {}
+
   public Map<Long, Gift> getActiveGiveaways() {
     return activeGiveaways;
   }

@@ -25,17 +25,38 @@ public class DataBase {
   // PRIMARY KEY (`guild_long_id`),
   // UNIQUE KEY `guild_long_id` (`guild_long_id`))
   // ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-  private static Connection connection;
+  private static volatile Connection connection;
+  private static volatile DataBase instance;
 
   //Создаем один коннект на программу
   public static Connection getConnection() throws SQLException {
     if (connection == null || connection.isClosed()) {
-      connection = DriverManager.getConnection(Config.getGiveawayConnection(), Config.getGiveawayUser(), Config.getGiveawayPass());
+      synchronized (DataBase.class) {
+        if (connection == null || connection.isClosed()) {
+          connection = DriverManager.getConnection(
+              Config.getGiveawayConnection(),
+              Config.getGiveawayUser(),
+              Config.getGiveawayPass());
+        }
+      }
     }
     return connection;
   }
 
-  public DataBase() throws SQLException {}
+  public static DataBase getInstance() {
+    DataBase localInstance = instance;
+    if (localInstance == null) {
+      synchronized (DataBase.class) {
+        localInstance = instance;
+        if (localInstance == null) {
+          instance = localInstance = new DataBase();
+        }
+      }
+    }
+    return localInstance;
+  }
+
+   private DataBase() {}
 
   //Создаем таблицу когда кто-то создал Giveaway
   public void createTableWhenGiveawayStart(String guildLongId) {
@@ -63,18 +84,6 @@ public class DataBase {
       e.printStackTrace();
     }
   }
-
-//  public void insertUserToDB(long guildIdLong, long userIdLong) {
-//    try {
-//      String query = "INSERT IGNORE INTO `" + guildIdLong + "` (user_long_id) VALUES (?)";
-//      PreparedStatement preparedStmt = getConnection().prepareStatement(query);
-//      preparedStmt.setLong(1, userIdLong);
-//      preparedStmt.executeUpdate();
-//      preparedStmt.close();
-//    } catch (Exception e) {
-//      e.printStackTrace();
-//    }
-//  }
 
   //Добавление префикса
   public void addPrefixToDB(String serverId, String prefix) {

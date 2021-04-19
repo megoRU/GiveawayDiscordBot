@@ -33,8 +33,7 @@ public class Gift {
     this.guildId = guildId;
   }
 
-  public Gift() {
-  }
+  public Gift() {}
 
   public void startGift(Guild guild, TextChannel channel, String newTitle, String countWinners, String time) {
     GiveawayRegistry.getInstance().getTitle().put(guild.getIdLong(), newTitle == null ? "Giveaway" : newTitle);
@@ -61,28 +60,18 @@ public class Gift {
       GiveawayRegistry.getInstance().getMessageId().put(guild.getIdLong(), m.getId());
       GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().put(guild.getIdLong(), m.getId());
       m.addReaction(Reactions.emojiPresent).queue();
-      try {
-        DataBase dataBase = new DataBase();
-        dataBase.addMessageToDB(guild.getIdLong(),
-            m.getIdLong(),
-            m.getChannel().getIdLong(),
-            countWinners,
-            time == null ? null : String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(time))),
-            GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
-      } catch (SQLException throwable) {
-        throwable.printStackTrace();
-      }
+      DataBase.getInstance().addMessageToDB(guild.getIdLong(),
+          m.getIdLong(),
+          m.getChannel().getIdLong(),
+          countWinners,
+          time == null ? null : String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(time))),
+          GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
     });
     start.clear();
     //Вот мы запускаем бесконечный поток.
     autoInsert();
 
-    try {
-      DataBase dataBase = new DataBase();
-      dataBase.createTableWhenGiveawayStart(guild.getId());
-    } catch (SQLException throwable) {
-      throwable.printStackTrace();
-    }
+    DataBase.getInstance().createTableWhenGiveawayStart(guild.getId());
   }
 
   public void addUserToPoll(User user, Guild guild, TextChannel channel) {
@@ -157,13 +146,10 @@ public class Gift {
 
       //Удаляет данные из коллекций
       clearingCollections();
-      try {
-        DataBase dataBase = new DataBase();
-        dataBase.removeMessageFromDB(guildIdLong);
-        dataBase.dropTableWhenGiveawayStop(String.valueOf(guildIdLong));
-      } catch (SQLException throwable) {
-        throwable.printStackTrace();
-      }
+
+      DataBase.getInstance().removeMessageFromDB(guildIdLong);
+      DataBase.getInstance().dropTableWhenGiveawayStop(String.valueOf(guildIdLong));
+
       return;
     }
 
@@ -239,13 +225,10 @@ public class Gift {
 
       //Удаляет данные из коллекций
       clearingCollections();
-      try {
-        DataBase dataBase = new DataBase();
-        dataBase.removeMessageFromDB(guildIdLong);
-        dataBase.dropTableWhenGiveawayStop(String.valueOf(guildIdLong));
-      } catch (SQLException throwable) {
-        throwable.printStackTrace();
-      }
+
+      DataBase.getInstance().removeMessageFromDB(guildIdLong);
+      DataBase.getInstance().dropTableWhenGiveawayStop(String.valueOf(guildIdLong));
+
       return;
     }
 
@@ -259,13 +242,10 @@ public class Gift {
 
     //Удаляет данные из коллекций
     clearingCollections();
-    try {
-      DataBase dataBase = new DataBase();
-      dataBase.removeMessageFromDB(guildIdLong);
-      dataBase.dropTableWhenGiveawayStop(String.valueOf(guildIdLong));
-    } catch (SQLException throwable) {
-      throwable.printStackTrace();
-    }
+
+    DataBase.getInstance().removeMessageFromDB(guildIdLong);
+    DataBase.getInstance().dropTableWhenGiveawayStop(String.valueOf(guildIdLong));
+
   }
 
   private void sendMessage(EmbedBuilder embedBuilder, long channelIdLong) {
