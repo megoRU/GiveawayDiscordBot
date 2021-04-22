@@ -1,5 +1,6 @@
 # GiveawayDiscordBot
-[![Build Status](https://travis-ci.com/megoRU/GiveawayDiscordBot.svg?branch=main)](https://travis-ci.com/megoRU/GiveawayDiscordBot)  [![Discord](https://img.shields.io/discord/779317239722672128?label=Discord)](https://discord.gg/UrWG3R683d)
+[![Java CI](https://github.com/megoRU/GiveawayDiscordBot/actions/workflows/build.yml/badge.svg)](https://github.com/megoRU/GiveawayDiscordBot/actions/workflows/build.yml) 
+[![Discord](https://img.shields.io/discord/779317239722672128?label=Discord)](https://discord.gg/UrWG3R683d)
 [![Add](https://img.shields.io/badge/invite-Giveaway-blue?logo=discord)](https://top.gg/bot/808277484524011531/invite/)
 [![top](https://img.shields.io/badge/TOP.GG-pink?logo=discord)](https://top.gg/bot/808277484524011531) [![Discord Bots](https://top.gg/api/widget/servers/808277484524011531.svg)](https://top.gg/bot/808277484524011531)
 
@@ -28,4 +29,4 @@
 
 ## Privacy Policy
 
-Here you can read more about what we store and how we store it. [Privacy Policy](https://github.com/megoRU/GiveawayDiscordBot/blob/database/privacy.md)
+Here you can read more about what we store and how we store it. [Privacy Policy](https://github.com/megoRU/GiveawayDiscordBot/tree/main/.github/privacy.md)

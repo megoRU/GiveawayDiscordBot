@@ -1,6 +1,0 @@
-dist: focal
-language: java
-
-jdk:
-  - oraclejdk15
-  - openjdk15
