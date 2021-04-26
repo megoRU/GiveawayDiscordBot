@@ -1,13 +1,17 @@
-FROM maven:3.6.3-openjdk-15 AS build
+FROM maven:3.6.3-openjdk-15
 
-COPY ./ /tmp
+ENV HOME=/home/usr/app
 
-RUN mvn -f /tmp/pom.xml clean install
+RUN mkdir -p $HOME
 
-FROM openjdk:15
+WORKDIR $HOME
 
-COPY --from=build ./tmp/target/ /maven
+ADD pom.xml $HOME
 
-WORKDIR /maven
+RUN ["/usr/local/bin/mvn-entrypoint.sh", "mvn", "verify", "clean", "--fail-never"]
 
-ENTRYPOINT ["java", "-jar", "GiveawayDiscord-1.0.4-jar-with-dependencies.jar"]
+ADD . $HOME
+
+RUN ["mvn", "intstall"]
+
+ENTRYPOINT ["java", "-jar", "./target/GiveawayDiscord-1.0.4-jar-with-dependencies.jar"]
