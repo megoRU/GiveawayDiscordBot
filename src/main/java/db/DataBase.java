@@ -56,7 +56,7 @@ public class DataBase {
     return localInstance;
   }
 
-   private DataBase() {}
+  private DataBase() {}
 
   //Создаем таблицу когда кто-то создал Giveaway
   public void createTableWhenGiveawayStart(String guildLongId) {
