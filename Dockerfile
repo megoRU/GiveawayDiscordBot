@@ -1,19 +1,13 @@
-FROM openjdk:15
-
-FROM maven:3.6.3-openjdk-15 AS  clean
-
-FROM maven:3.6.3-openjdk-15 AS  install
+FROM maven:3.6.3-openjdk-15 AS build
 
 COPY ./ /tmp
 
-WORKDIR /tmp
+RUN mvn -f /tmp/pom.xml clean install
 
-RUN ["mvn", "clean"]
+FROM openjdk:15
 
-RUN ["mvn", "install"]
+COPY --from=build ./tmp/target/ /maven
 
-COPY ./target/ /tmp
+WORKDIR /maven
 
-WORKDIR /tmp
-
-ENTRYPOINT ["java","-jar", "GiveawayDiscord-1.0.4-jar-with-dependencies.jar"]
+ENTRYPOINT ["java", "-jar", "GiveawayDiscord-1.0.4-jar-with-dependencies.jar"]
