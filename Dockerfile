@@ -12,6 +12,6 @@ RUN ["/usr/local/bin/mvn-entrypoint.sh", "mvn", "verify", "clean", "--fail-never
 
 ADD . $HOME
 
-RUN ["mvn", "intstall"]
+RUN ["mvn", "install"]
 
 ENTRYPOINT ["java", "-jar", "./target/GiveawayDiscord-1.0.4-jar-with-dependencies.jar"]
