@@ -16,7 +16,7 @@ public class TopGGApiThread extends Thread {
             .build();
         int serverCount = (int) BotStart.getJda().getGuildCache().size();
         TOP_GG_API.setStats(serverCount);
-        TopGGApiThread.sleep(1800000);
+        TopGGApiThread.sleep(300000);
       }
     } catch (Exception e) {
       TopGGApiThread.currentThread().interrupt();

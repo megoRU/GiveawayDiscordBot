@@ -12,11 +12,11 @@ public class Main {
     botStart.startBot();
     GiveawayRegistry.getInstance();
 
-//    StatcordThread statcordThread = new StatcordThread();
-//    statcordThread.start();
-//
-//    TopGGApiThread topGGApiThread = new TopGGApiThread();
-//    topGGApiThread.start();
+    StatcordThread statcordThread = new StatcordThread();
+    statcordThread.start();
+
+    TopGGApiThread topGGApiThread = new TopGGApiThread();
+    topGGApiThread.start();
 
     StopGiveawayByTimer stopGiveawayByTimer = new StopGiveawayByTimer();
     stopGiveawayByTimer.start();
