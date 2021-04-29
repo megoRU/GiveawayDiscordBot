@@ -118,6 +118,7 @@ public class BotStart {
               .getActiveGiveaways()
               .get(Long.parseLong(guildIdHashList.get(i))).getListUsersHash().size());
         }
+        rs.close();
       }
       statement.close();
     } catch (SQLException e) {

@@ -1,6 +1,7 @@
 package threads;
 
 import config.Config;
+import db.DataBase;
 import giveaway.GiveawayRegistry;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -15,11 +16,7 @@ public class StopGiveawayByTimer extends Thread {
   public void run() {
     try {
       while (true) {
-        Connection connection = DriverManager.getConnection(
-            Config.getGiveawayConnection(),
-            Config.getGiveawayUser(),
-            Config.getGiveawayPass());
-        Statement statement = connection.createStatement();
+        Statement statement = DataBase.getConnection().createStatement();
         String sql = "select * from ActiveGiveaways";
         ResultSet rs = statement.executeQuery(sql);
         while (rs.next()) {
@@ -44,7 +41,6 @@ public class StopGiveawayByTimer extends Thread {
         }
         statement.close();
         rs.close();
-        connection.close();
         TopGGApiThread.sleep(5000);
       }
     } catch (Exception e) {
