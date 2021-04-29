@@ -62,6 +62,9 @@ public class MessageInfoHelp extends ListenerAdapter {
       info.addField("Giveaway:", "`"
           + p + jsonParsers.getLocale("messages_events_Start_Giveaway", event.getGuild().getId())
           + p + jsonParsers.getLocale("messages_events_Start_Text_Giveaway", event.getGuild().getId())
+          + p + jsonParsers.getLocale("messages_events_Start_Text_Time_Giveaway", event.getGuild().getId())
+          + p + jsonParsers.getLocale("messages_events_Start_Text_Time_Count_Giveaway", event.getGuild().getId())
+          + p + jsonParsers.getLocale("messages_events_Start_Time_Count_Giveaway", event.getGuild().getId())
           + p + jsonParsers.getLocale("messages_events_Stop_Giveaway", event.getGuild().getId())
           + p + jsonParsers.getLocale("messages_events_Stop_Number_Giveaway", event.getGuild().getId()), false);
 
