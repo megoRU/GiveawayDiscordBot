@@ -1,5 +1,6 @@
 package giveaway;
 
+import jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -10,6 +11,7 @@ import startbot.Statcord;
 
 public class MessageGift extends ListenerAdapter {
 
+  private final JSONParsers jsonParsers = new JSONParsers();
   private static final String GIFT_START = "!gift start";
   private static final String GIFT_START_WITH_MINUTES = "gift start\\s[0-9]{1,2}$";
   private static final String GIFT_START_TITLE = "gift start\\s.{0,255}$";
@@ -41,7 +43,9 @@ public class MessageGift extends ListenerAdapter {
     String messageWithOutPrefix = message.substring(1, length);
 
     if (messageSplit.length > 2 && messageSplit[2].equals("0")) {
-      event.getChannel().sendMessage("You set `0` minutes. We took care of this and increased it by `1` minute.").queue();
+      event.getChannel()
+          .sendMessage(jsonParsers.getLocale("message_gift_Set_Zero_Minutes", event.getGuild().getId()))
+          .queue();
       messageSplit[2] = "1";
     }
 
@@ -57,7 +61,9 @@ public class MessageGift extends ListenerAdapter {
 
     //TODO: Нужно это тестировать!
     if ((message.contains("!gift start ") && (message.length() - 11) >= 256)) {
-      event.getChannel().sendMessage("The title must not be longer than 255 characters!").queue();
+      event.getChannel()
+          .sendMessage(jsonParsers.getLocale("message_gift_Long_Title", event.getGuild().getId()))
+          .queue();
       return;
     }
 
@@ -83,13 +89,17 @@ public class MessageGift extends ListenerAdapter {
 
         if (!event.getMember().hasPermission(event.getChannel(), Permission.ADMINISTRATOR)
             && !event.getMember().hasPermission(event.getChannel(), Permission.MESSAGE_MANAGE)) {
-          event.getChannel().sendMessage("You are not Admin or you can't managed messages!").queue();
+          event.getChannel()
+              .sendMessage(jsonParsers.getLocale("message_gift_Not_Admin", event.getGuild().getId()))
+              .queue();
           return;
         }
 
         if ((message.equals(prefix2) || messageWithOutPrefix.matches(GIFT_START_TITLE))
             && GiveawayRegistry.getInstance().hasGift(guildLongId)) {
-          event.getChannel().sendMessage("First you need to stop Giveaway").queue();
+          event.getChannel()
+              .sendMessage(jsonParsers.getLocale("message_gift_Need_Stop_Giveaway", event.getGuild().getId()))
+              .queue();
           return;
         }
         if ((message.equals(prefix2)

@@ -15,7 +15,6 @@
 .idea
 trash
 .target/
-.src/main/resources/
 
 # Package Files #
 *.jar
@@ -30,7 +29,6 @@ trash
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-src/main/resources/
 src/test/
 target/
 target/generated-sources/

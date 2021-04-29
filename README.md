@@ -17,7 +17,7 @@
 -   [X]   Use one DB.
 -   [X]   Perform optimization for queries.
 -   [ ]   Optimization code.
--   [ ]   Make Russian language support available.
+-   [X]   Make Russian language support available.
 
 ## Add bot to your guild
 [![Discord Bots](https://top.gg/api/widget/808277484524011531.svg)](https://top.gg/bot/808277484524011531)

@@ -1,7 +1,5 @@
 package startbot;
 
-import com.sun.management.OperatingSystemMXBean;
-import java.lang.management.ManagementFactory;
 import java.text.DecimalFormat;
 import java.util.Enumeration;
 import net.dv8tion.jda.api.JDA;
@@ -15,11 +13,16 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Timer;
 import java.util.TimerTask;
+import oshi.hardware.CentralProcessor;
+import oshi.hardware.CentralProcessor.TickType;
+import oshi.hardware.HardwareAbstractionLayer;
 import oshi.hardware.NetworkIF;
 
 public class Statcord {
 
   private static boolean statcordActive = false;
+  private static boolean runned = false;
+
   private static int servers = 0;
   private static int users = 0;
   private static int commandsRun = 0;
@@ -28,10 +31,14 @@ public class Statcord {
 
   private static int memactive = 0;
   private static int memload = 0;
-  private static int cpuload = 0;
 
   private static long bandwidth;
-  public static SystemInfo si = new SystemInfo(); // is public because maybe user wants some information
+
+  public static SystemInfo systemInfo = new SystemInfo(); // is public because maybe user wants some information
+  private static final HardwareAbstractionLayer systemInfoHardware = systemInfo.getHardware();
+  private static final CentralProcessor cpu = systemInfoHardware.getProcessor();
+  private static long[] prevTicks = new long[TickType.values().length];
+  private static final DecimalFormat format = new DecimalFormat("#0");
 
   private static String custom1 = "empty";
   private static String custom2 = "empty";
@@ -64,18 +71,9 @@ public class Statcord {
     Statcord.id = id;
     getNetworkName();
 
-    // get ip which is mainly used and test connection
-
-    for (int i = 0; i < si.getHardware().getNetworkIFs().size(); i++) {
-      count++;
-      if (si.getHardware().getNetworkIFs().get(i).getName().equals(NetworkName)) {
-        break;
-      }
-    }
-
     getNetworkSpeed();
 
-    bandwidth = down + up;
+    bandwidth = getNetworkSpeed();
 
     //make it active
     statcordActive = true;
@@ -84,27 +82,10 @@ public class Statcord {
 
     if (autopost) {
       autorun();
-      System.out.println(ANSI_YELLOW +"!!! [Statcord] autorun activated!" + RESET);
+      System.out.println(ANSI_YELLOW + "!!! [Statcord] autorun activated!" + RESET);
       Statcord.autopost = true;
     }
 
-  }
-
-  //some booleans for users
-  public static boolean isStatcordActive() {
-    return statcordActive;
-  }
-
-  public static boolean isAutopostActive() {
-    return autopost;
-  }
-
-  public static String getCustom1() {
-    return custom1;
-  }
-
-  public static String getCustom2() {
-    return custom2;
   }
 
   //manually updating Stats
@@ -122,14 +103,6 @@ public class Statcord {
     double mem = ((double) memload / (double) memactive) * (double) 100;
     int memperc = (int) Math.round(mem);
 
-    //cpu
-
-    OperatingSystemMXBean bean = (com.sun.management.OperatingSystemMXBean) ManagementFactory
-        .getOperatingSystemMXBean();
-
-    DecimalFormat formatter = new DecimalFormat("#0");
-
-    cpuload = Integer.parseInt(formatter.format(bean.getCpuLoad() * 100));
 
     JSONObject post = new JSONObject();
     post.put("id", id);
@@ -141,7 +114,7 @@ public class Statcord {
     post.put("popular", popcmd);
     post.put("memactive", String.valueOf(memload));
     post.put("memload", String.valueOf(memperc));
-    post.put("cpuload", String.valueOf(cpuload));
+    post.put("cpuload", getCPULoad());
     post.put("bandwidth", String.valueOf(bandwidth));
     if (!custom1.equalsIgnoreCase("empty")) {
       post.put("custom1", custom1);
@@ -161,23 +134,6 @@ public class Statcord {
     custom2 = "empty";
     custom1 = "empty";
   }
-
-  public static void customPost(int id, String content) {
-    if (!statcordActive) {
-      System.out.println(ANSI_YELLOW + "[Statcord]You can not use 'customPost' because Statcord is not active!" + RESET);
-      return;
-    }
-    switch (id) {
-      case (1):
-        custom1 = content;
-      case (2):
-        custom2 = content;
-      default:
-        System.out.println("[Statcord] The given customPost ID is not working. It only can be 1 or 2!");
-        break;
-    }
-  }
-
 
   // command metrics with active users
   public static void commandPost(String command, String author) {
@@ -239,12 +195,16 @@ public class Statcord {
     }
   }
 
+  public static String getCPULoad() {
+    double cpuLoad = Math.round((cpu.getSystemCpuLoadBetweenTicks(prevTicks) * 100) + 1.0D);
+    prevTicks = cpu.getSystemCpuLoadTicks();
+    return format.format(cpuLoad);
+  }
+
   public static void getNetworkName() throws Exception {
-
     final Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
-
     // get hostname
-    InetAddress myAddr = InetAddress.getByName(si.getOperatingSystem().getNetworkParams().getHostName());
+    InetAddress myAddr = InetAddress.getByName(systemInfo.getOperatingSystem().getNetworkParams().getHostName());
 
     while (networkInterfaces.hasMoreElements()) {
       NetworkInterface networkInterface = networkInterfaces.nextElement();
@@ -260,9 +220,17 @@ public class Statcord {
     System.out.println("Not found network hostname");
   }
 
-  public static void getNetworkSpeed() {
-
-    NetworkIF[] networkIFs = si.getHardware().getNetworkIFs().toArray(new NetworkIF[count]);
+  public static long getNetworkSpeed() {
+    if (!runned) {
+      for (int d = 0; d < systemInfo.getHardware().getNetworkIFs().size(); d++) {
+        count++;
+        if (systemInfo.getHardware().getNetworkIFs().get(d).getName().equals(NetworkName)) {
+          runned = true;
+          break;
+        }
+      }
+    }
+    NetworkIF[] networkIFs = systemInfo.getHardware().getNetworkIFs().toArray(new NetworkIF[count]);
     int i = 0;
     NetworkIF net = networkIFs[count];
     try {
@@ -289,7 +257,7 @@ public class Statcord {
 
     down = (download2 - download1) / (timestamp2 - timestamp1);
     up = (upload2 - upload1) / (timestamp2 - timestamp1);
-
+    return down + up;
   }
 
   //autorun set to N min
