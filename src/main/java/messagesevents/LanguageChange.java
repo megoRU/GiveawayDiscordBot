@@ -1,7 +1,6 @@
 package messagesevents;
 
 import db.DataBase;
-import java.sql.SQLException;
 import jsonparser.JSONParsers;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
@@ -49,13 +48,10 @@ public class LanguageChange extends ListenerAdapter {
 
     if (message.equals(prefix_LANG_RUS) || message.equals(prefix_LANG_ENG)) {
       BotStart.getMapLanguages().put(event.getGuild().getId(), messages[1]);
-      try {
-        DataBase dataBase = new DataBase();
-        dataBase.removeLangFromDB(event.getGuild().getId());
-        dataBase.addLangToDB(event.getGuild().getId(), messages[1]);
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
+
+      DataBase.getInstance().removeLangFromDB(event.getGuild().getId());
+      DataBase.getInstance().addLangToDB(event.getGuild().getId(), messages[1]);
+
       event.getChannel()
           .sendMessage(jsonParsers
               .getLocale("language_change_lang", event.getGuild().getId())
@@ -67,12 +63,9 @@ public class LanguageChange extends ListenerAdapter {
 
     if (message.equals(prefix_LANG_RESET)) {
       BotStart.getMapLanguages().remove(event.getGuild().getId());
-      try {
-        DataBase dataBase = new DataBase();
-        dataBase.removeLangFromDB(event.getGuild().getId());
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
+
+      DataBase.getInstance().removeLangFromDB(event.getGuild().getId());
+
       event.getChannel()
           .sendMessage(jsonParsers.getLocale("language_change_lang_reset", event.getGuild().getId()))
           .queue();
