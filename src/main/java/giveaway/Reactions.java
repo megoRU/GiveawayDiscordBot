@@ -1,5 +1,6 @@
 package giveaway;
 
+import jsonparser.JSONParsers;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -8,6 +9,7 @@ import startbot.Statcord;
 
 public class Reactions extends ListenerAdapter {
 
+  private final JSONParsers jsonParsers = new JSONParsers();
   public static final String emojiPresent = "\uD83C\uDF81";
 
   @Override
@@ -28,8 +30,9 @@ public class Reactions extends ListenerAdapter {
     }
 
     if (!event.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_MANAGE)) {
-      event.getChannel().sendMessage("Bot: `" + event.getGuild().getSelfMember().getUser().getName()
-          + "` don\\`t have: `Permission.MESSAGE_MANAGE` \nTo work correctly, add the specified permission to it!")
+      event.getChannel().sendMessage(jsonParsers
+          .getLocale("reactions_bot_dont_have_permissions", event.getGuild().getId())
+          .replaceAll("\\{0}", event.getGuild().getSelfMember().getUser().getName()))
           .queue();
       return;
     }

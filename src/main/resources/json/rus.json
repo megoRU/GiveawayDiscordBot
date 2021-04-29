@@ -41,5 +41,6 @@
   "gift_Giveaway_Winner_Mention": "Победитель: <@",
   "language_change_Not_Admin": "Вы не являетесь Админом или не можете управлять сервером!",
   "language_change_lang": "Вы изменили язык на: ",
-  "language_change_lang_reset": "Язык теперь стандартный: `ENG`"
+  "language_change_lang_reset": "Язык теперь стандартный: `ENG`",
+  "reactions_bot_dont_have_permissions": "Бот: `{0}` не имеет: `Permission.MESSAGE_MANAGE`\nДобавьте ему указанное разрешение!"
 }
