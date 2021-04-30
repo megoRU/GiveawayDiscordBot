@@ -65,7 +65,7 @@ public class DataBase {
       PreparedStatement preparedStmt = getConnection().prepareStatement(query);
       preparedStmt.executeUpdate();
       preparedStmt.close();
-    } catch (Exception e) {
+    } catch (SQLException e) {
       dropTableWhenGiveawayStop(guildLongId);
       createTableWhenGiveawayStart(guildLongId);
       e.printStackTrace();
@@ -76,11 +76,11 @@ public class DataBase {
   //Удаляем таблицу когда кто-то остановил Giveaway
   public void dropTableWhenGiveawayStop(String guildLongId) {
     try {
-      String query = "DROP TABLE `" + guildLongId + "`;";
+      String query = "DROP TABLE IF EXISTS `" + guildLongId + "`;";
       PreparedStatement preparedStmt = getConnection().prepareStatement(query);
       preparedStmt.executeUpdate();
       preparedStmt.close();
-    } catch (Exception e) {
+    } catch (SQLException e) {
       e.printStackTrace();
     }
   }
