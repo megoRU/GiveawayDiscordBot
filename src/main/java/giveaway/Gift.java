@@ -48,7 +48,6 @@ public class Gift {
 
     if (time != null) {
 
-
       start.setDescription(jsonParsers.getLocale("gift_React_With_Gift", guild.getId()) + getCount() + "`");
       start.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(time)));
       start.setFooter(jsonParsers.getLocale("gift_Ends_At", guild.getId()));
@@ -105,25 +104,31 @@ public class Gift {
 
   }
 
-  public void executeMultiInsert(long guildIdLong) throws SQLException {
-    String sql = "INSERT IGNORE INTO `"
-        + guildIdLong
-        + "` (user_long_id) "
-        + "VALUES" + insertQuery.toString();
-    if (!insertQuery.isEmpty()) {
-      DataBase.getConnection().createStatement().execute(sql);
+  private void executeMultiInsert(long guildIdLong) {
+    try {
+      String sql = "INSERT IGNORE INTO `"
+          + guildIdLong
+          + "` (user_long_id) "
+          + "VALUES" + insertQuery.toString();
+      if (!insertQuery.isEmpty()) {
+        DataBase.getConnection().createStatement().execute(sql);
+        insertQuery = new StringBuilder();
+      }
+    } catch (SQLException e) {
       insertQuery = new StringBuilder();
+      System.out.println("Таблица: " + guildIdLong
+          + " больше не существует, скорее всего Giveaway завершился!\n"
+          + "Очищаем StringBuilder!");
     }
   }
 
-  public void addUserToInsertQuery(long userIdLong) {
+  private void addUserToInsertQuery(long userIdLong) {
     insertQuery.append(insertQuery.length() == 0 ? "" : ",").append("('").append(userIdLong).append("')");
   }
 
   //Автоматически отправляет в БД данные которые в буфере StringBuilder
   public void autoInsert() {
-    Timer timer = new Timer();
-    timer.schedule(new TimerTask() {
+    new Timer().scheduleAtFixedRate(new TimerTask() {
       public void run() throws NullPointerException {
         try {
           executeMultiInsert(guildId);
