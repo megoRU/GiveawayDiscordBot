@@ -106,12 +106,12 @@ public class Gift {
 
   private void executeMultiInsert(long guildIdLong) {
     try {
-      String sql = "INSERT IGNORE INTO `"
-          + guildIdLong
-          + "` (user_long_id) "
-          + "VALUES" + insertQuery.toString();
       if (!insertQuery.isEmpty()) {
-        DataBase.getConnection().createStatement().execute(sql);
+        DataBase.getConnection().createStatement().execute(
+            "INSERT IGNORE INTO `"
+            + guildIdLong
+            + "` (user_long_id) "
+            + "VALUES" + insertQuery.toString());
         insertQuery = new StringBuilder();
       }
     } catch (SQLException e) {
