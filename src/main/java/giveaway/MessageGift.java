@@ -71,7 +71,11 @@ public class MessageGift extends ListenerAdapter {
     long guildLongId = event.getGuild().getIdLong();
 
     if (!event.getMember().hasPermission(event.getChannel(), Permission.ADMINISTRATOR)
-        && !event.getMember().hasPermission(event.getChannel(), Permission.MESSAGE_MANAGE)) {
+        && !event.getMember().hasPermission(event.getChannel(), Permission.MESSAGE_MANAGE)
+        && (messageWithOutPrefix.matches(GIFT_START_TITLE)
+        || messageWithOutPrefix.matches(GIFT_START_WITHOUT_PREFIX)
+        || messageWithOutPrefix.matches(GIFT_STOP)
+        || messageWithOutPrefix.matches(GIFT_STOP_COUNT))) {
       event.getChannel()
           .sendMessage(jsonParsers.getLocale("message_gift_Not_Admin", event.getGuild().getId()))
           .queue();
@@ -87,6 +91,7 @@ public class MessageGift extends ListenerAdapter {
       return;
     }
 
+    //GIFT START
     if ((messageWithOutPrefix.matches(GIFT_START_TITLE)
         || messageWithOutPrefix.matches(GIFT_START_WITHOUT_PREFIX))
         && !GiveawayRegistry.getInstance().hasGift(guildLongId)) {
@@ -146,6 +151,7 @@ public class MessageGift extends ListenerAdapter {
       }
     }
 
+    //GIFT STOP
     if ((messageWithOutPrefix.matches(GIFT_STOP)
         || messageWithOutPrefix.matches(GIFT_STOP_COUNT))
         && GiveawayRegistry.getInstance().hasGift(guildLongId)) {
