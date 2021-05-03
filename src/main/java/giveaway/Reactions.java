@@ -53,36 +53,25 @@ public class Reactions extends ListenerAdapter {
       boolean isUserAdminOrHaveManageMessage = (event.getMember().hasPermission(event.getChannel(), Permission.ADMINISTRATOR)
           || event.getMember().hasPermission(event.getChannel(), Permission.MESSAGE_MANAGE));
 
-      if (!isThisTheEmoji && GiveawayRegistry.getInstance()
-          .getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong())
-          != null) {
+      if (!isThisTheEmoji) {
         event.getReaction().removeReaction(event.getUser()).queue();
       }
 
       long guild = event.getGuild().getIdLong();
 
       if (emoji.equals(emojiPresent)
-          && GiveawayRegistry.getInstance()
-          .getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong())
-          != null
-          && GiveawayRegistry.getInstance().hasGift(guild)) {
+          && GiveawayRegistry.getInstance().hasGift(guild)
+          && GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
+          .getListUsersHash(event.getUser().getId()) == null) {
 
-        if (GiveawayRegistry.getInstance()
-            .getActiveGiveaways().get(event.getGuild().getIdLong())
-            .getListUsersHash(event.getUser().getId())
-            == null) {
+        GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
+            .addUserToPoll(event.getMember().getUser(), event.getGuild(), event.getChannel());
 
-          GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
-              .addUserToPoll(event.getMember().getUser(), event.getGuild(), event.getChannel());
-
-          Statcord.commandPost("gift", event.getUser().getId());
-        }
+        Statcord.commandPost("gift", event.getUser().getId());
+        return;
       }
 
-      if (isThisTheEmoji && GiveawayRegistry.getInstance()
-          .getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong()) != null
-          && GiveawayRegistry.getInstance().hasGift(guild)
-          && isUserAdminOrHaveManageMessage) {
+      if (isThisTheEmoji && GiveawayRegistry.getInstance().hasGift(guild) && isUserAdminOrHaveManageMessage) {
 
         if (emoji.equals(emojiStopOne)) {
           GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
