@@ -63,6 +63,9 @@ public class Gift {
       GiveawayRegistry.getInstance().getMessageId().put(guild.getIdLong(), m.getId());
       GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().put(guild.getIdLong(), m.getId());
       m.addReaction(Reactions.emojiPresent).queue();
+      m.addReaction(Reactions.emojiStopOne).queue();
+      m.addReaction(Reactions.emojiStopTwo).queue();
+      m.addReaction(Reactions.emojiStopThree).queue();
       DataBase.getInstance().addMessageToDB(guild.getIdLong(),
           m.getIdLong(),
           m.getChannel().getIdLong(),

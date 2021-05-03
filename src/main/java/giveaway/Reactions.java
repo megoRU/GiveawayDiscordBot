@@ -11,6 +11,9 @@ public class Reactions extends ListenerAdapter {
 
   private final JSONParsers jsonParsers = new JSONParsers();
   public static final String emojiPresent = "\uD83C\uDF81";
+  public static final String emojiStopOne = "\u0031\u20E3";
+  public static final String emojiStopTwo = "\u0032\u20E3";
+  public static final String emojiStopThree = "\u0033\u20E3";
 
   @Override
   public void onGuildMessageReactionAdd(@NotNull GuildMessageReactionAddEvent event) {
@@ -45,9 +48,12 @@ public class Reactions extends ListenerAdapter {
       //
 
       String emoji = event.getReactionEmote().getEmoji();
+      boolean isThisTheEmoji = (emoji.equals(emojiPresent) || emoji.equals(emojiStopOne) || emoji.equals(emojiStopTwo) || emoji.equals(emojiStopThree));
 
-      if (!emoji.equals(emojiPresent)
-          && GiveawayRegistry.getInstance()
+      boolean isUserAdminOrHaveManageMessage = (event.getMember().hasPermission(event.getChannel(), Permission.ADMINISTRATOR)
+          || event.getMember().hasPermission(event.getChannel(), Permission.MESSAGE_MANAGE));
+
+      if (!isThisTheEmoji && GiveawayRegistry.getInstance()
           .getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong())
           != null) {
         event.getReaction().removeReaction(event.getUser()).queue();
@@ -71,6 +77,36 @@ public class Reactions extends ListenerAdapter {
 
           Statcord.commandPost("gift", event.getUser().getId());
         }
+      }
+
+      if (isThisTheEmoji && GiveawayRegistry.getInstance()
+          .getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong()) != null
+          && GiveawayRegistry.getInstance().hasGift(guild)
+          && isUserAdminOrHaveManageMessage) {
+
+        if (emoji.equals(emojiStopOne)) {
+          GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
+              .stopGift(event.getGuild().getIdLong(), event.getChannel().getIdLong(), 1);
+          Statcord.commandPost("gift stop", event.getUser().getId());
+          return;
+        }
+
+        if (emoji.equals(emojiStopTwo)) {
+          GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
+              .stopGift(event.getGuild().getIdLong(), event.getChannel().getIdLong(), 2);
+          Statcord.commandPost("gift stop 2", event.getUser().getId());
+          return;
+        }
+
+        if (emoji.equals(emojiStopThree)) {
+          GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
+              .stopGift(event.getGuild().getIdLong(), event.getChannel().getIdLong(), 3);
+          Statcord.commandPost("gift stop 3", event.getUser().getId());
+        }
+      }
+
+      if (!emoji.equals(emojiPresent) && !isUserAdminOrHaveManageMessage) {
+        event.getReaction().removeReaction(event.getUser()).queue();
       }
     } catch (Exception e) {
       e.printStackTrace();

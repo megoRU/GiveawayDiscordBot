@@ -31,7 +31,7 @@
   "message_gift_Not_Admin": "Вы не являетесь Админом или не можете управлять сообщениями!",
   "message_gift_Need_Stop_Giveaway": "Сначала вам нужно завершить Giveaway",
   "giveaway_registry_Error": "Giveaway был отменен, потому что бот не смог получить ID своего сообщения\nПожалуйста, попробуйте снова. **Напишите нам, что именно произошло.\nМы пытаемся исправить эту ошибку. Сервер поддержки:** https://discord.gg/UrWG3R683d",
-  "gift_React_With_Gift": "Нажмите на :gift: чтобы участвовать!\nУчастников: `",
+  "gift_React_With_Gift": "Нажмите на :gift: чтобы участвовать!\n:one: Завершает с одним победителем и т.д.\n\nУчастников: `",
   "gift_Ends_At": "Завершится:",
   "gift_Not_Enough_Users": "Недостаточно участников",
   "gift_Giveaway_Deleted": ":x: Giveaway удалена!",
