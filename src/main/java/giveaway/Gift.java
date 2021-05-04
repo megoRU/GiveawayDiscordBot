@@ -60,12 +60,14 @@ public class Gift {
     GiveawayRegistry.getInstance().incrementGiveAwayCount();
 
     channel.sendMessage(start.build()).queue(m -> {
-      GiveawayRegistry.getInstance().getMessageId().put(guild.getIdLong(), m.getId());
-      GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().put(guild.getIdLong(), m.getId());
       m.addReaction(Reactions.emojiPresent).queue();
       m.addReaction(Reactions.emojiStopOne).queue();
       m.addReaction(Reactions.emojiStopTwo).queue();
       m.addReaction(Reactions.emojiStopThree).queue();
+      GiveawayRegistry.getInstance().getMessageId().put(guild.getIdLong(), m.getId());
+      GiveawayRegistry.getInstance().getChannelId().put(guild.getIdLong(), m.getChannel().getId());
+      GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().put(guild.getIdLong(), m.getId());
+      GiveawayRegistry.getInstance().getCountWinners().put(guild.getIdLong(), countWinners);
       DataBase.getInstance().addMessageToDB(guild.getIdLong(),
           m.getIdLong(),
           m.getChannel().getIdLong(),
@@ -267,11 +269,13 @@ public class Gift {
     listUsersHash.clear();
     listUsers.clear();
     GiveawayRegistry.getInstance().getMessageId().remove(guildId);
+    GiveawayRegistry.getInstance().getChannelId().remove(guildId);
     GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().remove(guildId);
     GiveawayRegistry.getInstance().getTitle().remove(guildId);
     GiveawayRegistry.getInstance().removeGift(guildId);
     GiveawayRegistry.getInstance().decrementGiveAwayCount();
     GiveawayRegistry.getInstance().getEndGiveawayDate().remove(guildId);
+    GiveawayRegistry.getInstance().getCountWinners().remove(guildId);
   }
 
   public String getListUsersHash(String id) {

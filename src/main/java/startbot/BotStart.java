@@ -66,7 +66,7 @@ public class BotStart {
       while (rs.next()) {
 
         long guild_long_id = rs.getLong("guild_long_id");
-        long channel_long_id = rs.getLong("channel_id_long");
+        String channel_long_id = rs.getString("channel_id_long");
         String count_winners = rs.getString("count_winners");
         long message_id_long = rs.getLong("message_id_long");
         String giveaway_title = rs.getString("giveaway_title");
@@ -81,7 +81,6 @@ public class BotStart {
         GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild_long_id, date_end_giveaway == null ? "null" : date_end_giveaway);
         GiveawayRegistry.getInstance().getChannelId().put(guild_long_id, channel_long_id);
         GiveawayRegistry.getInstance().getCountWinners().put(guild_long_id, count_winners);
-
 
       }
       rs.close();

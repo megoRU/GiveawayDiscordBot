@@ -11,7 +11,7 @@ public class GiveawayRegistry {
   private static final Map<Long, Gift> activeGiveaways = new HashMap<>();
   private static final Map<Long, String> idMessagesWithGiveawayEmoji = new HashMap<>();
   private static final AtomicInteger giveawayCount = new AtomicInteger(0);
-  private static final Map<Long, Long> channelId = new HashMap<>();
+  private static final Map<Long, String> channelId = new HashMap<>();
   private static final Map<Long, String> messageId = new HashMap<>();
   private static final Map<Long, String> countWinners = new HashMap<>();
   private static final Map<Long, String> title = new HashMap<>();
@@ -73,7 +73,7 @@ public class GiveawayRegistry {
     return endGiveawayDate;
   }
 
-  public Map<Long, Long> getChannelId() {
+  public Map<Long, String> getChannelId() {
     return channelId;
   }
 
