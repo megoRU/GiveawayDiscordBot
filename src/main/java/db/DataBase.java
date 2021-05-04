@@ -26,7 +26,7 @@ public class DataBase {
   // UNIQUE KEY `guild_long_id` (`guild_long_id`))
   // ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   private static volatile Connection connection;
-  private static volatile DataBase instance;
+  private static volatile DataBase dataBase;
 
   //Создаем один коннект на программу
   public static Connection getConnection() throws SQLException {
@@ -44,16 +44,14 @@ public class DataBase {
   }
 
   public static DataBase getInstance() {
-    DataBase localInstance = instance;
-    if (localInstance == null) {
+    if (dataBase == null) {
       synchronized (DataBase.class) {
-        localInstance = instance;
-        if (localInstance == null) {
-          instance = localInstance = new DataBase();
+        if (dataBase == null) {
+          dataBase = new DataBase();
         }
       }
     }
-    return localInstance;
+    return dataBase;
   }
 
   private DataBase() {}

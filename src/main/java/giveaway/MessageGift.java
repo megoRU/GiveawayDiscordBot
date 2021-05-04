@@ -69,6 +69,7 @@ public class MessageGift extends ListenerAdapter {
     }
 
     long guildLongId = event.getGuild().getIdLong();
+    boolean isMessageMatches = (messageWithOutPrefix.matches(GIFT_START_TITLE) || messageWithOutPrefix.matches(GIFT_START_WITHOUT_PREFIX));
 
     if (!event.getMember().hasPermission(event.getChannel(), Permission.ADMINISTRATOR)
         && !event.getMember().hasPermission(event.getChannel(), Permission.MESSAGE_MANAGE)
@@ -82,9 +83,7 @@ public class MessageGift extends ListenerAdapter {
       return;
     }
 
-    if ((messageWithOutPrefix.matches(GIFT_START_TITLE)
-        || messageWithOutPrefix.matches(GIFT_START_WITHOUT_PREFIX))
-        && GiveawayRegistry.getInstance().hasGift(guildLongId)) {
+    if (isMessageMatches && GiveawayRegistry.getInstance().hasGift(guildLongId)) {
       event.getChannel()
           .sendMessage(jsonParsers.getLocale("message_gift_Need_Stop_Giveaway", event.getGuild().getId()))
           .queue();
@@ -92,9 +91,7 @@ public class MessageGift extends ListenerAdapter {
     }
 
     //GIFT START
-    if ((messageWithOutPrefix.matches(GIFT_START_TITLE)
-        || messageWithOutPrefix.matches(GIFT_START_WITHOUT_PREFIX))
-        && !GiveawayRegistry.getInstance().hasGift(guildLongId)) {
+    if (isMessageMatches && !GiveawayRegistry.getInstance().hasGift(guildLongId)) {
 
       if (messageSplit.length > 2 && messageSplit[2].equals("0")) {
         event.getChannel()

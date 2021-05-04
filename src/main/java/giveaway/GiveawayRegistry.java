@@ -2,6 +2,7 @@ package giveaway;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import jsonparser.JSONParsers;
 
@@ -10,23 +11,23 @@ public class GiveawayRegistry {
   private static final Map<Long, Gift> activeGiveaways = new HashMap<>();
   private static final Map<Long, String> idMessagesWithGiveawayEmoji = new HashMap<>();
   private static final AtomicInteger giveawayCount = new AtomicInteger(0);
+  private static final Map<Long, Long> channelId = new HashMap<>();
   private static final Map<Long, String> messageId = new HashMap<>();
+  private static final Map<Long, String> countWinners = new HashMap<>();
   private static final Map<Long, String> title = new HashMap<>();
-  private static final Map<Long, String> endGiveawayDate = new HashMap<>();
-  private static volatile GiveawayRegistry instance;
+  private static final Map<Long, String> endGiveawayDate = new ConcurrentHashMap<>();
+  private static volatile GiveawayRegistry giveawayRegistry;
   private static final JSONParsers jsonParsers = new JSONParsers();
 
   public static GiveawayRegistry getInstance() {
-    GiveawayRegistry localInstance = instance;
-    if (localInstance == null) {
+    if (giveawayRegistry == null) {
       synchronized (GiveawayRegistry.class) {
-        localInstance = instance;
-        if (localInstance == null) {
-          instance = localInstance = new GiveawayRegistry();
+        if (giveawayRegistry == null) {
+          giveawayRegistry = new GiveawayRegistry();
         }
       }
     }
-    return localInstance;
+    return giveawayRegistry;
   }
 
   private GiveawayRegistry() {}
@@ -68,6 +69,18 @@ public class GiveawayRegistry {
     return title;
   }
 
+  public Map<Long, String> getEndGiveawayDate() {
+    return endGiveawayDate;
+  }
+
+  public Map<Long, Long> getChannelId() {
+    return channelId;
+  }
+
+  public Map<Long, String> getCountWinners() {
+    return countWinners;
+  }
+
   public synchronized void incrementGiveAwayCount() {
     giveawayCount.getAndIncrement();
   }
@@ -82,10 +95,6 @@ public class GiveawayRegistry {
 
   public synchronized void setGiveAwayCount(Integer value) {
     giveawayCount.set(value);
-  }
-
-  public Map<Long, String> getEndGiveawayDate() {
-    return endGiveawayDate;
   }
 
 }

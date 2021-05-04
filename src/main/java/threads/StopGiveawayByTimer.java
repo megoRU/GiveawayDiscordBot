@@ -1,9 +1,6 @@
 package threads;
 
-import db.DataBase;
 import giveaway.GiveawayRegistry;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 
@@ -13,32 +10,25 @@ public class StopGiveawayByTimer extends Thread {
   public void run() {
     try {
       while (true) {
-        Statement statement = DataBase.getConnection().createStatement();
-        String sql = "select * from ActiveGiveaways";
-        ResultSet rs = statement.executeQuery(sql);
-        while (rs.next()) {
-          long guild_long_id = rs.getLong("guild_long_id");
-          long channel_id_long = rs.getLong("channel_id_long");
-          String count_winners = rs.getString("count_winners");
-          String date_end_giveaway = rs.getString("date_end_giveaway");
-          if (date_end_giveaway != null) {
+        GiveawayRegistry.getInstance().getEndGiveawayDate().forEach((k, v) -> {
+          if (!v.equals("null")) {
             Instant timestamp = Instant.now();
             //Instant для timestamp
             Instant specificTime = Instant.ofEpochMilli(timestamp.toEpochMilli());
-            OffsetDateTime timeFormDB = OffsetDateTime.parse(date_end_giveaway);
+            OffsetDateTime timeFormDB = OffsetDateTime.parse(v);
 
             if (specificTime.isAfter(Instant.from(timeFormDB))) {
               GiveawayRegistry.getInstance()
                   .getActiveGiveaways()
-                  .get(guild_long_id)
-                  .stopGift(guild_long_id, channel_id_long,
-                      count_winners == null ? 1 : Integer.parseInt(count_winners));
+                  .get(k)
+                  .stopGift(k,
+                      GiveawayRegistry.getInstance().getChannelId().get(k),
+                      GiveawayRegistry.getInstance().getCountWinners().get(k)
+                          == null ? 1 : Integer.parseInt(GiveawayRegistry.getInstance().getCountWinners().get(k)));
             }
           }
-        }
-        statement.close();
-        rs.close();
-        TopGGApiThread.sleep(5000);
+        });
+        StopGiveawayByTimer.sleep(3000);
       }
     } catch (Exception e) {
       StopGiveawayByTimer.currentThread().interrupt();

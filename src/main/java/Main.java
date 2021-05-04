@@ -1,8 +1,7 @@
 import giveaway.GiveawayRegistry;
 import startbot.BotStart;
-import threads.StatcordThread;
 import threads.StopGiveawayByTimer;
-import threads.TopGGApiThread;
+import threads.TopGGAndStatcordThread;
 
 public class Main {
 
@@ -12,11 +11,10 @@ public class Main {
     botStart.startBot();
     GiveawayRegistry.getInstance();
 
-    StatcordThread statcordThread = new StatcordThread();
-    statcordThread.start();
+    TopGGAndStatcordThread topGGAndStatcordThread = new TopGGAndStatcordThread();
+    topGGAndStatcordThread.start();
 
-    TopGGApiThread topGGApiThread = new TopGGApiThread();
-    topGGApiThread.start();
+    System.out.println("23:00");
 
     StopGiveawayByTimer stopGiveawayByTimer = new StopGiveawayByTimer();
     stopGiveawayByTimer.start();
