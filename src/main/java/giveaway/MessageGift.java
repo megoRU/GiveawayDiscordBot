@@ -104,7 +104,6 @@ public class MessageGift extends ListenerAdapter {
 
       if (messageWithOutPrefix.matches(GIFT_START_TITLE_COUNT_WITH_MINUTES)) {
         int len = messageSplit[messageSplit.length - 1].length() + messageSplit[messageSplit.length - 2].length();
-        System.out.println("1");
         GiveawayRegistry.getInstance()
             .getActiveGiveaways().get(event.getGuild().getIdLong()).startGift(
             event.getGuild(),

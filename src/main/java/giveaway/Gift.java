@@ -268,6 +268,7 @@ public class Gift {
   private void clearingCollections() {
     listUsersHash.clear();
     listUsers.clear();
+    uniqueWinners.clear();
     GiveawayRegistry.getInstance().getMessageId().remove(guildId);
     GiveawayRegistry.getInstance().getChannelId().remove(guildId);
     GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().remove(guildId);
