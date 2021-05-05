@@ -22,7 +22,7 @@
 
 ## JETBRAINS
 
-[<img src="https://github.com/megoRU/GiveawayDiscordBot/tree/main/.github//jetbrains-variant-3.png?raw=true">](https://jb.gg/OpenSource)
+[<img src="https://github.com/megoRU/GiveawayDiscordBot/blob/main/.github/jetbrains-logo.png?raw=true">](https://jb.gg/OpenSource)
 
 ## Privacy Policy
 
