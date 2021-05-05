@@ -139,7 +139,9 @@ public class MessageGift extends ListenerAdapter {
 
       if (messageWithOutPrefix.matches(GIFT_START_TITLE)) {
         GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
-            .startGift(event.getGuild(), event.getChannel(), messageSplit[2], null, null);
+            .startGift(
+                event.getGuild(), event.getChannel(),
+                event.getMessage().getContentDisplay().substring(12, message.length()), null, null);
         return;
       } else {
         GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
