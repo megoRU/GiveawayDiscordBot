@@ -36,7 +36,7 @@
   "gift_Not_Enough_Users": "Not enough users",
   "gift_Giveaway_Deleted": ":x: The giveaway deleted!",
   "gift_Invalid_Number": ":warning: Invalid number",
-  "gift_Invalid_Number_Description": "The number of winners must be greater than zero!\nYou entered a number: `{0}`\nNumber of participants: `{1}`\nThis action did not cause the deletion: **Giveaway**!",
+  "gift_Invalid_Number_Description": "The number of winners must be less than the number of participants!\nYou entered a number: `{0}`\nNumber of participants: `{1}`\nThis action did not cause the deletion: **Giveaway**!",
   "gift_Invalid_Number_Description_Loop": "In order not to get loop, we had to reduce the number\nof winners by one. Since their number was equal to the participants",
   "gift_Giveaway_End": "Giveaway the end",
   "gift_Giveaway_Winners": "Number of participants: `{0}`\nWinners: ",

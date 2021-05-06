@@ -95,35 +95,6 @@ public class Gift {
     addUserToInsertQuery(user.getIdLong());
   }
 
-  private void updateMessage() {
-    try {
-      EmbedBuilder edit = new EmbedBuilder();
-      edit.setColor(0x00FF00);
-      edit.setTitle(GiveawayRegistry.getInstance().getTitle().get(guildId));
-
-      edit.setDescription(jsonParsers.getLocale("gift_React_With_Gift", String.valueOf(guildId))
-          .replaceAll("\\{0}", GiveawayRegistry.getInstance().getCountWinners().get(guildId) == null ? "TBA"
-              : GiveawayRegistry.getInstance().getCountWinners().get(guildId))
-          .replaceAll("\\{1}", setEndingWord(GiveawayRegistry.getInstance().getCountWinners().get(guildId) == null ? "TBA"
-              : GiveawayRegistry.getInstance().getCountWinners().get(guildId))) + getCount() + "`");
-
-      //Если есть время окончания включить в EmbedBuilder
-      if (GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildId) != null) {
-        edit.setTimestamp(OffsetDateTime.parse(String.valueOf(GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildId))));
-        edit.setFooter(jsonParsers.getLocale("gift_Ends_At", String.valueOf(guildId)));
-      }
-      //Отправляет сообщение и если нельзя редактировать то отправляет ошибку
-      BotStart.getJda().getGuildById(guildId).getTextChannelById(channelId)
-          .editMessageById(GiveawayRegistry
-              .getInstance().getMessageId().get(guildId), edit.build()).queue(null, (exception) ->
-          BotStart.getJda().getTextChannelById(channelId).sendMessage(GiveawayRegistry.getInstance().removeGiftExceptions(guildId))
-              .queue());
-      edit.clear();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
   private void executeMultiInsert(long guildIdLong) {
     try {
       if (!insertQuery.isEmpty()) {
@@ -170,7 +141,7 @@ public class Gift {
       notEnoughUsers.setDescription(jsonParsers
           .getLocale("gift_Giveaway_Deleted", String.valueOf(guildIdLong)));
       //Отправляет сообщение
-      sendMessage(notEnoughUsers);
+      messageStop(notEnoughUsers);
 
       //Удаляет данные из коллекций
       clearingCollections();
@@ -181,7 +152,7 @@ public class Gift {
       return;
     }
 
-    if (countWinner == 0) {
+    if (countWinner == 0 || countWinner >= listUsers.size()) {
       EmbedBuilder zero = new EmbedBuilder();
       zero.setColor(0xFF8000);
       zero.setTitle(jsonParsers.getLocale("gift_Invalid_Number", String.valueOf(guildIdLong)));
@@ -190,34 +161,7 @@ public class Gift {
           .replaceAll("\\{0}", String.valueOf(countWinner))
           .replaceAll("\\{1}", String.valueOf(getCount())));
       //Отправляет сообщение
-      sendMessage(zero);
-      return;
-    }
-
-    if (countWinner == listUsers.size()
-        && GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildIdLong) != null) {
-      countWinner -= 1;
-
-      EmbedBuilder equally = new EmbedBuilder();
-      equally.setColor(0xFF8000);
-      equally.setTitle(jsonParsers.getLocale("gift_Invalid_Number", String.valueOf(guildIdLong)));
-      equally.setDescription(jsonParsers
-          .getLocale("gift_Invalid_Number_Description_Loop", String.valueOf(guildIdLong)));
-      //Отправляет сообщение
-      sendMessage(equally);
-    }
-
-    if (countWinner >= listUsers.size()) {
-      EmbedBuilder fewParticipants = new EmbedBuilder();
-      fewParticipants.setColor(0xFF8000);
-      fewParticipants.setTitle(jsonParsers.getLocale("gift_Invalid_Number", String.valueOf(guildIdLong)));
-      fewParticipants.setDescription(jsonParsers
-          .getLocale("gift_Invalid_Number_Description", String.valueOf(guildIdLong))
-          .replaceAll("\\{0}", String.valueOf(countWinner))
-          .replaceAll("\\{1}", String.valueOf(getCount())));
-      //Отправляет сообщение
-      sendMessage(fewParticipants);
-
+      messageStop(zero);
       return;
     }
 
@@ -283,14 +227,30 @@ public class Gift {
     }
   }
 
-  private void sendMessage(EmbedBuilder embedBuilder) {
+  private void updateMessage() {
     try {
-      BotStart.getJda()
-          .getGuildById(guildId)
-          .getTextChannelById(channelId)
-          .sendMessage(embedBuilder.build())
-          .queue();
-      embedBuilder.clear();
+      EmbedBuilder edit = new EmbedBuilder();
+      edit.setColor(0x00FF00);
+      edit.setTitle(GiveawayRegistry.getInstance().getTitle().get(guildId));
+
+      edit.setDescription(jsonParsers.getLocale("gift_React_With_Gift", String.valueOf(guildId))
+          .replaceAll("\\{0}", GiveawayRegistry.getInstance().getCountWinners().get(guildId) == null ? "TBA"
+              : GiveawayRegistry.getInstance().getCountWinners().get(guildId))
+          .replaceAll("\\{1}", setEndingWord(GiveawayRegistry.getInstance().getCountWinners().get(guildId) == null ? "TBA"
+              : GiveawayRegistry.getInstance().getCountWinners().get(guildId))) + getCount() + "`");
+
+      //Если есть время окончания включить в EmbedBuilder
+      if (GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildId) != null) {
+        edit.setTimestamp(OffsetDateTime.parse(String.valueOf(GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildId))));
+        edit.setFooter(jsonParsers.getLocale("gift_Ends_At", String.valueOf(guildId)));
+      }
+      //Отправляет сообщение и если нельзя редактировать то отправляет ошибку
+      BotStart.getJda().getGuildById(guildId).getTextChannelById(channelId)
+          .editMessageById(GiveawayRegistry
+              .getInstance().getMessageId().get(guildId), edit.build()).queue(null, (exception) ->
+          BotStart.getJda().getTextChannelById(channelId).sendMessage(GiveawayRegistry.getInstance().removeGiftExceptions(guildId))
+              .queue());
+      edit.clear();
     } catch (Exception e) {
       e.printStackTrace();
     }

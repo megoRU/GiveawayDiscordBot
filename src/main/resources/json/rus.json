@@ -36,7 +36,7 @@
   "gift_Not_Enough_Users": "Недостаточно участников",
   "gift_Giveaway_Deleted": ":x: Giveaway удалена!",
   "gift_Invalid_Number": ":warning: Неверное число",
-  "gift_Invalid_Number_Description": "Число победителей должно быть больше нуля!\nВы ввели число: `{0}`\nКоличество участников: `{1}`\nЭто действие не завершило: **Giveaway**!",
+  "gift_Invalid_Number_Description": "Число победителей должно быть меньше участников!\nВы ввели число: `{0}`\nКоличество участников: `{1}`\nЭто действие не завершило: **Giveaway**!",
   "gift_Invalid_Number_Description_Loop": "Чтобы не попасть в рекурсию, нам пришлось уменьшить количество\nпобедителей на один. Так как их число было равно числу участников",
   "gift_Giveaway_End": "Giveaway завершилась",
   "gift_Giveaway_Winners": "Количество участников: `{0}`\nПобедители: ",
