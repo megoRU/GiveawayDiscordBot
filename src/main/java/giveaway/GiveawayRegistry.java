@@ -3,6 +3,7 @@ package giveaway;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import jsonparser.JSONParsers;
 
@@ -15,7 +16,7 @@ public class GiveawayRegistry {
   private static final Map<Long, String> messageId = new HashMap<>();
   private static final Map<Long, String> countWinners = new HashMap<>();
   private static final Map<Long, String> title = new HashMap<>();
-  private static final Map<Long, String> endGiveawayDate = new ConcurrentHashMap<>();
+  private static final ConcurrentMap<Long, String> endGiveawayDate = new ConcurrentHashMap<>();
   private static volatile GiveawayRegistry giveawayRegistry;
   private static final JSONParsers jsonParsers = new JSONParsers();
 
@@ -81,19 +82,19 @@ public class GiveawayRegistry {
     return countWinners;
   }
 
-  public synchronized void incrementGiveAwayCount() {
+  public void incrementGiveAwayCount() {
     giveawayCount.getAndIncrement();
   }
 
-  public synchronized void decrementGiveAwayCount() {
+  public void decrementGiveAwayCount() {
     giveawayCount.decrementAndGet();
   }
 
-  public synchronized Integer getGiveAwayCount() {
+  public Integer getGiveAwayCount() {
     return giveawayCount.get();
   }
 
-  public synchronized void setGiveAwayCount(Integer value) {
+  public void setGiveAwayCount(Integer value) {
     giveawayCount.set(value);
   }
 

@@ -100,7 +100,7 @@ public class MessageGift extends ListenerAdapter {
         messageSplit[2] = "1";
       }
 
-      GiveawayRegistry.getInstance().setGift(event.getGuild().getIdLong(), new Gift(event.getGuild().getIdLong()));
+      GiveawayRegistry.getInstance().setGift(event.getGuild().getIdLong(), new Gift(event.getGuild().getIdLong(), event.getChannel().getIdLong()));
 
       if (messageWithOutPrefix.matches(GIFT_START_TITLE_COUNT_WITH_MINUTES)) {
         int len = messageSplit[messageSplit.length - 1].length() + messageSplit[messageSplit.length - 2].length();
@@ -156,12 +156,11 @@ public class MessageGift extends ListenerAdapter {
 
       if (messageWithOutPrefix.matches(GIFT_STOP_COUNT)) {
         GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
-            .stopGift(event.getGuild().getIdLong(), event.getChannel().getIdLong(),
-                Integer.parseInt(messageSplit[messageSplit.length - 1]));
+            .stopGift(event.getGuild().getIdLong(), Integer.parseInt(messageSplit[messageSplit.length - 1]));
         return;
       }
       GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
-          .stopGift(event.getGuild().getIdLong(), event.getChannel().getIdLong(), Integer.parseInt("1"));
+          .stopGift(event.getGuild().getIdLong(), Integer.parseInt("1"));
       return;
     }
 

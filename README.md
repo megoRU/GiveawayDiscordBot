@@ -10,6 +10,8 @@
 
 ## TODO
 
+-   [X]   Add the number of winners in EmbedBuilder.
+-   [X]   Completing Giveaway should edit the message with the final statistics.
 -   [ ]   Optimization code.
 
 ## Add bot to your guild

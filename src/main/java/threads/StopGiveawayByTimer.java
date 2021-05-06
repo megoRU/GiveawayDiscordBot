@@ -22,9 +22,8 @@ public class StopGiveawayByTimer extends Thread {
                   .getActiveGiveaways()
                   .get(k)
                   .stopGift(k,
-                      Long.parseLong(GiveawayRegistry.getInstance().getChannelId().get(k)),
-                      GiveawayRegistry.getInstance().getCountWinners().get(k)
-                          == null ? 1 : Integer.parseInt(GiveawayRegistry.getInstance().getCountWinners().get(k)));
+                      GiveawayRegistry.getInstance().getCountWinners().get(k) == null ? 1
+                          : Integer.parseInt(GiveawayRegistry.getInstance().getCountWinners().get(k)));
             }
           }
         });

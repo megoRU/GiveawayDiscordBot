@@ -64,8 +64,7 @@ public class Reactions extends ListenerAdapter {
           && GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
           .getListUsersHash(event.getUser().getId()) == null) {
 
-        GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
-            .addUserToPoll(event.getMember().getUser(), event.getGuild(), event.getChannel());
+        GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong()).addUserToPoll(event.getMember().getUser());
 
         Statcord.commandPost("gift", event.getUser().getId());
         return;
@@ -75,21 +74,21 @@ public class Reactions extends ListenerAdapter {
 
         if (emoji.equals(emojiStopOne)) {
           GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
-              .stopGift(event.getGuild().getIdLong(), event.getChannel().getIdLong(), 1);
+              .stopGift(event.getGuild().getIdLong(), 1);
           Statcord.commandPost("gift stop", event.getUser().getId());
           return;
         }
 
         if (emoji.equals(emojiStopTwo)) {
           GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
-              .stopGift(event.getGuild().getIdLong(), event.getChannel().getIdLong(), 2);
+              .stopGift(event.getGuild().getIdLong(), 2);
           Statcord.commandPost("gift stop 2", event.getUser().getId());
           return;
         }
 
         if (emoji.equals(emojiStopThree)) {
           GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
-              .stopGift(event.getGuild().getIdLong(), event.getChannel().getIdLong(), 3);
+              .stopGift(event.getGuild().getIdLong(), 3);
           Statcord.commandPost("gift stop 3", event.getUser().getId());
         }
       }

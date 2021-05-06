@@ -73,7 +73,7 @@ public class BotStart {
         String date_end_giveaway = rs.getString("date_end_giveaway");
 
         guildIdHashList.put(guildIdHashList.size() + 1, String.valueOf(guild_long_id));
-        GiveawayRegistry.getInstance().setGift(guild_long_id, new Gift(guild_long_id));
+        GiveawayRegistry.getInstance().setGift(guild_long_id, new Gift(guild_long_id, Long.parseLong(channel_long_id)));
         GiveawayRegistry.getInstance().getActiveGiveaways().get(guild_long_id).autoInsert();
         GiveawayRegistry.getInstance().getMessageId().put(guild_long_id, String.valueOf(message_id_long));
         GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().put(guild_long_id, String.valueOf(message_id_long));
