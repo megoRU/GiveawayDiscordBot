@@ -10,10 +10,10 @@ import startbot.Statcord;
 public class Reactions extends ListenerAdapter {
 
   private final JSONParsers jsonParsers = new JSONParsers();
-  public static final String emojiPresent = "\uD83C\uDF81";
-  public static final String emojiStopOne = "\u0031\u20E3";
-  public static final String emojiStopTwo = "\u0032\u20E3";
-  public static final String emojiStopThree = "\u0033\u20E3";
+  public static final String emojiPresent = "🎁";
+  public static final String emojiStopOne = "1️⃣";
+  public static final String emojiStopTwo = "2️⃣";
+  public static final String emojiStopThree = "3️⃣";
 
   @Override
   public void onGuildMessageReactionAdd(@NotNull GuildMessageReactionAddEvent event) {
