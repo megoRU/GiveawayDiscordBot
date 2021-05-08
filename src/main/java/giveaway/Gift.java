@@ -164,7 +164,8 @@ public class Gift {
       messageStop(zero);
       return;
     }
-
+    Instant timestamp = Instant.now();
+    Instant specificTime = Instant.ofEpochMilli(timestamp.toEpochMilli());
     if (countWinner > 1) {
       for (int i = 0; i < countWinner; i++) {
         int randomNumber = random.nextInt(listUsers.size());
@@ -180,6 +181,8 @@ public class Gift {
           .replaceAll("\\{0}", String.valueOf(getCount()))
           + Arrays.toString(uniqueWinners.toArray())
           .replaceAll("\\[", "").replaceAll("]", ""));
+      stopWithMoreWinner.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)));
+      stopWithMoreWinner.setFooter(jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
 
       //Отправляет сообщение
       messageStop(stopWithMoreWinner);
@@ -202,6 +205,8 @@ public class Gift {
         .getLocale("gift_Giveaway_Winner_Mention", String.valueOf(guildIdLong))
         .replaceAll("\\{0}", String.valueOf(getCount()))
         + listUsers.get(random.nextInt(listUsers.size())) + ">");
+    stop.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)));
+    stop.setFooter(jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
 
     //Отправляет сообщение
     messageStop(stop);
