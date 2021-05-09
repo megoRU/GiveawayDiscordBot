@@ -19,7 +19,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import startbot.BotStart;
 
 public class Gift {
 
@@ -51,7 +50,7 @@ public class Gift {
 
       start.setDescription(jsonParsers.getLocale("gift_React_With_Gift", guild.getId())
           .replaceAll("\\{0}", countWinners == null ? "TBA" : countWinners)
-          .replaceAll("\\{1}", setEndingWord(countWinners == null ? "TBA" : countWinners)) + getCount() + "`");
+          .replaceAll("\\{1}", GiftHelper.setEndingWord(countWinners == null ? "TBA" : countWinners, guildId)) + getCount() + "`");
       start.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(time)));
       start.setFooter(jsonParsers.getLocale("gift_Ends_At", guild.getId()));
       GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild.getIdLong(),
@@ -60,7 +59,8 @@ public class Gift {
     if (time == null) {
       start.setDescription(jsonParsers.getLocale("gift_React_With_Gift", guild.getId())
           .replaceAll("\\{0}", countWinners == null ? "TBA" : countWinners)
-          .replaceAll("\\{1}", setEndingWord(countWinners == null ? "TBA" : countWinners)) + getCount() + "`");
+          .replaceAll("\\{1}", GiftHelper.setEndingWord(countWinners == null ? "TBA" : countWinners, guildId)) + getCount() + "`");
+      GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild.getIdLong(), "null");
     }
     GiveawayRegistry.getInstance().incrementGiveAwayCount();
 
@@ -81,10 +81,10 @@ public class Gift {
           GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
     });
     start.clear();
+    DataBase.getInstance().createTableWhenGiveawayStart(guild.getId());
+
     //Вот мы запускаем бесконечный поток.
     autoInsert();
-
-    DataBase.getInstance().createTableWhenGiveawayStart(guild.getId());
   }
 
   //Добавляет пользователя в StringBuilder
@@ -104,7 +104,13 @@ public class Gift {
                 + "` (user_long_id) "
                 + "VALUES" + insertQuery.toString());
         insertQuery = new StringBuilder();
-        updateMessage();
+        GiftHelper.updateStopMessage(
+            GiveawayRegistry.getInstance().getCountWinners().get(guildId) == null
+                ? "TBA"
+                : GiveawayRegistry.getInstance().getCountWinners().get(guildId),
+            this.guildId,
+            this.channelId,
+            getCount());
       }
     } catch (SQLException e) {
       insertQuery = new StringBuilder();
@@ -141,7 +147,7 @@ public class Gift {
       notEnoughUsers.setDescription(jsonParsers
           .getLocale("gift_Giveaway_Deleted", String.valueOf(guildIdLong)));
       //Отправляет сообщение
-      messageStop(notEnoughUsers);
+      GiftHelper.sendStopMessage(notEnoughUsers, this.guildId, this.channelId);
 
       //Удаляет данные из коллекций
       clearingCollections();
@@ -161,7 +167,7 @@ public class Gift {
           .replaceAll("\\{0}", String.valueOf(countWinner))
           .replaceAll("\\{1}", String.valueOf(getCount())));
       //Отправляет сообщение
-      messageStop(zero);
+      GiftHelper.sendStopMessage(zero, this.guildId, this.channelId);
       return;
     }
     Instant timestamp = Instant.now();
@@ -185,7 +191,7 @@ public class Gift {
       stopWithMoreWinner.setFooter(jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
 
       //Отправляет сообщение
-      messageStop(stopWithMoreWinner);
+      GiftHelper.sendStopMessage(stopWithMoreWinner, this.guildId, this.channelId);
 
       //Удаляет данные из коллекций
       clearingCollections();
@@ -209,7 +215,7 @@ public class Gift {
     stop.setFooter(jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
 
     //Отправляет сообщение
-    messageStop(stop);
+    GiftHelper.sendStopMessage(stop, this.guildId, this.channelId);
 
     //Удаляет данные из коллекций
     clearingCollections();
@@ -217,68 +223,6 @@ public class Gift {
     DataBase.getInstance().removeMessageFromDB(guildIdLong);
     DataBase.getInstance().dropTableWhenGiveawayStop(String.valueOf(guildIdLong));
 
-  }
-
-  private void messageStop(EmbedBuilder embedBuilder) {
-    try {
-      BotStart.getJda()
-          .getGuildById(guildId)
-          .getTextChannelById(channelId)
-          .editMessageById(GiveawayRegistry.getInstance().getMessageId().get(guildId), embedBuilder.build())
-          .queue();
-      embedBuilder.clear();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  private void updateMessage() {
-    try {
-      EmbedBuilder edit = new EmbedBuilder();
-      edit.setColor(0x00FF00);
-      edit.setTitle(GiveawayRegistry.getInstance().getTitle().get(guildId));
-
-      edit.setDescription(jsonParsers.getLocale("gift_React_With_Gift", String.valueOf(guildId))
-          .replaceAll("\\{0}", GiveawayRegistry.getInstance().getCountWinners().get(guildId) == null ? "TBA"
-              : GiveawayRegistry.getInstance().getCountWinners().get(guildId))
-          .replaceAll("\\{1}", setEndingWord(GiveawayRegistry.getInstance().getCountWinners().get(guildId) == null ? "TBA"
-              : GiveawayRegistry.getInstance().getCountWinners().get(guildId))) + getCount() + "`");
-
-      //Если есть время окончания включить в EmbedBuilder
-      if (GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildId) != null) {
-        edit.setTimestamp(OffsetDateTime.parse(String.valueOf(GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildId))));
-        edit.setFooter(jsonParsers.getLocale("gift_Ends_At", String.valueOf(guildId)));
-      }
-      //Отправляет сообщение и если нельзя редактировать то отправляет ошибку
-      BotStart.getJda().getGuildById(guildId).getTextChannelById(channelId)
-          .editMessageById(GiveawayRegistry
-              .getInstance().getMessageId().get(guildId), edit.build()).queue(null, (exception) ->
-          BotStart.getJda().getTextChannelById(channelId).sendMessage(GiveawayRegistry.getInstance().removeGiftExceptions(guildId))
-              .queue());
-      edit.clear();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  private String setEndingWord(Object num) {
-    String language = "eng";
-    if (BotStart.getMapLanguages().get(String.valueOf(guildId)) != null) {
-      language = BotStart.getMapLanguages().get(String.valueOf(guildId));
-    }
-    if (num == null) {
-      num = "1";
-    }
-
-    if (num.equals("TBA")) {
-      return language.equals("eng") ? "Winners" : "Победителей";
-    }
-
-    return switch (Integer.parseInt((String) num) % 10) {
-      case 1 -> language.equals("eng") ? "Winner" : "Победитель";
-      case 2, 3, 4 -> language.equals("eng") ? "Winners" : "Победителя";
-      default -> language.equals("eng") ? "Winners" : "Победителей";
-    };
   }
 
   private void clearingCollections() {

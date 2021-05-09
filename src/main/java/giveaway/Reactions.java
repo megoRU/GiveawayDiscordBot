@@ -22,13 +22,15 @@ public class Reactions extends ListenerAdapter {
       return;
     }
 
-    if (GiveawayRegistry.getInstance()
-        .getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong()) == null) {
+    if (GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong()) == null) {
       return;
     }
 
-    if (!event.getGuild().getSelfMember()
-        .hasPermission(event.getChannel(), Permission.MESSAGE_WRITE)) {
+    if (!GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong()).equals(event.getMessageId())) {
+      return;
+    }
+
+    if (!event.getGuild().getSelfMember().hasPermission(event.getChannel(), Permission.MESSAGE_WRITE)) {
       return;
     }
 
@@ -61,11 +63,10 @@ public class Reactions extends ListenerAdapter {
 
       if (emoji.equals(emojiPresent)
           && GiveawayRegistry.getInstance().hasGift(guild)
-          && GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
-          .getListUsersHash(event.getUser().getId()) == null) {
-
+//          && GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong()).equals(event.getMessageId())
+          && GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong()).getListUsersHash(event.getUser().getId()) == null) {
         GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong()).addUserToPoll(event.getMember().getUser());
-
+        System.out.println("Засчитали нажатие");
         Statcord.commandPost("gift", event.getUser().getId());
         return;
       }
