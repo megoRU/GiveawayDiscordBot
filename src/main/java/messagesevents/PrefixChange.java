@@ -1,7 +1,6 @@
 package messagesevents;
 
 import db.DataBase;
-import java.sql.SQLException;
 import jsonparser.JSONParsers;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;

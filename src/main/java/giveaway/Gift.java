@@ -104,7 +104,7 @@ public class Gift {
                 + "` (user_long_id) "
                 + "VALUES" + insertQuery.toString());
         insertQuery = new StringBuilder();
-        GiftHelper.updateStopMessage(
+        GiftHelper.updateGiveawayMessage(
             GiveawayRegistry.getInstance().getCountWinners().get(guildId) == null
                 ? "TBA"
                 : GiveawayRegistry.getInstance().getCountWinners().get(guildId),
@@ -147,7 +147,7 @@ public class Gift {
       notEnoughUsers.setDescription(jsonParsers
           .getLocale("gift_Giveaway_Deleted", String.valueOf(guildIdLong)));
       //Отправляет сообщение
-      GiftHelper.sendStopMessage(notEnoughUsers, this.guildId, this.channelId);
+      GiftHelper.editMessage(notEnoughUsers, this.guildId, this.channelId);
 
       //Удаляет данные из коллекций
       clearingCollections();
@@ -167,7 +167,7 @@ public class Gift {
           .replaceAll("\\{0}", String.valueOf(countWinner))
           .replaceAll("\\{1}", String.valueOf(getCount())));
       //Отправляет сообщение
-      GiftHelper.sendStopMessage(zero, this.guildId, this.channelId);
+      GiftHelper.editMessage(zero, this.guildId, this.channelId);
       return;
     }
     Instant timestamp = Instant.now();
@@ -191,7 +191,7 @@ public class Gift {
       stopWithMoreWinner.setFooter(jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
 
       //Отправляет сообщение
-      GiftHelper.sendStopMessage(stopWithMoreWinner, this.guildId, this.channelId);
+      GiftHelper.editMessage(stopWithMoreWinner, this.guildId, this.channelId);
 
       //Удаляет данные из коллекций
       clearingCollections();
@@ -215,7 +215,7 @@ public class Gift {
     stop.setFooter(jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
 
     //Отправляет сообщение
-    GiftHelper.sendStopMessage(stop, this.guildId, this.channelId);
+    GiftHelper.editMessage(stop, this.guildId, this.channelId);
 
     //Удаляет данные из коллекций
     clearingCollections();

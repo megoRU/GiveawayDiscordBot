@@ -3,13 +3,15 @@ package giveaway;
 import java.time.OffsetDateTime;
 import jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import org.jetbrains.annotations.NotNull;
 import startbot.BotStart;
 
-interface GiftHelper {
+public interface GiftHelper {
 
   JSONParsers jsonParsers = new JSONParsers();
 
-  static void sendStopMessage(EmbedBuilder embedBuilder, long guildId, long channelId) {
+  static void editMessage(EmbedBuilder embedBuilder, long guildId, long channelId) {
     try {
       BotStart.getJda()
           .getGuildById(guildId)
@@ -22,7 +24,15 @@ interface GiftHelper {
     }
   }
 
-  static void updateStopMessage(String endingWord, long guildId, long channelId, int count) {
+  static void sendMessage(EmbedBuilder embedBuilder, @NotNull MessageReceivedEvent event) {
+    try {
+      event.getChannel().sendMessage(embedBuilder.build()).queue();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  static void updateGiveawayMessage(String endingWord, long guildId, long channelId, int count) {
     try {
       EmbedBuilder edit = new EmbedBuilder();
       edit.setColor(0x00FF00);

@@ -9,7 +9,6 @@ import jsonparser.JSONParsers;
 
 public class GiveawayRegistry {
 
-
   //Возвращает Gift по long id
   private static final Map<Long, Gift> activeGiveaways = new HashMap<>();
   //Возвращает String id message с активным Giveaway

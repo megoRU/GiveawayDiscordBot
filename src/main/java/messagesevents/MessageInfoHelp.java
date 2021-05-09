@@ -1,12 +1,14 @@
 package messagesevents;
 
+import giveaway.GiftHelper;
 import java.util.concurrent.TimeUnit;
 import jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.jetbrains.annotations.NotNull;
 import startbot.BotStart;
 
 public class MessageInfoHelp extends ListenerAdapter {
@@ -15,25 +17,33 @@ public class MessageInfoHelp extends ListenerAdapter {
   private final JSONParsers jsonParsers = new JSONParsers();
 
   @Override
-  public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
+  public void onMessageReceived(@NotNull MessageReceivedEvent event) {
     if (event.getAuthor().isBot()) {
       return;
     }
-    if (!event.getGuild().getSelfMember()
-        .hasPermission(event.getChannel(), Permission.MESSAGE_WRITE)) {
+
+    if (event.isFromType(ChannelType.PRIVATE) && event.getMessage().getContentDisplay().trim().equals("!help")) {
+      buildMessage(ChannelType.PRIVATE, event);
       return;
     }
-    String message = event.getMessage().getContentRaw().toLowerCase();
-    String prefix = HELP;
 
+    if (!event.isFromType(ChannelType.PRIVATE)) {
+      buildMessage(ChannelType.TEXT, event);
+    }
+  }
+
+  private void buildMessage(ChannelType channelType, @NotNull MessageReceivedEvent event) {
     String p = "!";
+    String prefix = HELP;
+    if (!channelType.equals(ChannelType.PRIVATE)) {
 
-    if (BotStart.getMapPrefix().containsKey(event.getGuild().getId())) {
-      prefix = BotStart.getMapPrefix().get(event.getGuild().getId()) + "help";
-      p = BotStart.getMapPrefix().get(event.getGuild().getId());
+      if (BotStart.getMapPrefix().containsKey(event.getGuild().getId())) {
+        p = BotStart.getMapPrefix().get(event.getGuild().getId());
+        prefix = BotStart.getMapPrefix().get(event.getGuild().getId()) + "help";
+      }
     }
 
-    if (message.equals(prefix)) {
+    if (event.getMessage().getContentDisplay().trim().equals(prefix)) {
       String avatarUrl = null;
       String avatarFromEvent = event.getMessage().getAuthor().getAvatarUrl();
       if (avatarFromEvent == null) {
@@ -42,53 +52,58 @@ public class MessageInfoHelp extends ListenerAdapter {
       if (avatarFromEvent != null) {
         avatarUrl = avatarFromEvent;
       }
+      String guildIdLong = !channelType.equals(ChannelType.PRIVATE) ? event.getGuild().getId() : "0000000000000";
+
       EmbedBuilder info = new EmbedBuilder();
       info.setColor(0xa224db);
       info.setAuthor(event.getAuthor().getName(), null, avatarUrl);
-      info.addField(
-          jsonParsers.getLocale("messages_events_Prefix", event.getGuild().getId()),
-          jsonParsers.getLocale("messages_events_Changes_Prefix", event.getGuild().getId()) +
-              jsonParsers.getLocale("messages_events_Reset_Prefix", event.getGuild().getId())
-          , false);
+      info.addField(jsonParsers.getLocale("messages_events_Prefix", guildIdLong),
+          jsonParsers.getLocale("messages_events_Changes_Prefix", guildIdLong) +
+              jsonParsers.getLocale("messages_events_Reset_Prefix", guildIdLong), false);
 
-      info.addField(
-          jsonParsers.getLocale("messages_events_Language_Title", event.getGuild().getId()),
-          "`"
-            + p + jsonParsers.getLocale("messages_events_Language", event.getGuild().getId())
-              + "`"
-            + p + jsonParsers.getLocale("messages_events_Language_Reset", event.getGuild().getId())
+      info.addField(jsonParsers.getLocale("messages_events_Language_Title", guildIdLong), "`"
+              + p + jsonParsers.getLocale("messages_events_Language", guildIdLong) + "`"
+              + p + jsonParsers.getLocale("messages_events_Language_Reset", guildIdLong)
           , false);
 
       info.addField("Giveaway:", "`"
-          + p + jsonParsers.getLocale("messages_events_Start_Giveaway", event.getGuild().getId())
-          + p + jsonParsers.getLocale("messages_events_Start_Text_Giveaway", event.getGuild().getId())
-          + p + jsonParsers.getLocale("messages_events_Start_Text_Time_Giveaway", event.getGuild().getId())
-          + p + jsonParsers.getLocale("messages_events_Start_Text_Time_Count_Giveaway", event.getGuild().getId())
-          + p + jsonParsers.getLocale("messages_events_Start_Time_Count_Giveaway", event.getGuild().getId())
-          + p + jsonParsers.getLocale("messages_events_Stop_Giveaway", event.getGuild().getId())
-          + p + jsonParsers.getLocale("messages_events_Stop_Number_Giveaway", event.getGuild().getId()), false);
+          + p + jsonParsers.getLocale("messages_events_Start_Giveaway", guildIdLong)
+          + p + jsonParsers.getLocale("messages_events_Start_Text_Giveaway", guildIdLong)
+          + p + jsonParsers.getLocale("messages_events_Start_Text_Time_Giveaway", guildIdLong)
+          + p + jsonParsers.getLocale("messages_events_Start_Text_Time_Count_Giveaway", guildIdLong)
+          + p + jsonParsers.getLocale("messages_events_Start_Time_Count_Giveaway", guildIdLong)
+          + p + jsonParsers.getLocale("messages_events_Stop_Giveaway", guildIdLong)
+          + p + jsonParsers.getLocale("messages_events_Stop_Number_Giveaway", guildIdLong), false);
 
-      info.addField(jsonParsers.getLocale("messages_events_Links", event.getGuild().getId()),
-          jsonParsers.getLocale("messages_events_Site", event.getGuild().getId()) +
-              jsonParsers.getLocale("messages_events_Add_Me_To_Other_Guilds", event.getGuild().getId()) +
-              jsonParsers.getLocale("messages_events_Vote_For_This_Bot", event.getGuild().getId()), false);
+      info.addField(jsonParsers.getLocale("messages_events_Links", guildIdLong),
+          jsonParsers.getLocale("messages_events_Site", guildIdLong) +
+              jsonParsers.getLocale("messages_events_Add_Me_To_Other_Guilds", guildIdLong) +
+              jsonParsers.getLocale("messages_events_Vote_For_This_Bot", guildIdLong), false);
 
-      info.addField(jsonParsers.getLocale("messages_events_Bot_Creator", event.getGuild().getId()),
-          jsonParsers.getLocale("messages_events_Bot_Creator_Url_Steam", event.getGuild().getId()), false);
+      info.addField(
+          jsonParsers.getLocale("messages_events_Bot_Creator", guildIdLong),
+          jsonParsers.getLocale("messages_events_Bot_Creator_Url_Steam", guildIdLong), false);
 
-      info.addField(jsonParsers.getLocale("messages_events_Support", event.getGuild().getId()),
-          jsonParsers.getLocale("messages_events_Support_Url_Discord", event.getGuild().getId()), false);
+      info.addField(
+          jsonParsers.getLocale("messages_events_Support", guildIdLong),
+          jsonParsers.getLocale("messages_events_Support_Url_Discord", guildIdLong), false);
 
-      event.getChannel().sendMessage(jsonParsers.getLocale("messages_events_Send_Private_Message",
-          event.getGuild().getId())).delay(5, TimeUnit.SECONDS)
-          .flatMap(Message::delete).queue();
-
-      event.getMember().getUser().openPrivateChannel()
-          .flatMap(m -> event.getMember().getUser().openPrivateChannel())
-          .flatMap(channel -> channel.sendMessage(info.build()))
-          .queue(null, error -> event.getChannel()
-              .sendMessage(jsonParsers
-                  .getLocale("messages_events_Failed_To_Send_Message", event.getGuild().getId())).queue());
+      switch (channelType) {
+        case TEXT -> {
+          event.getChannel().sendMessage(jsonParsers.getLocale("messages_events_Send_Private_Message",
+              event.getGuild().getId())).delay(5, TimeUnit.SECONDS)
+              .flatMap(Message::delete).queue();
+          event.getMember().getUser().openPrivateChannel()
+              .flatMap(m -> event.getMember().getUser().openPrivateChannel())
+              .flatMap(channel -> channel.sendMessage(info.build()))
+              .queue(null, error -> event.getChannel()
+                  .sendMessage(jsonParsers.getLocale("messages_events_Failed_To_Send_Message", event.getGuild().getId())).queue());
+        }
+        case PRIVATE -> {
+          GiftHelper.sendMessage(info, event);
+          info.clear();
+        }
+      }
     }
   }
 }
