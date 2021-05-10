@@ -20,7 +20,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 
-public class Gift {
+public class Gift implements GiftHelper {
 
   private final JSONParsers jsonParsers = new JSONParsers();
   private final List<String> listUsers = new ArrayList<>();
@@ -50,7 +50,7 @@ public class Gift {
 
       start.setDescription(jsonParsers.getLocale("gift_React_With_Gift", guild.getId())
           .replaceAll("\\{0}", countWinners == null ? "TBA" : countWinners)
-          .replaceAll("\\{1}", GiftHelper.setEndingWord(countWinners == null ? "TBA" : countWinners, guildId)) + getCount() + "`");
+          .replaceAll("\\{1}", setEndingWord(countWinners == null ? "TBA" : countWinners, guildId)) + getCount() + "`");
       start.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(time)));
       start.setFooter(jsonParsers.getLocale("gift_Ends_At", guild.getId()));
       GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild.getIdLong(),
@@ -59,7 +59,7 @@ public class Gift {
     if (time == null) {
       start.setDescription(jsonParsers.getLocale("gift_React_With_Gift", guild.getId())
           .replaceAll("\\{0}", countWinners == null ? "TBA" : countWinners)
-          .replaceAll("\\{1}", GiftHelper.setEndingWord(countWinners == null ? "TBA" : countWinners, guildId)) + getCount() + "`");
+          .replaceAll("\\{1}", setEndingWord(countWinners == null ? "TBA" : countWinners, guildId)) + getCount() + "`");
       GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild.getIdLong(), "null");
     }
     GiveawayRegistry.getInstance().incrementGiveAwayCount();
@@ -104,7 +104,7 @@ public class Gift {
                 + "` (user_long_id) "
                 + "VALUES" + insertQuery.toString());
         insertQuery = new StringBuilder();
-        GiftHelper.updateGiveawayMessage(
+        updateGiveawayMessage(
             GiveawayRegistry.getInstance().getCountWinners().get(guildId) == null
                 ? "TBA"
                 : GiveawayRegistry.getInstance().getCountWinners().get(guildId),
@@ -147,7 +147,7 @@ public class Gift {
       notEnoughUsers.setDescription(jsonParsers
           .getLocale("gift_Giveaway_Deleted", String.valueOf(guildIdLong)));
       //Отправляет сообщение
-      GiftHelper.editMessage(notEnoughUsers, this.guildId, this.channelId);
+      editMessage(notEnoughUsers, this.guildId, this.channelId);
 
       //Удаляет данные из коллекций
       clearingCollections();
@@ -167,7 +167,7 @@ public class Gift {
           .replaceAll("\\{0}", String.valueOf(countWinner))
           .replaceAll("\\{1}", String.valueOf(getCount())));
       //Отправляет сообщение
-      GiftHelper.editMessage(zero, this.guildId, this.channelId);
+      editMessage(zero, this.guildId, this.channelId);
       return;
     }
     Instant timestamp = Instant.now();
@@ -191,7 +191,7 @@ public class Gift {
       stopWithMoreWinner.setFooter(jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
 
       //Отправляет сообщение
-      GiftHelper.editMessage(stopWithMoreWinner, this.guildId, this.channelId);
+      editMessage(stopWithMoreWinner, this.guildId, this.channelId);
 
       //Удаляет данные из коллекций
       clearingCollections();
@@ -215,7 +215,7 @@ public class Gift {
     stop.setFooter(jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
 
     //Отправляет сообщение
-    GiftHelper.editMessage(stop, this.guildId, this.channelId);
+    editMessage(stop, this.guildId, this.channelId);
 
     //Удаляет данные из коллекций
     clearingCollections();

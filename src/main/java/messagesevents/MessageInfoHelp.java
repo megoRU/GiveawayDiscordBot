@@ -4,6 +4,7 @@ import giveaway.GiftHelper;
 import java.util.concurrent.TimeUnit;
 import jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -11,7 +12,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import startbot.BotStart;
 
-public class MessageInfoHelp extends ListenerAdapter {
+public class MessageInfoHelp extends ListenerAdapter implements GiftHelper {
 
   private static final String HELP = "!help";
   private final JSONParsers jsonParsers = new JSONParsers();
@@ -88,21 +89,30 @@ public class MessageInfoHelp extends ListenerAdapter {
           jsonParsers.getLocale("messages_events_Support", guildIdLong),
           jsonParsers.getLocale("messages_events_Support_Url_Discord", guildIdLong), false);
 
-      switch (channelType) {
-        case TEXT -> {
-          event.getChannel().sendMessage(jsonParsers.getLocale("messages_events_Send_Private_Message",
-              event.getGuild().getId())).delay(5, TimeUnit.SECONDS)
-              .flatMap(Message::delete).queue();
-          event.getMember().getUser().openPrivateChannel()
-              .flatMap(m -> event.getMember().getUser().openPrivateChannel())
-              .flatMap(channel -> channel.sendMessage(info.build()))
-              .queue(null, error -> event.getChannel()
-                  .sendMessage(jsonParsers.getLocale("messages_events_Failed_To_Send_Message", event.getGuild().getId())).queue());
+      try {
+        switch (channelType) {
+          case TEXT -> {
+            if (!event.getGuild().getSelfMember()
+                .hasPermission(event.getGuild().getTextChannelById(event.getChannel().getId()), Permission.MESSAGE_WRITE)) {
+              return;
+            }
+            event.getChannel().sendMessage(jsonParsers.getLocale("messages_events_Send_Private_Message",
+                event.getGuild().getId())).delay(5, TimeUnit.SECONDS)
+                .flatMap(Message::delete).queue();
+            event.getMember().getUser().openPrivateChannel()
+                .flatMap(m -> event.getMember().getUser().openPrivateChannel())
+                .flatMap(channel -> channel.sendMessage(info.build()))
+                .queue(null, error -> event.getChannel()
+                    .sendMessage(jsonParsers.getLocale("messages_events_Failed_To_Send_Message", event.getGuild().getId())).queue());
+          }
+          case PRIVATE -> {
+            sendMessage(info, event);
+            info.clear();
+          }
+
         }
-        case PRIVATE -> {
-          GiftHelper.sendMessage(info, event);
-          info.clear();
-        }
+      } catch (Exception e) {
+        e.printStackTrace();
       }
     }
   }

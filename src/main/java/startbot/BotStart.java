@@ -44,7 +44,7 @@ public class BotStart {
 
     jdaBuilder.setAutoReconnect(true);
     jdaBuilder.setStatus(OnlineStatus.ONLINE);
-    jdaBuilder.setActivity(Activity.playing("!help | Contact us if you find a bug!\nPublic Beta v12"));
+    jdaBuilder.setActivity(Activity.playing("!help | Public Beta v13"));
     jdaBuilder.setBulkDeleteSplittingEnabled(false);
     jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild());
     jdaBuilder.addEventListeners(new MessageGift());

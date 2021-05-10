@@ -11,7 +11,7 @@ public interface GiftHelper {
 
   JSONParsers jsonParsers = new JSONParsers();
 
-  static void editMessage(EmbedBuilder embedBuilder, long guildId, long channelId) {
+  default void editMessage(EmbedBuilder embedBuilder, long guildId, long channelId) {
     try {
       BotStart.getJda()
           .getGuildById(guildId)
@@ -24,7 +24,7 @@ public interface GiftHelper {
     }
   }
 
-  static void sendMessage(EmbedBuilder embedBuilder, @NotNull MessageReceivedEvent event) {
+  default void sendMessage(EmbedBuilder embedBuilder, @NotNull MessageReceivedEvent event) {
     try {
       event.getChannel().sendMessage(embedBuilder.build()).queue();
     } catch (Exception e) {
@@ -32,7 +32,7 @@ public interface GiftHelper {
     }
   }
 
-  static void updateGiveawayMessage(String endingWord, long guildId, long channelId, int count) {
+  default void updateGiveawayMessage(String endingWord, long guildId, long channelId, int count) {
     try {
       EmbedBuilder edit = new EmbedBuilder();
       edit.setColor(0x00FF00);
@@ -61,7 +61,7 @@ public interface GiftHelper {
     }
   }
 
-  static String setEndingWord(Object num, long guildId) {
+  default String setEndingWord(Object num, long guildId) {
     String language = "eng";
     if (BotStart.getMapLanguages().get(String.valueOf(guildId)) != null) {
       language = BotStart.getMapLanguages().get(String.valueOf(guildId));
