@@ -3,8 +3,6 @@ package giveaway;
 import java.time.OffsetDateTime;
 import jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import org.jetbrains.annotations.NotNull;
 import startbot.BotStart;
 
 public interface GiftHelper {
@@ -19,14 +17,6 @@ public interface GiftHelper {
           .editMessageById(GiveawayRegistry.getInstance().getMessageId().get(guildId), embedBuilder.build())
           .queue();
       embedBuilder.clear();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  default void sendMessage(EmbedBuilder embedBuilder, @NotNull MessageReceivedEvent event) {
-    try {
-      event.getChannel().sendMessage(embedBuilder.build()).queue();
     } catch (Exception e) {
       e.printStackTrace();
     }
