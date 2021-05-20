@@ -1,37 +1,43 @@
 package threads;
 
 import giveaway.GiveawayRegistry;
+import startbot.BotStart;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 
 public class StopGiveawayByTimer extends Thread {
 
-  @Override
-  public void run() {
-    try {
-      while (true) {
-        GiveawayRegistry.getInstance().getEndGiveawayDate().forEach((k, v) -> {
-          if (!v.equals("null")) {
-            Instant timestamp = Instant.now();
-            //Instant для timestamp
-            Instant specificTime = Instant.ofEpochMilli(timestamp.toEpochMilli());
-            OffsetDateTime timeFormDB = OffsetDateTime.parse(v);
+    private final Giveaway giveaway;
 
-            if (specificTime.isAfter(Instant.from(timeFormDB))) {
-              GiveawayRegistry.getInstance()
-                  .getActiveGiveaways()
-                  .get(k)
-                  .stopGift(k,
-                      GiveawayRegistry.getInstance().getCountWinners().get(k) == null ? 1
-                          : Integer.parseInt(GiveawayRegistry.getInstance().getCountWinners().get(k)));
-            }
-          }
-        });
-        StopGiveawayByTimer.sleep(3000);
-      }
-    } catch (Exception e) {
-      StopGiveawayByTimer.currentThread().interrupt();
-      e.printStackTrace();
+    public StopGiveawayByTimer(Giveaway giveaway) {
+        this.giveaway = giveaway;
     }
-  }
+
+    @Override
+    public void run() {
+        try {
+            if (giveaway.getTIME() == null) {
+                return;
+            }
+            if (!giveaway.getTIME().equals("null")) {
+                Instant timestamp = Instant.now();
+                Instant specificTime = Instant.ofEpochMilli(timestamp.toEpochMilli());
+                OffsetDateTime timeFormDB = OffsetDateTime.parse(giveaway.getTIME());
+                if (specificTime.isAfter(Instant.from(timeFormDB))) {
+
+                    GiveawayRegistry.getInstance()
+                            .getActiveGiveaways()
+                            .get(giveaway.getID_GUILD())
+                            .stopGift(giveaway.getID_GUILD(),
+                                    GiveawayRegistry.getInstance().getCountWinners().get(giveaway.getID_GUILD())
+                                            == null ? 1
+                                            : Integer.parseInt(GiveawayRegistry.getInstance().getCountWinners().get(giveaway.getID_GUILD())));
+                    return;
+                }
+                BotStart.getQueue().addLast(giveaway);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

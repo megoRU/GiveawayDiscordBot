@@ -19,6 +19,8 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import startbot.BotStart;
+import threads.Giveaway;
 
 public class Gift implements GiftHelper {
 
@@ -55,6 +57,10 @@ public class Gift implements GiftHelper {
       start.setFooter(jsonParsers.getLocale("gift_Ends_At", guild.getId()));
       GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild.getIdLong(),
           String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(time))));
+
+      BotStart.getQueue().add(new Giveaway(
+              guildId,
+                      String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(time)))));
     }
     if (time == null) {
       start.setDescription(jsonParsers.getLocale("gift_React_With_Gift", guild.getId())
