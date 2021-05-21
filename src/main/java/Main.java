@@ -1,7 +1,6 @@
 import giveaway.GiveawayRegistry;
 import startbot.BotStart;
 import threads.StopGiveawayByTimer;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -25,10 +24,12 @@ public class Main {
         while (true) {
           int count = BotStart.getQueue().size();
           for (int i = 0; i < count; i++) {
-            executorService = Executors.newFixedThreadPool(2);
+            executorService = Executors.newFixedThreadPool(1);
             executorService.submit(new StopGiveawayByTimer(BotStart.getQueue().poll()));
           }
-          executorService.shutdown();
+          if (executorService != null) {
+            executorService.shutdown();
+          }
           Thread.sleep(2000);
         }
 

@@ -66,7 +66,6 @@ public class Reactions extends ListenerAdapter {
 //          && GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong()).equals(event.getMessageId())
           && GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong()).getListUsersHash(event.getUser().getId()) == null) {
         GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong()).addUserToPoll(event.getMember().getUser());
-        System.out.println("Засчитали нажатие");
         Statcord.commandPost("gift", event.getUser().getId());
         return;
       }

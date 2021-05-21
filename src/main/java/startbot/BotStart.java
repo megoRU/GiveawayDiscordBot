@@ -45,7 +45,7 @@ public class BotStart {
 
     jdaBuilder.setAutoReconnect(true);
     jdaBuilder.setStatus(OnlineStatus.ONLINE);
-    jdaBuilder.setActivity(Activity.playing("!help | Public Beta v14"));
+    jdaBuilder.setActivity(Activity.playing("!help | Public Beta v15"));
     jdaBuilder.setBulkDeleteSplittingEnabled(false);
     jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild());
     jdaBuilder.addEventListeners(new MessageGift());
@@ -82,8 +82,10 @@ public class BotStart {
         GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild_long_id, date_end_giveaway == null ? "null" : date_end_giveaway);
         GiveawayRegistry.getInstance().getChannelId().put(guild_long_id, channel_long_id);
         GiveawayRegistry.getInstance().getCountWinners().put(guild_long_id, count_winners);
-        queue.add(new Giveaway(guild_long_id, date_end_giveaway == null ? "null" : date_end_giveaway));
 
+        if (date_end_giveaway != null) {
+          queue.add(new Giveaway(guild_long_id, date_end_giveaway));
+        }
       }
       rs.close();
       statement.close();

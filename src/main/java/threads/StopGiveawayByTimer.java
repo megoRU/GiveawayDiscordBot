@@ -1,7 +1,6 @@
 package threads;
 
 import giveaway.GiveawayRegistry;
-import startbot.BotStart;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 
@@ -16,10 +15,7 @@ public class StopGiveawayByTimer extends Thread {
     @Override
     public void run() {
         try {
-            if (giveaway.getTIME() == null) {
-                return;
-            }
-            if (!giveaway.getTIME().equals("null")) {
+            while (true) {
                 Instant timestamp = Instant.now();
                 Instant specificTime = Instant.ofEpochMilli(timestamp.toEpochMilli());
                 OffsetDateTime timeFormDB = OffsetDateTime.parse(giveaway.getTIME());
@@ -34,8 +30,9 @@ public class StopGiveawayByTimer extends Thread {
                                             : Integer.parseInt(GiveawayRegistry.getInstance().getCountWinners().get(giveaway.getID_GUILD())));
                     return;
                 }
-                BotStart.getQueue().addLast(giveaway);
+                Thread.sleep(2000);
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
