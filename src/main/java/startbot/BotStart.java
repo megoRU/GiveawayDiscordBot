@@ -47,7 +47,7 @@ public class BotStart {
 
     jdaBuilder.setAutoReconnect(true);
     jdaBuilder.setStatus(OnlineStatus.ONLINE);
-    jdaBuilder.setActivity(Activity.playing(activity + TopGGAndStatcordThread.serverCount + " guilds | " + version));
+    jdaBuilder.setActivity(Activity.playing(activity + version + " | " + TopGGAndStatcordThread.serverCount + " guilds"));
     jdaBuilder.setBulkDeleteSplittingEnabled(false);
     jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild());
     jdaBuilder.addEventListeners(new MessageGift());
