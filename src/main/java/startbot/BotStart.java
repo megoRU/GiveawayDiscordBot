@@ -10,8 +10,7 @@ import giveaway.Reactions;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import messagesevents.LanguageChange;
 import messagesevents.MessageInfoHelp;
 import messagesevents.PrefixChange;
@@ -26,6 +25,7 @@ public class BotStart {
   public static final String activity = "!help | ";
   public static final String version = "v14.2";
   private static JDA jda;
+  private static final Deque<Giveaway> queue = new ArrayDeque<>();
   private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
   private static final Map<String, String> mapPrefix = new HashMap<>();
   private static final Map<String, String> mapLanguages = new HashMap<>();
@@ -85,6 +85,9 @@ public class BotStart {
         GiveawayRegistry.getInstance().getChannelId().put(guild_long_id, channel_long_id);
         GiveawayRegistry.getInstance().getCountWinners().put(guild_long_id, count_winners);
 
+        if (date_end_giveaway != null) {
+          queue.add(new Giveaway(guild_long_id, date_end_giveaway));
+        }
       }
       rs.close();
       statement.close();
@@ -180,5 +183,9 @@ public class BotStart {
 
   public static JDA getJda() {
     return jda;
+  }
+
+  public static Deque<Giveaway> getQueue() {
+    return queue;
   }
 }
