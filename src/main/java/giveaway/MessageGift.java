@@ -16,9 +16,9 @@ public class MessageGift extends ListenerAdapter {
   private static final String GIFT_START_WITHOUT_PREFIX = "gift start";
   private static final String GIFT_START_WITH_MINUTES = "gift start\\s[0-9]{1,2}[mмhчdд]$";
   private static final String GIFT_START_TITLE = "gift start\\s.{0,255}$";
-  private static final String GIFT_START_TITLE_COUNT_WITH_MINUTES = "gift start\\s.{0,255}\\s[0-9]{1,2}\\s[0-9]{1,2}[mмhчdд]$";
+  private static final String GIFT_START_TITLE_MINUTES_WITH_COUNT = "gift start\\s.{0,255}\\s[0-9]{1,2}[mмhчdд]\\s[0-9]{1,2}$";
   private static final String GIFT_START_TITLE_WITH_MINUTES = "gift start\\s.{0,255}\\s[0-9]{1,2}[mмhчdд]$";
-  private static final String GIFT_START_COUNT_WITH_MINUTES = "gift start\\s[0-9]{1,2}\\s[0-9]{1,2}[mмhчdд]$";
+  private static final String GIFT_START_COUNT_WITH_MINUTES = "gift start\\s[0-9]{1,2}[mмhчdд]\\s[0-9]{1,2}$";
   private static final String GIFT_STOP = "gift stop";
   private static final String GIFT_STOP_COUNT = "gift stop\\s[0-9]+";
   private static final String GIFT_COUNT = "!gift count";
@@ -101,7 +101,7 @@ public class MessageGift extends ListenerAdapter {
 
       GiveawayRegistry.getInstance().setGift(event.getGuild().getIdLong(), new Gift(event.getGuild().getIdLong(), event.getChannel().getIdLong()));
 
-      if (messageWithOutPrefix.matches(GIFT_START_TITLE_COUNT_WITH_MINUTES)) {
+      if (messageWithOutPrefix.matches(GIFT_START_TITLE_MINUTES_WITH_COUNT)) {
         int len = messageSplit[messageSplit.length - 1].length() + messageSplit[messageSplit.length - 2].length();
         GiveawayRegistry.getInstance()
             .getActiveGiveaways().get(event.getGuild().getIdLong()).startGift(
@@ -124,7 +124,7 @@ public class MessageGift extends ListenerAdapter {
             .getActiveGiveaways().get(event.getGuild().getIdLong()).startGift(
             event.getGuild(),
             event.getChannel(),
-            event.getMessage().getContentDisplay().substring(12, message.length() - 2),
+            event.getMessage().getContentDisplay().substring(12, message.length() - 3),
             null,
             messageSplit[messageSplit.length - 1]);
         return;
