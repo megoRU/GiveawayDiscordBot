@@ -1,6 +1,7 @@
 package threads;
 
 import config.Config;
+import net.dv8tion.jda.api.entities.Activity;
 import org.discordbots.api.client.DiscordBotListAPI;
 import startbot.BotStart;
 import startbot.Statcord;
@@ -8,6 +9,7 @@ import startbot.Statcord;
 public class TopGGAndStatcordThread extends Thread {
 
   private boolean isLaunched;
+  public static int serverCount;
 
   @Override
   public void run() {
@@ -17,8 +19,13 @@ public class TopGGAndStatcordThread extends Thread {
             .token(Config.getTopGgApiToken())
             .botId(Config.getBotId())
             .build();
-        int serverCount = (int) BotStart.getJda().getGuildCache().size();
+        serverCount = (int) BotStart.getJda().getGuildCache().size();
         TOP_GG_API.setStats(serverCount);
+
+        BotStart.getJda().getPresence().setActivity(Activity.playing(BotStart.activity
+                        + TopGGAndStatcordThread.serverCount
+                        + " guilds | "
+                        + BotStart.version));
 
         if (!isLaunched) {
           Statcord.start(

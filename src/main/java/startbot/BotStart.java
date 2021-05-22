@@ -19,9 +19,12 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
+import threads.TopGGAndStatcordThread;
 
 public class BotStart {
 
+  public static final String activity = "!help | ";
+  public static final String version = "v14.2";
   private static JDA jda;
   private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
   private static final Map<String, String> mapPrefix = new HashMap<>();
@@ -44,7 +47,7 @@ public class BotStart {
 
     jdaBuilder.setAutoReconnect(true);
     jdaBuilder.setStatus(OnlineStatus.ONLINE);
-    jdaBuilder.setActivity(Activity.playing("!help | Public Beta v14"));
+    jdaBuilder.setActivity(Activity.playing(activity + TopGGAndStatcordThread.serverCount + " guilds | " + version));
     jdaBuilder.setBulkDeleteSplittingEnabled(false);
     jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild());
     jdaBuilder.addEventListeners(new MessageGift());
