@@ -33,6 +33,7 @@ public class Gift implements GiftHelper {
   private final long guildId;
   private final long channelId;
   private int count;
+  private String times;
 
   public Gift(long guildId, long channelId) {
     this.guildId = guildId;
@@ -49,18 +50,18 @@ public class Gift implements GiftHelper {
     start.setTitle(GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
 
     if (time != null) {
-
+      times = getMinutes(time);
       start.setDescription(jsonParsers.getLocale("gift_React_With_Gift", guild.getId())
           .replaceAll("\\{0}", countWinners == null ? "TBA" : countWinners)
           .replaceAll("\\{1}", setEndingWord(countWinners == null ? "TBA" : countWinners, guildId)) + getCount() + "`");
-      start.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(time)));
+      start.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times)));
       start.setFooter(jsonParsers.getLocale("gift_Ends_At", guild.getId()));
       GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild.getIdLong(),
-          String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(time))));
+          String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times))));
 
       BotStart.getQueue().add(new Giveaway(
               guildId,
-                      String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(time)))));
+                      String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times)))));
     }
     if (time == null) {
       start.setDescription(jsonParsers.getLocale("gift_React_With_Gift", guild.getId())
@@ -83,7 +84,7 @@ public class Gift implements GiftHelper {
           m.getIdLong(),
           m.getChannel().getIdLong(),
           countWinners,
-          time == null ? null : String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(time))),
+          time == null ? null : String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times))),
           GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
     });
     start.clear();
@@ -91,6 +92,24 @@ public class Gift implements GiftHelper {
 
     //Вот мы запускаем бесконечный поток.
     autoInsert();
+  }
+
+  private String getMinutes(String time) {
+    String symbol = time.substring(time.length() - 1);
+    time = time.substring(0, time.length() - 1);
+
+    if (symbol.equals("m") || symbol.equals("м")) {
+      return time;
+    }
+
+    if (symbol.equals("h") || symbol.equals("ч")) {
+      return String.valueOf(Integer.parseInt(time) * 60);
+    }
+
+    if (symbol.equals("d") || symbol.equals("д")) {
+      return String.valueOf(Integer.parseInt(time) * 1440);
+    }
+    return "5";
   }
 
   //Добавляет пользователя в StringBuilder

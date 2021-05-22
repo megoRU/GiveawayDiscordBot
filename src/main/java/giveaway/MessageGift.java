@@ -14,11 +14,11 @@ public class MessageGift extends ListenerAdapter {
   private final JSONParsers jsonParsers = new JSONParsers();
   private static final String GIFT_START = "!gift start";
   private static final String GIFT_START_WITHOUT_PREFIX = "gift start";
-  private static final String GIFT_START_WITH_MINUTES = "gift start\\s[0-9]{1,5}$";
+  private static final String GIFT_START_WITH_MINUTES = "gift start\\s[0-9]{1,2}[mмhчdд]$";
   private static final String GIFT_START_TITLE = "gift start\\s.{0,255}$";
-  private static final String GIFT_START_TITLE_COUNT_WITH_MINUTES = "gift start\\s.{0,255}\\s[0-9]{1,2}\\s[0-9]{1,5}$";
-  private static final String GIFT_START_TITLE_WITH_MINUTES = "gift start\\s.{0,255}\\s[0-9]{1,5}$";
-  private static final String GIFT_START_COUNT_WITH_MINUTES = "gift start\s[0-9]{1,2}\s[0-9]{1,5}$";
+  private static final String GIFT_START_TITLE_COUNT_WITH_MINUTES = "gift start\\s.{0,255}\\s[0-9]{1,2}\\s[0-9]{1,2}[mмhчdд]$";
+  private static final String GIFT_START_TITLE_WITH_MINUTES = "gift start\\s.{0,255}\\s[0-9]{1,2}[mмhчdд]$";
+  private static final String GIFT_START_COUNT_WITH_MINUTES = "gift start\\s[0-9]{1,2}\\s[0-9]{1,2}[mмhчdд]$";
   private static final String GIFT_STOP = "gift stop";
   private static final String GIFT_STOP_COUNT = "gift stop\\s[0-9]+";
   private static final String GIFT_COUNT = "!gift count";
