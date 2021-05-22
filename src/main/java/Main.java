@@ -6,7 +6,7 @@ import java.util.concurrent.Executors;
 
 public class Main {
 
-  public static ExecutorService executorService;
+  public static ExecutorService executorService = Executors.newFixedThreadPool(2);
 
   public static void main(String[] args) throws Exception {
 
@@ -17,18 +17,14 @@ public class Main {
 //    TopGGAndStatcordThread topGGAndStatcordThread = new TopGGAndStatcordThread();
 //    topGGAndStatcordThread.start();
 
-    System.out.println("23:00");
+    System.out.println("16:30");
 
     Thread thread = new Thread(() -> {
       try {
         while (true) {
           int count = BotStart.getQueue().size();
           for (int i = 0; i < count; i++) {
-            executorService = Executors.newFixedThreadPool(1);
             executorService.submit(new StopGiveawayByTimer(BotStart.getQueue().poll()));
-          }
-          if (executorService != null) {
-            executorService.shutdown();
           }
           Thread.sleep(2000);
         }

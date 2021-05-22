@@ -16,6 +16,10 @@ public class StopGiveawayByTimer extends Thread {
     public void run() {
         try {
             while (true) {
+                if (GiveawayRegistry.getInstance().getActiveGiveaways().get(giveaway.getID_GUILD()) == null) {
+                    return;
+                }
+
                 Instant timestamp = Instant.now();
                 Instant specificTime = Instant.ofEpochMilli(timestamp.toEpochMilli());
                 OffsetDateTime timeFormDB = OffsetDateTime.parse(giveaway.getTIME());
