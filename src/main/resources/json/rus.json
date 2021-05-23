@@ -5,6 +5,7 @@
   "messages_events_Language_Title": "Изменение языка:",
   "messages_events_Language": "lang rus` - Доступные языки: `(rus|eng)`\n",
   "messages_events_Language_Reset": "lang reset` - Сбросить язык на: `ENG`",
+  "messages_events_PS": "-------------------------------\n`Внимание:`\n1. Не используйте кавычки `< >`\n2. `<1-99м|ч|д>` используйте только **ОДНУ БУКВУ**.\nИспользовать минуты, часы или дни вместе **НЕЛЬЗЯ**.\n-------------------------------\n",
   "messages_events_Start_Giveaway": "gift start` - Начните Giveaway.\n`",
   "messages_events_Start_Text_Giveaway": "gift start <текст>` - Начните Giveaway со своим текстом.\n`",
   "messages_events_Start_Text_Time_Giveaway": "gift start <текст> <1-99м|ч|д>` - Начните Giveaway со своим текстом и с таймером до остановки.\n`",

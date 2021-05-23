@@ -1,6 +1,7 @@
 import giveaway.GiveawayRegistry;
 import startbot.BotStart;
 import threads.StopGiveawayByTimer;
+import threads.TopGGAndStatcordThread;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -17,7 +18,7 @@ public class Main {
 //    TopGGAndStatcordThread topGGAndStatcordThread = new TopGGAndStatcordThread();
 //    topGGAndStatcordThread.start();
 
-    System.out.println("16:30");
+    System.out.println("0:48");
 
     Thread thread = new Thread(() -> {
       try {
