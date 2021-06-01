@@ -14,6 +14,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Logger;
 import jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -25,6 +26,7 @@ import threads.Giveaway;
 public class Gift implements GiftHelper {
 
   private final JSONParsers jsonParsers = new JSONParsers();
+  private final static Logger LOGGER = Logger.getLogger(Gift.class.getName());
   private final List<String> listUsers = new ArrayList<>();
   private final Map<String, String> listUsersHash = new HashMap<>();
   private final Set<String> uniqueWinners = new HashSet<>();
@@ -41,6 +43,12 @@ public class Gift implements GiftHelper {
   }
 
   protected void startGift(Guild guild, TextChannel channel, String newTitle, String countWinners, String time) {
+    LOGGER.info("\nGuild id: " + guild.getId()
+            + "\nTextChannel: " + channel.getName()
+            + "\nTitle: " + newTitle
+            + "\nCount winners: " + countWinners
+            + "\nTime: " + time);
+
     GiveawayRegistry.getInstance().getTitle().put(guild.getIdLong(), newTitle == null ? "Giveaway" : newTitle);
     Instant timestamp = Instant.now();
     //Instant для timestamp
@@ -164,7 +172,7 @@ public class Gift implements GiftHelper {
   }
 
   public void stopGift(long guildIdLong, int countWinner) {
-
+    LOGGER.info("\nstopGift method" + "\nCount winner: " + countWinner);
     if (listUsers.size() < 2) {
       EmbedBuilder notEnoughUsers = new EmbedBuilder();
       notEnoughUsers.setColor(0xFF0000);
@@ -172,7 +180,7 @@ public class Gift implements GiftHelper {
       notEnoughUsers.setDescription(jsonParsers
           .getLocale("gift_Giveaway_Deleted", String.valueOf(guildIdLong)));
       //Отправляет сообщение
-      editMessage(notEnoughUsers, this.guildId, this.channelId);
+      editMessage(notEnoughUsers, guildId, channelId);
 
       //Удаляет данные из коллекций
       clearingCollections();
@@ -192,7 +200,7 @@ public class Gift implements GiftHelper {
           .replaceAll("\\{0}", String.valueOf(countWinner))
           .replaceAll("\\{1}", String.valueOf(getCount())));
       //Отправляет сообщение
-      editMessage(zero, this.guildId, this.channelId);
+      editMessage(zero, guildId, channelId);
       return;
     }
     Instant timestamp = Instant.now();
@@ -216,7 +224,7 @@ public class Gift implements GiftHelper {
       stopWithMoreWinner.setFooter(jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
 
       //Отправляет сообщение
-      editMessage(stopWithMoreWinner, this.guildId, this.channelId);
+      editMessage(stopWithMoreWinner, guildId, channelId);
 
       //Удаляет данные из коллекций
       clearingCollections();

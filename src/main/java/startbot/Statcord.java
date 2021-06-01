@@ -95,7 +95,7 @@ public class Statcord {
       System.out.println(ANSI_YELLOW + "[Statcord]You can not use 'updateStats' because Statcord is not active!" + RESET);
       return;
     }
-    System.out.println(ANSI_YELLOW + "[Statcord] Updating Statcord!" + RESET);
+   // System.out.println(ANSI_YELLOW + "[Statcord] Updating Statcord!" + RESET);
 
     servers = jda.getGuilds().size();
     users = jda.getUsers().size();
@@ -126,7 +126,7 @@ public class Statcord {
 
     String body = post.toString();
 
-    System.out.println(body);
+    //System.out.println(body);
     post(body);
 
     commandsRun = 0;
@@ -142,7 +142,7 @@ public class Statcord {
       System.out.println(ANSI_YELLOW + "[Statcord]You can not use 'commandPost' because Statcord is not active!" + RESET);
       return;
     }
-    System.out.println("Adding a command to Statcord");
+   // System.out.println("Adding a command to Statcord");
 
     // popular cmds
     JSONObject obj = new JSONObject();
@@ -187,7 +187,7 @@ public class Statcord {
     HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
     if (response.body().contains("error\":false")) {
-      System.out.println(ANSI_YELLOW + "[Statcord] Updated Stats on Statcord!" + RESET);
+     // System.out.println(ANSI_YELLOW + "[Statcord] Updated Stats on Statcord!" + RESET);
     } else {
       System.out.println("[Statcord] An error happened");
       System.out.println("Status code: " + response.statusCode());

@@ -7,9 +7,12 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import startbot.Statcord;
 
+import java.util.logging.Logger;
+
 public class Reactions extends ListenerAdapter {
 
     private final JSONParsers jsonParsers = new JSONParsers();
+    private final static Logger LOGGER = Logger.getLogger(Reactions.class.getName());
     public static final String emojiPresent = "🎁";
     public static final String emojiStopOne = "1️⃣";
     public static final String emojiStopTwo = "2️⃣";
@@ -50,6 +53,8 @@ public class Reactions extends ListenerAdapter {
             boolean isThisTheEmoji = (emoji.equals(emojiPresent) || emoji.equals(emojiStopOne)
                     || emoji.equals(emojiStopTwo) || emoji.equals(emojiStopThree));
 
+            LOGGER.info("\nGuild id: " + event.getGuild().getId() + "\nEmoji received: " + event.getReactionEmote().getEmoji());
+
             //Удаляет не те эмодзи/реакции
             if (!isThisTheEmoji) {
                 event.getReaction().removeReaction(event.getUser()).queue();
@@ -70,7 +75,7 @@ public class Reactions extends ListenerAdapter {
                 return;
             }
 
-            if (isThisTheEmoji && GiveawayRegistry.getInstance().hasGift(guild) && isUserAdminOrHaveManageMessage) {
+            if (GiveawayRegistry.getInstance().hasGift(guild) && isUserAdminOrHaveManageMessage) {
 
                 if (emoji.equals(emojiStopOne)) {
                     GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())

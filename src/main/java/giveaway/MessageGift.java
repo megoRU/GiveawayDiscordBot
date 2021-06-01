@@ -8,10 +8,13 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import startbot.BotStart;
 import startbot.Statcord;
+import java.util.Arrays;
+import java.util.logging.Logger;
 
 public class MessageGift extends ListenerAdapter {
 
   private final JSONParsers jsonParsers = new JSONParsers();
+  private final static Logger LOGGER = Logger.getLogger(MessageGift.class.getName());
   private static final String GIFT_START = "!gift start";
   private static final String GIFT_START_WITHOUT_PREFIX = "gift start";
   private static final String GIFT_START_WITH_MINUTES = "gift start\\s[0-9]{1,2}[mмhчdд]$";
@@ -50,6 +53,12 @@ public class MessageGift extends ListenerAdapter {
       prefix_GIFT_START = BotStart.getMapPrefix().get(event.getGuild().getId()) + "gift start";
       prefix_GIFT_COUNT = BotStart.getMapPrefix().get(event.getGuild().getId()) + "gift count";
     }
+
+    LOGGER.info("\nGuild id: " + event.getGuild().getId()
+            + "\nMessage received: " + message
+            + "\nMessage with out prefix: " + messageWithOutPrefix
+            + "\nMessage length: " + length
+            + "\nMessage args: " + Arrays.toString(messageSplit));
 
     //TODO: Нужно это тестировать!
     if ((message.contains(prefix_GIFT_START + " ") && (message.length() - 11) >= 256)) {
@@ -136,6 +145,7 @@ public class MessageGift extends ListenerAdapter {
         return;
       }
 
+      //Тут ошибка и не понятно почему: java.lang.StringIndexOutOfBoundsException: begin 12, end 56, length 38
       if (messageWithOutPrefix.matches(GIFT_START_TITLE)) {
         GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
             .startGift(
