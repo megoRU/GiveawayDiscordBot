@@ -49,7 +49,6 @@ public class LanguageChange extends ListenerAdapter {
     if (message.equals(prefix_LANG_RUS) || message.equals(prefix_LANG_ENG)) {
       BotStart.getMapLanguages().put(event.getGuild().getId(), messages[1]);
 
-      DataBase.getInstance().removeLangFromDB(event.getGuild().getId());
       DataBase.getInstance().addLangToDB(event.getGuild().getId(), messages[1]);
 
       event.getChannel()

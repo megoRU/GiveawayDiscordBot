@@ -86,7 +86,7 @@ public class DataBase {
   //Добавление префикса
   public void addPrefixToDB(String serverId, String prefix) {
     try {
-      String sql = "INSERT INTO prefixs (serverId, prefix) VALUES (?, ?)";
+      String sql = "REPLACE INTO prefixs (serverId, prefix) VALUES (?, ?)";
       PreparedStatement preparedStatement = getConnection().prepareStatement(sql);
       preparedStatement.setString(1, serverId);
       preparedStatement.setString(2, prefix);
@@ -112,7 +112,7 @@ public class DataBase {
   //Добавление префикса
   public void addLangToDB(String serverId, String lang) {
     try {
-      String sql = "INSERT INTO `language` (serverId, lang) VALUES (?, ?)";
+      String sql = "REPLACE INTO `language` (serverId, lang) VALUES (?, ?)";
       PreparedStatement preparedStatement = getConnection().prepareStatement(sql);
       preparedStatement.setString(1, serverId);
       preparedStatement.setString(2, lang);
