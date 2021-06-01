@@ -20,6 +20,7 @@ import oshi.hardware.NetworkIF;
 
 public class Statcord {
 
+  private static final String URL = "https://api.statcord.com/v3/stats";
   private static boolean statcordActive = false;
   private static boolean runned = false;
 
@@ -175,23 +176,22 @@ public class Statcord {
 
   //http post to statcord
   private static void post(String body) throws IOException, InterruptedException {
-    String url = "https://statcord.com/logan/stats";
-
+    System.out.println(body);
     HttpClient client = HttpClient.newHttpClient();
     HttpRequest request = HttpRequest.newBuilder()
-        .uri(URI.create(url))
+        .uri(URI.create(URL))
         .POST(HttpRequest.BodyPublishers.ofString(body))
         .header("Content-Type", "application/json")
         .build();
 
-    HttpResponse<String> response = client.send(request,
-        HttpResponse.BodyHandlers.ofString());
+    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-    if (response.body().contains("Success")) {
+    if (response.body().contains("error\":false")) {
       System.out.println(ANSI_YELLOW + "[Statcord] Updated Stats on Statcord!" + RESET);
     } else {
       System.out.println("[Statcord] An error happened");
-      System.out.println(response.body());
+      System.out.println("Status code: " + response.statusCode());
+      System.out.println("Response body: " + response.body());
     }
   }
 
@@ -202,22 +202,22 @@ public class Statcord {
   }
 
   public static void getNetworkName() throws Exception {
-    final Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
-    // get hostname
-    InetAddress myAddr = InetAddress.getByName(systemInfo.getOperatingSystem().getNetworkParams().getHostName());
+    Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+    // hostname is passed to your method
+    InetAddress myAddr = InetAddress.getLocalHost();
 
     while (networkInterfaces.hasMoreElements()) {
       NetworkInterface networkInterface = networkInterfaces.nextElement();
       Enumeration<InetAddress> inAddrs = networkInterface.getInetAddresses();
       while (inAddrs.hasMoreElements()) {
-        InetAddress inAddr = inAddrs.nextElement();
-        if (inAddr.equals(myAddr)) {
+        InetAddress inetAddress = inAddrs.nextElement();
+        if (inetAddress.equals(myAddr)) {
           NetworkName = networkInterface.getName();
           return;
         }
       }
     }
-    System.out.println("Not found network hostname");
+    throw new Exception("Not found network hostname");
   }
 
   public static long getNetworkSpeed() {
@@ -257,6 +257,7 @@ public class Statcord {
 
     down = (download2 - download1) / (timestamp2 - timestamp1);
     up = (upload2 - upload1) / (timestamp2 - timestamp1);
+
     return down + up;
   }
 

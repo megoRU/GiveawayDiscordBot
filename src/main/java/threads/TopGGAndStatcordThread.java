@@ -8,7 +8,7 @@ import startbot.Statcord;
 
 public class TopGGAndStatcordThread extends Thread {
 
-  private boolean isLaunched;
+  private volatile boolean isLaunched;
   public static int serverCount;
 
   @Override
