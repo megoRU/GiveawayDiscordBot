@@ -54,12 +54,6 @@ public class MessageGift extends ListenerAdapter {
       prefix_GIFT_COUNT = BotStart.getMapPrefix().get(event.getGuild().getId()) + "gift count";
     }
 
-    LOGGER.info("\nGuild id: " + event.getGuild().getId()
-            + "\nMessage received: " + message
-            + "\nMessage with out prefix: " + messageWithOutPrefix
-            + "\nMessage length: " + length
-            + "\nMessage args: " + Arrays.toString(messageSplit));
-
     //TODO: Нужно это тестировать!
     if ((message.contains(prefix_GIFT_START + " ") && (message.length() - 11) >= 256)) {
       event.getChannel()
@@ -100,7 +94,11 @@ public class MessageGift extends ListenerAdapter {
 
     //GIFT START
     if (isMessageMatches && !GiveawayRegistry.getInstance().hasGift(guildLongId)) {
-
+      LOGGER.info("\nGuild id: " + event.getGuild().getId()
+              + "\nMessage received: " + message
+              + "\nMessage with out prefix: " + messageWithOutPrefix
+              + "\nMessage length: " + length
+              + "\nMessage args: " + Arrays.toString(messageSplit));
       if (messageSplit.length > 2 && messageSplit[2].equals("0")) {
         event.getChannel()
             .sendMessage(jsonParsers.getLocale("message_gift_Set_Zero_Minutes", event.getGuild().getId()))

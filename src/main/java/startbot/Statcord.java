@@ -267,7 +267,7 @@ public class Statcord {
 
     timer.schedule(new TimerTask() {
       public void run() throws NullPointerException {
-        System.out.println(ANSI_YELLOW + "[33m[Statcord] Automatic update!" + RESET);
+//        System.out.println(ANSI_YELLOW + "[33m[Statcord] Automatic update!" + RESET);
         try {
           updateStats();
         } catch (IOException | InterruptedException e) {
