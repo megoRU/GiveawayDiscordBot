@@ -176,7 +176,7 @@ public class Statcord {
 
   //http post to statcord
   private static void post(String body) throws IOException, InterruptedException {
-    System.out.println(body);
+//    System.out.println(body);
     HttpClient client = HttpClient.newHttpClient();
     HttpRequest request = HttpRequest.newBuilder()
         .uri(URI.create(URL))

@@ -15,6 +15,8 @@ public class MessageGift extends ListenerAdapter {
 
   private final JSONParsers jsonParsers = new JSONParsers();
   private final static Logger LOGGER = Logger.getLogger(MessageGift.class.getName());
+  private static final String GIFT_CHECKER = "gift start\\s(<|).+(>|)\\s<([0-9]|)+(м|m)\\|([0-9]|)+(ч|h)\\|([0-9]|)+(д|d)>";
+  private static final String GIFT_CHECKER_2 = "gift start\\s(<|).+(>|)\\s<.+>";
   private static final String GIFT_START = "!gift start";
   private static final String GIFT_START_WITHOUT_PREFIX = "gift start";
   private static final String GIFT_START_WITH_MINUTES = "gift start\\s[0-9]{1,2}[mмhчdд]$";
@@ -48,10 +50,18 @@ public class MessageGift extends ListenerAdapter {
 
     String prefix_GIFT_START = GIFT_START;
     String prefix_GIFT_COUNT = GIFT_COUNT;
+    String prefix = "!";
+
 
     if (BotStart.getMapPrefix().containsKey(event.getGuild().getId())) {
       prefix_GIFT_START = BotStart.getMapPrefix().get(event.getGuild().getId()) + "gift start";
       prefix_GIFT_COUNT = BotStart.getMapPrefix().get(event.getGuild().getId()) + "gift count";
+      prefix = BotStart.getMapPrefix().get(event.getGuild().getId());
+    }
+
+    if (messageWithOutPrefix.matches(GIFT_CHECKER) || messageWithOutPrefix.matches(GIFT_CHECKER_2)) {
+      event.getChannel().sendMessage(jsonParsers.getLocale("message_gift_Not_Correct", event.getGuild().getId()).replaceAll("\\{0}", prefix)).queue();
+      return;
     }
 
     //TODO: Нужно это тестировать!
