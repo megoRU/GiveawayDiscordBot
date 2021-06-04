@@ -17,12 +17,16 @@ public class LanguageChange extends ListenerAdapter {
 
   @Override
   public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
+
     if (event.getAuthor().isBot()) {
       return;
     }
+
     if (!event.getGuild().getSelfMember().hasPermission(event.getChannel(), Permission.MESSAGE_WRITE)) {
       return;
     }
+
+    if (event.getMember() == null) return;
 
     String message = event.getMessage().getContentRaw().toLowerCase().trim();
     String[] messages = message.split(" ", 2);

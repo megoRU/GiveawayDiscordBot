@@ -6,12 +6,11 @@ import org.jetbrains.annotations.NotNull;
 
 public interface SenderMessage {
 
-  default void sendMessage(EmbedBuilder embedBuilder, @NotNull MessageReceivedEvent event) {
-    try {
-      event.getChannel().sendMessage(embedBuilder.build()).queue();
-    } catch (Exception e) {
-      e.printStackTrace();
+    default void sendMessage(EmbedBuilder embedBuilder, @NotNull MessageReceivedEvent event) {
+        try {
+            event.getChannel().sendMessage(embedBuilder.build()).queue();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
-  }
-
 }

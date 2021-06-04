@@ -48,12 +48,16 @@ public class Reactions extends ListenerAdapter {
             //Удаляет не те эмодзи/реакции
             if (!event.getReactionEmote().isEmoji()) {
                 event.getReaction().removeReaction(event.getUser()).queue();
+                return;
             }
             String emoji = event.getReactionEmote().getEmoji();
             boolean isThisTheEmoji = (emoji.equals(emojiPresent) || emoji.equals(emojiStopOne)
                     || emoji.equals(emojiStopTwo) || emoji.equals(emojiStopThree));
 
-            LOGGER.info("\nGuild id: " + event.getGuild().getId() + "\nEmoji received: " + event.getReactionEmote().getEmoji());
+            LOGGER.info(
+                    "\nGuild id: " + event.getGuild().getId() + "" +
+                            "\nUser id: " + event.getUser().getId() + "" +
+                            "\nEmoji received: " + event.getReactionEmote().getEmoji());
 
             //Удаляет не те эмодзи/реакции
             if (!isThisTheEmoji) {

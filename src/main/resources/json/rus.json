@@ -25,6 +25,7 @@
   "messages_events_Failed_To_Send_Message": "Не удалось отправить сообщение. Возможно я у тебя черном списке!",
   "prefix_change_Must_have_Permission": "Вы не можете изменить префикс. У вас должно быть разрешение: `УПРАВЛЯТЬ СЕРВЕРОМ`",
   "prefix_change_Its_Standard_Prefix": "Это стандартный префикс!",
+  "prefix_change_Cannot_Be": "Такой префикс: `{0}` недопустим!",
   "prefix_change_Now_Prefix": "Вы изменили префикс на: `{0}`",
   "prefix_change_Prefix_Now_Standard": "Префикс теперь стандартный: `!`",
   "message_gift_Set_Zero_Minutes": "Вы установили `0` минут. Мы позаботились об этом и увеличили его на `1` минуту.",
