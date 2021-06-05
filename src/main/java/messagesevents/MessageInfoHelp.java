@@ -13,7 +13,9 @@ import startbot.BotStart;
 
 public class MessageInfoHelp extends ListenerAdapter implements SenderMessage {
 
+    private static final String HELP_WITHOUT = "help";
     private static final String HELP = "!help";
+    private static final String PREFIX = "!";
     private final JSONParsers jsonParsers = new JSONParsers();
 
     @Override
@@ -24,13 +26,15 @@ public class MessageInfoHelp extends ListenerAdapter implements SenderMessage {
         }
 
         String message = event.getMessage().getContentDisplay().trim();
-        String prefix = HELP;
+        String prefix = PREFIX;
+        String messageWithOutPrefix = message.substring(1);
 
-        if (!event.getChannelType().equals(ChannelType.PRIVATE) && BotStart.getMapPrefix().containsKey(event.getGuild().getId())) {
-            prefix = BotStart.getMapPrefix().get(event.getGuild().getId()) + "help";
+        if (!event.getChannelType().equals(ChannelType.PRIVATE)
+                && BotStart.getMapPrefix().containsKey(event.getGuild().getId())) {
+            prefix = BotStart.getMapPrefix().get(event.getGuild().getId());
         }
 
-        if (message.matches(prefix)) {
+        if (message.substring(0, 1).equals(prefix) && messageWithOutPrefix.matches(HELP_WITHOUT)) {
 
             if (event.isFromType(ChannelType.PRIVATE) && event.getMessage().getContentDisplay().trim().equals("!help")) {
                 buildMessage(ChannelType.PRIVATE, event);

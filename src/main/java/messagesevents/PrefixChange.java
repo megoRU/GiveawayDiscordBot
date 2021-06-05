@@ -28,6 +28,8 @@ public class PrefixChange extends ListenerAdapter {
         String message = event.getMessage().getContentRaw().toLowerCase().trim();
         String[] messages = message.split(" ", 2);
 
+        if (!message.matches(PREFIX) && !message.equals(PREFIX_RESET)) return;
+
         if ((message.equals(PREFIX_RESET) || message.matches(PREFIX)) && !event.getMember()
                 .hasPermission(Permission.MANAGE_SERVER)) {
             event.getChannel()
@@ -43,7 +45,7 @@ public class PrefixChange extends ListenerAdapter {
             return;
         }
 
-        if (messages[1].equals("/") || messages[1].equals("\\")) {
+        if (message.charAt(8) == '/' || message.charAt(8) == '\\' ) {
             event.getChannel()
                     .sendMessage(jsonParsers.getLocale("prefix_change_Cannot_Be", event.getGuild().getId())
                             .replaceAll("\\{0}", "\\" + messages[1]))
