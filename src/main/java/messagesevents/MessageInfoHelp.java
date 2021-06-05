@@ -26,6 +26,9 @@ public class MessageInfoHelp extends ListenerAdapter implements SenderMessage {
         }
 
         String message = event.getMessage().getContentDisplay().trim();
+
+        if (message.equals("")) return;
+
         String prefix = PREFIX;
         String messageWithOutPrefix = message.substring(1);
 
