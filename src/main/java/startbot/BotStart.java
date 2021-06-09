@@ -3,10 +3,8 @@ package startbot;
 import config.Config;
 import db.DataBase;
 import events.MessageWhenBotJoinToGuild;
-import giveaway.Gift;
-import giveaway.GiveawayRegistry;
-import giveaway.MessageGift;
-import giveaway.Reactions;
+import giveaway.*;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -54,8 +52,8 @@ public class BotStart {
     jdaBuilder.addEventListeners(new MessageGift());
     jdaBuilder.addEventListeners(new PrefixChange());
     jdaBuilder.addEventListeners(new MessageInfoHelp());
-    jdaBuilder.addEventListeners(new Reactions());
     jdaBuilder.addEventListeners(new LanguageChange());
+    jdaBuilder.addEventListeners(new ReactionsButton());
 
     jda = jdaBuilder.build();
     jda.awaitReady();

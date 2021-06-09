@@ -1,21 +1,24 @@
 package giveaway;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
 import startbot.BotStart;
 
 public interface GiftHelper {
 
   JSONParsers jsonParsers = new JSONParsers();
 
-  default void editMessage(EmbedBuilder embedBuilder, long guildId, long channelId) {
+  default void editMessage(EmbedBuilder embedBuilder, long guildId, long channelId, List<ActionRow> buttons) {
     try {
       BotStart.getJda()
           .getGuildById(guildId)
           .getTextChannelById(channelId)
           .editMessageById(GiveawayRegistry.getInstance().getMessageId().get(guildId), embedBuilder.build())
           .queue();
+//      message -> message.getButtons().removeAll(buttons)
       embedBuilder.clear();
     } catch (Exception e) {
       e.printStackTrace();
@@ -28,7 +31,7 @@ public interface GiftHelper {
       edit.setColor(0x00FF00);
       edit.setTitle(GiveawayRegistry.getInstance().getTitle().get(guildId));
 
-      edit.setDescription(jsonParsers.getLocale("gift_React_With_Gift", String.valueOf(guildId))
+      edit.setDescription(jsonParsers.getLocale("gift_Press_Green_Button", String.valueOf(guildId))
           .replaceAll("\\{0}", GiveawayRegistry.getInstance().getCountWinners().get(guildId) == null ? "TBA"
               : GiveawayRegistry.getInstance().getCountWinners().get(guildId))
           .replaceAll("\\{1}", setEndingWord(endingWord, guildId)) + count + "`");
