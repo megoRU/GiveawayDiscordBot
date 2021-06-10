@@ -2,28 +2,32 @@ package giveaway;
 
 import jsonparser.JSONParsers;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import startbot.Statcord;
-
 import java.util.logging.Logger;
 
-public class Reactions extends ListenerAdapter {
+public class ReactionsButton extends ListenerAdapter {
 
     private final JSONParsers jsonParsers = new JSONParsers();
-    private final static Logger LOGGER = Logger.getLogger(Reactions.class.getName());
+    private final static Logger LOGGER = Logger.getLogger(ReactionsButton.class.getName());
     public static final String emojiPresent = "🎁";
     public static final String emojiStopOne = "1️⃣";
     public static final String emojiStopTwo = "2️⃣";
     public static final String emojiStopThree = "3️⃣";
 
     @Override
-    public void onGuildMessageReactionAdd(@NotNull GuildMessageReactionAddEvent event) {
-
-        if (event.getUser().isBot()) {
+    public void onButtonClick(@NotNull ButtonClickEvent event) {
+        if (event.getButton() == null) {
             return;
         }
+        if (event.getGuild() == null) {
+            return;
+        }
+
+        if (event.getUser().isBot()) return;
+
 
         if (GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong()) == null) {
             return;
@@ -33,7 +37,7 @@ public class Reactions extends ListenerAdapter {
             return;
         }
 
-        if (!event.getGuild().getSelfMember().hasPermission(event.getChannel(), Permission.MESSAGE_WRITE)) {
+        if (!event.getGuild().getSelfMember().hasPermission(event.getGuildChannel(), Permission.MESSAGE_WRITE)) {
             return;
         }
 
@@ -45,65 +49,71 @@ public class Reactions extends ListenerAdapter {
             return;
         }
         try {
-            //Удаляет не те эмодзи/реакции
-            if (!event.getReactionEmote().isEmoji()) {
-                event.getReaction().removeReaction(event.getUser()).queue();
-                return;
-            }
-            String emoji = event.getReactionEmote().getEmoji();
-            boolean isThisTheEmoji = (emoji.equals(emojiPresent) || emoji.equals(emojiStopOne)
-                    || emoji.equals(emojiStopTwo) || emoji.equals(emojiStopThree));
 
             LOGGER.info(
                     "\nGuild id: " + event.getGuild().getId() + "" +
                             "\nUser id: " + event.getUser().getId() + "" +
-                            "\nEmoji received: " + event.getReactionEmote().getEmoji());
+                            "\nButton pressed: " + event.getButton().getId());
 
-            //Удаляет не те эмодзи/реакции
-            if (!isThisTheEmoji) {
-                event.getReaction().removeReaction(event.getUser()).queue();
-                return;
-            }
-
-            boolean isUserAdminOrHaveManageMessage = (event.getMember().hasPermission(event.getChannel(), Permission.ADMINISTRATOR)
-                    || event.getMember().hasPermission(event.getChannel(), Permission.MESSAGE_MANAGE));
+            boolean isUserAdminOrHaveManageMessage = (
+                    event.getMember().hasPermission(event.getGuildChannel(), Permission.ADMINISTRATOR)
+                            || event.getMember().hasPermission(event.getGuildChannel(), Permission.MESSAGE_MANAGE));
 
             long guild = event.getGuild().getIdLong();
 
-            if (emoji.equals(emojiPresent)
+            if (event.getButton().getId().equals(event.getGuild().getId() + ":" + emojiPresent)
                     && GiveawayRegistry.getInstance().hasGift(guild)
                     && GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
                     .getListUsersHash(event.getUser().getId()) == null) {
-                GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong()).addUserToPoll(event.getMember().getUser());
+                event.deferEdit().queue();
+
+                GiveawayRegistry.getInstance()
+                        .getActiveGiveaways()
+                        .get(event.getGuild().getIdLong())
+                        .addUserToPoll(event.getMember().getUser());
                 Statcord.commandPost("gift", event.getUser().getId());
+                return;
+            }
+
+            if (event.getButton().getId().equals(event.getGuild().getId() + ":" + emojiPresent)
+                    && GiveawayRegistry.getInstance().hasGift(guild)
+                    && GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
+                    .getListUsersHash(event.getUser().getId()) != null) {
+                event.deferEdit().queue();
                 return;
             }
 
             if (GiveawayRegistry.getInstance().hasGift(guild) && isUserAdminOrHaveManageMessage) {
 
-                if (emoji.equals(emojiStopOne)) {
-                    GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
+                if (event.getButton().getId().equals(event.getGuild().getId() + ":" + emojiStopOne)) {
+
+                    GiveawayRegistry.getInstance()
+                            .getActiveGiveaways()
+                            .get(event.getGuild().getIdLong())
                             .stopGift(event.getGuild().getIdLong(), 1);
+
                     Statcord.commandPost("gift stop", event.getUser().getId());
                     return;
                 }
 
-                if (emoji.equals(emojiStopTwo)) {
-                    GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
+                if (event.getButton().getId().equals(event.getGuild().getId() + ":" + emojiStopTwo)) {
+                    event.deferEdit().queue();
+                    GiveawayRegistry.getInstance()
+                            .getActiveGiveaways()
+                            .get(event.getGuild().getIdLong())
                             .stopGift(event.getGuild().getIdLong(), 2);
                     Statcord.commandPost("gift stop 2", event.getUser().getId());
                     return;
                 }
 
-                if (emoji.equals(emojiStopThree)) {
-                    GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
+                if (event.getButton().getId().equals(event.getGuild().getId() + ":" + emojiStopThree)) {
+                    event.deferEdit().queue();
+                    GiveawayRegistry.getInstance()
+                            .getActiveGiveaways()
+                            .get(event.getGuild().getIdLong())
                             .stopGift(event.getGuild().getIdLong(), 3);
                     Statcord.commandPost("gift stop 3", event.getUser().getId());
                 }
-            }
-
-            if (!emoji.equals(emojiPresent) && !isUserAdminOrHaveManageMessage) {
-                event.getReaction().removeReaction(event.getUser()).queue();
             }
         } catch (Exception e) {
             e.printStackTrace();

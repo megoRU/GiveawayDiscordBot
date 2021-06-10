@@ -113,10 +113,14 @@ public class MessageInfoHelp extends ListenerAdapter implements SenderMessage {
                         if (!event.getGuild().getSelfMember().hasPermission(event.getMessage().getTextChannel(), Permission.MESSAGE_WRITE)) {
                             return;
                         }
-                        event.getChannel().sendMessage(jsonParsers.getLocale("messages_events_Send_Private_Message",
-                                event.getGuild().getId())).delay(5, TimeUnit.SECONDS)
-                                .flatMap(Message::delete).queue();
-
+                        try {
+                            event.getChannel().sendMessage(jsonParsers.getLocale("messages_events_Send_Private_Message",
+                                    event.getGuild().getId())).delay(5, TimeUnit.SECONDS)
+                                    .flatMap(Message::delete).queue();
+                        } catch (Exception e) {
+                            System.out.println("Ошибка в удалении сообщении, но почему... Он же удаляет своё..");
+                            e.printStackTrace();
+                        }
                         event.getAuthor().openPrivateChannel()
                                 .flatMap(channel -> channel.sendMessage(info.build()))
                                 .queue(null, error -> event.getChannel()
