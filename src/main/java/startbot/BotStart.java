@@ -4,11 +4,11 @@ import config.Config;
 import db.DataBase;
 import events.MessageWhenBotJoinToGuild;
 import giveaway.*;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
+import jsonparser.JSONParsers;
 import messagesevents.LanguageChange;
 import messagesevents.MessageInfoHelp;
 import messagesevents.PrefixChange;
@@ -16,6 +16,8 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Button;
 import threads.Giveaway;
 import threads.TopGGAndStatcordThread;
 
@@ -23,6 +25,7 @@ public class BotStart {
 
   public static final String activity = "!help | ";
   public static final String version = "v15 ";
+  private final JSONParsers jsonParsers = new JSONParsers();
   private static JDA jda;
   private static final Deque<Giveaway> queue = new ArrayDeque<>();
   private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
@@ -31,6 +34,9 @@ public class BotStart {
   private static final Map<Integer, String> guildIdHashList = new HashMap<>();
 
   public void startBot() throws Exception {
+    //Получаем языки
+    getLocalizationFromDB();
+
     //Получаем id guild и id message
     getMessageIdFromDB();
 
@@ -39,9 +45,6 @@ public class BotStart {
 
     //Получаем все префиксы из базы данных
     getPrefixFromDB();
-
-    //Получаем языки
-    getLocalizationFromDB();
 
 
     jdaBuilder.setAutoReconnect(true);
@@ -83,6 +86,9 @@ public class BotStart {
         GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild_long_id, date_end_giveaway == null ? "null" : date_end_giveaway);
         GiveawayRegistry.getInstance().getChannelId().put(guild_long_id, channel_long_id);
         GiveawayRegistry.getInstance().getCountWinners().put(guild_long_id, count_winners);
+
+        //Добавляем кнопки для Giveaway в Gift class
+        setButtonsInGift(String.valueOf(guild_long_id), guild_long_id);
 
         if (date_end_giveaway != null) {
           queue.add(new Giveaway(guild_long_id, date_end_giveaway));
@@ -136,6 +142,36 @@ public class BotStart {
     }
     GiveawayRegistry.getInstance().setGiveAwayCount(guildIdHashList.size());
     guildIdHashList.clear();
+  }
+
+  private void setButtonsInGift(String guildId, long longGuildId) {
+    if (getMapLanguages().get(guildId) != null) {
+      if (getMapLanguages().get(guildId).equals("rus")) {
+        GiveawayRegistry.getInstance().getActiveGiveaways().get(longGuildId).getButtons()
+                .add(ActionRow.of(Button.success(longGuildId + ":" + ReactionsButton.emojiPresent,
+                        jsonParsers.getLocale("gift_Press_Me_Button", guildId) + "⠀ ⠀⠀")));
+      } else {
+        GiveawayRegistry.getInstance().getActiveGiveaways().get(longGuildId).getButtons()
+                .add(ActionRow.of(Button.success(longGuildId + ":" + ReactionsButton.emojiPresent,
+                        jsonParsers.getLocale("gift_Press_Me_Button", guildId) + "⠀⠀⠀⠀⠀⠀⠀⠀")));
+      }
+    } else {
+      GiveawayRegistry.getInstance().getActiveGiveaways().get(longGuildId).getButtons()
+              .add(ActionRow.of(Button.success(longGuildId + ":" + ReactionsButton.emojiPresent,
+                      jsonParsers.getLocale("gift_Press_Me_Button", guildId) + "⠀⠀⠀⠀⠀⠀⠀⠀")));
+    }
+
+    GiveawayRegistry.getInstance().getActiveGiveaways().get(longGuildId).getButtons()
+            .add(ActionRow.of(Button.danger(longGuildId + ":" + ReactionsButton.emojiStopOne,
+                    jsonParsers.getLocale("gift_Stop_Button", guildId).replaceAll("\\{0}", "1"))));
+
+    GiveawayRegistry.getInstance().getActiveGiveaways().get(longGuildId).getButtons()
+            .add(ActionRow.of(Button.danger(longGuildId + ":" + ReactionsButton.emojiStopTwo,
+                    jsonParsers.getLocale("gift_Stop_Button", guildId).replaceAll("\\{0}", "2"))));
+
+    GiveawayRegistry.getInstance().getActiveGiveaways().get(longGuildId).getButtons()
+            .add(ActionRow.of(Button.danger(longGuildId + ":" + ReactionsButton.emojiStopThree,
+                    jsonParsers.getLocale("gift_Stop_Button", guildId).replaceAll("\\{0}", "3"))));
   }
 
   private void getPrefixFromDB() {

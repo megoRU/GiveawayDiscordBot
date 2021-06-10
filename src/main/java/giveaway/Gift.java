@@ -80,8 +80,20 @@ public class Gift implements GiftHelper {
         }
         GiveawayRegistry.getInstance().incrementGiveAwayCount();
 
-        buttons.add(ActionRow.of(Button.success(guildId + ":" + ReactionsButton.emojiPresent,
-                jsonParsers.getLocale("gift_Press_Me_Button", guild.getId()) + ReactionsButton.emojiPresent)));
+        if (BotStart.getMapLanguages().get(guild.getId()) != null) {
+
+            if (BotStart.getMapLanguages().get(guild.getId()).equals("rus")) {
+                buttons.add(ActionRow.of(Button.success(guildId + ":" + ReactionsButton.emojiPresent,
+                        jsonParsers.getLocale("gift_Press_Me_Button", guild.getId()) + "⠀ ⠀⠀")));
+            } else {
+                buttons.add(ActionRow.of(Button.success(guildId + ":" + ReactionsButton.emojiPresent,
+                        jsonParsers.getLocale("gift_Press_Me_Button", guild.getId()) + "⠀⠀⠀⠀⠀⠀⠀⠀")));
+            }
+        } else {
+            buttons.add(ActionRow.of(Button.success(guildId + ":" + ReactionsButton.emojiPresent,
+                    jsonParsers.getLocale("gift_Press_Me_Button", guild.getId()) + "⠀⠀⠀⠀⠀⠀⠀⠀")));
+        }
+
         buttons.add(ActionRow.of(Button.danger(guildId + ":" + ReactionsButton.emojiStopOne,
                 jsonParsers.getLocale("gift_Stop_Button", guild.getId()).replaceAll("\\{0}", "1"))));
         buttons.add(ActionRow.of(Button.danger(guildId + ":" + ReactionsButton.emojiStopTwo,
@@ -256,7 +268,7 @@ public class Gift implements GiftHelper {
         stop.setFooter(jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
 
         //Отправляет сообщение
-        editMessage(stop, this.guildId, this.channelId, buttons);
+        editMessage(stop, guildId, channelId, buttons);
 
         //Удаляет данные из коллекций
         clearingCollections();
@@ -270,6 +282,7 @@ public class Gift implements GiftHelper {
         listUsersHash.clear();
         listUsers.clear();
         uniqueWinners.clear();
+        buttons.clear();
         GiveawayRegistry.getInstance().getMessageId().remove(guildId);
         GiveawayRegistry.getInstance().getChannelId().remove(guildId);
         GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().remove(guildId);
@@ -282,6 +295,10 @@ public class Gift implements GiftHelper {
 
     public String getListUsersHash(String id) {
         return listUsersHash.get(id);
+    }
+
+    public List<ActionRow> getButtons() {
+        return buttons;
     }
 
     public Map<String, String> getListUsersHash() {

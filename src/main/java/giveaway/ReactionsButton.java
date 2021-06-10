@@ -2,13 +2,10 @@ package giveaway;
 
 import jsonparser.JSONParsers;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import startbot.Statcord;
-
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 public class ReactionsButton extends ListenerAdapter {
@@ -19,7 +16,6 @@ public class ReactionsButton extends ListenerAdapter {
     public static final String emojiStopOne = "1️⃣";
     public static final String emojiStopTwo = "2️⃣";
     public static final String emojiStopThree = "3️⃣";
-//    private final List<ActionRow> buttons = new ArrayList<>();
 
     @Override
     public void onButtonClick(@NotNull ButtonClickEvent event) {
@@ -61,7 +57,7 @@ public class ReactionsButton extends ListenerAdapter {
 
             boolean isUserAdminOrHaveManageMessage = (
                     event.getMember().hasPermission(event.getGuildChannel(), Permission.ADMINISTRATOR)
-                    || event.getMember().hasPermission(event.getGuildChannel(), Permission.MESSAGE_MANAGE));
+                            || event.getMember().hasPermission(event.getGuildChannel(), Permission.MESSAGE_MANAGE));
 
             long guild = event.getGuild().getIdLong();
 
@@ -71,7 +67,10 @@ public class ReactionsButton extends ListenerAdapter {
                     .getListUsersHash(event.getUser().getId()) == null) {
                 event.deferEdit().queue();
 
-                GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong()).addUserToPoll(event.getMember().getUser());
+                GiveawayRegistry.getInstance()
+                        .getActiveGiveaways()
+                        .get(event.getGuild().getIdLong())
+                        .addUserToPoll(event.getMember().getUser());
                 Statcord.commandPost("gift", event.getUser().getId());
                 return;
             }
@@ -87,12 +86,11 @@ public class ReactionsButton extends ListenerAdapter {
             if (GiveawayRegistry.getInstance().hasGift(guild) && isUserAdminOrHaveManageMessage) {
 
                 if (event.getButton().getId().equals(event.getGuild().getId() + ":" + emojiStopOne)) {
-                    event.deferEdit().queue();
 
-                    GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
+                    GiveawayRegistry.getInstance()
+                            .getActiveGiveaways()
+                            .get(event.getGuild().getIdLong())
                             .stopGift(event.getGuild().getIdLong(), 1);
-
-                    event.getMessage().getButtons().forEach(button -> System.out.println(button.asDisabled()));
 
                     Statcord.commandPost("gift stop", event.getUser().getId());
                     return;
@@ -100,7 +98,9 @@ public class ReactionsButton extends ListenerAdapter {
 
                 if (event.getButton().getId().equals(event.getGuild().getId() + ":" + emojiStopTwo)) {
                     event.deferEdit().queue();
-                    GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
+                    GiveawayRegistry.getInstance()
+                            .getActiveGiveaways()
+                            .get(event.getGuild().getIdLong())
                             .stopGift(event.getGuild().getIdLong(), 2);
                     Statcord.commandPost("gift stop 2", event.getUser().getId());
                     return;
@@ -108,7 +108,9 @@ public class ReactionsButton extends ListenerAdapter {
 
                 if (event.getButton().getId().equals(event.getGuild().getId() + ":" + emojiStopThree)) {
                     event.deferEdit().queue();
-                    GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
+                    GiveawayRegistry.getInstance()
+                            .getActiveGiveaways()
+                            .get(event.getGuild().getIdLong())
                             .stopGift(event.getGuild().getIdLong(), 3);
                     Statcord.commandPost("gift stop 3", event.getUser().getId());
                 }

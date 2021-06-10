@@ -5,6 +5,7 @@ import java.util.List;
 import jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Button;
 import startbot.BotStart;
 
 public interface GiftHelper {
@@ -13,12 +14,14 @@ public interface GiftHelper {
 
   default void editMessage(EmbedBuilder embedBuilder, long guildId, long channelId, List<ActionRow> buttons) {
     try {
+      buttons.set(0, ActionRow.of(Button.success(String.valueOf(guildId),
+                      buttons.get(0).getButtons().get(0).getLabel().replaceAll("⠀", ""))));
       BotStart.getJda()
           .getGuildById(guildId)
           .getTextChannelById(channelId)
           .editMessageById(GiveawayRegistry.getInstance().getMessageId().get(guildId), embedBuilder.build())
+          .setActionRow(buttons.get(0).getButtons().get(0).asDisabled())
           .queue();
-//      message -> message.getButtons().removeAll(buttons)
       embedBuilder.clear();
     } catch (Exception e) {
       e.printStackTrace();

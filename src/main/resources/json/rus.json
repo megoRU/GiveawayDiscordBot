@@ -33,7 +33,7 @@
   "message_gift_Need_Stop_Giveaway": "Сначала вам нужно завершить Giveaway",
   "message_gift_Not_Correct": "Вы неправильно создаете Giveaway!\n\n**Вот парочка правильных команд:**\n`{0}gift start` — Вечный Giveaway пока вручную не завершите.\n`{0}gift start Free key` — Вечный Giveaway с названием и пока вручную не завершите.\n`{0}gift start Free key 20m` — Запуск Giveaway с названием и на 20 минут.\n`{0}gift start Free key 1d 3` — Запуск Giveaway с названием, на 1 день и с 3 победителями.\n\nДополнительная информация: `{0}help`",
   "giveaway_registry_Error": "Giveaway был отменен, потому что бот не смог получить ID своего сообщения\nПожалуйста, попробуйте снова. **Напишите нам, что именно произошло.\nМы пытаемся исправить эту ошибку. Сервер поддержки:** https://discord.gg/UrWG3R683d",
-  "gift_Press_Green_Button": "Нажми на зелёную кнопку, \nчтобы участвовать!\n\n:medal: {0} {1}\n\nУчастников: `",
+  "gift_Press_Green_Button": "Нажми на зелёную кнопку, чтобы\nучаствовать!\n\n:medal: {0} {1}\n\nУчастников: `",
   "gift_Stop_Button": "Завершить Giveaway с {0} победителем",
   "gift_Press_Me_Button": "Нажми меня чтобы участвовать! ",
   "gift_Ends_At": "Завершится:",
