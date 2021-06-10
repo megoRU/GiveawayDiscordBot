@@ -58,12 +58,6 @@ public class MessageGift extends ListenerAdapter {
             prefix = BotStart.getMapPrefix().get(event.getGuild().getId());
         }
 
-        if (messageWithOutPrefix.matches(GIFT_CHECKER)
-                || messageWithOutPrefix.matches(GIFT_CHECKER_2)
-                || messageSplit.length > 6 || Arrays.toString(messageSplit).contains("#")) {
-            event.getChannel().sendMessage(jsonParsers.getLocale("message_gift_Not_Correct", event.getGuild().getId()).replaceAll("\\{0}", prefix)).queue();
-            return;
-        }
 
         //TODO: Нужно это тестировать!
         if ((message.contains(prefix_GIFT_START + " ") && (message.length() - 11) >= 256)) {
@@ -110,6 +104,14 @@ public class MessageGift extends ListenerAdapter {
                     + "\nMessage with out prefix: " + messageWithOutPrefix
                     + "\nMessage length: " + length
                     + "\nMessage args: " + Arrays.toString(messageSplit));
+
+            if (messageWithOutPrefix.matches(GIFT_CHECKER)
+                    || messageWithOutPrefix.matches(GIFT_CHECKER_2)
+                    || Arrays.toString(messageSplit).contains("#")) {
+                event.getChannel().sendMessage(jsonParsers.getLocale("message_gift_Not_Correct", event.getGuild().getId()).replaceAll("\\{0}", prefix)).queue();
+                return;
+            }
+
             if (messageSplit.length > 2 && messageSplit[2].equals("0")) {
                 event.getChannel()
                         .sendMessage(jsonParsers.getLocale("message_gift_Set_Zero_Minutes", event.getGuild().getId()))
@@ -154,7 +156,6 @@ public class MessageGift extends ListenerAdapter {
                 return;
             }
 
-            //Тут ошибка и не понятно почему: java.lang.StringIndexOutOfBoundsException: begin 12, end 56, length 38
             if (messageWithOutPrefix.matches(GIFT_START_TITLE)) {
                 GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
                         .startGift(
