@@ -101,37 +101,7 @@ public class Gift implements GiftHelper {
                     countWinners,
                     time == null ? null : String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times))),
                     GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
-
-
         });
-
-
-//    MessageBuilder messageBuilder = new MessageBuilder();
-//    messageBuilder
-//            .append(
-//            jsonParsers.getLocale("gift_Press_Green_Button", guild.getId())
-//            .replaceAll("\\{0}", countWinners == null ? "TBA" : countWinners)
-//            .replaceAll("\\{1}", setEndingWord(countWinners == null ? "TBA" : countWinners, guildId)))
-//            .append(String.valueOf(getCount()))
-//            .append("`");
-//    messageBuilder.setActionRows(buttons);
-
-//    channel.sendMessage("⠀").queue(m -> {
-//
-//      m.reply(start.build()).setActionRows(buttons).queue(message -> {
-//        GiveawayRegistry.getInstance().getMessageId().put(guild.getIdLong(), message.getId());
-//        GiveawayRegistry.getInstance().getChannelId().put(guild.getIdLong(), message.getChannel().getId());
-//        GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().put(guild.getIdLong(), message.getId());
-//        GiveawayRegistry.getInstance().getCountWinners().put(guild.getIdLong(), countWinners);
-//        DataBase.getInstance().addMessageToDB(guild.getIdLong(),
-//                message.getIdLong(),
-//                message.getChannel().getIdLong(),
-//                countWinners,
-//                time == null ? null : String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times))),
-//                GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
-//      });
-//      m.delete().queue();
-//    });
 
         DataBase.getInstance().createTableWhenGiveawayStart(guild.getId());
 
