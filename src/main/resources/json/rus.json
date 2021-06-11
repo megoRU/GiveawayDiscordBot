@@ -50,5 +50,6 @@
   "language_change_Not_Admin": "Вы не являетесь Админом или не можете управлять сервером!",
   "language_change_lang": "Вы изменили язык на: ",
   "language_change_lang_reset": "The language is now standard: `ENG`",
-  "reactions_bot_dont_have_permissions": "Бот: `{0}` не имеет: `Разрешения: УПРАВЛЯТЬ СООБЩЕНИЯМИ`\nДобавьте ему указанное разрешение!"
+  "reactions_bot_dont_have_permissions": "Бот: `{0}` не имеет: `Разрешения: УПРАВЛЯТЬ СООБЩЕНИЯМИ`\nДобавьте ему указанное разрешение!",
+  "reactions_you_dont_have_permissions": "У Вас нет разрешений"
 }

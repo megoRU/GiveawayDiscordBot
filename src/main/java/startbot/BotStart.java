@@ -8,6 +8,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import jsonparser.JSONParsers;
 import messagesevents.LanguageChange;
 import messagesevents.MessageInfoHelp;
@@ -18,8 +20,8 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import threads.Giveaway;
-import threads.TopGGAndStatcordThread;
 
 public class BotStart {
 
@@ -30,7 +32,7 @@ public class BotStart {
   private static final Deque<Giveaway> queue = new ArrayDeque<>();
   private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
   private static final Map<String, String> mapPrefix = new HashMap<>();
-  private static final Map<String, String> mapLanguages = new HashMap<>();
+  private static final ConcurrentMap<String, String> mapLanguages = new ConcurrentHashMap<>();
   private static final Map<Integer, String> guildIdHashList = new HashMap<>();
 
   public void startBot() throws Exception {
@@ -46,10 +48,10 @@ public class BotStart {
     //Получаем все префиксы из базы данных
     getPrefixFromDB();
 
-
+    //TopGGAndStatcordThread.serverCount guilds |
     jdaBuilder.setAutoReconnect(true);
     jdaBuilder.setStatus(OnlineStatus.ONLINE);
-    jdaBuilder.setActivity(Activity.playing(activity + TopGGAndStatcordThread.serverCount + " guilds"));
+    jdaBuilder.setActivity(Activity.playing(activity + " New update. If you created Giveaway before June 11, please re-create it !gift stop"));
     jdaBuilder.setBulkDeleteSplittingEnabled(false);
     jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild());
     jdaBuilder.addEventListeners(new MessageGift());
@@ -81,7 +83,7 @@ public class BotStart {
         GiveawayRegistry.getInstance().setGift(guild_long_id, new Gift(guild_long_id, Long.parseLong(channel_long_id)));
         GiveawayRegistry.getInstance().getActiveGiveaways().get(guild_long_id).autoInsert();
         GiveawayRegistry.getInstance().getMessageId().put(guild_long_id, String.valueOf(message_id_long));
-        GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().put(guild_long_id, String.valueOf(message_id_long));
+        GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().put(guild_long_id, String.valueOf(message_id_long));
         GiveawayRegistry.getInstance().getTitle().put(guild_long_id, giveaway_title);
         GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild_long_id, date_end_giveaway == null ? "null" : date_end_giveaway);
         GiveawayRegistry.getInstance().getChannelId().put(guild_long_id, channel_long_id);
@@ -140,7 +142,6 @@ public class BotStart {
     } catch (SQLException e) {
       e.printStackTrace();
     }
-    GiveawayRegistry.getInstance().setGiveAwayCount(guildIdHashList.size());
     guildIdHashList.clear();
   }
 

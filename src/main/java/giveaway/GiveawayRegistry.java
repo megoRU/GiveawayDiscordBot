@@ -4,20 +4,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import jsonparser.JSONParsers;
 
 public class GiveawayRegistry {
 
   //Возвращает Gift по long id
-  private static final Map<Long, Gift> activeGiveaways = new HashMap<>();
+  private static final ConcurrentMap<Long, Gift> activeGiveaways = new ConcurrentHashMap<>();
   //Возвращает String id message с активным Giveaway
-  private static final Map<Long, String> idMessagesWithGiveawayEmoji = new HashMap<>();
-  private static final AtomicInteger giveawayCount = new AtomicInteger(0);
-  private static final Map<Long, String> channelId = new HashMap<>();
-  private static final Map<Long, String> messageId = new HashMap<>();
+  private static final ConcurrentMap<Long, String> idMessagesWithGiveawayButtons = new ConcurrentHashMap<>();
+  private static final ConcurrentMap<Long, String> channelId = new ConcurrentHashMap<>();
+  private static final ConcurrentMap<Long, String> messageId = new ConcurrentHashMap<>();
   private static final Map<Long, String> countWinners = new HashMap<>();
-  private static final Map<Long, String> title = new HashMap<>();
+  private static final ConcurrentMap<Long, String> title = new ConcurrentHashMap<>();
   private static final ConcurrentMap<Long, String> endGiveawayDate = new ConcurrentHashMap<>();
   private static volatile GiveawayRegistry giveawayRegistry;
   private static final JSONParsers jsonParsers = new JSONParsers();
@@ -35,10 +33,6 @@ public class GiveawayRegistry {
 
   private GiveawayRegistry() {}
 
-  public Map<Long, Gift> getActiveGiveaways() {
-    return activeGiveaways;
-  }
-
   public void getGift(long userId) {
     activeGiveaways.get(userId);
   }
@@ -55,13 +49,17 @@ public class GiveawayRegistry {
     activeGiveaways.remove(guildId);
   }
 
-  public Map<Long, String> getIdMessagesWithGiveawayEmoji() {
-    return idMessagesWithGiveawayEmoji;
-  }
-
   public String removeGiftExceptions(long guildId) {
     activeGiveaways.remove(guildId);
     return jsonParsers.getLocale("giveaway_registry_Error", String.valueOf(guildId));
+  }
+
+  public ConcurrentMap<Long, String> getIdMessagesWithGiveawayButtons() {
+    return idMessagesWithGiveawayButtons;
+  }
+
+  public ConcurrentMap<Long, Gift> getActiveGiveaways() {
+    return activeGiveaways;
   }
 
   public Map<Long, String> getMessageId() {
@@ -72,7 +70,7 @@ public class GiveawayRegistry {
     return title;
   }
 
-  public Map<Long, String> getEndGiveawayDate() {
+  public ConcurrentMap<Long, String> getEndGiveawayDate() {
     return endGiveawayDate;
   }
 
@@ -82,22 +80,6 @@ public class GiveawayRegistry {
 
   public Map<Long, String> getCountWinners() {
     return countWinners;
-  }
-
-  public void incrementGiveAwayCount() {
-    giveawayCount.getAndIncrement();
-  }
-
-  public void decrementGiveAwayCount() {
-    giveawayCount.decrementAndGet();
-  }
-
-  public Integer getGiveAwayCount() {
-    return giveawayCount.get();
-  }
-
-  public void setGiveAwayCount(Integer value) {
-    giveawayCount.set(value);
   }
 
 }

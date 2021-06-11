@@ -1,7 +1,6 @@
 package giveaway;
 
 import jsonparser.JSONParsers;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -26,7 +25,6 @@ public class MessageGift extends ListenerAdapter {
     private static final String GIFT_START_COUNT_WITH_MINUTES = "gift start\\s[0-9]{1,2}[mмhчdд]\\s[0-9]{1,2}$";
     private static final String GIFT_STOP = "gift stop";
     private static final String GIFT_STOP_COUNT = "gift stop\\s[0-9]+";
-    private static final String GIFT_COUNT = "!gift count";
 
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
@@ -48,13 +46,11 @@ public class MessageGift extends ListenerAdapter {
         String messageWithOutPrefix = message.substring(1, length);
 
         String prefix_GIFT_START = GIFT_START;
-        String prefix_GIFT_COUNT = GIFT_COUNT;
         String prefix = "!";
 
 
         if (BotStart.getMapPrefix().containsKey(event.getGuild().getId())) {
             prefix_GIFT_START = BotStart.getMapPrefix().get(event.getGuild().getId()) + "gift start";
-            prefix_GIFT_COUNT = BotStart.getMapPrefix().get(event.getGuild().getId()) + "gift count";
             prefix = BotStart.getMapPrefix().get(event.getGuild().getId());
         }
 
@@ -180,17 +176,6 @@ public class MessageGift extends ListenerAdapter {
             }
             GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
                     .stopGift(event.getGuild().getIdLong(), Integer.parseInt("1"));
-            return;
-        }
-
-        if (message.equals(prefix_GIFT_COUNT) && event.getAuthor().getId().equals("250699265389625347")) {
-            EmbedBuilder getCount = new EmbedBuilder();
-            getCount.setTitle("Giveaway count");
-            getCount.setColor(0x00FF00);
-            getCount.setDescription("Active: `" + GiveawayRegistry.getInstance().getGiveAwayCount() + "`");
-            event.getChannel().sendMessage(getCount.build()).queue();
-            getCount.clear();
-
         }
     }
 }

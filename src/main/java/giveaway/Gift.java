@@ -78,7 +78,6 @@ public class Gift implements GiftHelper {
                     .replaceAll("\\{1}", setEndingWord(countWinners == null ? "TBA" : countWinners, guildId)) + getCount() + "`");
             GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild.getIdLong(), "null");
         }
-        GiveawayRegistry.getInstance().incrementGiveAwayCount();
 
         if (BotStart.getMapLanguages().get(guild.getId()) != null) {
 
@@ -106,7 +105,7 @@ public class Gift implements GiftHelper {
 
             GiveawayRegistry.getInstance().getMessageId().put(guild.getIdLong(), message.getId());
             GiveawayRegistry.getInstance().getChannelId().put(guild.getIdLong(), message.getChannel().getId());
-            GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().put(guild.getIdLong(), message.getId());
+            GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().put(guild.getIdLong(), message.getId());
             GiveawayRegistry.getInstance().getCountWinners().put(guild.getIdLong(), countWinners);
             DataBase.getInstance().addMessageToDB(guild.getIdLong(),
                     message.getIdLong(),
@@ -285,10 +284,9 @@ public class Gift implements GiftHelper {
         buttons.clear();
         GiveawayRegistry.getInstance().getMessageId().remove(guildId);
         GiveawayRegistry.getInstance().getChannelId().remove(guildId);
-        GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().remove(guildId);
+        GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().remove(guildId);
         GiveawayRegistry.getInstance().getTitle().remove(guildId);
         GiveawayRegistry.getInstance().removeGift(guildId);
-        GiveawayRegistry.getInstance().decrementGiveAwayCount();
         GiveawayRegistry.getInstance().getEndGiveawayDate().remove(guildId);
         GiveawayRegistry.getInstance().getCountWinners().remove(guildId);
     }

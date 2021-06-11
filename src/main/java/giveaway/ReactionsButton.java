@@ -2,10 +2,17 @@ package giveaway;
 
 import jsonparser.JSONParsers;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.ClientType;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import startbot.Statcord;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 public class ReactionsButton extends ListenerAdapter {
@@ -19,22 +26,23 @@ public class ReactionsButton extends ListenerAdapter {
 
     @Override
     public void onButtonClick(@NotNull ButtonClickEvent event) {
-        if (event.getButton() == null) {
-            return;
-        }
-        if (event.getGuild() == null) {
-            return;
-        }
+
+        if (event.getButton() == null) return;
+
+        if (event.getGuild() == null || event.getMember() == null) return;
 
         if (event.getUser().isBot()) return;
 
+        try {
+            if (GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().get(event.getGuild().getIdLong()) == null) {
+                return;
+            }
 
-        if (GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong()) == null) {
-            return;
-        }
-
-        if (!GiveawayRegistry.getInstance().getIdMessagesWithGiveawayEmoji().get(event.getGuild().getIdLong()).equals(event.getMessageId())) {
-            return;
+            if (!GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().get(event.getGuild().getIdLong()).equals(event.getMessageId())) {
+                return;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         if (!event.getGuild().getSelfMember().hasPermission(event.getGuildChannel(), Permission.MESSAGE_WRITE)) {
@@ -55,13 +63,12 @@ public class ReactionsButton extends ListenerAdapter {
                             "\nUser id: " + event.getUser().getId() + "" +
                             "\nButton pressed: " + event.getButton().getId());
 
-            boolean isUserAdminOrHaveManageMessage = (
-                    event.getMember().hasPermission(event.getGuildChannel(), Permission.ADMINISTRATOR)
-                            || event.getMember().hasPermission(event.getGuildChannel(), Permission.MESSAGE_MANAGE));
+            boolean isUserAdmin = event.getMember().hasPermission(event.getGuildChannel(), Permission.ADMINISTRATOR);
+            boolean isUserCanManageServer = event.getMember().hasPermission(event.getGuildChannel(), Permission.MESSAGE_MANAGE);
 
             long guild = event.getGuild().getIdLong();
-
-            if (event.getButton().getId().equals(event.getGuild().getId() + ":" + emojiPresent)
+            //if (event.getButton().getId().equals(event.getGuild().getId() + ":" + emojiPresent)
+            if (Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + emojiPresent)
                     && GiveawayRegistry.getInstance().hasGift(guild)
                     && GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
                     .getListUsersHash(event.getUser().getId()) == null) {
@@ -83,7 +90,7 @@ public class ReactionsButton extends ListenerAdapter {
                 return;
             }
 
-            if (GiveawayRegistry.getInstance().hasGift(guild) && isUserAdminOrHaveManageMessage) {
+            if (GiveawayRegistry.getInstance().hasGift(guild) && (isUserCanManageServer || isUserAdmin)) {
 
                 if (event.getButton().getId().equals(event.getGuild().getId() + ":" + emojiStopOne)) {
 
@@ -114,6 +121,10 @@ public class ReactionsButton extends ListenerAdapter {
                             .stopGift(event.getGuild().getIdLong(), 3);
                     Statcord.commandPost("gift stop 3", event.getUser().getId());
                 }
+            } else {
+                event.deferEdit().queue();
+                event.getHook().sendMessage(jsonParsers
+                        .getLocale("message_gift_Not_Admin", event.getGuild().getId())).setEphemeral(true).queue();
             }
         } catch (Exception e) {
             e.printStackTrace();
