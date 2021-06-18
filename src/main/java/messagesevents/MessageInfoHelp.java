@@ -21,9 +21,7 @@ public class MessageInfoHelp extends ListenerAdapter implements SenderMessage {
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
 
-        if (event.getAuthor().isBot()) {
-            return;
-        }
+        if (event.getAuthor().isBot()) return;
 
         String message = event.getMessage().getContentDisplay().trim();
 
@@ -121,10 +119,15 @@ public class MessageInfoHelp extends ListenerAdapter implements SenderMessage {
                             System.out.println("Ошибка в удалении сообщении, но почему... Он же удаляет своё..");
                             e.printStackTrace();
                         }
-                        event.getAuthor().openPrivateChannel()
-                                .flatMap(channel -> channel.sendMessage(info.build()))
-                                .queue(null, error -> event.getChannel()
-                                        .sendMessage(jsonParsers.getLocale("messages_events_Failed_To_Send_Message", event.getGuild().getId())).queue());
+                        try {
+                            event.getAuthor().openPrivateChannel()
+                                    .flatMap(channel -> channel.sendMessage(info.build()))
+                                    .queue(null, error -> event.getChannel()
+                                            .sendMessage(jsonParsers.getLocale("messages_events_Failed_To_Send_Message", event.getGuild().getId())).queue());
+                        } catch (Exception e) {
+                            System.out.println("Ошибка при отправке");
+                            e.printStackTrace();
+                        }
                     }
                     case PRIVATE -> {
                         sendMessage(info, event);

@@ -3,25 +3,28 @@ package startbot;
 import config.Config;
 import db.DataBase;
 import events.MessageWhenBotJoinToGuild;
-import giveaway.*;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import giveaway.Gift;
+import giveaway.GiveawayRegistry;
+import giveaway.MessageGift;
+import giveaway.ReactionsButton;
 import jsonparser.JSONParsers;
-import messagesevents.LanguageChange;
-import messagesevents.MessageInfoHelp;
-import messagesevents.PrefixChange;
+import messagesevents.*;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
-import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import threads.Giveaway;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class BotStart {
 
@@ -31,6 +34,7 @@ public class BotStart {
   private static JDA jda;
   private static final Deque<Giveaway> queue = new ArrayDeque<>();
   private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
+  private static final Map<String, String> disabledGuildForNews = new HashMap<>();
   private static final Map<String, String> mapPrefix = new HashMap<>();
   private static final ConcurrentMap<String, String> mapLanguages = new ConcurrentHashMap<>();
   private static final Map<Integer, String> guildIdHashList = new HashMap<>();
@@ -38,6 +42,9 @@ public class BotStart {
   public void startBot() throws Exception {
     //Получаем языки
     getLocalizationFromDB();
+
+    //Получаем гильдии которые запретили рассылку
+    getDisabledGuildsForNews();
 
     //Получаем id guild и id message
     getMessageIdFromDB();
@@ -59,6 +66,8 @@ public class BotStart {
     jdaBuilder.addEventListeners(new MessageInfoHelp());
     jdaBuilder.addEventListeners(new LanguageChange());
     jdaBuilder.addEventListeners(new ReactionsButton());
+    jdaBuilder.addEventListeners(new MessageNews());
+    jdaBuilder.addEventListeners(new SendingMessagesToGuilds());
 
     jda = jdaBuilder.build();
     jda.awaitReady();
@@ -175,6 +184,23 @@ public class BotStart {
                     jsonParsers.getLocale("gift_Stop_Button", guildId).replaceAll("\\{0}", "3"))));
   }
 
+  private void getDisabledGuildsForNews() {
+    try {
+      Statement statement = DataBase.getConnection().createStatement();
+      String sql = "SELECT guild_id, is_can_send_news FROM sendNews WHERE is_can_send_news = false";
+      ResultSet rs = statement.executeQuery(sql);
+
+      while (rs.next()) {
+        getDisabledGuildForNews().put(rs.getString("guild_id"), rs.getString("guild_id"));
+      }
+
+      rs.close();
+      statement.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+  }
+
   private void getPrefixFromDB() {
     try {
       Statement statement = DataBase.getConnection().createStatement();
@@ -215,6 +241,10 @@ public class BotStart {
 
   public static Map<String, String> getMapLanguages() {
     return mapLanguages;
+  }
+
+  public static Map<String, String> getDisabledGuildForNews() {
+    return disabledGuildForNews;
   }
 
   public static JDA getJda() {
