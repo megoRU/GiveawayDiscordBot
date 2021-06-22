@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 public class MessageGift extends ListenerAdapter {
 
     private final JSONParsers jsonParsers = new JSONParsers();
-    private final static Logger LOGGER = Logger.getLogger(MessageGift.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(MessageGift.class.getName());
     private static final String GIFT_CHECKER = "gift start\\s(<|).+(>|)\\s<([0-9]|)+(м|m)\\|([0-9]|)+(ч|h)\\|([0-9]|)+(д|d)>";
     private static final String GIFT_CHECKER_2 = "gift start\\s(<|).+(>|)\\s<.+>";
     private static final String GIFT_START = "!gift start";
@@ -36,7 +36,7 @@ public class MessageGift extends ListenerAdapter {
 
         if (event.getMember() == null || message.equals("")) return;
 
-        if (!event.getGuild().getSelfMember().hasPermission(event.getChannel(), Permission.MESSAGE_WRITE) &&
+        if (!event.getGuild().getSelfMember().hasPermission(event.getChannel(), Permission.MESSAGE_WRITE) ||
                 !event.getGuild().getSelfMember().hasPermission(event.getChannel(), Permission.MESSAGE_EMBED_LINKS)) {
             return;
         }

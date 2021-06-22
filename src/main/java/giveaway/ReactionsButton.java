@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 public class ReactionsButton extends ListenerAdapter {
 
     private final JSONParsers jsonParsers = new JSONParsers();
-    private final static Logger LOGGER = Logger.getLogger(ReactionsButton.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ReactionsButton.class.getName());
     public static final String emojiPresent = "🎁";
     public static final String emojiStopOne = "1️⃣";
     public static final String emojiStopTwo = "2️⃣";

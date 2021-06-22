@@ -16,7 +16,7 @@ public class MessageInfoHelp extends ListenerAdapter implements SenderMessage {
     private static final String HELP_WITHOUT = "help";
     private static final String HELP = "!help";
     private static final String PREFIX = "!";
-    private final JSONParsers jsonParsers = new JSONParsers();
+    private static final JSONParsers jsonParsers = new JSONParsers();
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {

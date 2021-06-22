@@ -13,7 +13,7 @@ public class LanguageChange extends ListenerAdapter {
   private static final String LANG_RUS = "!lang rus";
   private static final String LANG_ENG = "!lang eng";
   private static final String LANG_RESET = "!lang reset";
-  private final JSONParsers jsonParsers = new JSONParsers();
+  private static final JSONParsers jsonParsers = new JSONParsers();
 
   @Override
   public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {

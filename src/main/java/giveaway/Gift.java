@@ -27,7 +27,7 @@ public class Gift implements GiftHelper {
 
     private final JSONParsers jsonParsers = new JSONParsers();
     private final List<ActionRow> buttons = new ArrayList<>();
-    private final static Logger LOGGER = Logger.getLogger(Gift.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(Gift.class.getName());
     private final List<String> listUsers = new ArrayList<>();
     private final Map<String, String> listUsersHash = new HashMap<>();
     private final Set<String> uniqueWinners = new HashSet<>();

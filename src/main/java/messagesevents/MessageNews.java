@@ -12,7 +12,7 @@ public class MessageNews extends ListenerAdapter {
     private static final String NEWS_DISABLE = "!news disable";
     private static final String NEWS_ENABLED = "!news enable";
     private static final String NEWS_CHANNEL = "!news <#[0-9]+>";
-    private final JSONParsers jsonParsers = new JSONParsers();
+    private static final JSONParsers jsonParsers = new JSONParsers();
 
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
