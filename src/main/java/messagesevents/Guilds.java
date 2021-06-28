@@ -2,7 +2,6 @@ package messagesevents;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
-
 import java.util.List;
 
 public class Guilds {

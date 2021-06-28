@@ -19,7 +19,7 @@ public interface GiftHelper {
       BotStart.getJda()
           .getGuildById(guildId)
           .getTextChannelById(channelId)
-          .editMessageById(GiveawayRegistry.getInstance().getMessageId().get(guildId), embedBuilder.build())
+          .editMessageEmbedsById(GiveawayRegistry.getInstance().getMessageId().get(guildId), embedBuilder.build())
           .setActionRow(buttons.get(0).getButtons().get(0).asDisabled())
           .queue();
       embedBuilder.clear();
@@ -47,7 +47,7 @@ public interface GiftHelper {
       //Отправляет сообщение и если нельзя редактировать то отправляет ошибку
       BotStart.getJda().getGuildById(guildId)
           .getTextChannelById(channelId)
-          .editMessageById(GiveawayRegistry.getInstance().getMessageId().get(guildId),
+          .editMessageEmbedsById(GiveawayRegistry.getInstance().getMessageId().get(guildId),
               edit.build()).queue(null, (exception) ->
           BotStart.getJda().getTextChannelById(channelId).sendMessage(GiveawayRegistry.getInstance().removeGiftExceptions(guildId))
               .queue());

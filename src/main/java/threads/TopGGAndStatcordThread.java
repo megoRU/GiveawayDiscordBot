@@ -21,8 +21,7 @@ public class TopGGAndStatcordThread extends Thread {
             .build();
         serverCount = (int) BotStart.getJda().getGuildCache().size();
         TOP_GG_API.setStats(serverCount);
-//        BotStart.getJda().getPresence().setActivity(Activity.playing(BotStart.activity
-//                        + TopGGAndStatcordThread.serverCount + " guilds"));
+        BotStart.getJda().getPresence().setActivity(Activity.playing(BotStart.activity + TopGGAndStatcordThread.serverCount + " guilds"));
 
         if (!isLaunched) {
           Statcord.start(

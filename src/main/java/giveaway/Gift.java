@@ -101,7 +101,7 @@ public class Gift implements GiftHelper {
                 jsonParsers.getLocale("gift_Stop_Button", guild.getId()).replaceAll("\\{0}", "3"))));
 
 
-        channel.sendMessage(start.build()).setActionRows(buttons).queue(message -> {
+        channel.sendMessageEmbeds(start.build()).setActionRows(buttons).queue(message -> {
 
             GiveawayRegistry.getInstance().getMessageId().put(guild.getIdLong(), message.getId());
             GiveawayRegistry.getInstance().getChannelId().put(guild.getIdLong(), message.getChannel().getId());
