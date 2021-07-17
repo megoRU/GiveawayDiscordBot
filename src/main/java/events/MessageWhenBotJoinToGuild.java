@@ -1,13 +1,14 @@
 package events;
 
 import db.DataBase;
-import java.awt.Color;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
+
+import java.awt.*;
 
 public class MessageWhenBotJoinToGuild extends ListenerAdapter {
 
@@ -33,7 +34,7 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
             welcome.addField("One more Thing", "If you are not satisfied with something in the bot, please let us know, we will fix it!"
                     , false);
 
-            event.getGuild().getDefaultChannel().sendMessage(welcome.build()).queue();
+            event.getGuild().getDefaultChannel().sendMessageEmbeds(welcome.build()).queue();
             welcome.clear();
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,6 +1,5 @@
 package messagesevents;
 
-import java.util.concurrent.TimeUnit;
 import jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -10,6 +9,8 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import startbot.BotStart;
+
+import java.util.concurrent.TimeUnit;
 
 public class MessageInfoHelp extends ListenerAdapter implements SenderMessage {
 
@@ -122,7 +123,7 @@ public class MessageInfoHelp extends ListenerAdapter implements SenderMessage {
                             e.printStackTrace();
                         }
                         event.getAuthor().openPrivateChannel()
-                                .flatMap(channel -> channel.sendMessage(info.build()))
+                                .flatMap(channel -> channel.sendMessageEmbeds(info.build()))
                                 .queue(null, error -> event.getChannel()
                                         .sendMessage(jsonParsers.getLocale("messages_events_Failed_To_Send_Message", event.getGuild().getId())).queue());
                     }

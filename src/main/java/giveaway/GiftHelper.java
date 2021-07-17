@@ -1,25 +1,26 @@
 package giveaway;
 
-import java.time.OffsetDateTime;
-import java.util.List;
 import jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
 import startbot.BotStart;
 
+import java.time.OffsetDateTime;
+import java.util.List;
+
 public interface GiftHelper {
 
   JSONParsers jsonParsers = new JSONParsers();
 
-  default void editMessage(EmbedBuilder embedBuilder, long guildId, long channelId, List<ActionRow> buttons) {
+  default void editMessage(EmbedBuilder embedBuilder, Long guildId, Long channelId, List<ActionRow> buttons) {
     try {
       buttons.set(0, ActionRow.of(Button.success(String.valueOf(guildId),
                       buttons.get(0).getButtons().get(0).getLabel().replaceAll("⠀", ""))));
       BotStart.getJda()
           .getGuildById(guildId)
           .getTextChannelById(channelId)
-          .editMessageById(GiveawayRegistry.getInstance().getMessageId().get(guildId), embedBuilder.build())
+          .editMessageEmbedsById(GiveawayRegistry.getInstance().getMessageId().get(guildId), embedBuilder.build())
           .setActionRow(buttons.get(0).getButtons().get(0).asDisabled())
           .queue();
       embedBuilder.clear();
@@ -28,7 +29,7 @@ public interface GiftHelper {
     }
   }
 
-  default void updateGiveawayMessage(String endingWord, long guildId, long channelId, int count) {
+  default void updateGiveawayMessage(String endingWord, Long guildId, Long channelId, Integer count) {
     try {
       EmbedBuilder edit = new EmbedBuilder();
       edit.setColor(0x00FF00);
@@ -47,7 +48,7 @@ public interface GiftHelper {
       //Отправляет сообщение и если нельзя редактировать то отправляет ошибку
       BotStart.getJda().getGuildById(guildId)
           .getTextChannelById(channelId)
-          .editMessageById(GiveawayRegistry.getInstance().getMessageId().get(guildId),
+          .editMessageEmbedsById(GiveawayRegistry.getInstance().getMessageId().get(guildId),
               edit.build()).queue(null, (exception) ->
           BotStart.getJda().getTextChannelById(channelId).sendMessage(GiveawayRegistry.getInstance().removeGiftExceptions(guildId))
               .queue());

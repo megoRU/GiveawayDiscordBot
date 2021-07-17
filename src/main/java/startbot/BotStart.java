@@ -3,13 +3,10 @@ package startbot;
 import config.Config;
 import db.DataBase;
 import events.MessageWhenBotJoinToGuild;
-import giveaway.*;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import giveaway.Gift;
+import giveaway.GiveawayRegistry;
+import giveaway.MessageGift;
+import giveaway.ReactionsButton;
 import jsonparser.JSONParsers;
 import messagesevents.LanguageChange;
 import messagesevents.MessageInfoHelp;
@@ -20,8 +17,18 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
-import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import threads.Giveaway;
+import threads.TopGGAndStatcordThread;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class BotStart {
 
@@ -48,10 +55,9 @@ public class BotStart {
     //Получаем все префиксы из базы данных
     getPrefixFromDB();
 
-    //TopGGAndStatcordThread.serverCount guilds |
     jdaBuilder.setAutoReconnect(true);
     jdaBuilder.setStatus(OnlineStatus.ONLINE);
-    jdaBuilder.setActivity(Activity.playing(activity + " New update. If you created Giveaway before June 11, please re-create it !gift stop"));
+    jdaBuilder.setActivity(Activity.playing(activity + TopGGAndStatcordThread.serverCount + " guilds"));
     jdaBuilder.setBulkDeleteSplittingEnabled(false);
     jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild());
     jdaBuilder.addEventListeners(new MessageGift());

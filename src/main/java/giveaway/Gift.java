@@ -1,27 +1,21 @@
 package giveaway;
 
 import db.DataBase;
-import java.sql.SQLException;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.logging.Logger;
 import jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
 import startbot.BotStart;
 import threads.Giveaway;
+
+import java.sql.SQLException;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.*;
+import java.util.logging.Logger;
 
 public class Gift implements GiftHelper {
 
@@ -101,7 +95,7 @@ public class Gift implements GiftHelper {
                 jsonParsers.getLocale("gift_Stop_Button", guild.getId()).replaceAll("\\{0}", "3"))));
 
 
-        channel.sendMessage(start.build()).setActionRows(buttons).queue(message -> {
+        channel.sendMessageEmbeds(start.build()).setActionRows(buttons).queue(message -> {
 
             GiveawayRegistry.getInstance().getMessageId().put(guild.getIdLong(), message.getId());
             GiveawayRegistry.getInstance().getChannelId().put(guild.getIdLong(), message.getChannel().getId());

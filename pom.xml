@@ -48,7 +48,7 @@
     <dependency>
       <groupId>net.dv8tion</groupId>
       <artifactId>JDA</artifactId>
-      <version>4.3.0_277</version>
+      <version>4.3.0_296</version>
       <exclusions>
         <exclusion>
           <groupId>club.minnced</groupId>
@@ -67,7 +67,7 @@
     <dependency>
       <groupId>com.github.oshi</groupId>
       <artifactId>oshi-core</artifactId>
-      <version>5.7.4</version>
+      <version>5.7.5</version>
     </dependency>
 
     <dependency>
@@ -80,7 +80,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>1.7.30</version>
+      <version>1.7.31</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
