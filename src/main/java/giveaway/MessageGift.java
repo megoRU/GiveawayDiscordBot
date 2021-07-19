@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import startbot.BotStart;
 import startbot.Statcord;
+
 import java.util.Arrays;
 import java.util.logging.Logger;
 
@@ -28,9 +29,7 @@ public class MessageGift extends ListenerAdapter {
 
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
-        if (event.getAuthor().isBot()) {
-            return;
-        }
+        if (event.getAuthor().isBot()) return;
 
         String message = event.getMessage().getContentRaw().toLowerCase().trim();
 

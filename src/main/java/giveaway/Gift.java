@@ -76,22 +76,22 @@ public class Gift implements GiftHelper {
         if (BotStart.getMapLanguages().get(guild.getId()) != null) {
 
             if (BotStart.getMapLanguages().get(guild.getId()).equals("rus")) {
-                buttons.add(ActionRow.of(Button.success(guildId + ":" + ReactionsButton.emojiPresent,
+                buttons.add(ActionRow.of(Button.success(guildId + ":" + ReactionsButton.PRESENT,
                         jsonParsers.getLocale("gift_Press_Me_Button", guild.getId()) + "⠀ ⠀⠀")));
             } else {
-                buttons.add(ActionRow.of(Button.success(guildId + ":" + ReactionsButton.emojiPresent,
+                buttons.add(ActionRow.of(Button.success(guildId + ":" + ReactionsButton.PRESENT,
                         jsonParsers.getLocale("gift_Press_Me_Button", guild.getId()) + "⠀⠀⠀⠀⠀⠀⠀⠀")));
             }
         } else {
-            buttons.add(ActionRow.of(Button.success(guildId + ":" + ReactionsButton.emojiPresent,
+            buttons.add(ActionRow.of(Button.success(guildId + ":" + ReactionsButton.PRESENT,
                     jsonParsers.getLocale("gift_Press_Me_Button", guild.getId()) + "⠀⠀⠀⠀⠀⠀⠀⠀")));
         }
 
-        buttons.add(ActionRow.of(Button.danger(guildId + ":" + ReactionsButton.emojiStopOne,
+        buttons.add(ActionRow.of(Button.danger(guildId + ":" + ReactionsButton.STOP_ONE,
                 jsonParsers.getLocale("gift_Stop_Button", guild.getId()).replaceAll("\\{0}", "1"))));
-        buttons.add(ActionRow.of(Button.danger(guildId + ":" + ReactionsButton.emojiStopTwo,
+        buttons.add(ActionRow.of(Button.danger(guildId + ":" + ReactionsButton.STOP_TWO,
                 jsonParsers.getLocale("gift_Stop_Button", guild.getId()).replaceAll("\\{0}", "2"))));
-        buttons.add(ActionRow.of(Button.danger(guildId + ":" + ReactionsButton.emojiStopThree,
+        buttons.add(ActionRow.of(Button.danger(guildId + ":" + ReactionsButton.STOP_THREE,
                 jsonParsers.getLocale("gift_Stop_Button", guild.getId()).replaceAll("\\{0}", "3"))));
 
 
@@ -193,7 +193,7 @@ public class Gift implements GiftHelper {
             notEnoughUsers.setDescription(jsonParsers
                     .getLocale("gift_Giveaway_Deleted", String.valueOf(guildIdLong)));
             //Отправляет сообщение
-            editMessage(notEnoughUsers, guildId, channelId, buttons);
+            editMessage(notEnoughUsers, guildId, channelId);
             //Удаляет данные из коллекций
             clearingCollections();
 
@@ -212,7 +212,7 @@ public class Gift implements GiftHelper {
                     .replaceAll("\\{0}", String.valueOf(countWinner))
                     .replaceAll("\\{1}", String.valueOf(getCount())));
             //Отправляет сообщение
-            editMessage(zero, guildId, channelId, buttons);
+            editMessage(zero, guildId, channelId);
             return;
         }
         Instant timestamp = Instant.now();
@@ -237,7 +237,7 @@ public class Gift implements GiftHelper {
 
 
             //Отправляет сообщение
-            editMessage(stopWithMoreWinner, guildId, channelId, buttons);
+            editMessage(stopWithMoreWinner, guildId, channelId);
 
             //Удаляет данные из коллекций
             clearingCollections();
@@ -261,7 +261,7 @@ public class Gift implements GiftHelper {
         stop.setFooter(jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
 
         //Отправляет сообщение
-        editMessage(stop, guildId, channelId, buttons);
+        editMessage(stop, guildId, channelId);
 
         //Удаляет данные из коллекций
         clearingCollections();
@@ -272,10 +272,6 @@ public class Gift implements GiftHelper {
     }
 
     private void clearingCollections() {
-        listUsersHash.clear();
-        listUsers.clear();
-        uniqueWinners.clear();
-        buttons.clear();
         GiveawayRegistry.getInstance().getMessageId().remove(guildId);
         GiveawayRegistry.getInstance().getChannelId().remove(guildId);
         GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().remove(guildId);

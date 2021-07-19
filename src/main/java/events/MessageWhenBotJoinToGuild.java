@@ -1,16 +1,21 @@
 package events;
 
 import db.DataBase;
+import giveaway.ReactionsButton;
+import jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.components.Button;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 
 public class MessageWhenBotJoinToGuild extends ListenerAdapter {
+
+    private final JSONParsers jsonParsers = new JSONParsers();
 
     //bot join msg
     @Override
@@ -34,7 +39,10 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
             welcome.addField("One more Thing", "If you are not satisfied with something in the bot, please let us know, we will fix it!"
                     , false);
 
-            event.getGuild().getDefaultChannel().sendMessageEmbeds(welcome.build()).queue();
+            event.getGuild().getDefaultChannel().sendMessageEmbeds(welcome.build())
+                    .setActionRow(Button.success(event.getGuild().getId() + ":" + ReactionsButton.BUTTON_HELP,
+                            jsonParsers.getLocale("button_Help", event.getGuild().getId())))
+                    .queue();
             welcome.clear();
         } catch (Exception e) {
             e.printStackTrace();

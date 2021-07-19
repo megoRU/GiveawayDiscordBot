@@ -1,28 +1,29 @@
 package giveaway;
 
 import jsonparser.JSONParsers;
+import messagesevents.MessageInfoHelp;
+import messagesevents.SenderMessage;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.entities.ClientType;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.components.Button;
 import org.jetbrains.annotations.NotNull;
+import startbot.BotStart;
 import startbot.Statcord;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.logging.Logger;
 
-public class ReactionsButton extends ListenerAdapter {
+public class ReactionsButton extends ListenerAdapter implements SenderMessage {
 
     private final JSONParsers jsonParsers = new JSONParsers();
     private final static Logger LOGGER = Logger.getLogger(ReactionsButton.class.getName());
-    public static final String emojiPresent = "🎁";
-    public static final String emojiStopOne = "1️⃣";
-    public static final String emojiStopTwo = "2️⃣";
-    public static final String emojiStopThree = "3️⃣";
+    public static final String PRESENT = "PRESENT";
+    public static final String STOP_ONE = "STOP_ONE";
+    public static final String STOP_TWO = "STOP_TWO";
+    public static final String STOP_THREE = "STOP_THREE";
+    public static final String BUTTON_EXAMPLES = "BUTTON_EXAMPLES";
+    public static final String BUTTON_HELP = "BUTTON_HELP";
 
     @Override
     public void onButtonClick(@NotNull ButtonClickEvent event) {
@@ -32,6 +33,37 @@ public class ReactionsButton extends ListenerAdapter {
         if (event.getGuild() == null || event.getMember() == null) return;
 
         if (event.getUser().isBot()) return;
+
+        if (Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + BUTTON_EXAMPLES)) {
+
+            event.deferEdit().queue();
+            event.getChannel().sendMessage(jsonParsers
+                    .getLocale("message_gift_Not_Correct", event.getGuild().getId())
+                    .replaceAll("\\{0}",
+                            BotStart.getMapPrefix().get(event.getGuild().getId())
+                                    == null
+                                    ? "!"
+                                    : BotStart.getMapPrefix().get(event.getGuild().getId())))
+                    .setActionRow(Button.success(event.getGuild().getId() + ":" + ReactionsButton.BUTTON_HELP,
+                            jsonParsers.getLocale("button_Help", event.getGuild().getId())))
+                    .queue();
+            return;
+        }
+
+        if (Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + BUTTON_HELP)) {
+
+            event.deferEdit().queue();
+            MessageInfoHelp messageInfoHelp = new MessageInfoHelp();
+            messageInfoHelp.buildMessage(
+                    BotStart.getMapPrefix().get(event.getGuild().getId()) == null ? "!" : BotStart.getMapPrefix().get(event.getGuild().getId()),
+                    event.getTextChannel(),
+                    event.getUser().getAvatarUrl(),
+                    event.getGuild().getId(),
+                    event.getUser().getName()
+            );
+            return;
+        }
+
 
         try {
             if (GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().get(event.getGuild().getIdLong()) == null) {
@@ -48,14 +80,6 @@ public class ReactionsButton extends ListenerAdapter {
         if (!event.getGuild().getSelfMember().hasPermission(event.getGuildChannel(), Permission.MESSAGE_WRITE)) {
             return;
         }
-
-        if (!event.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_MANAGE)) {
-            event.getChannel().sendMessage(jsonParsers
-                    .getLocale("reactions_bot_dont_have_permissions", event.getGuild().getId())
-                    .replaceAll("\\{0}", event.getGuild().getSelfMember().getUser().getName()))
-                    .queue();
-            return;
-        }
         try {
 
             LOGGER.info(
@@ -68,7 +92,7 @@ public class ReactionsButton extends ListenerAdapter {
 
             long guild = event.getGuild().getIdLong();
             //if (event.getButton().getId().equals(event.getGuild().getId() + ":" + emojiPresent)
-            if (Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + emojiPresent)
+            if (Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + PRESENT)
                     && GiveawayRegistry.getInstance().hasGift(guild)
                     && GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
                     .getListUsersHash(event.getUser().getId()) == null) {
@@ -82,7 +106,7 @@ public class ReactionsButton extends ListenerAdapter {
                 return;
             }
 
-            if (event.getButton().getId().equals(event.getGuild().getId() + ":" + emojiPresent)
+            if (event.getButton().getId().equals(event.getGuild().getId() + ":" + PRESENT)
                     && GiveawayRegistry.getInstance().hasGift(guild)
                     && GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
                     .getListUsersHash(event.getUser().getId()) != null) {
@@ -92,7 +116,7 @@ public class ReactionsButton extends ListenerAdapter {
 
             if (GiveawayRegistry.getInstance().hasGift(guild) && (isUserCanManageServer || isUserAdmin)) {
 
-                if (event.getButton().getId().equals(event.getGuild().getId() + ":" + emojiStopOne)) {
+                if (event.getButton().getId().equals(event.getGuild().getId() + ":" + STOP_ONE)) {
 
                     GiveawayRegistry.getInstance()
                             .getActiveGiveaways()
@@ -103,7 +127,7 @@ public class ReactionsButton extends ListenerAdapter {
                     return;
                 }
 
-                if (event.getButton().getId().equals(event.getGuild().getId() + ":" + emojiStopTwo)) {
+                if (event.getButton().getId().equals(event.getGuild().getId() + ":" + STOP_TWO)) {
                     event.deferEdit().queue();
                     GiveawayRegistry.getInstance()
                             .getActiveGiveaways()
@@ -113,7 +137,7 @@ public class ReactionsButton extends ListenerAdapter {
                     return;
                 }
 
-                if (event.getButton().getId().equals(event.getGuild().getId() + ":" + emojiStopThree)) {
+                if (event.getButton().getId().equals(event.getGuild().getId() + ":" + STOP_THREE)) {
                     event.deferEdit().queue();
                     GiveawayRegistry.getInstance()
                             .getActiveGiveaways()

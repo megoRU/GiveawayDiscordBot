@@ -155,29 +155,29 @@ public class BotStart {
     if (getMapLanguages().get(guildId) != null) {
       if (getMapLanguages().get(guildId).equals("rus")) {
         GiveawayRegistry.getInstance().getActiveGiveaways().get(longGuildId).getButtons()
-                .add(ActionRow.of(Button.success(longGuildId + ":" + ReactionsButton.emojiPresent,
+                .add(ActionRow.of(Button.success(longGuildId + ":" + ReactionsButton.PRESENT,
                         jsonParsers.getLocale("gift_Press_Me_Button", guildId) + "⠀ ⠀⠀")));
       } else {
         GiveawayRegistry.getInstance().getActiveGiveaways().get(longGuildId).getButtons()
-                .add(ActionRow.of(Button.success(longGuildId + ":" + ReactionsButton.emojiPresent,
+                .add(ActionRow.of(Button.success(longGuildId + ":" + ReactionsButton.PRESENT,
                         jsonParsers.getLocale("gift_Press_Me_Button", guildId) + "⠀⠀⠀⠀⠀⠀⠀⠀")));
       }
     } else {
       GiveawayRegistry.getInstance().getActiveGiveaways().get(longGuildId).getButtons()
-              .add(ActionRow.of(Button.success(longGuildId + ":" + ReactionsButton.emojiPresent,
+              .add(ActionRow.of(Button.success(longGuildId + ":" + ReactionsButton.PRESENT,
                       jsonParsers.getLocale("gift_Press_Me_Button", guildId) + "⠀⠀⠀⠀⠀⠀⠀⠀")));
     }
 
     GiveawayRegistry.getInstance().getActiveGiveaways().get(longGuildId).getButtons()
-            .add(ActionRow.of(Button.danger(longGuildId + ":" + ReactionsButton.emojiStopOne,
+            .add(ActionRow.of(Button.danger(longGuildId + ":" + ReactionsButton.STOP_ONE,
                     jsonParsers.getLocale("gift_Stop_Button", guildId).replaceAll("\\{0}", "1"))));
 
     GiveawayRegistry.getInstance().getActiveGiveaways().get(longGuildId).getButtons()
-            .add(ActionRow.of(Button.danger(longGuildId + ":" + ReactionsButton.emojiStopTwo,
+            .add(ActionRow.of(Button.danger(longGuildId + ":" + ReactionsButton.STOP_TWO,
                     jsonParsers.getLocale("gift_Stop_Button", guildId).replaceAll("\\{0}", "2"))));
 
     GiveawayRegistry.getInstance().getActiveGiveaways().get(longGuildId).getButtons()
-            .add(ActionRow.of(Button.danger(longGuildId + ":" + ReactionsButton.emojiStopThree,
+            .add(ActionRow.of(Button.danger(longGuildId + ":" + ReactionsButton.STOP_THREE,
                     jsonParsers.getLocale("gift_Stop_Button", guildId).replaceAll("\\{0}", "3"))));
   }
 

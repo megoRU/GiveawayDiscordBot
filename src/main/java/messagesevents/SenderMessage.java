@@ -1,14 +1,18 @@
 package messagesevents;
 
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import org.jetbrains.annotations.NotNull;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.interactions.components.Button;
+
+import java.util.List;
 
 public interface SenderMessage {
 
-    default void sendMessage(EmbedBuilder embedBuilder, @NotNull MessageReceivedEvent event) {
+    default void sendMessage(MessageEmbed embedBuilder, TextChannel textChannel, List<Button> buttons) {
         try {
-            event.getChannel().sendMessageEmbeds(embedBuilder.build()).queue();
+            textChannel.sendMessageEmbeds(embedBuilder)
+                    .setActionRow(buttons)
+                    .queue();
         } catch (Exception e) {
             e.printStackTrace();
         }
