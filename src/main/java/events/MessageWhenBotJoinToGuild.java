@@ -48,20 +48,30 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
             buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
 
 
-            if (BotStart.getMapLanguages().get(event.getGuild().getId()).equals("eng")) {
+            if (BotStart.getMapLanguages().get(event.getGuild().getId()) != null) {
+
+                if (BotStart.getMapLanguages().get(event.getGuild().getId()).equals("eng")) {
+
+                    buttons.add(Button.secondary(event.getGuild().getId() + ":" + ReactionsButton.CHANGE_LANGUAGE,
+                            "Сменить язык ")
+                            .withEmoji(Emoji.fromUnicode("U+1F1F7U+1F1FA")));
+                } else {
+                    buttons.add(Button.secondary(event.getGuild().getId() + ":" + ReactionsButton.CHANGE_LANGUAGE,
+                            "Change language ")
+                            .withEmoji(Emoji.fromUnicode("U+1F1ECU+1F1E7")));
+                }
+            } else {
                 buttons.add(Button.secondary(event.getGuild().getId() + ":" + ReactionsButton.CHANGE_LANGUAGE,
                         "Сменить язык ")
                         .withEmoji(Emoji.fromUnicode("U+1F1F7U+1F1FA")));
-            } else {
-                buttons.add(Button.secondary(event.getGuild().getId() + ":" + ReactionsButton.CHANGE_LANGUAGE,
-                        "Change language ")
-                        .withEmoji(Emoji.fromUnicode("U+1F1ECU+1F1E7")));
             }
+
 
             event.getGuild().getDefaultChannel().sendMessageEmbeds(welcome.build())
                     .setActionRow(buttons).queue();
 
             welcome.clear();
+
         } catch (Exception e) {
             System.out.println("Скорее всего нет `DefaultChannel`!");
             e.printStackTrace();
