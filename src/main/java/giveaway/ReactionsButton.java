@@ -1,5 +1,6 @@
 package giveaway;
 
+import db.DataBase;
 import jsonparser.JSONParsers;
 import messagesevents.MessageInfoHelp;
 import messagesevents.SenderMessage;
@@ -24,6 +25,7 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
     public static final String STOP_THREE = "STOP_THREE";
     public static final String BUTTON_EXAMPLES = "BUTTON_EXAMPLES";
     public static final String BUTTON_HELP = "BUTTON_HELP";
+    public static final String CHANGE_LANGUAGE = "CHANGE_LANGUAGE";
 
     @Override
     public void onButtonClick(@NotNull ButtonClickEvent event) {
@@ -38,7 +40,7 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
 
             event.deferEdit().queue();
             event.getChannel().sendMessage(jsonParsers
-                    .getLocale("message_gift_Not_Correct", event.getGuild().getId())
+                    .getLocale("message_gift_Not_Correct_For_Button", event.getGuild().getId())
                     .replaceAll("\\{0}",
                             BotStart.getMapPrefix().get(event.getGuild().getId())
                                     == null
@@ -64,6 +66,18 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
             return;
         }
 
+        if (Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + CHANGE_LANGUAGE)) {
+            event.deferEdit().queue();
+            String buttonName = event.getButton().getEmoji().getName().contains("\uD83C\uDDF7\uD83C\uDDFA") ? "rus" : "eng";
+
+            DataBase.getInstance().addLangToDB(event.getGuild().getId(), buttonName);
+            BotStart.getMapLanguages().put(event.getGuild().getId(), buttonName);
+
+            event.getHook().sendMessage(jsonParsers
+                    .getLocale("button_Language", event.getGuild().getId())
+                    .replaceAll("\\{0}", buttonName))
+                    .setEphemeral(true).queue();
+        }
 
         try {
             if (GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().get(event.getGuild().getIdLong()) == null) {

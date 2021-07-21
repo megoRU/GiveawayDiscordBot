@@ -4,6 +4,7 @@ import giveaway.ReactionsButton;
 import jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -19,7 +20,6 @@ public class MessageInfoHelp extends ListenerAdapter implements SenderMessage {
     private static final String HELP = "!help";
     private static final String PREFIX = "!";
     private final JSONParsers jsonParsers = new JSONParsers();
-    private final List<Button> buttons = new ArrayList<>();
 
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
@@ -90,18 +90,24 @@ public class MessageInfoHelp extends ListenerAdapter implements SenderMessage {
 
         info.addField(jsonParsers.getLocale("messages_events_Links", guildIdLong),
                 jsonParsers.getLocale("messages_events_Site", guildIdLong) +
-                        jsonParsers.getLocale("messages_events_Add_Me_To_Other_Guilds", guildIdLong) +
-                        jsonParsers.getLocale("messages_events_Vote_For_This_Bot", guildIdLong), false);
+                        jsonParsers.getLocale("messages_events_Add_Me_To_Other_Guilds", guildIdLong), false);
 
-        info.addField(
-                jsonParsers.getLocale("messages_events_Bot_Creator", guildIdLong),
-                jsonParsers.getLocale("messages_events_Bot_Creator_Url_Steam", guildIdLong), false);
-
-        info.addField(
-                jsonParsers.getLocale("messages_events_Support", guildIdLong),
-                jsonParsers.getLocale("messages_events_Support_Url_Discord", guildIdLong), false);
+        List<Button> buttons = new ArrayList<>();
 
         buttons.add(Button.success(guildIdLong + ":" + ReactionsButton.BUTTON_EXAMPLES, jsonParsers.getLocale("button_Examples", guildIdLong)));
+        buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
+
+
+        if (BotStart.getMapLanguages().get(guildIdLong).equals("eng")) {
+            buttons.add(Button.secondary(guildIdLong + ":" + ReactionsButton.CHANGE_LANGUAGE,
+                    "Сменить язык ")
+                    .withEmoji(Emoji.fromUnicode("U+1F1F7U+1F1FA")));
+
+        } else {
+            buttons.add(Button.secondary(guildIdLong + ":" + ReactionsButton.CHANGE_LANGUAGE,
+                    "Change language ")
+                    .withEmoji(Emoji.fromUnicode("U+1F1ECU+1F1E7")));
+        }
 
         sendMessage(info.build(), textChannel, buttons);
     }

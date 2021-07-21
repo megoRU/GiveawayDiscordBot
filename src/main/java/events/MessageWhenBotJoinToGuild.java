@@ -5,13 +5,17 @@ import giveaway.ReactionsButton;
 import jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.Button;
 import org.jetbrains.annotations.NotNull;
+import startbot.BotStart;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MessageWhenBotJoinToGuild extends ListenerAdapter {
 
@@ -39,12 +43,27 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
             welcome.addField("One more Thing", "If you are not satisfied with something in the bot, please let us know, we will fix it!"
                     , false);
 
+            List<Button> buttons = new ArrayList<>();
+            buttons.add(Button.success(event.getGuild().getId() + ":" + ReactionsButton.BUTTON_HELP, jsonParsers.getLocale("button_Help", event.getGuild().getId())));
+            buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
+
+
+            if (BotStart.getMapLanguages().get(event.getGuild().getId()).equals("eng")) {
+                buttons.add(Button.secondary(event.getGuild().getId() + ":" + ReactionsButton.CHANGE_LANGUAGE,
+                        "Сменить язык ")
+                        .withEmoji(Emoji.fromUnicode("U+1F1F7U+1F1FA")));
+            } else {
+                buttons.add(Button.secondary(event.getGuild().getId() + ":" + ReactionsButton.CHANGE_LANGUAGE,
+                        "Change language ")
+                        .withEmoji(Emoji.fromUnicode("U+1F1ECU+1F1E7")));
+            }
+
             event.getGuild().getDefaultChannel().sendMessageEmbeds(welcome.build())
-                    .setActionRow(Button.success(event.getGuild().getId() + ":" + ReactionsButton.BUTTON_HELP,
-                            jsonParsers.getLocale("button_Help", event.getGuild().getId())))
-                    .queue();
+                    .setActionRow(buttons).queue();
+
             welcome.clear();
         } catch (Exception e) {
+            System.out.println("Скорее всего нет `DefaultChannel`!");
             e.printStackTrace();
         }
     }

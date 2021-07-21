@@ -16,11 +16,6 @@
   "messages_events_Links": "Links:",
   "messages_events_Site": ":zap: [megoru.ru](https://megoru.ru)\n",
   "messages_events_Add_Me_To_Other_Guilds": ":robot: [Add me to other guilds](https://discord.com/oauth2/authorize?client_id=808277484524011531&scope=bot&permissions=2147511360)\n",
-  "messages_events_Vote_For_This_Bot": ":boom: [Vote for this bot](https://top.gg/bot/808277484524011531/vote)",
-  "messages_events_Bot_Creator": "Bot creator",
-  "messages_events_Bot_Creator_Url_Steam": ":tools: [mego](https://steamcommunity.com/id/megoRU)\n",
-  "messages_events_Support": "Support",
-  "messages_events_Support_Url_Discord": ":helmet_with_cross: [Discord server](https://discord.com/invite/UrWG3R683d)\n",
   "messages_events_Send_Private_Message": "I sent you a private message",
   "messages_events_Failed_To_Send_Message": "Failed to send message. Maybe I'm on your blacklist!",
   "prefix_change_Must_have_Permission": "You cannot change the prefix. You must have permission: `MANAGE SERVER`",
@@ -33,6 +28,7 @@
   "message_gift_Not_Admin": "You are not Admin or you can't managed messages!",
   "message_gift_Need_Stop_Giveaway": "First you need to stop Giveaway",
   "message_gift_Not_Correct": "You are creating Giveaway incorrectly!\n\n**Here are a couple of the right commands:**\n`{0}gift start` — Eternal Giveaway until manually complete.\n`{0}gift start Free key` — Eternal Giveaway with the title and until manually complete.\n`{0}gift start Free key 20m` — Launch Giveaway with the title and for 20 minutes.\n`{0}gift start Free key 1d 3` — Launch of Giveaway with a title, for 1 day and with 3 winners.\n\nAdditional information:",
+  "message_gift_Not_Correct_For_Button": "**Here are a couple of the right commands:**\n`{0}gift start` — Eternal Giveaway until manually complete.\n`{0}gift start Free key` — Eternal Giveaway with the title and until manually complete.\n`{0}gift start Free key 20m` — Launch Giveaway with the title and for 20 minutes.\n`{0}gift start Free key 1d 3` — Launch of Giveaway with a title, for 1 day and with 3 winners.",
   "giveaway_registry_Error": "The giveaway was canceled because the bot was unable to get the ID\nyour post for editing. Please try again. **Write us what exactly happened.\nWe are trying to fix this bug. Support guild:** https://discord.gg/UrWG3R683d",
   "gift_Press_Green_Button": "Press green button to enter!\n\n:medal: {0} {1}\n\nUsers: `",
   "gift_Press_Me_Button": "Click me to enter! ",
@@ -52,5 +48,6 @@
   "language_change_lang_reset": "The language is now standard: `ENG`",
   "reactions_bot_dont_have_permissions": "Bot: `{0}` don\\`t have: `Permission: MESSAGE MANAGE`\nAdd the specified permission to it!",
   "button_Examples": "Examples: !gift start",
-  "button_Help": "!help"
+  "button_Help": "!help",
+  "button_Language": "You changed the language to: `{0}`"
 }
