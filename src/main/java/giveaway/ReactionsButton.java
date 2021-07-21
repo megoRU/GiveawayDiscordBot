@@ -105,7 +105,7 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
             boolean isUserCanManageServer = event.getMember().hasPermission(event.getGuildChannel(), Permission.MESSAGE_MANAGE);
 
             long guild = event.getGuild().getIdLong();
-            //if (event.getButton().getId().equals(event.getGuild().getId() + ":" + emojiPresent)
+
             if (Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + PRESENT)
                     && GiveawayRegistry.getInstance().hasGift(guild)
                     && GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
