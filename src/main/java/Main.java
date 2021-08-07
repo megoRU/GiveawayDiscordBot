@@ -12,14 +12,14 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
+        GiveawayRegistry.getInstance();
         BotStart botStart = new BotStart();
         botStart.startBot();
-        GiveawayRegistry.getInstance();
 
         TopGGAndStatcordThread topGGAndStatcordThread = new TopGGAndStatcordThread();
         topGGAndStatcordThread.start();
 
-        System.out.println("20:11");
+        System.out.println("13:45");
 
         Thread thread = new Thread(() -> {
             try {

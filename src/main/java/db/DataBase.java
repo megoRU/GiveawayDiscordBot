@@ -1,6 +1,7 @@
 package db;
 
 import config.Config;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -65,10 +66,10 @@ public class DataBase {
             preparedStmt.executeUpdate();
             preparedStmt.close();
         } catch (SQLException e) {
-            dropTableWhenGiveawayStop(guildLongId);
             try {
-                getConnection().isClosed();
+                getConnection();
                 if (!getConnection().isClosed()) {
+                    dropTableWhenGiveawayStop(guildLongId);
                     createTableWhenGiveawayStart(guildLongId);
                 }
             } catch (SQLException throwable) {
@@ -87,6 +88,14 @@ public class DataBase {
             preparedStmt.executeUpdate();
             preparedStmt.close();
         } catch (SQLException e) {
+            try {
+                getConnection();
+                if (!getConnection().isClosed()) {
+                    dropTableWhenGiveawayStop(guildLongId);
+                }
+            } catch (SQLException throwable) {
+                throwable.printStackTrace();
+            }
             e.printStackTrace();
         }
     }
@@ -177,10 +186,10 @@ public class DataBase {
             preparedStatement.execute();
             preparedStatement.close();
         } catch (SQLException e) {
-            removeMessageFromDB(guildId);
             try {
                 getConnection().isClosed();
                 if (!getConnection().isClosed()) {
+                    removeMessageFromDB(guildId);
                     addMessageToDB(guildId, messageId, channelId, countWinners, date, title);
                 }
             } catch (SQLException throwable) {
