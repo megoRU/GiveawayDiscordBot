@@ -10,9 +10,7 @@ public interface SenderMessage {
 
     default void sendMessage(MessageEmbed embedBuilder, TextChannel textChannel, List<Button> buttons) {
         try {
-            textChannel.sendMessageEmbeds(embedBuilder)
-                    .setActionRow(buttons)
-                    .queue();
+            textChannel.sendMessageEmbeds(embedBuilder).setActionRow(buttons).queue();
         } catch (Exception e) {
             e.printStackTrace();
         }

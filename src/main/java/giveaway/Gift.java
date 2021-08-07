@@ -190,8 +190,7 @@ public class Gift implements GiftHelper {
             EmbedBuilder notEnoughUsers = new EmbedBuilder();
             notEnoughUsers.setColor(0xFF0000);
             notEnoughUsers.setTitle(jsonParsers.getLocale("gift_Not_Enough_Users", String.valueOf(guildIdLong)));
-            notEnoughUsers.setDescription(jsonParsers
-                    .getLocale("gift_Giveaway_Deleted", String.valueOf(guildIdLong)));
+            notEnoughUsers.setDescription(jsonParsers.getLocale("gift_Giveaway_Deleted", String.valueOf(guildIdLong)));
             //Отправляет сообщение
             editMessage(notEnoughUsers, guildId, channelId);
             //Удаляет данные из коллекций

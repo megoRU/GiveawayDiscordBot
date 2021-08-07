@@ -23,16 +23,16 @@ public class MessageInfoHelp extends ListenerAdapter implements SenderMessage {
 
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
+        if (event.getAuthor().isBot()) return;
 
-        if (!event.getGuild().getSelfMember().hasPermission(event.getMessage().getTextChannel(), Permission.MESSAGE_WRITE)) {
+        if (!event.getGuild().getSelfMember().hasPermission(event.getChannel(), Permission.MESSAGE_WRITE) ||
+                !event.getGuild().getSelfMember().hasPermission(event.getChannel(), Permission.MESSAGE_EMBED_LINKS)) {
             return;
         }
 
-        if (event.getAuthor().isBot()) return;
-
         String message = event.getMessage().getContentDisplay().trim();
 
-        if (message.equals("")) return;
+        if (event.getMember() == null || message.equals("")) return;
 
         String prefix = HELP;
         String p = PREFIX;
@@ -55,6 +55,11 @@ public class MessageInfoHelp extends ListenerAdapter implements SenderMessage {
     }
 
     public void buildMessage(String p, TextChannel textChannel, String avatarUrl, String guildIdLong, String name) {
+
+        if (!textChannel.getGuild().getSelfMember().hasPermission(textChannel, Permission.MESSAGE_WRITE) ||
+                !textChannel.getGuild().getSelfMember().hasPermission(textChannel, Permission.MESSAGE_EMBED_LINKS)) {
+            return;
+        }
 
         String avatar = null;
 

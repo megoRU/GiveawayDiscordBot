@@ -35,7 +35,7 @@ public class MessageGift extends ListenerAdapter {
 
         if (event.getMember() == null || message.equals("")) return;
 
-        if (!event.getGuild().getSelfMember().hasPermission(event.getChannel(), Permission.MESSAGE_WRITE) &&
+        if (!event.getGuild().getSelfMember().hasPermission(event.getChannel(), Permission.MESSAGE_WRITE) ||
                 !event.getGuild().getSelfMember().hasPermission(event.getChannel(), Permission.MESSAGE_EMBED_LINKS)) {
             return;
         }
