@@ -13,7 +13,6 @@ import java.util.logging.Logger;
 
 public class MessageGift extends ListenerAdapter {
 
-    private final JSONParsers jsonParsers = new JSONParsers();
     private final static Logger LOGGER = Logger.getLogger(MessageGift.class.getName());
     private static final String GIFT_CHECKER = "gift start\\s(<|).+(>|)\\s<([0-9]|)+(м|m)\\|([0-9]|)+(ч|h)\\|([0-9]|)+(д|d)>";
     private static final String GIFT_CHECKER_2 = "gift start\\s(<|).+(>|)\\s<.+>";
@@ -26,6 +25,7 @@ public class MessageGift extends ListenerAdapter {
     private static final String GIFT_START_COUNT_WITH_MINUTES = "gift start\\s[0-9]{1,2}[mмhчdд]\\s[0-9]{1,2}$";
     private static final String GIFT_STOP = "gift stop";
     private static final String GIFT_STOP_COUNT = "gift stop\\s[0-9]+";
+    private final JSONParsers jsonParsers = new JSONParsers();
 
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
@@ -120,11 +120,11 @@ public class MessageGift extends ListenerAdapter {
                 int len = messageSplit[messageSplit.length - 1].length() + messageSplit[messageSplit.length - 2].length();
                 GiveawayRegistry.getInstance()
                         .getActiveGiveaways().get(event.getGuild().getIdLong()).startGift(
-                        event.getGuild(),
-                        event.getChannel(),
-                        event.getMessage().getContentDisplay().substring(12, message.length() - len - 1),
-                        messageSplit[messageSplit.length - 1],
-                        messageSplit[messageSplit.length - 2]);
+                                event.getGuild(),
+                                event.getChannel(),
+                                event.getMessage().getContentDisplay().substring(12, message.length() - len - 1),
+                                messageSplit[messageSplit.length - 1],
+                                messageSplit[messageSplit.length - 2]);
                 return;
             }
 
@@ -137,11 +137,11 @@ public class MessageGift extends ListenerAdapter {
             if (messageWithOutPrefix.matches(GIFT_START_TITLE_WITH_MINUTES)) {
                 GiveawayRegistry.getInstance()
                         .getActiveGiveaways().get(event.getGuild().getIdLong()).startGift(
-                        event.getGuild(),
-                        event.getChannel(),
-                        event.getMessage().getContentDisplay().substring(12, message.length() - 3),
-                        null,
-                        messageSplit[messageSplit.length - 1]);
+                                event.getGuild(),
+                                event.getChannel(),
+                                event.getMessage().getContentDisplay().substring(12, message.length() - 3),
+                                null,
+                                messageSplit[messageSplit.length - 1]);
                 return;
             }
 

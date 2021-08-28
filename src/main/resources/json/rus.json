@@ -50,5 +50,8 @@
   "reactions_you_dont_have_permissions": "У Вас нет разрешений",
   "button_Examples": "Примеры: !gift start",
   "button_Help": "!help",
-  "button_Language": "Вы сменили язык на: `{0}`"
+  "button_Language": "Вы сменили язык на: `{0}`",
+  "slash_Stop_No_Has": "Сейчас нет активного Giveaway",
+  "slash_Stop": "Вы завершили Giveaway",
+  "slash_Errors": "Вы допустили ошибку, посмотрите документацию"
 }

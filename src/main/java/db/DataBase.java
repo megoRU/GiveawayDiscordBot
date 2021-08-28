@@ -29,6 +29,9 @@ public class DataBase {
     private static volatile Connection connection;
     private static volatile DataBase dataBase;
 
+    private DataBase() {
+    }
+
     //Создаем один коннект на программу
     public static Connection getConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
@@ -53,9 +56,6 @@ public class DataBase {
             }
         }
         return dataBase;
-    }
-
-    private DataBase() {
     }
 
     //Создаем таблицу когда кто-то создал Giveaway

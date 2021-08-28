@@ -19,7 +19,7 @@ public class Main {
         TopGGAndStatcordThread topGGAndStatcordThread = new TopGGAndStatcordThread();
         topGGAndStatcordThread.start();
 
-        System.out.println("13:45");
+        System.out.println("15:49");
 
         Thread thread = new Thread(() -> {
             try {

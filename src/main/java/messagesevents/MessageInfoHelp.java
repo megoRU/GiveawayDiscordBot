@@ -108,16 +108,16 @@ public class MessageInfoHelp extends ListenerAdapter implements SenderMessage {
             if (BotStart.getMapLanguages().get(guildIdLong).equals("eng")) {
 
                 buttons.add(Button.secondary(guildIdLong + ":" + ReactionsButton.CHANGE_LANGUAGE,
-                        "Сменить язык ")
+                                "Сменить язык ")
                         .withEmoji(Emoji.fromUnicode("U+1F1F7U+1F1FA")));
             } else {
                 buttons.add(Button.secondary(guildIdLong + ":" + ReactionsButton.CHANGE_LANGUAGE,
-                        "Change language ")
+                                "Change language ")
                         .withEmoji(Emoji.fromUnicode("U+1F1ECU+1F1E7")));
             }
         } else {
             buttons.add(Button.secondary(guildIdLong + ":" + ReactionsButton.CHANGE_LANGUAGE,
-                    "Сменить язык ")
+                            "Сменить язык ")
                     .withEmoji(Emoji.fromUnicode("U+1F1F7U+1F1FA")));
         }
 
