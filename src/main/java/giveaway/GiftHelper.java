@@ -46,8 +46,8 @@ public interface GiftHelper {
                     .getTextChannelById(channelId)
                     .editMessageEmbedsById(GiveawayRegistry.getInstance().getMessageId().get(guildId),
                             edit.build()).queue(null, (exception) ->
-                    BotStart.getJda().getTextChannelById(channelId).sendMessage(GiveawayRegistry.getInstance().removeGiftExceptions(guildId))
-                            .queue());
+                            BotStart.getJda().getTextChannelById(channelId).sendMessage(GiveawayRegistry.getInstance().removeGiftExceptions(guildId))
+                                    .queue());
             edit.clear();
         } catch (Exception e) {
             e.printStackTrace();

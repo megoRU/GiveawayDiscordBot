@@ -45,7 +45,7 @@ public class PrefixChange extends ListenerAdapter {
             return;
         }
 
-        if (message.charAt(8) == '/' || message.charAt(8) == '\\' ) {
+        if (message.charAt(8) == '/' || message.charAt(8) == '\\') {
             event.getChannel()
                     .sendMessage(jsonParsers.getLocale("prefix_change_Cannot_Be", event.getGuild().getId())
                             .replaceAll("\\{0}", "\\" + messages[1]))

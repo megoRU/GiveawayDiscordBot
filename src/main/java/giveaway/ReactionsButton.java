@@ -17,8 +17,6 @@ import java.util.logging.Logger;
 
 public class ReactionsButton extends ListenerAdapter implements SenderMessage {
 
-    private final JSONParsers jsonParsers = new JSONParsers();
-    private final static Logger LOGGER = Logger.getLogger(ReactionsButton.class.getName());
     public static final String PRESENT = "PRESENT";
     public static final String STOP_ONE = "STOP_ONE";
     public static final String STOP_TWO = "STOP_TWO";
@@ -26,6 +24,8 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
     public static final String BUTTON_EXAMPLES = "BUTTON_EXAMPLES";
     public static final String BUTTON_HELP = "BUTTON_HELP";
     public static final String CHANGE_LANGUAGE = "CHANGE_LANGUAGE";
+    private final static Logger LOGGER = Logger.getLogger(ReactionsButton.class.getName());
+    private final JSONParsers jsonParsers = new JSONParsers();
 
     @Override
     public void onButtonClick(@NotNull ButtonClickEvent event) {
@@ -40,12 +40,12 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
 
             event.deferEdit().queue();
             event.getChannel().sendMessage(jsonParsers
-                    .getLocale("message_gift_Not_Correct_For_Button", event.getGuild().getId())
-                    .replaceAll("\\{0}",
-                            BotStart.getMapPrefix().get(event.getGuild().getId())
-                                    == null
-                                    ? "!"
-                                    : BotStart.getMapPrefix().get(event.getGuild().getId())))
+                            .getLocale("message_gift_Not_Correct_For_Button", event.getGuild().getId())
+                            .replaceAll("\\{0}",
+                                    BotStart.getMapPrefix().get(event.getGuild().getId())
+                                            == null
+                                            ? "!"
+                                            : BotStart.getMapPrefix().get(event.getGuild().getId())))
                     .setActionRow(Button.success(event.getGuild().getId() + ":" + ReactionsButton.BUTTON_HELP,
                             jsonParsers.getLocale("button_Help", event.getGuild().getId())))
                     .queue();
@@ -74,8 +74,8 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
             BotStart.getMapLanguages().put(event.getGuild().getId(), buttonName);
 
             event.getHook().sendMessage(jsonParsers
-                    .getLocale("button_Language", event.getGuild().getId())
-                    .replaceAll("\\{0}", buttonName))
+                            .getLocale("button_Language", event.getGuild().getId())
+                            .replaceAll("\\{0}", buttonName))
                     .setEphemeral(true).queue();
         }
 

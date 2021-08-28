@@ -49,5 +49,8 @@
   "reactions_bot_dont_have_permissions": "Bot: `{0}` don\\`t have: `Permission: MESSAGE MANAGE`\nAdd the specified permission to it!",
   "button_Examples": "Examples: !gift start",
   "button_Help": "!help",
-  "button_Language": "You changed the language to: `{0}`"
+  "button_Language": "You changed the language to: `{0}`",
+  "slash_Stop_No_Has": "Currently there is no active Giveaway",
+  "slash_Stop": "You have completed Giveaway",
+  "slash_Errors": "You made a mistake, look at the documentation"
 }
