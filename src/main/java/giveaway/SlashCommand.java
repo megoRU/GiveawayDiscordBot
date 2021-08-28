@@ -52,6 +52,30 @@ public class SlashCommand extends ListenerAdapter {
                                         event.getOptions().get(1).getAsString(),
                                         null);
 
+                    } else if (event.getOptions().size() == 2
+                            && event.getOptions().get(0).getAsString().matches(".{0,255}")
+                            && event.getOptions().get(1).getAsString().matches("[0-9]{1,2}[mмhчdд]")) {
+
+                        GiveawayRegistry.getInstance()
+                                .getActiveGiveaways().get(event.getGuild().getIdLong()).startGift(event,
+                                        event.getGuild(),
+                                        event.getTextChannel(),
+                                        event.getOptions().get(0).getAsString(),
+                                        null,
+                                        event.getOptions().get(1).getAsString());
+
+                    } else if (event.getOptions().size() == 2
+                            && event.getOptions().get(0).getAsString().matches("[0-9]{1,2}")
+                            && event.getOptions().get(1).getAsString().matches("[0-9]{1,2}[mмhчdд]")) {
+
+                        GiveawayRegistry.getInstance()
+                                .getActiveGiveaways().get(event.getGuild().getIdLong()).startGift(event,
+                                        event.getGuild(),
+                                        event.getTextChannel(),
+                                        null,
+                                        event.getOptions().get(0).getAsString(),
+                                        event.getOptions().get(1).getAsString());
+
                     } else if (event.getOptions().size() == 1 && event.getOptions().get(0).getAsString().matches("[0-9]{1,2}")) {
 
                         GiveawayRegistry.getInstance()
