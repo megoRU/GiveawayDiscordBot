@@ -53,7 +53,7 @@ public class Gift implements GiftHelper {
 
         start.setColor(0x00FF00);
         start.setTitle(GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
-        start.addField("Attention for Admins", "[Add slash commands](https://discord.com/api/oauth2/authorize?client_id=780145910764142613&scope=applications.commands%20bot)", false);
+        start.addField("Attention for Admins", "[Add slash commands](https://discord.com/oauth2/authorize?client_id=808277484524011531&scope=applications.commands%20bot)", false);
 
         if (time != null) {
             times = getMinutes(time);
