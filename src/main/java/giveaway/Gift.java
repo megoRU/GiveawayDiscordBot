@@ -2,6 +2,8 @@ package giveaway;
 
 import db.DataBase;
 import jsonparser.JSONParsers;
+import lombok.Getter;
+import lombok.Setter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -18,6 +20,8 @@ import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.logging.Logger;
 
+@Getter
+@Setter
 public class Gift implements GiftHelper {
 
     private final static Logger LOGGER = Logger.getLogger(Gift.class.getName());
@@ -310,30 +314,6 @@ public class Gift implements GiftHelper {
 
     public String getListUsersHash(String id) {
         return listUsersHash.get(id);
-    }
-
-    public List<Button> getButtons() {
-        return buttons;
-    }
-
-    public Map<String, String> getListUsersHash() {
-        return listUsersHash;
-    }
-
-    public long getGuild() {
-        return guildId;
-    }
-
-    public int getCount() {
-        return count;
-    }
-
-    public void setCount(int count) {
-        this.count = count;
-    }
-
-    public List<String> getListUsers() {
-        return listUsers;
     }
 
 }

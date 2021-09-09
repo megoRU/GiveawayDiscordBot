@@ -1,11 +1,13 @@
 package threads;
 
 import giveaway.GiveawayRegistry;
+import lombok.Getter;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
 
-public class StopGiveawayByTimer extends Thread {
+@Getter
+public class StopGiveawayByTimer implements Runnable {
 
     private final Long ID_GUILD;
     private final String TIME;
@@ -19,7 +21,6 @@ public class StopGiveawayByTimer extends Thread {
     public void run() {
         try {
             while (true) {
-
                 if (GiveawayRegistry.getInstance().getActiveGiveaways().get(getID_GUILD()) == null) {
                     return;
                 }
@@ -40,7 +41,7 @@ public class StopGiveawayByTimer extends Thread {
                     return;
                 }
 
-                Thread.sleep(2000);
+                Thread.sleep(timeFormDB.toInstant().toEpochMilli() - specificTime.toEpochMilli());
             }
 
         } catch (Exception e) {
@@ -49,11 +50,4 @@ public class StopGiveawayByTimer extends Thread {
         }
     }
 
-    public Long getID_GUILD() {
-        return ID_GUILD;
-    }
-
-    public String getTIME() {
-        return TIME;
-    }
 }
