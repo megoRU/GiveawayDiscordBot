@@ -34,7 +34,7 @@ public class DataBase {
 
     //Создаем один коннект на программу
     public static Connection getConnection() throws SQLException {
-        if (connection == null || connection.isClosed()) {
+        if (connection == null || connection.isClosed() || connection.getMetaData().getDatabaseProductName() == null) {
             synchronized (DataBase.class) {
                 if (connection == null || connection.isClosed()) {
                     connection = DriverManager.getConnection(
@@ -62,9 +62,8 @@ public class DataBase {
     public void createTableWhenGiveawayStart(String guildLongId) {
         try {
             String query = "CREATE TABLE `" + guildLongId + "` (`user_long_id` bigint(30) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
-            PreparedStatement preparedStmt = getConnection().prepareStatement(query);
-            preparedStmt.executeUpdate();
-            preparedStmt.close();
+            getConnection().prepareStatement(query).executeUpdate();
+
         } catch (SQLException e) {
             try {
                 getConnection();
@@ -84,9 +83,7 @@ public class DataBase {
     public void dropTableWhenGiveawayStop(String guildLongId) {
         try {
             String query = "DROP TABLE IF EXISTS `" + guildLongId + "`;";
-            PreparedStatement preparedStmt = getConnection().prepareStatement(query);
-            preparedStmt.executeUpdate();
-            preparedStmt.close();
+            getConnection().prepareStatement(query).executeUpdate();
         } catch (SQLException e) {
             try {
                 getConnection();
@@ -118,9 +115,7 @@ public class DataBase {
     public void removePrefixFromDB(String serverId) {
         try {
             String sql = "DELETE FROM prefixs WHERE serverId='" + serverId + "'";
-            PreparedStatement preparedStatement = getConnection().prepareStatement(sql);
-            preparedStatement.execute(sql);
-            preparedStatement.close();
+            getConnection().prepareStatement(sql).execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -136,7 +131,15 @@ public class DataBase {
             preparedStatement.execute();
             preparedStatement.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("recursion addLangToDB");
+
+            try {
+                if (connection != null && connection.isClosed()) {
+                    addLangToDB(serverId, lang);
+                }
+            } catch (SQLException sqlException) {
+
+            }
         }
     }
 
@@ -144,9 +147,7 @@ public class DataBase {
     public void removeLangFromDB(String serverId) {
         try {
             String sql = "DELETE FROM `language` WHERE serverId='" + serverId + "'";
-            PreparedStatement preparedStatement = getConnection().prepareStatement(sql);
-            preparedStatement.execute(sql);
-            preparedStatement.close();
+            getConnection().prepareStatement(sql).execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -157,9 +158,7 @@ public class DataBase {
     public void removeMessageFromDB(long guildId) {
         try {
             String sql = "DELETE FROM ActiveGiveaways WHERE guild_long_id='" + guildId + "'";
-            PreparedStatement preparedStatement = getConnection().prepareStatement(sql);
-            preparedStatement.execute(sql);
-            preparedStatement.close();
+            getConnection().prepareStatement(sql).execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }

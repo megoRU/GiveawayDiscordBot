@@ -51,9 +51,8 @@ public class Gift implements GiftHelper {
                 + "\nTime: " + time);
 
         GiveawayRegistry.getInstance().getTitle().put(guild.getIdLong(), newTitle == null ? "Giveaway" : newTitle);
-        Instant timestamp = Instant.now();
         //Instant для timestamp
-        specificTime = Instant.ofEpochMilli(timestamp.toEpochMilli());
+        specificTime = Instant.ofEpochMilli(Instant.now().toEpochMilli());
 
         start.setColor(0x00FF00);
         start.setTitle(GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
