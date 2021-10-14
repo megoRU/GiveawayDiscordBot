@@ -11,11 +11,11 @@ public interface GiftHelper {
 
     JSONParsers jsonParsers = new JSONParsers();
 
-    default void editMessage(EmbedBuilder embedBuilder, Long guildId, Long channelId) {
+    default void editMessage(EmbedBuilder embedBuilder, Long guildId, Long textChannel) {
         try {
             BotStart.getJda()
                     .getGuildById(guildId)
-                    .getTextChannelById(channelId)
+                    .getTextChannelById(textChannel)
                     .editMessageEmbedsById(GiveawayRegistry.getInstance().getMessageId().get(guildId), embedBuilder.build())
                     .setActionRows().setActionRows(new ArrayList<>())
                     .queue();
