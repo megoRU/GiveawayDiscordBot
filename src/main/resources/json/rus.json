@@ -53,5 +53,6 @@
   "button_Language": "Вы сменили язык на: `{0}`",
   "slash_Stop_No_Has": "Сейчас нет активного Giveaway",
   "slash_Stop": "Вы завершили Giveaway",
-  "slash_Errors": "Вы допустили ошибку, посмотрите документацию"
+  "slash_Errors": "Вы допустили ошибку, посмотрите документацию",
+  "send_slash_message": "Создал Giveaway в текстовом канале: <#{0}>"
 }

@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.Button;
 import org.jetbrains.annotations.NotNull;
 import startbot.BotStart;
@@ -18,6 +19,7 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 @Getter
@@ -33,19 +35,19 @@ public class Gift implements GiftHelper {
     private Instant specificTime = null;
     private final Random random = new Random();
     private final long guildId;
-    private final long channelId;
+    private final long textChannelId;
     private StringBuilder insertQuery = new StringBuilder();
     private int count;
     private String times;
 
-    public Gift(long guildId, long channelId) {
+    public Gift(long guildId, long textChannelId) {
         this.guildId = guildId;
-        this.channelId = channelId;
+        this.textChannelId = textChannelId;
     }
 
     private void extracted(EmbedBuilder start, Guild guild, TextChannel channel, String newTitle, String countWinners, String time) {
         LOGGER.info("\nGuild id: " + guild.getId()
-                + "\nTextChannel: " + channel.getName()
+                + "\nTextChannel: " + channel.getName() + " " + channel.getId()
                 + "\nTitle: " + newTitle
                 + "\nCount winners: " + countWinners
                 + "\nTime: " + time);
@@ -94,12 +96,12 @@ public class Gift implements GiftHelper {
         }
     }
 
-    protected void startGift(Guild guild, TextChannel channel, String newTitle, String countWinners, String time) {
+    protected void startGift(Guild guild, TextChannel textChannel, String newTitle, String countWinners, String time) {
         EmbedBuilder start = new EmbedBuilder();
 
-        extracted(start, guild, channel, newTitle, countWinners, time);
+        extracted(start, guild, textChannel, newTitle, countWinners, time);
 
-        channel.sendMessageEmbeds(start.build()).setActionRow(buttons).queue(message -> {
+        textChannel.sendMessageEmbeds(start.build()).setActionRow(buttons).queue(message -> {
 
             GiveawayRegistry.getInstance().getMessageId().put(guild.getIdLong(), message.getId());
             GiveawayRegistry.getInstance().getChannelId().put(guild.getIdLong(), message.getChannel().getId());
@@ -119,26 +121,34 @@ public class Gift implements GiftHelper {
         autoInsert();
     }
 
-    protected void startGift(@NotNull SlashCommandEvent event, Guild guild, TextChannel channel, String newTitle, String countWinners, String time) {
+    protected void startGift(@NotNull SlashCommandEvent event, Guild guild, TextChannel textChannel, String newTitle, String countWinners, String time) {
         EmbedBuilder start = new EmbedBuilder();
-        extracted(start, guild, channel, newTitle, countWinners, time);
+        extracted(start, guild, textChannel, newTitle, countWinners, time);
 
-        event.replyEmbeds(start.build())
-                .addActionRow(buttons)
-                .queue(m -> m.retrieveOriginal()
-                        .queue(message -> {
+        //TODO сделать перевод и нормальный текст. После перезагрузки не удаляет
+        //  Cannot invoke "net.dv8tion.jda.api.entities.TextChannel.editMessageEmbedsById(String, net.dv8tion.jda.api.entities.MessageEmbed[])" because the return value of "net.dv8tion.jda.api.entities.Guild.getTextChannelById(long)" is null
+        //	at giveaway.GiftHelper.editMessage(GiftHelper.java:19)
+        //	at giveaway.Gift.stopGift(Gift.java:232)
+        //	at giveaway.SlashCommand.onSlashCommand(SlashCommand.java:105)
 
-                            GiveawayRegistry.getInstance().getMessageId().put(guild.getIdLong(), message.getId());
-                            GiveawayRegistry.getInstance().getChannelId().put(guild.getIdLong(), message.getChannel().getId());
-                            GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().put(guild.getIdLong(), message.getId());
-                            GiveawayRegistry.getInstance().getCountWinners().put(guild.getIdLong(), countWinners);
-                            DataBase.getInstance().addMessageToDB(guild.getIdLong(),
-                                    message.getIdLong(),
-                                    message.getChannel().getIdLong(),
-                                    countWinners,
-                                    time == null ? null : String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times))),
-                                    GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
-                        }));
+        event.reply(jsonParsers.getLocale("send_slash_message", guild.getId()).replaceAll("\\{0}", textChannel.getId()))
+                .delay(15, TimeUnit.SECONDS)
+                .flatMap(InteractionHook::deleteOriginal)
+                .queue();
+
+        textChannel.sendMessageEmbeds(start.build()).setActionRow(buttons).queue(message -> {
+
+            GiveawayRegistry.getInstance().getMessageId().put(guild.getIdLong(), message.getId());
+            GiveawayRegistry.getInstance().getChannelId().put(guild.getIdLong(), message.getId());
+            GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().put(guild.getIdLong(), message.getId());
+            GiveawayRegistry.getInstance().getCountWinners().put(guild.getIdLong(), countWinners);
+            DataBase.getInstance().addMessageToDB(guild.getIdLong(),
+                    message.getIdLong(),
+                    message.getChannel().getIdLong(),
+                    countWinners,
+                    time == null ? null : String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times))),
+                    GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
+        });
 
         DataBase.getInstance().createTableWhenGiveawayStart(guild.getId());
 
@@ -186,7 +196,7 @@ public class Gift implements GiftHelper {
                                 ? "TBA"
                                 : GiveawayRegistry.getInstance().getCountWinners().get(guildId),
                         this.guildId,
-                        this.channelId,
+                        this.textChannelId,
                         getCount());
             }
         } catch (SQLException e) {
@@ -223,7 +233,7 @@ public class Gift implements GiftHelper {
             notEnoughUsers.setTitle(jsonParsers.getLocale("gift_Not_Enough_Users", String.valueOf(guildIdLong)));
             notEnoughUsers.setDescription(jsonParsers.getLocale("gift_Giveaway_Deleted", String.valueOf(guildIdLong)));
             //Отправляет сообщение
-            editMessage(notEnoughUsers, guildId, channelId);
+            editMessage(notEnoughUsers, guildIdLong, textChannelId);
             //Удаляет данные из коллекций
             clearingCollections();
 
@@ -242,7 +252,7 @@ public class Gift implements GiftHelper {
                     .replaceAll("\\{0}", String.valueOf(countWinner))
                     .replaceAll("\\{1}", String.valueOf(getCount())));
             //Отправляет сообщение
-            editMessage(zero, guildId, channelId);
+            editMessage(zero, guildId, textChannelId);
             return;
         }
         Instant timestamp = Instant.now();
@@ -267,7 +277,7 @@ public class Gift implements GiftHelper {
 
 
             //Отправляет сообщение
-            editMessage(stopWithMoreWinner, guildId, channelId);
+            editMessage(stopWithMoreWinner, guildId, textChannelId);
 
             //Удаляет данные из коллекций
             clearingCollections();
@@ -291,7 +301,7 @@ public class Gift implements GiftHelper {
         stop.setFooter(jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
 
         //Отправляет сообщение
-        editMessage(stop, guildId, channelId);
+        editMessage(stop, guildId, textChannelId);
 
         //Удаляет данные из коллекций
         clearingCollections();
@@ -302,13 +312,17 @@ public class Gift implements GiftHelper {
     }
 
     private void clearingCollections() {
-        GiveawayRegistry.getInstance().getMessageId().remove(guildId);
-        GiveawayRegistry.getInstance().getChannelId().remove(guildId);
-        GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().remove(guildId);
-        GiveawayRegistry.getInstance().getTitle().remove(guildId);
-        GiveawayRegistry.getInstance().removeGift(guildId);
-        GiveawayRegistry.getInstance().getEndGiveawayDate().remove(guildId);
-        GiveawayRegistry.getInstance().getCountWinners().remove(guildId);
+        try {
+            GiveawayRegistry.getInstance().getMessageId().remove(guildId);
+            GiveawayRegistry.getInstance().getChannelId().remove(guildId);
+            GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().remove(guildId);
+            GiveawayRegistry.getInstance().getTitle().remove(guildId);
+            GiveawayRegistry.getInstance().removeGift(guildId);
+            GiveawayRegistry.getInstance().getEndGiveawayDate().remove(guildId);
+            GiveawayRegistry.getInstance().getCountWinners().remove(guildId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public String getListUsersHash(String id) {

@@ -52,5 +52,6 @@
   "button_Language": "You changed the language to: `{0}`",
   "slash_Stop_No_Has": "Currently there is no active Giveaway",
   "slash_Stop": "You have completed Giveaway",
-  "slash_Errors": "You made a mistake, look at the documentation"
+  "slash_Errors": "You made a mistake, look at the documentation",
+  "send_slash_message": "Created Giveaway in the text channel: <#{0}>"
 }

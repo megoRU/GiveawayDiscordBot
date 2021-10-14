@@ -3,6 +3,7 @@ package giveaway;
 import db.DataBase;
 import jsonparser.JSONParsers;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -25,99 +26,58 @@ public class SlashCommand extends ListenerAdapter {
                 event.reply(jsonParsers.getLocale("message_gift_Need_Stop_Giveaway", event.getGuild().getId())).queue();
             } else {
                 try {
-                    GiveawayRegistry.getInstance().setGift(event.getGuild().getIdLong(), new Gift(event.getGuild().getIdLong(), event.getChannel().getIdLong()));
+                    TextChannel textChannel = null;
+                    String title = null;
+                    String count = null;
+                    String time = null;
 
-                    if (event.getOptions().size() == 3
-                            && event.getOptions().get(0).getAsString().matches(".{0,255}")
-                            && event.getOptions().get(1).getAsString().matches("[0-9]{1,2}")
-                            && event.getOptions().get(2).getAsString().matches("[0-9]{1,2}[mмhчdд]")) {
+                    for (int i = 0; i < event.getOptions().size(); i++) {
 
-                        GiveawayRegistry.getInstance()
-                                .getActiveGiveaways().get(event.getGuild().getIdLong()).startGift(event,
-                                        event.getGuild(),
-                                        event.getTextChannel(),
-                                        event.getOptions().get(0).getAsString(),
-                                        event.getOptions().get(1).getAsString(),
-                                        event.getOptions().get(2).getAsString());
+                        if (title == null
+                                && !event.getOptions().get(i).getAsString().matches("[0-9]{1,2}[mмhчdд]")
+                                && !event.getOptions().get(i).getAsString().matches("\\d{18}")
+                                && !event.getOptions().get(i).getAsString().matches("[0-9]{1,2}")
+                                && event.getOptions().get(i).getAsString().matches(".{0,255}")) {
+                            title = event.getOptions().get(i).getAsString();
+                        }
 
-                    } else if (event.getOptions().size() == 2
-                            && event.getOptions().get(0).getAsString().matches(".{0,255}")
-                            && event.getOptions().get(1).getAsString().matches("[0-9]{1,2}")) {
+                        if (event.getOptions().get(i).getAsString().matches("[0-9]{1,2}")) {
+                            count = event.getOptions().get(i).getAsString();
+                        }
 
-                        GiveawayRegistry.getInstance()
-                                .getActiveGiveaways().get(event.getGuild().getIdLong()).startGift(event,
-                                        event.getGuild(),
-                                        event.getTextChannel(),
-                                        event.getOptions().get(0).getAsString(),
-                                        event.getOptions().get(1).getAsString(),
-                                        null);
+                        if (event.getOptions().get(i).getAsString().matches("[0-9]{1,2}[mмhчdд]")) {
+                            time = event.getOptions().get(i).getAsString();
+                        }
 
-                    } else if (event.getOptions().size() == 2
-                            && event.getOptions().get(0).getAsString().matches(".{0,255}")
-                            && event.getOptions().get(1).getAsString().matches("[0-9]{1,2}[mмhчdд]")) {
+                        if (event.getOptions().get(i).getAsString().matches("\\d{18}")) {
+                            textChannel = event.getOptions().get(i).getAsGuildChannel().getGuild()
+                                    .getTextChannelById(event.getOptions().get(i).getAsGuildChannel().getId());
+                        }
 
-                        GiveawayRegistry.getInstance()
-                                .getActiveGiveaways().get(event.getGuild().getIdLong()).startGift(event,
-                                        event.getGuild(),
-                                        event.getTextChannel(),
-                                        event.getOptions().get(0).getAsString(),
-                                        null,
-                                        event.getOptions().get(1).getAsString());
-
-                    } else if (event.getOptions().size() == 2
-                            && event.getOptions().get(0).getAsString().matches("[0-9]{1,2}")
-                            && event.getOptions().get(1).getAsString().matches("[0-9]{1,2}[mмhчdд]")) {
-
-                        GiveawayRegistry.getInstance()
-                                .getActiveGiveaways().get(event.getGuild().getIdLong()).startGift(event,
-                                        event.getGuild(),
-                                        event.getTextChannel(),
-                                        null,
-                                        event.getOptions().get(0).getAsString(),
-                                        event.getOptions().get(1).getAsString());
-
-                    } else if (event.getOptions().size() == 1 && event.getOptions().get(0).getAsString().matches("[0-9]{1,2}")) {
-
-                        GiveawayRegistry.getInstance()
-                                .getActiveGiveaways().get(event.getGuild().getIdLong()).startGift(event,
-                                        event.getGuild(),
-                                        event.getTextChannel(),
-                                        null,
-                                        event.getOptions().get(0).getAsString(),
-                                        null);
-
-                    } else if (event.getOptions().size() == 1 && event.getOptions().get(0).getAsString().matches("[0-9]{1,2}[mмhчdд]")) {
-
-                        GiveawayRegistry.getInstance()
-                                .getActiveGiveaways().get(event.getGuild().getIdLong()).startGift(event,
-                                        event.getGuild(),
-                                        event.getTextChannel(),
-                                        null,
-                                        null,
-                                        event.getOptions().get(0).getAsString());
-
-                    } else if (event.getOptions().size() == 1 && event.getOptions().get(0).getAsString().matches(".{0,255}")) {
-
-                        GiveawayRegistry.getInstance()
-                                .getActiveGiveaways().get(event.getGuild().getIdLong()).startGift(event,
-                                        event.getGuild(),
-                                        event.getTextChannel(),
-                                        event.getOptions().get(0).getAsString(),
-                                        null,
-                                        null);
-
-                    } else if (event.getOptions().isEmpty()) {
-
-                        GiveawayRegistry.getInstance()
-                                .getActiveGiveaways().get(event.getGuild().getIdLong()).startGift(event,
-                                        event.getGuild(),
-                                        event.getTextChannel(),
-                                        null,
-                                        null,
-                                        null);
                     }
 
+                    GiveawayRegistry.getInstance().setGift(
+                            event.getGuild().getIdLong(),
+                            new Gift(event.getGuild().getIdLong(),
+                                    textChannel == null ? event.getTextChannel().getIdLong() : textChannel.getIdLong()));
+
+                    if (!event.getGuild().getSelfMember()
+                            .hasPermission(textChannel == null ? event.getTextChannel() : textChannel, Permission.MESSAGE_WRITE) ||
+                            !event.getGuild().getSelfMember()
+                                    .hasPermission(textChannel == null ? event.getTextChannel() : textChannel, Permission.MESSAGE_EMBED_LINKS)) {
+                        return;
+                    }
+
+                    GiveawayRegistry.getInstance()
+                            .getActiveGiveaways().get(event.getGuild().getIdLong()).startGift(event,
+                                    event.getGuild(),
+                                    textChannel == null ? event.getTextChannel() : textChannel,
+                                    title,
+                                    count,
+                                    time);
+
                 } catch (Exception e) {
+                    e.printStackTrace();
                     GiveawayRegistry.getInstance().removeGift(event.getGuild().getIdLong());
                     event.reply(jsonParsers.getLocale("slash_Errors", event.getGuild().getId())).queue();
                 }

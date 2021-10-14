@@ -93,8 +93,8 @@ public class BotStart {
         jda = jdaBuilder.build();
         jda.awaitReady();
 //        jda.updateCommands().queue();
-
-
+//
+//
 //        List<OptionData> optionsLanguage = new ArrayList<>();
 //        List<OptionData> optionsStart = new ArrayList<>();
 //        List<OptionData> optionsStop = new ArrayList<>();
@@ -108,12 +108,16 @@ public class BotStart {
 //                .setName("title")
 //        );
 //
-//        optionsStart.add(new OptionData(OptionType.STRING, "count", "Set count winners")
+//        optionsStart.add(new OptionData(OptionType.INTEGER, "count", "Set count winners")
 //                .setName("count")
 //        );
 //
 //        optionsStart.add(new OptionData(OptionType.STRING, "duration", "Examples: 20m, 10h, 1d. You can not specify the time, then it will be infinite")
 //                .setName("duration")
+//        );
+//
+//        optionsStart.add(new OptionData(OptionType.CHANNEL, "channel", "#text channel name")
+//                .setName("channel")
 //        );
 //
 //        optionsStop.add(new OptionData(OptionType.STRING, "stop", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1")
