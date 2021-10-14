@@ -15,6 +15,12 @@ import org.jetbrains.annotations.NotNull;
 import startbot.BotStart;
 import threads.Giveaway;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -27,6 +33,7 @@ import java.util.logging.Logger;
 public class Gift implements GiftHelper {
 
     private final static Logger LOGGER = Logger.getLogger(Gift.class.getName());
+    private final String URL = "http://localhost:8085/api/winners";
     private final JSONParsers jsonParsers = new JSONParsers();
     private final List<Button> buttons = new ArrayList<>();
     private final List<String> listUsers = new ArrayList<>();
@@ -125,12 +132,6 @@ public class Gift implements GiftHelper {
         EmbedBuilder start = new EmbedBuilder();
         extracted(start, guild, textChannel, newTitle, countWinners, time);
 
-        //TODO сделать перевод и нормальный текст. После перезагрузки не удаляет
-        //  Cannot invoke "net.dv8tion.jda.api.entities.TextChannel.editMessageEmbedsById(String, net.dv8tion.jda.api.entities.MessageEmbed[])" because the return value of "net.dv8tion.jda.api.entities.Guild.getTextChannelById(long)" is null
-        //	at giveaway.GiftHelper.editMessage(GiftHelper.java:19)
-        //	at giveaway.Gift.stopGift(Gift.java:232)
-        //	at giveaway.SlashCommand.onSlashCommand(SlashCommand.java:105)
-
         event.reply(jsonParsers.getLocale("send_slash_message", guild.getId()).replaceAll("\\{0}", textChannel.getId()))
                 .delay(15, TimeUnit.SECONDS)
                 .flatMap(InteractionHook::deleteOriginal)
@@ -225,6 +226,40 @@ public class Gift implements GiftHelper {
         }, 1, 5000);
     }
 
+    private void getWinners(int countWinner) {
+        try {
+            Winners winners = new Winners(countWinner, 0, listUsers.size() - 1);
+            URL url = new URL(URL);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/json");
+            con.setDoOutput(true);
+
+            try (OutputStream os = con.getOutputStream()) {
+                byte[] input = winners.toString().getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+            StringBuilder response = new StringBuilder();
+
+            try (BufferedReader br = new BufferedReader(
+                    new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
+                String responseLine;
+                while ((responseLine = br.readLine()) != null) {
+                    response.append(responseLine.trim());
+                }
+            }
+            String[] winnersArgs = response.toString().split(" ");
+
+            for (int i = 0; i < winnersArgs.length; i++) {
+                uniqueWinners.add("<@" + listUsers.get(Integer.parseInt(winnersArgs[i])) + ">");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public void stopGift(long guildIdLong, int countWinner) {
         LOGGER.info("\nstopGift method" + "\nCount winner: " + countWinner);
         if (listUsers.size() < 2) {
@@ -258,11 +293,8 @@ public class Gift implements GiftHelper {
         Instant timestamp = Instant.now();
         Instant specificTime = Instant.ofEpochMilli(timestamp.toEpochMilli());
         if (countWinner > 1) {
-            for (int i = 0; i < countWinner; i++) {
-                int randomNumber = random.nextInt(listUsers.size());
-                uniqueWinners.add("<@" + listUsers.get(randomNumber) + ">");
-                listUsers.remove(randomNumber);
-            }
+            //выбираем победителей
+            getWinners(countWinner);
 
             EmbedBuilder stopWithMoreWinner = new EmbedBuilder();
             stopWithMoreWinner.setColor(0x00FF00);
@@ -287,6 +319,9 @@ public class Gift implements GiftHelper {
 
             return;
         }
+
+        //выбираем победителей
+        getWinners(countWinner);
 
         EmbedBuilder stop = new EmbedBuilder();
         stop.setColor(0x00FF00);
