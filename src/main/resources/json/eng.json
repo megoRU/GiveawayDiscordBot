@@ -34,7 +34,7 @@
   "gift_Press_Me_Button": "Click me to enter! ",
   "gift_Stop_Button": "Stop Giveaway with {0} winners",
   "gift_Ends_At": "Ends at:",
-  "gift_Ends": "Ended in:",
+  "gift_Ends": "Ended in",
   "gift_Not_Enough_Users": "Not enough users",
   "gift_Giveaway_Deleted": ":x: The giveaway deleted!",
   "gift_Invalid_Number": ":warning: Invalid number",

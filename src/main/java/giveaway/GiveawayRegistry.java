@@ -64,11 +64,11 @@ public class GiveawayRegistry {
         return activeGiveaways;
     }
 
-    public Map<Long, String> getMessageId() {
+    public ConcurrentMap<Long, String> getMessageId() {
         return messageId;
     }
 
-    public Map<Long, String> getTitle() {
+    public ConcurrentMap<Long, String> getTitle() {
         return title;
     }
 
@@ -76,7 +76,7 @@ public class GiveawayRegistry {
         return endGiveawayDate;
     }
 
-    public Map<Long, String> getChannelId() {
+    public ConcurrentMap<Long, String> getChannelId() {
         return channelId;
     }
 

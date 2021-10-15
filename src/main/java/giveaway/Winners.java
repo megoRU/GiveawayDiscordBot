@@ -15,7 +15,6 @@ public class Winners {
     private Integer min;
     private Integer max;
 
-
     @Override
     public String toString() {
         return "{" +

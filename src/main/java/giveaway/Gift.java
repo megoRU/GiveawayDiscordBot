@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -109,17 +110,7 @@ public class Gift implements GiftHelper {
         extracted(start, guild, textChannel, newTitle, countWinners, time);
 
         textChannel.sendMessageEmbeds(start.build()).setActionRow(buttons).queue(message -> {
-
-            GiveawayRegistry.getInstance().getMessageId().put(guild.getIdLong(), message.getId());
-            GiveawayRegistry.getInstance().getChannelId().put(guild.getIdLong(), message.getChannel().getId());
-            GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().put(guild.getIdLong(), message.getId());
-            GiveawayRegistry.getInstance().getCountWinners().put(guild.getIdLong(), countWinners);
-            DataBase.getInstance().addMessageToDB(guild.getIdLong(),
-                    message.getIdLong(),
-                    message.getChannel().getIdLong(),
-                    countWinners,
-                    time == null ? null : String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times))),
-                    GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
+            updateCollections(guild, countWinners, time, message);
         });
 
         DataBase.getInstance().createTableWhenGiveawayStart(guild.getId());
@@ -138,23 +129,26 @@ public class Gift implements GiftHelper {
                 .queue();
 
         textChannel.sendMessageEmbeds(start.build()).setActionRow(buttons).queue(message -> {
-
-            GiveawayRegistry.getInstance().getMessageId().put(guild.getIdLong(), message.getId());
-            GiveawayRegistry.getInstance().getChannelId().put(guild.getIdLong(), message.getId());
-            GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().put(guild.getIdLong(), message.getId());
-            GiveawayRegistry.getInstance().getCountWinners().put(guild.getIdLong(), countWinners);
-            DataBase.getInstance().addMessageToDB(guild.getIdLong(),
-                    message.getIdLong(),
-                    message.getChannel().getIdLong(),
-                    countWinners,
-                    time == null ? null : String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times))),
-                    GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
+            updateCollections(guild, countWinners, time, message);
         });
 
         DataBase.getInstance().createTableWhenGiveawayStart(guild.getId());
 
         //Вот мы запускаем бесконечный поток.
         autoInsert();
+    }
+
+    private void updateCollections(Guild guild, String countWinners, String time, Message message) {
+        GiveawayRegistry.getInstance().getMessageId().put(guild.getIdLong(), message.getId());
+        GiveawayRegistry.getInstance().getChannelId().put(guild.getIdLong(), message.getChannel().getId());
+        GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().put(guild.getIdLong(), message.getId());
+        GiveawayRegistry.getInstance().getCountWinners().put(guild.getIdLong(), countWinners);
+        DataBase.getInstance().addMessageToDB(guild.getIdLong(),
+                message.getIdLong(),
+                message.getChannel().getIdLong(),
+                countWinners,
+                time == null ? null : String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times))),
+                GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
     }
 
     private String getMinutes(String time) {
