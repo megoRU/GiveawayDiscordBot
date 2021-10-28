@@ -16,12 +16,10 @@ import org.jetbrains.annotations.NotNull;
 import startbot.BotStart;
 import threads.Giveaway;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -223,26 +221,16 @@ public class Gift implements GiftHelper {
     private void getWinners(int countWinner) {
         try {
             Winners winners = new Winners(countWinner, 0, listUsers.size() - 1);
-            URL url = new URL(URL);
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("POST");
-            con.setRequestProperty("Content-Type", "application/json");
-            con.setDoOutput(true);
 
-            try (OutputStream os = con.getOutputStream()) {
-                byte[] input = winners.toString().getBytes(StandardCharsets.UTF_8);
-                os.write(input, 0, input.length);
-            }
-            StringBuilder response = new StringBuilder();
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(URL))
+                    .POST(HttpRequest.BodyPublishers.ofString(winners.toString()))
+                    .header("Content-Type", "application/json")
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            try (BufferedReader br = new BufferedReader(
-                    new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
-                String responseLine;
-                while ((responseLine = br.readLine()) != null) {
-                    response.append(responseLine.trim());
-                }
-            }
-            String[] winnersArgs = response.toString().split(" ");
+            String[] winnersArgs = response.body().split(" ");
 
             for (int i = 0; i < winnersArgs.length; i++) {
                 uniqueWinners.add("<@" + listUsers.get(Integer.parseInt(winnersArgs[i])) + ">");
