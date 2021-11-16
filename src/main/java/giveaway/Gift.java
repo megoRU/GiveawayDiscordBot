@@ -22,7 +22,10 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -45,6 +48,8 @@ public class Gift implements GiftHelper {
     private StringBuilder insertQuery = new StringBuilder();
     private int count;
     private String times;
+    private OffsetDateTime offsetTime;
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss.SSS");
 
     public Gift(long guildId, long textChannelId) {
         this.guildId = guildId;
@@ -67,18 +72,38 @@ public class Gift implements GiftHelper {
         start.addField("Attention for Admins", "[Add slash commands](https://discord.com/oauth2/authorize?client_id=808277484524011531&scope=applications.commands%20bot)", false);
 
         if (time != null) {
-            times = getMinutes(time);
-            start.setDescription(jsonParsers.getLocale("gift_Press_Green_Button", guild.getId())
-                    .replaceAll("\\{0}", countWinners == null ? "TBA" : countWinners)
-                    .replaceAll("\\{1}", setEndingWord(countWinners == null ? "TBA" : countWinners, guildId)) + getCount() + "`");
-            start.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times)));
-            start.setFooter(jsonParsers.getLocale("gift_Ends_At", guild.getId()));
-            GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild.getIdLong(),
-                    String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times))));
 
-            BotStart.getQueue().add(new Giveaway(
-                    guildId,
-                    String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times)))));
+            if (time.length() > 4) {
+                String localTime = time + ":00.001";
+                LocalDateTime dateTime = LocalDateTime.parse(localTime, formatter);
+                ZoneOffset offset = ZoneOffset.UTC;
+                offsetTime = OffsetDateTime.of(dateTime, offset);
+
+                start.setDescription(jsonParsers.getLocale("gift_Press_Green_Button", guild.getId())
+                        .replaceAll("\\{0}", countWinners == null ? "TBA" : countWinners)
+                        .replaceAll("\\{1}", setEndingWord(countWinners == null ? "TBA" : countWinners, guildId)) + getCount() + "`");
+                start.setTimestamp(OffsetDateTime.parse(String.valueOf(offsetTime)));
+                start.setFooter(jsonParsers.getLocale("gift_Ends_At", guild.getId()));
+                GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild.getIdLong(),
+                        String.valueOf(OffsetDateTime.parse(String.valueOf(offsetTime))));
+
+                BotStart.getQueue().add(new Giveaway(
+                        guildId,
+                        String.valueOf(OffsetDateTime.parse(String.valueOf(offsetTime)))));
+            } else {
+                times = getMinutes(time);
+                start.setDescription(jsonParsers.getLocale("gift_Press_Green_Button", guild.getId())
+                        .replaceAll("\\{0}", countWinners == null ? "TBA" : countWinners)
+                        .replaceAll("\\{1}", setEndingWord(countWinners == null ? "TBA" : countWinners, guildId)) + getCount() + "`");
+                start.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times)));
+                start.setFooter(jsonParsers.getLocale("gift_Ends_At", guild.getId()));
+                GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild.getIdLong(),
+                        String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times))));
+
+                BotStart.getQueue().add(new Giveaway(
+                        guildId,
+                        String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times)))));
+            }
         }
         if (time == null) {
             start.setDescription(jsonParsers.getLocale("gift_Press_Green_Button", guild.getId())
@@ -141,12 +166,22 @@ public class Gift implements GiftHelper {
         GiveawayRegistry.getInstance().getChannelId().put(guild.getIdLong(), message.getChannel().getId());
         GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().put(guild.getIdLong(), message.getId());
         GiveawayRegistry.getInstance().getCountWinners().put(guild.getIdLong(), countWinners);
-        DataBase.getInstance().addMessageToDB(guild.getIdLong(),
-                message.getIdLong(),
-                message.getChannel().getIdLong(),
-                countWinners,
-                time == null ? null : String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times))),
-                GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
+
+        if (time != null && time.length() > 4) {
+            DataBase.getInstance().addMessageToDB(guild.getIdLong(),
+                    message.getIdLong(),
+                    message.getChannel().getIdLong(),
+                    countWinners,
+                    String.valueOf(OffsetDateTime.parse(String.valueOf(offsetTime))),
+                    GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
+        } else {
+            DataBase.getInstance().addMessageToDB(guild.getIdLong(),
+                    message.getIdLong(),
+                    message.getChannel().getIdLong(),
+                    countWinners,
+                    time == null ? null : String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times))),
+                    GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
+        }
     }
 
     private String getMinutes(String time) {

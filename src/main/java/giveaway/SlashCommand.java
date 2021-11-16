@@ -37,7 +37,8 @@ public class SlashCommand extends ListenerAdapter {
                                 && !event.getOptions().get(i).getAsString().matches("[0-9]{1,2}[mмhчdд]")
                                 && !event.getOptions().get(i).getAsString().matches("\\d{18}")
                                 && !event.getOptions().get(i).getAsString().matches("[0-9]{1,2}")
-                                && event.getOptions().get(i).getAsString().matches(".{0,255}")) {
+                                && event.getOptions().get(i).getAsString().matches(".{0,255}")
+                                && !event.getOptions().get(i).getAsString().matches("[0-9]{4}.[0-9]{2}.[0-9]{2}\\s[0-9]{2}:[0-9]{2}")) {
                             title = event.getOptions().get(i).getAsString();
                         }
 
@@ -45,7 +46,8 @@ public class SlashCommand extends ListenerAdapter {
                             count = event.getOptions().get(i).getAsString();
                         }
 
-                        if (event.getOptions().get(i).getAsString().matches("[0-9]{1,2}[mмhчdд]")) {
+                        if (event.getOptions().get(i).getAsString().matches("[0-9]{1,2}[mмhчdд]")
+                                || event.getOptions().get(i).getAsString().matches("[0-9]{4}.[0-9]{2}.[0-9]{2}\\s[0-9]{2}:[0-9]{2}")) {
                             time = event.getOptions().get(i).getAsString();
                         }
 
@@ -76,6 +78,7 @@ public class SlashCommand extends ListenerAdapter {
                                     count,
                                     time);
 
+                //Если время будет неверным. Сработает try catch
                 } catch (Exception e) {
                     e.printStackTrace();
                     GiveawayRegistry.getInstance().removeGift(event.getGuild().getIdLong());

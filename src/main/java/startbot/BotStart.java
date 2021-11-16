@@ -92,42 +92,43 @@ public class BotStart {
 
         jda = jdaBuilder.build();
         jda.awaitReady();
-//        jda.updateCommands().queue();
-//
-//
-//        List<OptionData> optionsLanguage = new ArrayList<>();
-//        List<OptionData> optionsStart = new ArrayList<>();
-//        List<OptionData> optionsStop = new ArrayList<>();
-//
-//        optionsLanguage.add(new OptionData(OptionType.STRING, "bot", "Setting the bot language")
-//                .addChoice("eng", "eng")
-//                .addChoice("rus", "rus")
-//                .setRequired(true));
-//
-//        optionsStart.add(new OptionData(OptionType.STRING, "title", "Title for Giveaway")
-//                .setName("title")
-//        );
-//
-//        optionsStart.add(new OptionData(OptionType.INTEGER, "count", "Set count winners")
-//                .setName("count")
-//        );
-//
-//        optionsStart.add(new OptionData(OptionType.STRING, "duration", "Examples: 20m, 10h, 1d. You can not specify the time, then it will be infinite")
-//                .setName("duration")
-//        );
-//
-//        optionsStart.add(new OptionData(OptionType.CHANNEL, "channel", "#text channel name")
-//                .setName("channel")
-//        );
-//
-//        optionsStop.add(new OptionData(OptionType.STRING, "stop", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1")
-//                .setName("stop")
-//        );
-//
-//
-//        jda.upsertCommand("language", "Setting language").addOptions(optionsLanguage).queue();
-//        jda.upsertCommand("giveaway-start", "Create giveaway").addOptions(optionsStart).queue();
-//        jda.upsertCommand("giveaway-stop", "Stop the Giveaway").addOptions(optionsStop).queue();
+
+        jda.updateCommands().queue();
+
+
+        List<OptionData> optionsLanguage = new ArrayList<>();
+        List<OptionData> optionsStart = new ArrayList<>();
+        List<OptionData> optionsStop = new ArrayList<>();
+
+        optionsLanguage.add(new OptionData(OptionType.STRING, "bot", "Setting the bot language")
+                .addChoice("eng", "eng")
+                .addChoice("rus", "rus")
+                .setRequired(true));
+
+        optionsStart.add(new OptionData(OptionType.STRING, "title", "Title for Giveaway")
+                .setName("title")
+        );
+
+        optionsStart.add(new OptionData(OptionType.INTEGER, "count", "Set count winners")
+                .setName("count")
+        );
+
+        optionsStart.add(new OptionData(OptionType.STRING, "duration", "Examples: 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style. Preferably immediately in UTC ±0")
+                .setName("duration")
+        );
+
+        optionsStart.add(new OptionData(OptionType.CHANNEL, "channel", "#text channel name")
+                .setName("channel")
+        );
+
+        optionsStop.add(new OptionData(OptionType.STRING, "stop", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1")
+                .setName("stop")
+        );
+
+
+        jda.upsertCommand("language", "Setting language").addOptions(optionsLanguage).queue();
+        jda.upsertCommand("giveaway-start", "Create giveaway").addOptions(optionsStart).queue();
+        jda.upsertCommand("giveaway-stop", "Stop the Giveaway").addOptions(optionsStop).queue();
 
 
     }

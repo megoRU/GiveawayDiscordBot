@@ -9,42 +9,16 @@ import java.sql.SQLException;
 
 public class DataBase {
 
-    //CREATE TABLE `guildId`
-    // (`id` bigint(30) NOT NULL,
-    // `user_long_id` bigint(30) NOT NULL,
-    // PRIMARY KEY (`id`),
-    // UNIQUE KEY `id` (`id`))
-    // ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-    //CREATE TABLE `ActiveGiveaways`
-    // (`guild_long_id` bigint(30) NOT NULL,
-    // `message_id_long` bigint(30) NOT NULL,
-    // `channel_id_long` bigint(30) NOT NULL,
-    // `count_winners` varchar(255),
-    // `date_end_giveaway` varchar(255),
-    // `giveaway_title` varchar(255),
-    // PRIMARY KEY (`guild_long_id`),
-    // UNIQUE KEY `guild_long_id` (`guild_long_id`))
-    // ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-    private static volatile Connection connection;
     private static volatile DataBase dataBase;
 
     private DataBase() {
     }
 
-    //Создаем один коннект на программу
     public static Connection getConnection() throws SQLException {
-        if (connection == null || connection.isClosed() || connection.getMetaData().getDatabaseProductName() == null) {
-            synchronized (DataBase.class) {
-                if (connection == null || connection.isClosed()) {
-                    connection = DriverManager.getConnection(
-                            Config.getGiveawayConnection(),
-                            Config.getGiveawayUser(),
-                            Config.getGiveawayPass());
-                }
-            }
-        }
-        return connection;
+        return DriverManager.getConnection(
+                Config.getGiveawayConnection(),
+                Config.getGiveawayUser(),
+                Config.getGiveawayPass());
     }
 
     public static DataBase getInstance() {
@@ -132,14 +106,7 @@ public class DataBase {
             preparedStatement.close();
         } catch (SQLException e) {
             System.out.println("recursion addLangToDB");
-
-            try {
-                if (connection != null && connection.isClosed()) {
-                    addLangToDB(serverId, lang);
-                }
-            } catch (SQLException sqlException) {
-
-            }
+            addLangToDB(serverId, lang);
         }
     }
 
