@@ -9,6 +9,8 @@ import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.components.Button;
 import org.jetbrains.annotations.NotNull;
 import startbot.BotStart;
@@ -80,6 +82,47 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
             System.out.println("Скорее всего нет `DefaultChannel`!");
             e.printStackTrace();
         }
+
+        try {
+
+            List<OptionData> optionsLanguage = new ArrayList<>();
+            List<OptionData> optionsStart = new ArrayList<>();
+            List<OptionData> optionsStop = new ArrayList<>();
+
+            optionsLanguage.add(new OptionData(OptionType.STRING, "bot", "Setting the bot language")
+                    .addChoice("eng", "eng")
+                    .addChoice("rus", "rus")
+                    .setRequired(true));
+
+            optionsStart.add(new OptionData(OptionType.STRING, "title", "Title for Giveaway")
+                    .setName("title")
+            );
+
+            optionsStart.add(new OptionData(OptionType.INTEGER, "count", "Set count winners")
+                    .setName("count")
+            );
+
+            optionsStart.add(new OptionData(OptionType.STRING, "duration", "Examples: 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style. Preferably immediately in UTC ±0")
+                    .setName("duration")
+            );
+
+            optionsStart.add(new OptionData(OptionType.CHANNEL, "channel", "#text channel name")
+                    .setName("channel")
+            );
+
+            optionsStop.add(new OptionData(OptionType.STRING, "stop", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1")
+                    .setName("stop")
+            );
+
+
+            event.getGuild().upsertCommand("language", "Setting language").addOptions(optionsLanguage).queue();
+            event.getGuild().upsertCommand("giveaway-start", "Create giveaway").addOptions(optionsStart).queue();
+            event.getGuild().upsertCommand("giveaway-stop", "Stop the Giveaway").addOptions(optionsStop).queue();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override
