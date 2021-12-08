@@ -29,8 +29,7 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
 
         try {
             if (event.getGuild().getDefaultChannel() != null &&
-                    !event.getGuild().getSelfMember().hasPermission(event.getGuild().getDefaultChannel(),
-                            Permission.MESSAGE_WRITE)) {
+                    !event.getGuild().getSelfMember().hasPermission(event.getGuild().getDefaultChannel(), Permission.MESSAGE_SEND)) {
                 return;
             }
 

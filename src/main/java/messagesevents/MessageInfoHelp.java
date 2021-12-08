@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.Button;
 import org.jetbrains.annotations.NotNull;
@@ -22,11 +22,12 @@ public class MessageInfoHelp extends ListenerAdapter implements SenderMessage {
     private final JSONParsers jsonParsers = new JSONParsers();
 
     @Override
-    public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
+    public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
+        if (!event.isFromGuild()) return;
 
-        if (!event.getGuild().getSelfMember().hasPermission(event.getChannel(), Permission.MESSAGE_WRITE) ||
-                !event.getGuild().getSelfMember().hasPermission(event.getChannel(), Permission.MESSAGE_EMBED_LINKS)) {
+        if (!event.getGuild().getSelfMember().hasPermission(event.getTextChannel(), Permission.MESSAGE_SEND) ||
+                !event.getGuild().getSelfMember().hasPermission(event.getTextChannel(), Permission.MESSAGE_EMBED_LINKS)) {
             return;
         }
 
@@ -46,7 +47,7 @@ public class MessageInfoHelp extends ListenerAdapter implements SenderMessage {
         if (message.equals(prefix)) {
             buildMessage(
                     p,
-                    event.getChannel(),
+                    event.getTextChannel(),
                     event.getAuthor().getAvatarUrl(),
                     event.getGuild().getId(),
                     event.getAuthor().getName());
@@ -56,7 +57,7 @@ public class MessageInfoHelp extends ListenerAdapter implements SenderMessage {
 
     public void buildMessage(String p, TextChannel textChannel, String avatarUrl, String guildIdLong, String name) {
 
-        if (!textChannel.getGuild().getSelfMember().hasPermission(textChannel, Permission.MESSAGE_WRITE) ||
+        if (!textChannel.getGuild().getSelfMember().hasPermission(textChannel, Permission.MESSAGE_SEND) ||
                 !textChannel.getGuild().getSelfMember().hasPermission(textChannel, Permission.MESSAGE_EMBED_LINKS)) {
             return;
         }

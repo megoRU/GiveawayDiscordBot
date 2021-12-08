@@ -64,7 +64,7 @@ public class SlashCommand extends ListenerAdapter {
                                     textChannel == null ? event.getTextChannel().getIdLong() : textChannel.getIdLong()));
 
                     if (!event.getGuild().getSelfMember()
-                            .hasPermission(textChannel == null ? event.getTextChannel() : textChannel, Permission.MESSAGE_WRITE) ||
+                            .hasPermission(textChannel == null ? event.getTextChannel() : textChannel, Permission.MESSAGE_SEND) ||
                             !event.getGuild().getSelfMember()
                                     .hasPermission(textChannel == null ? event.getTextChannel() : textChannel, Permission.MESSAGE_EMBED_LINKS)) {
                         return;

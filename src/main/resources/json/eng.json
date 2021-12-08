@@ -15,7 +15,7 @@
   "messages_events_Stop_Number_Giveaway": "gift stop <number>` - Stop Giveaway with more winners.\n",
   "messages_events_Links": "Links:",
   "messages_events_Site": ":zap: [megoru.ru](https://megoru.ru)\n",
-  "messages_events_Add_Me_To_Other_Guilds": ":robot: [Add me to other guilds](https://discord.com/oauth2/authorize?client_id=808277484524011531&scope=bot&permissions=2147511360)\n",
+  "messages_events_Add_Me_To_Other_Guilds": ":robot: [Add me to other guilds](https://discord.com/oauth2/authorize?client_id=808277484524011531&permissions=2147511296&scope=applications.commands%20bot)\n",
   "messages_events_Send_Private_Message": "I sent you a private message",
   "messages_events_Failed_To_Send_Message": "Failed to send message. Maybe I'm on your blacklist!",
   "prefix_change_Must_have_Permission": "You cannot change the prefix. You must have permission: `MANAGE SERVER`",

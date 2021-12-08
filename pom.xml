@@ -45,10 +45,11 @@
     </build>
 
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/net.dv8tion/JDA -->
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>4.3.0_339</version>
+            <version>5.0.0-alpha.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>club.minnced</groupId>

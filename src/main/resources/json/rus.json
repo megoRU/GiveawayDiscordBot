@@ -15,7 +15,7 @@
   "messages_events_Stop_Number_Giveaway": "gift stop <число>` - Завершите Giveaway с большим количеством победителей.\n",
   "messages_events_Links": "Ссылки:",
   "messages_events_Site": ":zap: [megoru.ru](https://megoru.ru)\n",
-  "messages_events_Add_Me_To_Other_Guilds": ":robot: [Добавь меня в другие гильдии](https://discord.com/oauth2/authorize?client_id=808277484524011531&scope=bot&permissions=2147511360)\n",
+  "messages_events_Add_Me_To_Other_Guilds": ":robot: [Добавь меня в другие гильдии](https://discord.com/oauth2/authorize?client_id=808277484524011531&permissions=2147511296&scope=applications.commands%20bot)\n",
   "messages_events_Send_Private_Message": "Я отправил тебе личное сообщение",
   "messages_events_Failed_To_Send_Message": "Не удалось отправить сообщение. Возможно я у тебя черном списке!",
   "prefix_change_Must_have_Permission": "Вы не можете изменить префикс. У вас должно быть разрешение: `УПРАВЛЯТЬ СЕРВЕРОМ`",

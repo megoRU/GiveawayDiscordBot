@@ -91,7 +91,7 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
             e.printStackTrace();
         }
 
-        if (!event.getGuild().getSelfMember().hasPermission(event.getGuildChannel(), Permission.MESSAGE_WRITE)) {
+        if (!event.getGuild().getSelfMember().hasPermission(event.getGuildChannel(), Permission.MESSAGE_SEND)) {
             return;
         }
         try {
