@@ -29,7 +29,6 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
 
     @Override
     public void onButtonClick(@NotNull ButtonClickEvent event) {
-
         if (event.getButton() == null) return;
 
         if (event.getGuild() == null || event.getMember() == null) return;
