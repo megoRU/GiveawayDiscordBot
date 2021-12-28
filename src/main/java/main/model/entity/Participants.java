@@ -1,10 +1,7 @@
 package main.model.entity;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -30,4 +27,10 @@ public class Participants {
 
     @Column(name = "nick_name", nullable = false)
     private String nickName;
+
+    public Participants(ActiveGiveaways guildLongId, Long userIdLong, String nickName) {
+        this.guildLongId = guildLongId;
+        this.userIdLong = userIdLong;
+        this.nickName = nickName;
+    }
 }

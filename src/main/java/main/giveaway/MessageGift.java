@@ -1,17 +1,23 @@
 package main.giveaway;
 
+import lombok.AllArgsConstructor;
 import main.config.BotStartConfig;
 import main.jsonparser.JSONParsers;
+import main.model.repository.ActiveGiveawayRepository;
+import main.model.repository.ParticipantsRepository;
 import main.startbot.Statcord;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.logging.Logger;
 
+@AllArgsConstructor
+@Service
 public class MessageGift extends ListenerAdapter {
 
     private final static Logger LOGGER = Logger.getLogger(MessageGift.class.getName());
@@ -27,6 +33,8 @@ public class MessageGift extends ListenerAdapter {
     private static final String GIFT_STOP = "gift stop";
     private static final String GIFT_STOP_COUNT = "gift stop\\s[0-9]+";
     private final JSONParsers jsonParsers = new JSONParsers();
+    private final ActiveGiveawayRepository activeGiveawayRepository;
+    private final ParticipantsRepository participantsRepository;
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
@@ -116,7 +124,7 @@ public class MessageGift extends ListenerAdapter {
                 messageSplit[2] = "1";
             }
 
-            GiveawayRegistry.getInstance().setGift(event.getGuild().getIdLong(), new Gift(event.getGuild().getIdLong(), event.getChannel().getIdLong()));
+            GiveawayRegistry.getInstance().setGift(event.getGuild().getIdLong(), new Gift(event.getGuild().getIdLong(), event.getChannel().getIdLong(), activeGiveawayRepository, participantsRepository));
 
             if (messageWithOutPrefix.matches(GIFT_START_TITLE_MINUTES_WITH_COUNT)) {
                 int len = messageSplit[messageSplit.length - 1].length() + messageSplit[messageSplit.length - 2].length();

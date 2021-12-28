@@ -1,16 +1,27 @@
 package main.giveaway;
 
+import lombok.AllArgsConstructor;
 import main.config.BotStartConfig;
 import main.jsonparser.JSONParsers;
+import main.model.entity.Language;
+import main.model.repository.ActiveGiveawayRepository;
+import main.model.repository.LanguageRepository;
+import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
 
+@AllArgsConstructor
+@Service
 public class SlashCommand extends ListenerAdapter {
 
     private final JSONParsers jsonParsers = new JSONParsers();
+    private final LanguageRepository languageRepository;
+    private final ActiveGiveawayRepository activeGiveawayRepository;
+    private final ParticipantsRepository participantsRepository;
 
     @Override
     public void onSlashCommand(@NotNull SlashCommandEvent event) {
@@ -20,7 +31,7 @@ public class SlashCommand extends ListenerAdapter {
 
         if (event.getMember() == null) return;
 
-        if (event.getName().equals("giveaway-start")) {
+        if (event.getName().equals("start")) {
             if (GiveawayRegistry.getInstance().hasGift(event.getGuild().getIdLong())) {
                 event.reply(jsonParsers.getLocale("message_gift_Need_Stop_Giveaway", event.getGuild().getId())).queue();
             } else {
@@ -60,7 +71,7 @@ public class SlashCommand extends ListenerAdapter {
                     GiveawayRegistry.getInstance().setGift(
                             event.getGuild().getIdLong(),
                             new Gift(event.getGuild().getIdLong(),
-                                    textChannel == null ? event.getTextChannel().getIdLong() : textChannel.getIdLong()));
+                                    textChannel == null ? event.getTextChannel().getIdLong() : textChannel.getIdLong(), activeGiveawayRepository, participantsRepository));
 
                     if (!event.getGuild().getSelfMember()
                             .hasPermission(textChannel == null ? event.getTextChannel() : textChannel, Permission.MESSAGE_SEND) ||
@@ -88,7 +99,7 @@ public class SlashCommand extends ListenerAdapter {
             return;
         }
 
-        if (event.getName().equals("giveaway-stop")) {
+        if (event.getName().equals("stop")) {
             if (!GiveawayRegistry.getInstance().hasGift(event.getGuild().getIdLong())) {
                 event.reply(jsonParsers.getLocale("slash_Stop_No_Has", event.getGuild().getId())).queue();
                 return;
@@ -131,8 +142,10 @@ public class SlashCommand extends ListenerAdapter {
             event.reply(jsonParsers.getLocale("button_Language", event.getGuild().getId())
                     .replaceAll("\\{0}", event.getOptions().get(0).getAsString())).queue();
 
-            //TODO: Сделать через репозитории
-//            DataBase.getInstance().addLangToDB(event.getGuild().getId(), event.getOptions().get(0).getAsString());
+            Language language = new Language();
+            language.setServerId(event.getGuild().getId());
+            language.setLanguage(event.getOptions().get(0).getAsString());
+            languageRepository.save(language);
         }
     }
 }

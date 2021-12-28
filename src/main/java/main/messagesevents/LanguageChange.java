@@ -1,19 +1,26 @@
 package main.messagesevents;
 
+import lombok.AllArgsConstructor;
 import main.jsonparser.JSONParsers;
+import main.model.entity.Language;
+import main.model.repository.LanguageRepository;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import main.config.BotStartConfig;
+import org.springframework.stereotype.Service;
 
+@AllArgsConstructor
+@Service
 public class LanguageChange extends ListenerAdapter {
 
     private static final String LANG_RUS = "!lang rus";
     private static final String LANG_ENG = "!lang eng";
     private static final String LANG_RESET = "!lang reset";
     private final JSONParsers jsonParsers = new JSONParsers();
+    private final LanguageRepository languageRepository;
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
@@ -49,8 +56,10 @@ public class LanguageChange extends ListenerAdapter {
         if (message.equals(prefix_LANG_RUS) || message.equals(prefix_LANG_ENG)) {
             BotStartConfig.getMapLanguages().put(event.getGuild().getId(), messages[1]);
 
-            //TODO: Сделать через репозитории
-//            DataBase.getInstance().addLangToDB(event.getGuild().getId(), messages[1]);
+            Language language = new Language();
+            language.setServerId(event.getGuild().getId());
+            language.setLanguage( messages[1]);
+            languageRepository.save(language);
 
             event.getChannel()
                     .sendMessage(jsonParsers
@@ -63,10 +72,7 @@ public class LanguageChange extends ListenerAdapter {
 
         if (message.equals(prefix_LANG_RESET)) {
             BotStartConfig.getMapLanguages().remove(event.getGuild().getId());
-
-            //TODO: Сделать через репозитории
-//            DataBase.getInstance().removeLangFromDB(event.getGuild().getId());
-
+            languageRepository.deleteLanguage(event.getGuild().getId());
             event.getChannel()
                     .sendMessage(jsonParsers.getLocale("language_change_lang_reset", event.getGuild().getId()))
                     .queue();

@@ -1,8 +1,12 @@
 package main.events;
 
+import lombok.AllArgsConstructor;
 import main.config.BotStartConfig;
 import main.giveaway.ReactionsButton;
 import main.jsonparser.JSONParsers;
+import main.model.repository.ActiveGiveawayRepository;
+import main.model.repository.LanguageRepository;
+import main.model.repository.PrefixRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Emoji;
@@ -13,14 +17,20 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.components.Button;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@AllArgsConstructor
+@Service
 public class MessageWhenBotJoinToGuild extends ListenerAdapter {
 
     private final JSONParsers jsonParsers = new JSONParsers();
+    private final PrefixRepository prefixRepository;
+    private final ActiveGiveawayRepository activeGiveawayRepository;
+    private final LanguageRepository languageRepository;
 
     //bot join msg
     @Override
@@ -127,12 +137,9 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
     public void onGuildLeave(@NotNull GuildLeaveEvent event) {
         try {
             System.out.println("Удаляем данные после удаления бота из Guild");
-
-            //TODO: Сделать через репозитории
-//            DataBase.getInstance().removeLangFromDB(event.getGuild().getId());
-//            DataBase.getInstance().removePrefixFromDB(event.getGuild().getId());
-//            DataBase.getInstance().removeMessageFromDB(event.getGuild().getIdLong());
-//            DataBase.getInstance().dropTableWhenGiveawayStop(event.getGuild().getId());
+            languageRepository.deleteLanguage(event.getGuild().getId());
+            prefixRepository.deletePrefix(event.getGuild().getId());
+            activeGiveawayRepository.deleteActiveGiveaways(event.getGuild().getIdLong());
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -4,6 +4,10 @@ import lombok.Getter;
 import lombok.Setter;
 import main.config.BotStartConfig;
 import main.jsonparser.JSONParsers;
+import main.model.entity.ActiveGiveaways;
+import main.model.entity.Participants;
+import main.model.repository.ActiveGiveawayRepository;
+import main.model.repository.ParticipantsRepository;
 import main.threads.Giveaway;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -14,12 +18,16 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.Button;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.data.annotation.Transient;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.sql.SQLException;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -49,10 +57,15 @@ public class Gift implements GiftHelper {
     private String times;
     private OffsetDateTime offsetTime;
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss.SSS");
+    private final ActiveGiveawayRepository activeGiveawayRepository;
+    private final ParticipantsRepository participantsRepository;
+    private List<Participants> participantsList = new ArrayList<>();
 
-    public Gift(long guildId, long textChannelId) {
+    public Gift(long guildId, long textChannelId, ActiveGiveawayRepository activeGiveawayRepository, ParticipantsRepository participantsRepository) {
         this.guildId = guildId;
         this.textChannelId = textChannelId;
+        this.activeGiveawayRepository = activeGiveawayRepository;
+        this.participantsRepository = participantsRepository;
     }
 
     private void extracted(EmbedBuilder start, Guild guild, TextChannel channel, String newTitle, String countWinners, String time) {
@@ -132,15 +145,7 @@ public class Gift implements GiftHelper {
 
         extracted(start, guild, textChannel, newTitle, countWinners, time);
 
-        textChannel.sendMessageEmbeds(start.build()).setActionRow(buttons).queue(message -> {
-            updateCollections(guild, countWinners, time, message);
-        });
-
-
-        //TODO: Сделать через репозитории
-//        DataBase.getInstance().createTableWhenGiveawayStart(guild.getId());
-
-
+        textChannel.sendMessageEmbeds(start.build()).setActionRow(buttons).queue(message -> updateCollections(guild, countWinners, time, message));
 
         //Вот мы запускаем бесконечный поток.
         autoInsert();
@@ -155,12 +160,7 @@ public class Gift implements GiftHelper {
                 .flatMap(InteractionHook::deleteOriginal)
                 .queue();
 
-        textChannel.sendMessageEmbeds(start.build()).setActionRow(buttons).queue(message -> {
-            updateCollections(guild, countWinners, time, message);
-        });
-
-        //TODO: Сделать через репозитории
-//        DataBase.getInstance().createTableWhenGiveawayStart(guild.getId());
+        textChannel.sendMessageEmbeds(start.build()).setActionRow(buttons).queue(message -> updateCollections(guild, countWinners, time, message));
 
         //Вот мы запускаем бесконечный поток.
         autoInsert();
@@ -172,24 +172,19 @@ public class Gift implements GiftHelper {
         GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().put(guild.getIdLong(), message.getId());
         GiveawayRegistry.getInstance().getCountWinners().put(guild.getIdLong(), countWinners);
 
+        ActiveGiveaways activeGiveaways = new ActiveGiveaways();
+        activeGiveaways.setGuildLongId(guildId);
+        activeGiveaways.setMessageIdLong(message.getIdLong());
+        activeGiveaways.setChannelIdLong(message.getChannel().getIdLong());
+        activeGiveaways.setCountWinners(countWinners);
+        activeGiveaways.setGiveawayTitle(GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
 
-        //TODO: Сделать через репозитории
-
-//        if (time != null && time.length() > 4) {
-//            DataBase.getInstance().addMessageToDB(guild.getIdLong(),
-//                    message.getIdLong(),
-//                    message.getChannel().getIdLong(),
-//                    countWinners,
-//                    String.valueOf(OffsetDateTime.parse(String.valueOf(offsetTime))),
-//                    GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
-//        } else {
-//            DataBase.getInstance().addMessageToDB(guild.getIdLong(),
-//                    message.getIdLong(),
-//                    message.getChannel().getIdLong(),
-//                    countWinners,
-//                    time == null ? null : String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times))),
-//                    GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
-//        }
+        if (time != null && time.length() > 4) {
+            activeGiveaways.setDateEndGiveaway(String.valueOf(OffsetDateTime.parse(String.valueOf(offsetTime))));
+        } else {
+            activeGiveaways.setDateEndGiveaway(time == null ? null : String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times))));
+        }
+        activeGiveawayRepository.save(activeGiveaways);
     }
 
     private String getMinutes(String time) {
@@ -211,26 +206,30 @@ public class Gift implements GiftHelper {
     }
 
     //Добавляет пользователя в StringBuilder
-    protected void addUserToPoll(User user) {
+    protected void addUserToPoll(final User user) {
         setCount(getCount() + 1);
         listUsers.add(user.getId());
         listUsersHash.put(user.getId(), user.getId());
-        addUserToInsertQuery(user.getIdLong());
+        addUserToInsertQuery(user.getName(), user.getIdLong(), guildId);
     }
 
+    //TODO: Может удалять список с кем то.
+    @Deprecated(since = "3.5.8")
     private void executeMultiInsert(long guildIdLong) {
         try {
             if (!insertQuery.isEmpty()) {
-                //TODO: Сделать через репозитории
-                //TODO: Сделать мульти-инсерт для многих значений. Возможно на чистом SQL
+                Connection con = DriverManager.getConnection(
+                        BotStartConfig.DATABASE_URL,
+                        BotStartConfig.DATABASE_USER_DEV,
+                        BotStartConfig.DATABASE_PASS);
 
-//                DataBase.getConnection().createStatement().execute(
-//                        "INSERT IGNORE INTO `"
-//                                + guildIdLong
-//                                + "` (user_long_id) "
-//                                + "VALUES" + insertQuery.toString());
+                con.createStatement().execute("INSERT INTO participants (nick_name, user_long_id, guild_long_id) " +
+                        "VALUES " + insertQuery.toString());
 
-                insertQuery = new StringBuilder();
+                synchronized (this) {
+                    insertQuery = new StringBuilder();
+                }
+
                 updateGiveawayMessage(
                         GiveawayRegistry.getInstance().getCountWinners().get(guildId) == null
                                 ? "TBA"
@@ -241,14 +240,19 @@ public class Gift implements GiftHelper {
             }
         } catch (Exception e) {
             insertQuery = new StringBuilder();
+            e.printStackTrace();
             System.out.println("Таблица: " + guildIdLong
                     + " больше не существует, скорее всего Giveaway завершился!\n"
                     + "Очищаем StringBuilder!");
         }
     }
 
-    private void addUserToInsertQuery(long userIdLong) {
-        insertQuery.append(insertQuery.length() == 0 ? "" : ",").append("('").append(userIdLong).append("')");
+    private void addUserToInsertQuery(String nickName, long userIdLong, long guildIdLong) {
+        insertQuery.append(insertQuery.length() == 0 ? "" : ",")
+                .append("(\"").append(nickName)
+                .append("\", '").append(userIdLong)
+                .append("', '").append(guildIdLong)
+                .append("')");
     }
 
     //Автоматически отправляет в БД данные которые в буфере StringBuilder
@@ -301,10 +305,7 @@ public class Gift implements GiftHelper {
             //Удаляет данные из коллекций
             clearingCollections();
 
-            //TODO: Сделать через репозитории
-//            DataBase.getInstance().removeMessageFromDB(guildIdLong);
-//            DataBase.getInstance().dropTableWhenGiveawayStop(String.valueOf(guildIdLong));
-
+            activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
             return;
         }
 
@@ -344,10 +345,7 @@ public class Gift implements GiftHelper {
             //Удаляет данные из коллекций
             clearingCollections();
 
-            //TODO: Сделать через репозитории
-//            DataBase.getInstance().removeMessageFromDB(guildIdLong);
-//            DataBase.getInstance().dropTableWhenGiveawayStop(String.valueOf(guildIdLong));
-
+            activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
             return;
         }
 
@@ -372,10 +370,7 @@ public class Gift implements GiftHelper {
         //Удаляет данные из коллекций
         clearingCollections();
 
-        //TODO: Сделать через репозитории
-//        DataBase.getInstance().removeMessageFromDB(guildIdLong);
-//        DataBase.getInstance().dropTableWhenGiveawayStop(String.valueOf(guildIdLong));
-
+        activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
     }
 
     private void clearingCollections() {

@@ -1,19 +1,25 @@
 package main.giveaway;
 
+import lombok.AllArgsConstructor;
 import main.config.BotStartConfig;
 import main.jsonparser.JSONParsers;
 import main.messagesevents.MessageInfoHelp;
 import main.messagesevents.SenderMessage;
+import main.model.entity.Language;
+import main.model.repository.LanguageRepository;
 import main.startbot.Statcord;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.Button;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 import java.util.logging.Logger;
 
+@AllArgsConstructor
+@Service
 public class ReactionsButton extends ListenerAdapter implements SenderMessage {
 
     public static final String PRESENT = "PRESENT";
@@ -25,6 +31,7 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
     public static final String CHANGE_LANGUAGE = "CHANGE_LANGUAGE";
     private final static Logger LOGGER = Logger.getLogger(ReactionsButton.class.getName());
     private static final JSONParsers jsonParsers = new JSONParsers();
+    private final LanguageRepository languageRepository;
 
     @Override
     public void onButtonClick(@NotNull ButtonClickEvent event) {
@@ -67,8 +74,11 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
         if (Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + CHANGE_LANGUAGE)) {
             event.deferEdit().queue();
             String buttonName = event.getButton().getEmoji().getName().contains("\uD83C\uDDF7\uD83C\uDDFA") ? "rus" : "eng";
-            //TODO: Сделать через репозитории
-//            DataBase.getInstance().addLangToDB(event.getGuild().getId(), buttonName);
+
+            Language language = new Language();
+            language.setServerId(event.getGuild().getId());
+            language.setLanguage(buttonName);
+            languageRepository.save(language);
 
             BotStartConfig.getMapLanguages().put(event.getGuild().getId(), buttonName);
 
@@ -114,7 +124,7 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
                 GiveawayRegistry.getInstance()
                         .getActiveGiveaways()
                         .get(event.getGuild().getIdLong())
-                        .addUserToPoll(event.getMember().getUser());
+                        .addUserToPoll(event.getUser());
                 Statcord.commandPost("gift", event.getUser().getId());
                 return;
             }

@@ -10,7 +10,10 @@ import main.jsonparser.ParserClass;
 import main.messagesevents.LanguageChange;
 import main.messagesevents.MessageInfoHelp;
 import main.messagesevents.PrefixChange;
-import main.startbot.Statcord;
+import main.model.repository.ActiveGiveawayRepository;
+import main.model.repository.LanguageRepository;
+import main.model.repository.ParticipantsRepository;
+import main.model.repository.PrefixRepository;
 import main.threads.Giveaway;
 import main.threads.StopGiveawayByTimer;
 import net.dv8tion.jda.api.JDA;
@@ -20,15 +23,14 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.components.Button;
-import org.discordbots.api.client.DiscordBotListAPI;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -56,13 +58,26 @@ public class BotStartConfig {
     public static ExecutorService executorService;
     public static int serverCount;
     private volatile boolean isLaunched;
+    @Autowired
+    private Environment env;
+
+    public static String DATABASE_URL;
+    public static String DATABASE_PASS;
+    public static String DATABASE_USER_DEV;
 
     //REPOSITORY
-
+    private final ActiveGiveawayRepository activeGiveawayRepository;
+    private final LanguageRepository languageRepository;
+    private final PrefixRepository prefixRepository;
+    private final ParticipantsRepository participantsRepository;
 
     @Autowired
-    public BotStartConfig() {
-
+    public BotStartConfig(ActiveGiveawayRepository activeGiveawayRepository, LanguageRepository
+            languageRepository, PrefixRepository prefixRepository, ParticipantsRepository participantsRepository) {
+        this.activeGiveawayRepository = activeGiveawayRepository;
+        this.languageRepository = languageRepository;
+        this.prefixRepository = prefixRepository;
+        this.participantsRepository = participantsRepository;
     }
 
     @Bean
@@ -70,19 +85,21 @@ public class BotStartConfig {
         try {
             //Загружаем GiveawayRegistry
             GiveawayRegistry.getInstance();
-
+            DATABASE_URL = env.getProperty("DATABASE_URL_DEV");
+            DATABASE_PASS = env.getProperty("DATABASE_PASS");
+            DATABASE_USER_DEV = env.getProperty("DATABASE_USER_DEV");
 
             jdaBuilder.setAutoReconnect(true);
             jdaBuilder.setStatus(OnlineStatus.ONLINE);
             jdaBuilder.setActivity(Activity.playing(activity + serverCount + " guilds"));
             jdaBuilder.setBulkDeleteSplittingEnabled(false);
-            jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild());
-            jdaBuilder.addEventListeners(new MessageGift());
-            jdaBuilder.addEventListeners(new PrefixChange());
+            jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild(prefixRepository, activeGiveawayRepository, languageRepository));
+            jdaBuilder.addEventListeners(new MessageGift(activeGiveawayRepository, participantsRepository));
+            jdaBuilder.addEventListeners(new PrefixChange(prefixRepository));
             jdaBuilder.addEventListeners(new MessageInfoHelp());
-            jdaBuilder.addEventListeners(new LanguageChange());
-            jdaBuilder.addEventListeners(new ReactionsButton());
-            jdaBuilder.addEventListeners(new SlashCommand());
+            jdaBuilder.addEventListeners(new LanguageChange(languageRepository));
+            jdaBuilder.addEventListeners(new ReactionsButton(languageRepository));
+            jdaBuilder.addEventListeners(new SlashCommand(languageRepository, activeGiveawayRepository, participantsRepository));
 
             jda = jdaBuilder.build();
             jda.awaitReady();
@@ -158,8 +175,8 @@ public class BotStartConfig {
             );
 
             jda.upsertCommand("language", "Setting language").addOptions(optionsLanguage).queue();
-            jda.upsertCommand("giveaway-start", "Create giveaway").addOptions(optionsStart).queue();
-            jda.upsertCommand("giveaway-stop", "Stop the Giveaway").addOptions(optionsStop).queue();
+            jda.upsertCommand("start", "Create giveaway").addOptions(optionsStart).queue();
+            jda.upsertCommand("stop", "Stop the Giveaway").addOptions(optionsStop).queue();
         } catch (Exception e) {
             e.printStackTrace();
         }
