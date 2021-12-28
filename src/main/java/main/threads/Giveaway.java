@@ -1,4 +1,4 @@
-package threads;
+package main.threads;
 
 public class Giveaway {
 

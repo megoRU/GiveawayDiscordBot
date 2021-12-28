@@ -1,6 +1,6 @@
-package giveaway;
+package main.giveaway;
 
-import jsonparser.JSONParsers;
+import main.jsonparser.JSONParsers;
 
 import java.util.HashMap;
 import java.util.Map;

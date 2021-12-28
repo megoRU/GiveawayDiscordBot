@@ -1,13 +1,12 @@
-package giveaway;
+package main.giveaway;
 
-import db.DataBase;
-import jsonparser.JSONParsers;
+import main.config.BotStartConfig;
+import main.jsonparser.JSONParsers;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import startbot.BotStart;
 
 public class SlashCommand extends ListenerAdapter {
 
@@ -127,12 +126,13 @@ public class SlashCommand extends ListenerAdapter {
         //0 - bot
         if (event.getName().equals("language")) {
 
-            BotStart.getMapLanguages().put(event.getGuild().getId(), event.getOptions().get(0).getAsString());
+            BotStartConfig.getMapLanguages().put(event.getGuild().getId(), event.getOptions().get(0).getAsString());
 
             event.reply(jsonParsers.getLocale("button_Language", event.getGuild().getId())
                     .replaceAll("\\{0}", event.getOptions().get(0).getAsString())).queue();
 
-            DataBase.getInstance().addLangToDB(event.getGuild().getId(), event.getOptions().get(0).getAsString());
+            //TODO: Сделать через репозитории
+//            DataBase.getInstance().addLangToDB(event.getGuild().getId(), event.getOptions().get(0).getAsString());
         }
     }
 }

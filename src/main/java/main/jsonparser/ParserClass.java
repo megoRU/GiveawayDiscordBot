@@ -1,4 +1,4 @@
-package jsonparser;
+package main.jsonparser;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;

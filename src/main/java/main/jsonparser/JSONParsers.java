@@ -1,14 +1,14 @@
-package jsonparser;
+package main.jsonparser;
 
-import startbot.BotStart;
+import main.config.BotStartConfig;
 
 public class JSONParsers {
 
     public String getLocale(String key, String userIdLong) {
         try {
             String language = "eng";
-            if (BotStart.getMapLanguages().get(userIdLong) != null) {
-                language = BotStart.getMapLanguages().get(userIdLong);
+            if (BotStartConfig.getMapLanguages().get(userIdLong) != null) {
+                language = BotStartConfig.getMapLanguages().get(userIdLong);
             }
             return ParserClass.getInstance().getTranslation(key, language);
         } catch (Exception e) {

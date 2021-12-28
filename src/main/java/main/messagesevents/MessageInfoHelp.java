@@ -1,7 +1,8 @@
-package messagesevents;
+package main.messagesevents;
 
-import giveaway.ReactionsButton;
-import jsonparser.JSONParsers;
+import main.config.BotStartConfig;
+import main.giveaway.ReactionsButton;
+import main.jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
@@ -11,7 +12,6 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.Button;
 import org.jetbrains.annotations.NotNull;
-import startbot.BotStart;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,9 +39,9 @@ public class MessageInfoHelp extends ListenerAdapter implements SenderMessage {
         String prefix = HELP;
         String p = PREFIX;
 
-        if (BotStart.getMapPrefix().containsKey(event.getGuild().getId())) {
-            prefix = BotStart.getMapPrefix().get(event.getGuild().getId()) + "help";
-            p = BotStart.getMapPrefix().get(event.getGuild().getId());
+        if (BotStartConfig.getMapPrefix().containsKey(event.getGuild().getId())) {
+            prefix = BotStartConfig.getMapPrefix().get(event.getGuild().getId()) + "help";
+            p = BotStartConfig.getMapPrefix().get(event.getGuild().getId());
         }
 
 
@@ -105,9 +105,9 @@ public class MessageInfoHelp extends ListenerAdapter implements SenderMessage {
         buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
 
 
-        if (BotStart.getMapLanguages().get(guildIdLong) != null) {
+        if (BotStartConfig.getMapLanguages().get(guildIdLong) != null) {
 
-            if (BotStart.getMapLanguages().get(guildIdLong).equals("eng")) {
+            if (BotStartConfig.getMapLanguages().get(guildIdLong).equals("eng")) {
 
                 buttons.add(Button.secondary(guildIdLong + ":" + ReactionsButton.CHANGE_LANGUAGE,
                                 "Сменить язык ")

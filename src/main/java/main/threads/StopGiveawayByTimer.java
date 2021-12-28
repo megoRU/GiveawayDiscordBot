@@ -1,7 +1,7 @@
-package threads;
+package main.threads;
 
-import giveaway.GiveawayRegistry;
 import lombok.Getter;
+import main.giveaway.GiveawayRegistry;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;

@@ -1,16 +1,15 @@
-package giveaway;
+package main.giveaway;
 
-import db.DataBase;
-import jsonparser.JSONParsers;
-import messagesevents.MessageInfoHelp;
-import messagesevents.SenderMessage;
+import main.config.BotStartConfig;
+import main.jsonparser.JSONParsers;
+import main.messagesevents.MessageInfoHelp;
+import main.messagesevents.SenderMessage;
+import main.startbot.Statcord;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.Button;
 import org.jetbrains.annotations.NotNull;
-import startbot.BotStart;
-import startbot.Statcord;
 
 import java.util.Objects;
 import java.util.logging.Logger;
@@ -41,10 +40,10 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
             event.getChannel().sendMessage(jsonParsers
                             .getLocale("message_gift_Not_Correct_For_Button", event.getGuild().getId())
                             .replaceAll("\\{0}",
-                                    BotStart.getMapPrefix().get(event.getGuild().getId())
+                                    BotStartConfig.getMapPrefix().get(event.getGuild().getId())
                                             == null
                                             ? "!"
-                                            : BotStart.getMapPrefix().get(event.getGuild().getId())))
+                                            : BotStartConfig.getMapPrefix().get(event.getGuild().getId())))
                     .setActionRow(Button.success(event.getGuild().getId() + ":" + ReactionsButton.BUTTON_HELP,
                             jsonParsers.getLocale("button_Help", event.getGuild().getId())))
                     .queue();
@@ -56,7 +55,7 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
             event.deferEdit().queue();
             MessageInfoHelp messageInfoHelp = new MessageInfoHelp();
             messageInfoHelp.buildMessage(
-                    BotStart.getMapPrefix().get(event.getGuild().getId()) == null ? "!" : BotStart.getMapPrefix().get(event.getGuild().getId()),
+                    BotStartConfig.getMapPrefix().get(event.getGuild().getId()) == null ? "!" : BotStartConfig.getMapPrefix().get(event.getGuild().getId()),
                     event.getTextChannel(),
                     event.getUser().getAvatarUrl(),
                     event.getGuild().getId(),
@@ -68,9 +67,10 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
         if (Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + CHANGE_LANGUAGE)) {
             event.deferEdit().queue();
             String buttonName = event.getButton().getEmoji().getName().contains("\uD83C\uDDF7\uD83C\uDDFA") ? "rus" : "eng";
+            //TODO: Сделать через репозитории
+//            DataBase.getInstance().addLangToDB(event.getGuild().getId(), buttonName);
 
-            DataBase.getInstance().addLangToDB(event.getGuild().getId(), buttonName);
-            BotStart.getMapLanguages().put(event.getGuild().getId(), buttonName);
+            BotStartConfig.getMapLanguages().put(event.getGuild().getId(), buttonName);
 
             event.getHook().sendMessage(jsonParsers
                             .getLocale("button_Language", event.getGuild().getId())

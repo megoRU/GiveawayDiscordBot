@@ -1,8 +1,8 @@
-package giveaway;
+package main.giveaway;
 
-import jsonparser.JSONParsers;
+import main.config.BotStartConfig;
+import main.jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
-import startbot.BotStart;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ public interface GiftHelper {
 
     default void editMessage(EmbedBuilder embedBuilder, Long guildId, Long textChannel) {
         try {
-            BotStart.getJda()
+            BotStartConfig.getJda()
                     .getGuildById(guildId)
                     .getTextChannelById(textChannel)
                     .editMessageEmbedsById(GiveawayRegistry.getInstance().getMessageId().get(guildId), embedBuilder.build())
@@ -41,11 +41,11 @@ public interface GiftHelper {
                 edit.setFooter(jsonParsers.getLocale("gift_Ends_At", String.valueOf(guildId)));
             }
             //Отправляет сообщение и если нельзя редактировать то отправляет ошибку
-            BotStart.getJda().getGuildById(guildId)
+            BotStartConfig.getJda().getGuildById(guildId)
                     .getTextChannelById(channelId)
                     .editMessageEmbedsById(GiveawayRegistry.getInstance().getMessageId().get(guildId),
                             edit.build()).queue(null, (exception) ->
-                            BotStart.getJda().getTextChannelById(channelId).sendMessage(GiveawayRegistry.getInstance().removeGiftExceptions(guildId))
+                            BotStartConfig.getJda().getTextChannelById(channelId).sendMessage(GiveawayRegistry.getInstance().removeGiftExceptions(guildId))
                                     .queue());
         } catch (Exception e) {
             e.printStackTrace();
@@ -54,8 +54,8 @@ public interface GiftHelper {
 
     default String setEndingWord(Object num, long guildId) {
         String language = "eng";
-        if (BotStart.getMapLanguages().get(String.valueOf(guildId)) != null) {
-            language = BotStart.getMapLanguages().get(String.valueOf(guildId));
+        if (BotStartConfig.getMapLanguages().get(String.valueOf(guildId)) != null) {
+            language = BotStartConfig.getMapLanguages().get(String.valueOf(guildId));
         }
         if (num == null) {
             num = "1";

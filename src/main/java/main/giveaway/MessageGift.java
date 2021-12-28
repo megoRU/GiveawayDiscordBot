@@ -1,13 +1,13 @@
-package giveaway;
+package main.giveaway;
 
-import jsonparser.JSONParsers;
+import main.config.BotStartConfig;
+import main.jsonparser.JSONParsers;
+import main.startbot.Statcord;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import startbot.BotStart;
-import startbot.Statcord;
 
 import java.util.Arrays;
 import java.util.logging.Logger;
@@ -50,9 +50,9 @@ public class MessageGift extends ListenerAdapter {
         String prefix = "!";
 
 
-        if (BotStart.getMapPrefix().containsKey(event.getGuild().getId())) {
-            prefix_GIFT_START = BotStart.getMapPrefix().get(event.getGuild().getId()) + "gift start";
-            prefix = BotStart.getMapPrefix().get(event.getGuild().getId());
+        if (BotStartConfig.getMapPrefix().containsKey(event.getGuild().getId())) {
+            prefix_GIFT_START = BotStartConfig.getMapPrefix().get(event.getGuild().getId()) + "gift start";
+            prefix = BotStartConfig.getMapPrefix().get(event.getGuild().getId());
         }
 
 

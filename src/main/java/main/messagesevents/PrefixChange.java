@@ -1,13 +1,12 @@
-package messagesevents;
+package main.messagesevents;
 
-import db.DataBase;
-import jsonparser.JSONParsers;
+import main.config.BotStartConfig;
+import main.jsonparser.JSONParsers;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import startbot.BotStart;
 
 public class PrefixChange extends ListenerAdapter {
 
@@ -51,11 +50,12 @@ public class PrefixChange extends ListenerAdapter {
         }
 
         if (message.matches(PREFIX) && event.getMember().hasPermission(Permission.MANAGE_SERVER)
-                && BotStart.getMapPrefix().get(event.getMessage().getGuild().getId()) != null) {
-            BotStart.getMapPrefix().put(event.getGuild().getId(), messages[1]);
+                && BotStartConfig.getMapPrefix().get(event.getMessage().getGuild().getId()) != null) {
+            BotStartConfig.getMapPrefix().put(event.getGuild().getId(), messages[1]);
+            //TODO: Сделать через репозитории
 
-            DataBase.getInstance().removePrefixFromDB(event.getGuild().getId());
-            DataBase.getInstance().addPrefixToDB(event.getGuild().getId(), messages[1]);
+//            DataBase.getInstance().removePrefixFromDB(event.getGuild().getId());
+//            DataBase.getInstance().addPrefixToDB(event.getGuild().getId(), messages[1]);
 
             event.getChannel()
                     .sendMessage(
@@ -65,9 +65,10 @@ public class PrefixChange extends ListenerAdapter {
         }
 
         if (message.matches(PREFIX) && event.getMember().hasPermission(Permission.MANAGE_SERVER)) {
-            BotStart.getMapPrefix().put(event.getGuild().getId(), messages[1]);
+            BotStartConfig.getMapPrefix().put(event.getGuild().getId(), messages[1]);
+            //TODO: Сделать через репозитории
 
-            DataBase.getInstance().addPrefixToDB(event.getGuild().getId(), messages[1]);
+//            DataBase.getInstance().addPrefixToDB(event.getGuild().getId(), messages[1]);
 
             event.getChannel()
                     .sendMessage(jsonParsers.getLocale("prefix_change_Now_Prefix", event.getGuild().getId())
@@ -76,9 +77,10 @@ public class PrefixChange extends ListenerAdapter {
         }
 
         if (message.equals(PREFIX_RESET) && event.getMember().hasPermission(Permission.MANAGE_SERVER)) {
-            BotStart.getMapPrefix().remove(event.getGuild().getId());
+            BotStartConfig.getMapPrefix().remove(event.getGuild().getId());
+            //TODO: Сделать через репозитории
 
-            DataBase.getInstance().removePrefixFromDB(event.getGuild().getId());
+//            DataBase.getInstance().removePrefixFromDB(event.getGuild().getId());
 
             event.getChannel()
                     .sendMessage(jsonParsers.getLocale("prefix_change_Prefix_Now_Standard", event.getGuild().getId())).queue();

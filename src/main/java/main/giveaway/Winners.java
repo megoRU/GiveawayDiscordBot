@@ -1,4 +1,4 @@
-package giveaway;
+package main.giveaway;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

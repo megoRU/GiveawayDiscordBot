@@ -1,8 +1,8 @@
-package events;
+package main.events;
 
-import db.DataBase;
-import giveaway.ReactionsButton;
-import jsonparser.JSONParsers;
+import main.config.BotStartConfig;
+import main.giveaway.ReactionsButton;
+import main.jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Emoji;
@@ -13,7 +13,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.components.Button;
 import org.jetbrains.annotations.NotNull;
-import startbot.BotStart;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -52,9 +51,9 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
                 buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
 
 
-                if (BotStart.getMapLanguages().get(event.getGuild().getId()) != null) {
+                if (BotStartConfig.getMapLanguages().get(event.getGuild().getId()) != null) {
 
-                    if (BotStart.getMapLanguages().get(event.getGuild().getId()).equals("eng")) {
+                    if (BotStartConfig.getMapLanguages().get(event.getGuild().getId()).equals("eng")) {
 
                         buttons.add(Button.secondary(event.getGuild().getId() + ":" + ReactionsButton.CHANGE_LANGUAGE,
                                         "Сменить язык ")
@@ -128,10 +127,12 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
     public void onGuildLeave(@NotNull GuildLeaveEvent event) {
         try {
             System.out.println("Удаляем данные после удаления бота из Guild");
-            DataBase.getInstance().removeLangFromDB(event.getGuild().getId());
-            DataBase.getInstance().removePrefixFromDB(event.getGuild().getId());
-            DataBase.getInstance().removeMessageFromDB(event.getGuild().getIdLong());
-            DataBase.getInstance().dropTableWhenGiveawayStop(event.getGuild().getId());
+
+            //TODO: Сделать через репозитории
+//            DataBase.getInstance().removeLangFromDB(event.getGuild().getId());
+//            DataBase.getInstance().removePrefixFromDB(event.getGuild().getId());
+//            DataBase.getInstance().removeMessageFromDB(event.getGuild().getIdLong());
+//            DataBase.getInstance().dropTableWhenGiveawayStop(event.getGuild().getId());
         } catch (Exception e) {
             e.printStackTrace();
         }

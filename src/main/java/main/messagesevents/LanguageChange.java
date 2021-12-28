@@ -1,13 +1,12 @@
-package messagesevents;
+package main.messagesevents;
 
-import db.DataBase;
-import jsonparser.JSONParsers;
+import main.jsonparser.JSONParsers;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import startbot.BotStart;
+import main.config.BotStartConfig;
 
 public class LanguageChange extends ListenerAdapter {
 
@@ -31,10 +30,10 @@ public class LanguageChange extends ListenerAdapter {
         String prefix_LANG_ENG = LANG_ENG;
         String prefix_LANG_RESET = LANG_RESET;
 
-        if (BotStart.getMapPrefix().containsKey(event.getGuild().getId())) {
-            prefix_LANG_RUS = BotStart.getMapPrefix().get(event.getGuild().getId()) + "lang rus";
-            prefix_LANG_ENG = BotStart.getMapPrefix().get(event.getGuild().getId()) + "lang eng";
-            prefix_LANG_RESET = BotStart.getMapPrefix().get(event.getGuild().getId()) + "lang reset";
+        if (BotStartConfig.getMapPrefix().containsKey(event.getGuild().getId())) {
+            prefix_LANG_RUS = BotStartConfig.getMapPrefix().get(event.getGuild().getId()) + "lang rus";
+            prefix_LANG_ENG = BotStartConfig.getMapPrefix().get(event.getGuild().getId()) + "lang eng";
+            prefix_LANG_RESET = BotStartConfig.getMapPrefix().get(event.getGuild().getId()) + "lang reset";
         }
 
         if ((message.equals(prefix_LANG_RUS)
@@ -48,9 +47,10 @@ public class LanguageChange extends ListenerAdapter {
         }
 
         if (message.equals(prefix_LANG_RUS) || message.equals(prefix_LANG_ENG)) {
-            BotStart.getMapLanguages().put(event.getGuild().getId(), messages[1]);
+            BotStartConfig.getMapLanguages().put(event.getGuild().getId(), messages[1]);
 
-            DataBase.getInstance().addLangToDB(event.getGuild().getId(), messages[1]);
+            //TODO: Сделать через репозитории
+//            DataBase.getInstance().addLangToDB(event.getGuild().getId(), messages[1]);
 
             event.getChannel()
                     .sendMessage(jsonParsers
@@ -62,9 +62,10 @@ public class LanguageChange extends ListenerAdapter {
         }
 
         if (message.equals(prefix_LANG_RESET)) {
-            BotStart.getMapLanguages().remove(event.getGuild().getId());
+            BotStartConfig.getMapLanguages().remove(event.getGuild().getId());
 
-            DataBase.getInstance().removeLangFromDB(event.getGuild().getId());
+            //TODO: Сделать через репозитории
+//            DataBase.getInstance().removeLangFromDB(event.getGuild().getId());
 
             event.getChannel()
                     .sendMessage(jsonParsers.getLocale("language_change_lang_reset", event.getGuild().getId()))

@@ -1,9 +1,6 @@
-package db;
-
-import config.Config;
+package main.db;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -15,10 +12,11 @@ public class DataBase {
     }
 
     public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(
-                Config.getGiveawayConnection(),
-                Config.getGiveawayUser(),
-                Config.getGiveawayPass());
+//        return DriverManager.getConnection(
+//                Config.getGiveawayConnection(),
+//                Config.getGiveawayUser(),
+//                Config.getGiveawayPass());
+        return null;
     }
 
     public static DataBase getInstance() {

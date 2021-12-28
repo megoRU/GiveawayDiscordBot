@@ -1,4 +1,4 @@
-package startbot;
+package main.startbot;
 
 import net.dv8tion.jda.api.JDA;
 import org.json.JSONArray;
