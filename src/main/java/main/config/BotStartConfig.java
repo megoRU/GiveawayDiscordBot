@@ -44,7 +44,6 @@ import java.util.concurrent.Executors;
 public class BotStartConfig {
 
     public static final String activity = "!help | ";
-    public static final String version = "v15 ";
     private static final Deque<Giveaway> queue = new ArrayDeque<>();
     //String - guildLongId
     private static final Map<String, String> mapPrefix = new HashMap<>();
@@ -84,10 +83,6 @@ public class BotStartConfig {
             jdaBuilder.addEventListeners(new LanguageChange());
             jdaBuilder.addEventListeners(new ReactionsButton());
             jdaBuilder.addEventListeners(new SlashCommand());
-
-
-            jda = jdaBuilder.build();
-            jda.awaitReady();
 
             jda = jdaBuilder.build();
             jda.awaitReady();
@@ -283,31 +278,31 @@ public class BotStartConfig {
 //        }
 //    }
 
-    @Scheduled(fixedDelay = 20000L)
-    private void topGGAndStatcord() {
-        try {
-            //Заодно проверяем коннект, чтобы не было потом проблем
-            DiscordBotListAPI TOP_GG_API = new DiscordBotListAPI.Builder()
-                    .token(Config.getTopGgApiToken())
-                    .botId(Config.getBotId())
-                    .build();
-            serverCount = (int) jda.getGuildCache().size();
-            TOP_GG_API.setStats(serverCount);
-            jda.getPresence().setActivity(Activity.playing(activity + serverCount + " guilds"));
-
-            if (!isLaunched) {
-                Statcord.start(
-                        jda.getSelfUser().getId(),
-                        Config.getStatcord(),
-                        jda,
-                        true,
-                        3);
-                isLaunched = true;
-            }
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+//    @Scheduled(fixedDelay = 20000L)
+//    private void topGGAndStatcord() {
+//        try {
+//            //Заодно проверяем коннект, чтобы не было потом проблем
+//            DiscordBotListAPI TOP_GG_API = new DiscordBotListAPI.Builder()
+//                    .token(Config.getTopGgApiToken())
+//                    .botId(Config.getBotId())
+//                    .build();
+//            serverCount = (int) jda.getGuildCache().size();
+//            TOP_GG_API.setStats(serverCount);
+//            jda.getPresence().setActivity(Activity.playing(activity + serverCount + " guilds"));
+//
+//            if (!isLaunched) {
+//                Statcord.start(
+//                        jda.getSelfUser().getId(),
+//                        Config.getStatcord(),
+//                        jda,
+//                        true,
+//                        3);
+//                isLaunched = true;
+//            }
+//        }catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 
 //    @Bean
 //    public void getUsersWhoTakePartFromDB() {

@@ -24,7 +24,7 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
     public static final String BUTTON_HELP = "BUTTON_HELP";
     public static final String CHANGE_LANGUAGE = "CHANGE_LANGUAGE";
     private final static Logger LOGGER = Logger.getLogger(ReactionsButton.class.getName());
-    private final JSONParsers jsonParsers = new JSONParsers();
+    private static final JSONParsers jsonParsers = new JSONParsers();
 
     @Override
     public void onButtonClick(@NotNull ButtonClickEvent event) {
