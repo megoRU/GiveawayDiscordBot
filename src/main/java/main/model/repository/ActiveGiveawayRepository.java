@@ -8,6 +8,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Repository
 public interface ActiveGiveawayRepository extends CrudRepository<ActiveGiveaways, Long> {
 
@@ -19,4 +21,7 @@ public interface ActiveGiveawayRepository extends CrudRepository<ActiveGiveaways
 
     @Query(value = "SELECT ac FROM ActiveGiveaways ac WHERE ac.guildLongId = :guildIdLong")
     ActiveGiveaways getActiveGiveawaysByGuildIdLong(@Param("guildIdLong") Long guildIdLong);
+
+    @Query(value = "SELECT ac FROM ActiveGiveaways ac")
+    List<ActiveGiveaways> getAllActiveGiveaways();
 }

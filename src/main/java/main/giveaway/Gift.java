@@ -18,16 +18,11 @@ import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.Button;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
-import org.springframework.data.annotation.Transient;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -214,22 +209,13 @@ public class Gift implements GiftHelper {
     }
 
     //TODO: Может удалять список с кем то.
-    @Deprecated(since = "3.5.8")
     private void executeMultiInsert(long guildIdLong) {
         try {
-            if (!insertQuery.isEmpty()) {
-                Connection con = DriverManager.getConnection(
-                        BotStartConfig.DATABASE_URL,
-                        BotStartConfig.DATABASE_USER_DEV,
-                        BotStartConfig.DATABASE_PASS);
-
-                con.createStatement().execute("INSERT INTO participants (nick_name, user_long_id, guild_long_id) " +
-                        "VALUES " + insertQuery.toString());
-
+            if (!participantsList.isEmpty()) {
+                participantsRepository.saveAll(participantsList);
                 synchronized (this) {
-                    insertQuery = new StringBuilder();
+                    participantsList = new ArrayList<>();
                 }
-
                 updateGiveawayMessage(
                         GiveawayRegistry.getInstance().getCountWinners().get(guildId) == null
                                 ? "TBA"
@@ -248,11 +234,12 @@ public class Gift implements GiftHelper {
     }
 
     private void addUserToInsertQuery(String nickName, long userIdLong, long guildIdLong) {
-        insertQuery.append(insertQuery.length() == 0 ? "" : ",")
-                .append("(\"").append(nickName)
-                .append("\", '").append(userIdLong)
-                .append("', '").append(guildIdLong)
-                .append("')");
+        ActiveGiveaways activeGiveaways = activeGiveawayRepository.getActiveGiveawaysByGuildIdLong(guildIdLong);
+        Participants participants = new Participants();
+        participants.setUserIdLong(userIdLong);
+        participants.setNickName(nickName);
+        participants.setActiveGiveaways(activeGiveaways);
+        participantsList.add(participants);
     }
 
     //Автоматически отправляет в БД данные которые в буфере StringBuilder

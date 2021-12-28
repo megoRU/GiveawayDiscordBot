@@ -18,9 +18,9 @@ public class Participants {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "guild_long_id")
-    private ActiveGiveaways guildLongId;
+    @ManyToOne(cascade = CascadeType.MERGE) // Java хуита. На этом можно закончить
+    @JoinColumn(name = "guild_id", referencedColumnName = "guild_long_id", nullable = false)
+    private ActiveGiveaways activeGiveaways;
 
     @Column(name = "user_long_id", nullable = false)
     private Long userIdLong;
@@ -28,8 +28,8 @@ public class Participants {
     @Column(name = "nick_name", nullable = false)
     private String nickName;
 
-    public Participants(ActiveGiveaways guildLongId, Long userIdLong, String nickName) {
-        this.guildLongId = guildLongId;
+    public Participants(ActiveGiveaways activeGiveaways, Long userIdLong, String nickName) {
+        this.activeGiveaways = activeGiveaways;
         this.userIdLong = userIdLong;
         this.nickName = nickName;
     }

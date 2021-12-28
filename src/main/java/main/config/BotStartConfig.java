@@ -1,15 +1,14 @@
 package main.config;
 
 import main.events.MessageWhenBotJoinToGuild;
-import main.giveaway.GiveawayRegistry;
-import main.giveaway.MessageGift;
-import main.giveaway.ReactionsButton;
-import main.giveaway.SlashCommand;
+import main.giveaway.*;
 import main.jsonparser.JSONParsers;
 import main.jsonparser.ParserClass;
 import main.messagesevents.LanguageChange;
 import main.messagesevents.MessageInfoHelp;
 import main.messagesevents.PrefixChange;
+import main.model.entity.ActiveGiveaways;
+import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.LanguageRepository;
 import main.model.repository.ParticipantsRepository;
@@ -58,12 +57,6 @@ public class BotStartConfig {
     public static ExecutorService executorService;
     public static int serverCount;
     private volatile boolean isLaunched;
-    @Autowired
-    private Environment env;
-
-    public static String DATABASE_URL;
-    public static String DATABASE_PASS;
-    public static String DATABASE_USER_DEV;
 
     //REPOSITORY
     private final ActiveGiveawayRepository activeGiveawayRepository;
@@ -85,9 +78,6 @@ public class BotStartConfig {
         try {
             //Загружаем GiveawayRegistry
             GiveawayRegistry.getInstance();
-            DATABASE_URL = env.getProperty("DATABASE_URL_DEV");
-            DATABASE_PASS = env.getProperty("DATABASE_PASS");
-            DATABASE_USER_DEV = env.getProperty("DATABASE_USER_DEV");
 
             jdaBuilder.setAutoReconnect(true);
             jdaBuilder.setStatus(OnlineStatus.ONLINE);
@@ -113,7 +103,7 @@ public class BotStartConfig {
     }
 
     @Bean
-    public void StopGiveaway(){
+    public void StopGiveaway() {
         Thread thread = new Thread(() -> {
             try {
                 while (true) {
@@ -213,18 +203,18 @@ public class BotStartConfig {
         }
     }
 
-//    @Bean
-//    public void getPrefixFromDB() {
-//        try {
-//            for (int i = 0; i < prefixRepository.getPrefix().size(); i++) {
-//                mapPrefix.put(
-//                        prefixRepository.getPrefix().get(i).getServerId(),
-//                        prefixRepository.getPrefix().get(i).getPrefix());
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
+    @Bean
+    public void getPrefixFromDB() {
+        try {
+            for (int i = 0; i < prefixRepository.getPrefixs().size(); i++) {
+                mapPrefix.put(
+                        prefixRepository.getPrefixs().get(i).getServerId(),
+                        prefixRepository.getPrefixs().get(i).getPrefix());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     private void setButtonsInGift(String guildId, long longGuildId) {
         if (getMapLanguages().get(guildId) != null) {
@@ -256,54 +246,112 @@ public class BotStartConfig {
                         jsonParsers.getLocale("gift_Stop_Button", guildId).replaceAll("\\{0}", "3")));
     }
 
-//    @Bean
-//    public void getMessageIdFromDB() {
-//        try {
-//            Statement statement = DataBase.getConnection().createStatement();
-//            String sql = "SELECT * FROM ActiveGiveaways";
-//            ResultSet rs = statement.executeQuery(sql);
-//            while (rs.next()) {
-//
-//                long guild_long_id = rs.getLong("guild_long_id");
-//                String channel_long_id = rs.getString("channel_id_long");
-//                String count_winners = rs.getString("count_winners");
-//                long message_id_long = rs.getLong("message_id_long");
-//                String giveaway_title = rs.getString("giveaway_title");
-//                String date_end_giveaway = rs.getString("date_end_giveaway");
-//
-//                guildIdHashList.put(guildIdHashList.size() + 1, String.valueOf(guild_long_id));
-//                GiveawayRegistry.getInstance().setGift(guild_long_id, new Gift(guild_long_id, Long.parseLong(channel_long_id)));
-//                GiveawayRegistry.getInstance().getActiveGiveaways().get(guild_long_id).autoInsert();
-//                GiveawayRegistry.getInstance().getMessageId().put(guild_long_id, String.valueOf(message_id_long));
-//                GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().put(guild_long_id, String.valueOf(message_id_long));
-//                GiveawayRegistry.getInstance().getTitle().put(guild_long_id, giveaway_title);
-//                GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild_long_id, date_end_giveaway == null ? "null" : date_end_giveaway);
-//                GiveawayRegistry.getInstance().getChannelId().put(guild_long_id, channel_long_id);
-//                GiveawayRegistry.getInstance().getCountWinners().put(guild_long_id, count_winners);
-//
-//                //Добавляем кнопки для Giveaway в Gift class
-//                setButtonsInGift(String.valueOf(guild_long_id), guild_long_id);
-//
-//                if (date_end_giveaway != null) {
-//                    queue.add(new Giveaway(guild_long_id, date_end_giveaway));
-//                }
-//            }
-//            rs.close();
-//            statement.close();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//    }
+    @Bean
+    public void getMessageIdFromDB() {
+        try {
+
+            List<ActiveGiveaways> arl = activeGiveawayRepository.getAllActiveGiveaways();
+
+            for (int i = 0; i < arl.size(); i++) {
+
+                guildIdHashList.put(guildIdHashList.size() + 1, String.valueOf(arl.get(i).getGuildLongId()));
+
+                GiveawayRegistry.getInstance().setGift(arl.get(i).getGuildLongId(), new Gift(
+                        arl.get(i).getGuildLongId(),
+                        arl.get(i).getChannelIdLong(),
+                        activeGiveawayRepository,
+                        participantsRepository));
+
+                GiveawayRegistry.getInstance().getActiveGiveaways().get(arl.get(i).getGuildLongId()).autoInsert();
+
+                GiveawayRegistry.getInstance().getMessageId().put(
+                        arl.get(i).getGuildLongId(),
+                        String.valueOf(arl.get(i).getMessageIdLong()));
+
+                GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().put(
+                        arl.get(i).getGuildLongId(),
+                        String.valueOf(arl.get(i).getMessageIdLong()));
+
+                GiveawayRegistry.getInstance().getTitle().put(
+                        arl.get(i).getGuildLongId(),
+                        arl.get(i).getGiveawayTitle());
+
+                GiveawayRegistry.getInstance().getEndGiveawayDate().put(
+                        arl.get(i).getGuildLongId(),
+                        arl.get(i).getDateEndGiveaway() == null ? "null" : arl.get(i).getDateEndGiveaway());
+
+                GiveawayRegistry.getInstance().getChannelId().put(
+                        arl.get(i).getGuildLongId(),
+                        String.valueOf(arl.get(i).getChannelIdLong()));
+
+                GiveawayRegistry.getInstance().getCountWinners().put(
+                        arl.get(i).getGuildLongId(),
+                        arl.get(i).getCountWinners());
+
+                //Добавляем кнопки для Giveaway в Gift class
+                setButtonsInGift(String.valueOf(arl.get(i).getGuildLongId()), arl.get(i).getGuildLongId());
+
+                if (arl.get(i).getDateEndGiveaway() != null) {
+                    queue.add(new Giveaway(arl.get(i).getGuildLongId(), arl.get(i).getDateEndGiveaway()));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Bean
+    public void getUsersWhoTakePartFromDB() {
+        try {
+
+            System.out.println("Получаем данные с БД и добавляем их в коллекции и экземпляры классов");
+
+
+            for (int i = 1; i <= guildIdHashList.size(); i++) {
+
+                List<Participants> participantsList = participantsRepository.getParticipantsByGuildIdLong(Long.valueOf(guildIdHashList.get(i)));
+
+                for (int j = 0; j < participantsList.size(); j++) {
+
+                    long userIdLong = participantsList.get(j).getUserIdLong();
+
+                    System.out.println("Guild id: " + guildIdHashList.get(i) + " user id long: " + userIdLong);
+
+                    //Добавляем пользователей в hashmap
+                    GiveawayRegistry.getInstance()
+                            .getActiveGiveaways()
+                            .get(Long.parseLong(guildIdHashList.get(i))).getListUsersHash()
+                            .put(String.valueOf(userIdLong), String.valueOf(userIdLong));
+
+                    //Считаем пользователей в hashmap и устанавливаем верное значение
+                    GiveawayRegistry.getInstance()
+                            .getActiveGiveaways()
+                            .get(Long.parseLong(guildIdHashList.get(i))).getListUsers()
+                            .add(String.valueOf(userIdLong));
+
+                    //Устанавливаем счетчик на верное число
+                    GiveawayRegistry.getInstance()
+                            .getActiveGiveaways()
+                            .get(Long.parseLong(guildIdHashList.get(i))).setCount(GiveawayRegistry.getInstance()
+                                    .getActiveGiveaways()
+                                    .get(Long.parseLong(guildIdHashList.get(i))).getListUsersHash().size());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        guildIdHashList.clear();
+    }
 
 //    @Scheduled(fixedDelay = 20000L)
 //    private void topGGAndStatcord() {
 //        try {
-//            //Заодно проверяем коннект, чтобы не было потом проблем
+//            System.out.println(Config.getTopGgApiToken());
 //            DiscordBotListAPI TOP_GG_API = new DiscordBotListAPI.Builder()
 //                    .token(Config.getTopGgApiToken())
 //                    .botId(Config.getBotId())
 //                    .build();
-//            serverCount = (int) jda.getGuildCache().size();
+//            serverCount = jda.getGuilds().size();
 //            TOP_GG_API.setStats(serverCount);
 //            jda.getPresence().setActivity(Activity.playing(activity + serverCount + " guilds"));
 //
@@ -321,61 +369,18 @@ public class BotStartConfig {
 //        }
 //    }
 
-//    @Bean
-//    public void getUsersWhoTakePartFromDB() {
-//        try {
-//            Statement statement = DataBase.getConnection().createStatement();
-//            System.out.println("Получаем данные с БД и добавляем их в коллекции и экземпляры классов");
-//
-//            for (int i = 1; i <= guildIdHashList.size(); i++) {
-//                String sql = "SELECT * FROM `" + guildIdHashList.get(i) + "`;";
-//                ResultSet rs = statement.executeQuery(sql);
-//                while (rs.next()) {
-//
-//                    long userIdLong = rs.getLong("user_long_id");
-//
-//                    //System.out.println("Guild id: " + guildIdHashList.get(i) + " user id long: " + userIdLong);
-//
-//                    //Добавляем пользователей в hashmap
-//                    GiveawayRegistry.getInstance()
-//                            .getActiveGiveaways()
-//                            .get(Long.parseLong(guildIdHashList.get(i))).getListUsersHash()
-//                            .put(String.valueOf(userIdLong), String.valueOf(userIdLong));
-//
-//                    //Считаем пользователей в hashmap и устанавливаем верное значение
-//                    GiveawayRegistry.getInstance()
-//                            .getActiveGiveaways()
-//                            .get(Long.parseLong(guildIdHashList.get(i))).getListUsers()
-//                            .add(String.valueOf(userIdLong));
-//
-//                    //Устанавливаем счетчик на верное число
-//                    GiveawayRegistry.getInstance()
-//                            .getActiveGiveaways()
-//                            .get(Long.parseLong(guildIdHashList.get(i))).setCount(GiveawayRegistry.getInstance()
-//                                    .getActiveGiveaways()
-//                                    .get(Long.parseLong(guildIdHashList.get(i))).getListUsersHash().size());
-//                }
-//                rs.close();
-//            }
-//            statement.close();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//        guildIdHashList.clear();
-//    }
-
-//    @Bean
-//    public void getLocalizationFromDB() {
-//        try {
-//            for (int i = 0; i < languageRepository.getLanguages().size(); i++) {
-//                mapLanguages.put(
-//                        languageRepository.getLanguages().get(i).getUserIdLong(),
-//                        languageRepository.getLanguages().get(i).getLanguage());
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
+    @Bean
+    public void getLocalizationFromDB() {
+        try {
+            for (int i = 0; i < languageRepository.getLanguages().size(); i++) {
+                mapLanguages.put(
+                        languageRepository.getLanguages().get(i).getServerId(),
+                        languageRepository.getLanguages().get(i).getLanguage());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 
     public static Map<String, String> getMapPrefix() {
