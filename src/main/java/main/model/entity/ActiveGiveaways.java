@@ -6,10 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Getter
 @Setter
@@ -20,9 +17,6 @@ import javax.persistence.Table;
 public class ActiveGiveaways {
 
     @Id
-    @Column(name = "id", nullable = false)
-    private Long id;
-
     @Column(name = "guild_long_id", nullable = false)
     private Long guildLongId;
 
