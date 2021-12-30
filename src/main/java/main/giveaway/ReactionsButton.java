@@ -66,7 +66,8 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
                     event.getTextChannel(),
                     event.getUser().getAvatarUrl(),
                     event.getGuild().getId(),
-                    event.getUser().getName()
+                    event.getUser().getName(),
+                    null
             );
             return;
         }

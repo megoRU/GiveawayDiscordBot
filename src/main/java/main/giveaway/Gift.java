@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 public class Gift implements GiftHelper {
 
     private final static Logger LOGGER = Logger.getLogger(Gift.class.getName());
-    private final String URL = "http://45.140.167.181:8085/api/winners";
+    private final String URL = "http://94.103.91.165:8085/api/winners";
     private final JSONParsers jsonParsers = new JSONParsers();
     private final List<Button> buttons = new ArrayList<>();
     private final List<String> listUsers = new ArrayList<>();

@@ -126,6 +126,7 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
             event.getGuild().upsertCommand("language", "Setting language").addOptions(optionsLanguage).queue();
             event.getGuild().upsertCommand("giveaway-start", "Create giveaway").addOptions(optionsStart).queue();
             event.getGuild().upsertCommand("giveaway-stop", "Stop the Giveaway").addOptions(optionsStop).queue();
+            event.getGuild().upsertCommand("help", "Bot commands").queue();
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -167,6 +167,8 @@ public class BotStartConfig {
             jda.upsertCommand("language", "Setting language").addOptions(optionsLanguage).queue();
             jda.upsertCommand("start", "Create giveaway").addOptions(optionsStart).queue();
             jda.upsertCommand("stop", "Stop the Giveaway").addOptions(optionsStop).queue();
+            jda.upsertCommand("help", "Bot commands").queue();
+
         } catch (Exception e) {
             e.printStackTrace();
         }

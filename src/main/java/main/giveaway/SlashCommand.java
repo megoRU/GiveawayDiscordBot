@@ -3,6 +3,7 @@ package main.giveaway;
 import lombok.AllArgsConstructor;
 import main.config.BotStartConfig;
 import main.jsonparser.JSONParsers;
+import main.messagesevents.MessageInfoHelp;
 import main.model.entity.Language;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.LanguageRepository;
@@ -131,6 +132,20 @@ public class SlashCommand extends ListenerAdapter {
             GiveawayRegistry.getInstance()
                     .getActiveGiveaways().get(event.getGuild().getIdLong())
                     .stopGift(event.getGuild().getIdLong(), Integer.parseInt(event.getOptions().get(0).getAsString()));
+            return;
+        }
+
+        if (event.getName().equals("help")) {
+
+            String p = BotStartConfig.getMapPrefix().get(event.getGuild().getId()) == null ? "!" :
+                    BotStartConfig.getMapPrefix().get(event.getGuild().getId());
+
+            new MessageInfoHelp().buildMessage(
+                    p,
+                    event.getTextChannel(),
+                    event.getUser().getAvatarUrl(),
+                    event.getGuild().getId(),
+                    event.getUser().getName(), event);
             return;
         }
 
