@@ -9,7 +9,7 @@ public class Config {
 
   //Данный от БД с Giveaways
 
-  private static final String GIVEAWAY_CONNECTION = "jdbc:mysql://94.103.91.165:3306/" + GIVEAWAY_NAME + "?autoReconnect=true&useSSL=false&serverTimezone=UTC&characterEncoding=utf8"; //utf8mb4
+  private static final String GIVEAWAY_CONNECTION = "jdbc:mysql://45.140.167.181:3306/" + GIVEAWAY_NAME + "?autoReconnect=true&useSSL=false&serverTimezone=UTC&characterEncoding=utf8"; //utf8mb4
 
   private static final String GIVEAWAY_USER = GIVEAWAY_NAME;
   private static final String GIVEAWAY_PASS = System.getenv("PASS");
