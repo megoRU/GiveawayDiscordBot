@@ -7,12 +7,12 @@ import main.jsonparser.ParserClass;
 import main.messagesevents.LanguageChange;
 import main.messagesevents.MessageInfoHelp;
 import main.messagesevents.PrefixChange;
-import main.model.entity.ActiveGiveaways;
 import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.LanguageRepository;
 import main.model.repository.ParticipantsRepository;
 import main.model.repository.PrefixRepository;
+import main.startbot.Statcord;
 import main.threads.Giveaway;
 import main.threads.StopGiveawayByTimer;
 import net.dv8tion.jda.api.JDA;
@@ -22,18 +22,21 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.components.Button;
+import org.discordbots.api.client.DiscordBotListAPI;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.sql.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -64,6 +67,14 @@ public class BotStartConfig {
     private final PrefixRepository prefixRepository;
     private final ParticipantsRepository participantsRepository;
 
+    //DataBase
+    @Value("${spring.datasource.url}")
+    private String URL_CONNECTION;
+    @Value("${spring.datasource.username}")
+    private String USER_CONNECTION;
+    @Value("${spring.datasource.password}")
+    private String PASSWORD_CONNECTION;
+
     @Autowired
     public BotStartConfig(ActiveGiveawayRepository activeGiveawayRepository, LanguageRepository
             languageRepository, PrefixRepository prefixRepository, ParticipantsRepository participantsRepository) {
@@ -78,6 +89,16 @@ public class BotStartConfig {
         try {
             //Загружаем GiveawayRegistry
             GiveawayRegistry.getInstance();
+
+            getLocalizationFromDB();
+            //Устанавливаем языки
+            setLanguages();
+            //Получаем id guild и id message
+            getMessageIdFromDB();
+            //Получаем всех участников по гильдиям
+            getUsersWhoTakePartFromDB();
+            //Получаем все префиксы из базы данных
+            getPrefixFromDB();
 
             jdaBuilder.setAutoReconnect(true);
             jdaBuilder.setStatus(OnlineStatus.ONLINE);
@@ -174,8 +195,7 @@ public class BotStartConfig {
         }
     }
 
-    @Bean
-    public void setLanguages() {
+    private void setLanguages() {
         try {
             List<String> listLanguages = new ArrayList<>();
             listLanguages.add("rus");
@@ -200,20 +220,28 @@ public class BotStartConfig {
                 inputStream.close();
                 reader.close();
             }
+            System.out.println("setLanguages()");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    @Bean
-    public void getPrefixFromDB() {
+    private void getPrefixFromDB() {
         try {
-            for (int i = 0; i < prefixRepository.getPrefixs().size(); i++) {
-                mapPrefix.put(
-                        prefixRepository.getPrefixs().get(i).getServerId(),
-                        prefixRepository.getPrefixs().get(i).getPrefix());
+            Connection connection = DriverManager.getConnection(URL_CONNECTION, USER_CONNECTION, PASSWORD_CONNECTION);
+            Statement statement = connection.createStatement();
+            String sql = "SELECT * FROM prefixs";
+            ResultSet rs = statement.executeQuery(sql);
+
+            while (rs.next()) {
+                mapPrefix.put(rs.getString("server_id"), rs.getString("prefix"));
             }
-        } catch (Exception e) {
+
+            rs.close();
+            statement.close();
+            connection.close();
+            System.out.println("getPrefixFromDB()");
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
@@ -248,66 +276,56 @@ public class BotStartConfig {
                         jsonParsers.getLocale("gift_Stop_Button", guildId).replaceAll("\\{0}", "3")));
     }
 
-    @Bean
-    public void getMessageIdFromDB() {
+    private void getMessageIdFromDB() {
         try {
+            Connection connection = DriverManager.getConnection(URL_CONNECTION, USER_CONNECTION, PASSWORD_CONNECTION);
 
-            List<ActiveGiveaways> arl = activeGiveawayRepository.getAllActiveGiveaways();
+            Statement statement = connection.createStatement();
+            String sql = "SELECT * FROM active_giveaways";
+            ResultSet rs = statement.executeQuery(sql);
+            while (rs.next()) {
 
-            for (int i = 0; i < arl.size(); i++) {
+                long guild_long_id = rs.getLong("guild_long_id");
+                String channel_long_id = rs.getString("channel_id_long");
+                String count_winners = rs.getString("count_winners");
+                long message_id_long = rs.getLong("message_id_long");
+                String giveaway_title = rs.getString("giveaway_title");
+                String date_end_giveaway = rs.getString("date_end_giveaway");
 
-                guildIdHashList.put(guildIdHashList.size() + 1, String.valueOf(arl.get(i).getGuildLongId()));
-
-                GiveawayRegistry.getInstance().setGift(arl.get(i).getGuildLongId(), new Gift(
-                        arl.get(i).getGuildLongId(),
-                        arl.get(i).getChannelIdLong(),
-                        activeGiveawayRepository,
-                        participantsRepository));
-
-                GiveawayRegistry.getInstance().getActiveGiveaways().get(arl.get(i).getGuildLongId()).autoInsert();
-
-                GiveawayRegistry.getInstance().getMessageId().put(
-                        arl.get(i).getGuildLongId(),
-                        String.valueOf(arl.get(i).getMessageIdLong()));
-
-                GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().put(
-                        arl.get(i).getGuildLongId(),
-                        String.valueOf(arl.get(i).getMessageIdLong()));
-
-                GiveawayRegistry.getInstance().getTitle().put(
-                        arl.get(i).getGuildLongId(),
-                        arl.get(i).getGiveawayTitle());
-
-                GiveawayRegistry.getInstance().getEndGiveawayDate().put(
-                        arl.get(i).getGuildLongId(),
-                        arl.get(i).getDateEndGiveaway() == null ? "null" : arl.get(i).getDateEndGiveaway());
-
-                GiveawayRegistry.getInstance().getChannelId().put(
-                        arl.get(i).getGuildLongId(),
-                        String.valueOf(arl.get(i).getChannelIdLong()));
-
-                GiveawayRegistry.getInstance().getCountWinners().put(
-                        arl.get(i).getGuildLongId(),
-                        arl.get(i).getCountWinners());
+                guildIdHashList.put(guildIdHashList.size() + 1, String.valueOf(guild_long_id));
+                GiveawayRegistry.getInstance().setGift(
+                        guild_long_id,
+                        new Gift(guild_long_id,
+                                Long.parseLong(channel_long_id),
+                                activeGiveawayRepository,
+                                participantsRepository));
+                GiveawayRegistry.getInstance().getActiveGiveaways().get(guild_long_id).autoInsert();
+                GiveawayRegistry.getInstance().getMessageId().put(guild_long_id, String.valueOf(message_id_long));
+                GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().put(guild_long_id, String.valueOf(message_id_long));
+                GiveawayRegistry.getInstance().getTitle().put(guild_long_id, giveaway_title);
+                GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild_long_id, date_end_giveaway == null ? "null" : date_end_giveaway);
+                GiveawayRegistry.getInstance().getChannelId().put(guild_long_id, channel_long_id);
+                GiveawayRegistry.getInstance().getCountWinners().put(guild_long_id, count_winners);
 
                 //Добавляем кнопки для Giveaway в Gift class
-                setButtonsInGift(String.valueOf(arl.get(i).getGuildLongId()), arl.get(i).getGuildLongId());
+                setButtonsInGift(String.valueOf(guild_long_id), guild_long_id);
 
-                if (arl.get(i).getDateEndGiveaway() != null) {
-                    queue.add(new Giveaway(arl.get(i).getGuildLongId(), arl.get(i).getDateEndGiveaway()));
+                if (date_end_giveaway != null) {
+                    queue.add(new Giveaway(guild_long_id, date_end_giveaway));
                 }
             }
-        } catch (Exception e) {
+            rs.close();
+            statement.close();
+            connection.close();
+            System.out.println("getMessageIdFromDB()");
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    @Bean
-    public void getUsersWhoTakePartFromDB() {
+    private void getUsersWhoTakePartFromDB() {
         try {
-
             System.out.println("Получаем данные с БД и добавляем их в коллекции и экземпляры классов");
-
 
             for (int i = 1; i <= guildIdHashList.size(); i++) {
 
@@ -317,7 +335,7 @@ public class BotStartConfig {
 
                     long userIdLong = participantsList.get(j).getUserIdLong();
 
-                    System.out.println("Guild id: " + guildIdHashList.get(i) + " user id long: " + userIdLong);
+//                    System.out.println("Guild id: " + guildIdHashList.get(i) + " user id long: " + userIdLong);
 
                     //Добавляем пользователей в hashmap
                     GiveawayRegistry.getInstance()
@@ -339,47 +357,55 @@ public class BotStartConfig {
                                     .get(Long.parseLong(guildIdHashList.get(i))).getListUsersHash().size());
                 }
             }
+            System.out.println("getUsersWhoTakePartFromDB()");
         } catch (Exception e) {
             e.printStackTrace();
         }
         guildIdHashList.clear();
     }
 
-//    @Scheduled(fixedDelay = 20000L)
-//    private void topGGAndStatcord() {
-//        try {
-//            System.out.println(Config.getTopGgApiToken());
-//            DiscordBotListAPI TOP_GG_API = new DiscordBotListAPI.Builder()
-//                    .token(Config.getTopGgApiToken())
-//                    .botId(Config.getBotId())
-//                    .build();
-//            serverCount = jda.getGuilds().size();
-//            TOP_GG_API.setStats(serverCount);
-//            jda.getPresence().setActivity(Activity.playing(activity + serverCount + " guilds"));
-//
-//            if (!isLaunched) {
-//                Statcord.start(
-//                        jda.getSelfUser().getId(),
-//                        Config.getStatcord(),
-//                        jda,
-//                        true,
-//                        3);
-//                isLaunched = true;
-//            }
-//        }catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-    @Bean
-    public void getLocalizationFromDB() {
+    @Scheduled(fixedDelay = 20000L)
+    private void topGGAndStatcord() {
         try {
-            for (int i = 0; i < languageRepository.getLanguages().size(); i++) {
-                mapLanguages.put(
-                        languageRepository.getLanguages().get(i).getServerId(),
-                        languageRepository.getLanguages().get(i).getLanguage());
+            System.out.println(Config.getTopGgApiToken());
+            DiscordBotListAPI TOP_GG_API = new DiscordBotListAPI.Builder()
+                    .token(Config.getTopGgApiToken())
+                    .botId(Config.getBotId())
+                    .build();
+            serverCount = jda.getGuilds().size();
+            TOP_GG_API.setStats(serverCount);
+            jda.getPresence().setActivity(Activity.playing(activity + serverCount + " guilds"));
+
+            if (!isLaunched) {
+                Statcord.start(
+                        jda.getSelfUser().getId(),
+                        Config.getStatcord(),
+                        jda,
+                        true,
+                        3);
+                isLaunched = true;
             }
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void getLocalizationFromDB() {
+        try {
+            Connection connection = DriverManager.getConnection(URL_CONNECTION, USER_CONNECTION, PASSWORD_CONNECTION);
+            Statement statement = connection.createStatement();
+            String sql = "SELECT * FROM language";
+            ResultSet rs = statement.executeQuery(sql);
+
+            while (rs.next()) {
+                mapLanguages.put(rs.getString("user_id_long"), rs.getString("language"));
+            }
+
+            rs.close();
+            statement.close();
+            connection.close();
+            System.out.println("getLocalizationFromDB()");
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
