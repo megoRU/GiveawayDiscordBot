@@ -22,7 +22,7 @@ public class TopGGAndStatcordThread extends Thread {
                         .token(Config.getTopGgApiToken())
                         .botId(Config.getBotId())
                         .build();
-                serverCount = (int) BotStart.getJda().getGuildCache().size();
+                serverCount = BotStart.getJda().getGuilds().size();
                 TOP_GG_API.setStats(serverCount);
                 BotStart.getJda().getPresence().setActivity(Activity.playing(BotStart.activity
                         + TopGGAndStatcordThread.serverCount + " guilds"));

@@ -13,8 +13,6 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.components.Button;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -94,50 +92,47 @@ public class BotStart {
         jda.awaitReady();
 
         try {
-            jda.updateCommands().queue();
+//            jda.updateCommands().queue();
 
-            Thread.sleep(4000L);
+            jda.getGuilds().forEach(guild -> guild.updateCommands().queue());
 
-            List<OptionData> optionsLanguage = new ArrayList<>();
-            List<OptionData> optionsStart = new ArrayList<>();
-            List<OptionData> optionsStop = new ArrayList<>();
-
-            optionsLanguage.add(new OptionData(OptionType.STRING, "bot", "Setting the bot language")
-                    .addChoice("eng", "eng")
-                    .addChoice("rus", "rus")
-                    .setRequired(true));
-
-            optionsStart.add(new OptionData(OptionType.STRING, "title", "Title for Giveaway")
-                    .setName("title")
-            );
-
-            optionsStart.add(new OptionData(OptionType.INTEGER, "count", "Set count winners")
-                    .setName("count")
-            );
-
-            optionsStart.add(new OptionData(OptionType.STRING, "duration", "Examples: 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style. Preferably immediately in UTC ±0")
-                    .setName("duration")
-            );
-
-            optionsStart.add(new OptionData(OptionType.CHANNEL, "channel", "#text channel name")
-                    .setName("channel")
-            );
-
-            optionsStop.add(new OptionData(OptionType.STRING, "stop", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1")
-                    .setName("stop")
-            );
-
-
-            jda.upsertCommand("language", "Setting language").addOptions(optionsLanguage).queue();
-            jda.upsertCommand("giveaway-start", "Create giveaway").addOptions(optionsStart).queue();
-            jda.upsertCommand("giveaway-stop", "Stop the Giveaway").addOptions(optionsStop).queue();
-
-
-        } catch (
-                Exception e) {
-            e.printStackTrace();
+//            List<OptionData> optionsLanguage = new ArrayList<>();
+//            List<OptionData> optionsStart = new ArrayList<>();
+//            List<OptionData> optionsStop = new ArrayList<>();
+//
+//            optionsLanguage.add(new OptionData(OptionType.STRING, "bot", "Setting the bot language")
+//                    .addChoice("eng", "eng")
+//                    .addChoice("rus", "rus")
+//                    .setRequired(true));
+//
+//            optionsStart.add(new OptionData(OptionType.STRING, "title", "Title for Giveaway")
+//                    .setName("title")
+//            );
+//
+//            optionsStart.add(new OptionData(OptionType.INTEGER, "count", "Set count winners")
+//                    .setName("count")
+//            );
+//
+//            optionsStart.add(new OptionData(OptionType.STRING, "duration", "Examples: 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style. Preferably immediately in UTC ±0")
+//                    .setName("duration")
+//            );
+//
+//            optionsStart.add(new OptionData(OptionType.CHANNEL, "channel", "#text channel name")
+//                    .setName("channel")
+//            );
+//
+//            optionsStop.add(new OptionData(OptionType.STRING, "stop", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1")
+//                    .setName("stop")
+//            );
+//
+//            jda.getGuilds().forEach(guild -> {
+//                guild.upsertCommand("language", "Setting language").addOptions(optionsLanguage).queue();
+//                guild.upsertCommand("giveaway-start", "Create giveaway").addOptions(optionsStart).queue();
+//                guild.upsertCommand("giveaway-stop", "Stop the Giveaway").addOptions(optionsStop).queue();
+//            });
+        } catch (Exception e) {
+            System.out.println("Не прав на обновление");
         }
-
     }
 
     private void getMessageIdFromDB() {
