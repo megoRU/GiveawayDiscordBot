@@ -52,6 +52,41 @@ public interface GiftHelper {
         }
     }
 
+    default void updateGiveawayMessageWithError(String endingWord, Long guildId, Long channelId, Integer count, Integer countWinner) {
+        try {
+            EmbedBuilder edit = new EmbedBuilder();
+            edit.setColor(0x00FF00);
+            edit.setTitle(GiveawayRegistry.getInstance().getTitle().get(guildId));
+
+            edit.setDescription(jsonParsers.getLocale("gift_Press_Green_Button", String.valueOf(guildId))
+                    .replaceAll("\\{0}", GiveawayRegistry.getInstance().getCountWinners().get(guildId) == null ? "TBA"
+                            : GiveawayRegistry.getInstance().getCountWinners().get(guildId))
+                    .replaceAll("\\{1}", setEndingWord(endingWord, guildId)) + count + "`");
+
+            edit.addField(jsonParsers.getLocale("gift_Invalid_Number", String.valueOf(guildId)),
+                    jsonParsers
+                    .getLocale("gift_Invalid_Number_Description", String.valueOf(guildId))
+                    .replaceAll("\\{0}", String.valueOf(countWinner))
+                    .replaceAll("\\{1}", String.valueOf(count)), false);
+
+            //Если есть время окончания включить в EmbedBuilder
+            if (!GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildId).equals("null")) {
+                edit.setTimestamp(OffsetDateTime.parse(String.valueOf(GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildId))));
+                edit.setFooter(jsonParsers.getLocale("gift_Ends_At", String.valueOf(guildId)));
+            }
+            //Отправляет сообщение и если нельзя редактировать то отправляет ошибку
+            BotStartConfig.getJda().getGuildById(guildId)
+                    .getTextChannelById(channelId)
+                    .editMessageEmbedsById(GiveawayRegistry.getInstance().getMessageId().get(guildId),
+                            edit.build()).queue(null, (exception) ->
+                            BotStartConfig.getJda().getTextChannelById(channelId).sendMessage(GiveawayRegistry.getInstance().removeGiftExceptions(guildId))
+                                    .queue());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
     default String setEndingWord(Object num, long guildId) {
         String language = "eng";
         if (BotStartConfig.getMapLanguages().get(String.valueOf(guildId)) != null) {

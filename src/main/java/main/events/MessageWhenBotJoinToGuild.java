@@ -92,48 +92,48 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
         }
 
         try {
+            if ((event.getGuild().getSelfMember().hasPermission(Permission.USE_APPLICATION_COMMANDS))) {
 
-            List<OptionData> optionsLanguage = new ArrayList<>();
-            List<OptionData> optionsStart = new ArrayList<>();
-            List<OptionData> optionsStop = new ArrayList<>();
+                List<OptionData> optionsLanguage = new ArrayList<>();
+                List<OptionData> optionsStart = new ArrayList<>();
+                List<OptionData> optionsStop = new ArrayList<>();
 
-            optionsLanguage.add(new OptionData(OptionType.STRING, "bot", "Setting the bot language")
-                    .addChoice("eng", "eng")
-                    .addChoice("rus", "rus")
-                    .setRequired(true));
+                optionsLanguage.add(new OptionData(OptionType.STRING, "bot", "Setting the bot language")
+                        .addChoice("eng", "eng")
+                        .addChoice("rus", "rus")
+                        .setRequired(true));
 
-            optionsStart.add(new OptionData(OptionType.STRING, "title", "Title for Giveaway")
-                    .setName("title")
-            );
+                optionsStart.add(new OptionData(OptionType.STRING, "title", "Title for Giveaway")
+                        .setName("title")
+                );
 
-            optionsStart.add(new OptionData(OptionType.INTEGER, "count", "Set count winners")
-                    .setName("count")
-            );
+                optionsStart.add(new OptionData(OptionType.INTEGER, "count", "Set count winners")
+                        .setName("count")
+                );
 
-            optionsStart.add(new OptionData(OptionType.STRING, "duration", "Examples: 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style. Preferably immediately in UTC ±0")
-                    .setName("duration")
-            );
+                optionsStart.add(new OptionData(OptionType.STRING, "duration", "Examples: 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style. Preferably immediately in UTC ±0")
+                        .setName("duration")
+                );
 
-            optionsStart.add(new OptionData(OptionType.CHANNEL, "channel", "#text channel name")
-                    .setName("channel")
-            );
+                optionsStart.add(new OptionData(OptionType.CHANNEL, "channel", "#text channel name")
+                        .setName("channel")
+                );
 
-            optionsStop.add(new OptionData(OptionType.STRING, "stop", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1")
-                    .setName("stop")
-            );
+                optionsStop.add(new OptionData(OptionType.STRING, "stop", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1")
+                        .setName("stop")
+                );
 
-
-            event.getGuild().upsertCommand("language", "Setting language").addOptions(optionsLanguage).queue();
-            event.getGuild().upsertCommand("giveaway-start", "Create giveaway").addOptions(optionsStart).queue();
-            event.getGuild().upsertCommand("giveaway-stop", "Stop the Giveaway").addOptions(optionsStop).queue();
-            event.getGuild().upsertCommand("help", "Bot commands").queue();
-
+                event.getGuild().upsertCommand("language", "Setting language").addOptions(optionsLanguage).queue();
+                event.getGuild().upsertCommand("start", "Create giveaway").addOptions(optionsStart).queue();
+                event.getGuild().upsertCommand("stop", "Stop the Giveaway").addOptions(optionsStop).queue();
+                event.getGuild().upsertCommand("help", "Bot commands").queue();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
+    //TODO: Сделать в таблице ON DELETE CASCADE
     @Override
     public void onGuildLeave(@NotNull GuildLeaveEvent event) {
         try {

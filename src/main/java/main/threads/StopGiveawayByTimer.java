@@ -38,10 +38,9 @@ public class StopGiveawayByTimer implements Runnable {
                                     GiveawayRegistry.getInstance().getCountWinners().get(getID_GUILD())
                                             == null ? 1
                                             : Integer.parseInt(GiveawayRegistry.getInstance().getCountWinners().get(getID_GUILD())));
-                    return;
                 }
 
-                Thread.sleep(timeFormDB.toInstant().toEpochMilli() - specificTime.toEpochMilli());
+                Thread.sleep(5000L);
             }
 
         } catch (Exception e) {

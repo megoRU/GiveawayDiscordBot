@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 public class Gift implements GiftHelper {
 
     private final static Logger LOGGER = Logger.getLogger(Gift.class.getName());
-    private final String URL = "http://94.103.91.165:8085/api/winners";
+    private final String URL = "http://45.140.167.181:8085/api/winners";
     private final JSONParsers jsonParsers = new JSONParsers();
     private final List<Button> buttons = new ArrayList<>();
     private final List<String> listUsers = new ArrayList<>();
@@ -208,7 +208,7 @@ public class Gift implements GiftHelper {
         addUserToInsertQuery(user.getName(), user.getIdLong(), guildId);
     }
 
-    //TODO: Может удалять список с кем то.
+    //TODO: Может удалять список с кем то. Какой блять список? Уже его нет! А блять понял. Этот participantsList
     private void executeMultiInsert(long guildIdLong) {
         try {
             if (!participantsList.isEmpty()) {
@@ -300,12 +300,18 @@ public class Gift implements GiftHelper {
             EmbedBuilder zero = new EmbedBuilder();
             zero.setColor(0xFF8000);
             zero.setTitle(jsonParsers.getLocale("gift_Invalid_Number", String.valueOf(guildIdLong)));
+
             zero.setDescription(jsonParsers
                     .getLocale("gift_Invalid_Number_Description", String.valueOf(guildIdLong))
                     .replaceAll("\\{0}", String.valueOf(countWinner))
                     .replaceAll("\\{1}", String.valueOf(getCount())));
             //Отправляет сообщение
-            editMessage(zero, guildId, textChannelId);
+            updateGiveawayMessageWithError(
+                    GiveawayRegistry.getInstance().getCountWinners().get(guildId) == null ? "TBA" : GiveawayRegistry.getInstance().getCountWinners().get(guildId),
+                    this.guildId,
+                    this.textChannelId,
+                    getCount(),
+                    countWinner);
             return;
         }
         Instant timestamp = Instant.now();
