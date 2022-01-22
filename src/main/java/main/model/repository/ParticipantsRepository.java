@@ -13,4 +13,7 @@ public interface ParticipantsRepository extends JpaRepository<Participants, Long
 
     @Query(value = "SELECT p FROM Participants p WHERE p.activeGiveaways.guildLongId = :guildIdLong")
     List<Participants> getParticipantsByGuildIdLong(@Param("guildIdLong") Long guildIdLong);
+
+    @Query(value = "SELECT p FROM Participants p WHERE p.userIdLong = :userIdLong AND p.activeGiveaways.guildLongId = :guildIdLong")
+    Participants getParticipant(@Param("guildIdLong") Long guildIdLong, @Param("userIdLong") Long userIdLong);
 }

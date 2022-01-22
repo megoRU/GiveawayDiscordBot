@@ -5,8 +5,12 @@ import main.config.BotStartConfig;
 import main.jsonparser.JSONParsers;
 import main.messagesevents.MessageInfoHelp;
 import main.messagesevents.SenderMessage;
+import main.model.entity.ActiveGiveaways;
 import main.model.entity.Language;
+import main.model.entity.Participants;
+import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.LanguageRepository;
+import main.model.repository.ParticipantsRepository;
 import main.startbot.Statcord;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
@@ -32,6 +36,8 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
     private final static Logger LOGGER = Logger.getLogger(ReactionsButton.class.getName());
     private static final JSONParsers jsonParsers = new JSONParsers();
     private final LanguageRepository languageRepository;
+    private final ParticipantsRepository participantsRepository;
+    private final ActiveGiveawayRepository activeGiveawayRepository;
 
     @Override
     public void onButtonClick(@NotNull ButtonClickEvent event) {
@@ -116,19 +122,59 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
 
             long guild = event.getGuild().getIdLong();
 
-            if (Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + PRESENT)
-                    && GiveawayRegistry.getInstance().hasGift(guild)
-                    && GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
-                    .getListUsersHash(event.getUser().getId()) == null) {
-                event.deferEdit().queue();
 
-                GiveawayRegistry.getInstance()
-                        .getActiveGiveaways()
-                        .get(event.getGuild().getIdLong())
-                        .addUserToPoll(event.getUser());
-                Statcord.commandPost("gift", event.getUser().getId());
-                return;
+            // TODO: Может это слишком жёстко
+            new Thread(() -> {
+                try {
+                    System.out.println("Go to sleep");
+                    Thread.sleep(10000L);
+                    System.out.println("wake up");
+
+                    if (GiveawayRegistry.getInstance().hasGift(guild) &&
+                            GiveawayRegistry.getInstance().getActiveGiveaways()
+                                    .get(event.getGuild().getIdLong()).getListUsersHash(event.getUser().getId()) != null &&
+                            participantsRepository.getParticipant(event.getGuild().getIdLong(), event.getUser().getIdLong()) == null) {
+
+                        System.out.println(GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong()).getListUsersHash(event.getUser().getId()) != null);
+                        System.out.println(participantsRepository.getParticipant(event.getUser().getIdLong(), event.getGuild().getIdLong()));
+                        System.out.println("Пользователя нет в БД это странно!");
+
+                        ActiveGiveaways activeGiveaways = activeGiveawayRepository.getActiveGiveawaysByGuildIdLong(event.getGuild().getIdLong());
+                        Participants participants = new Participants();
+                        participants.setUserIdLong(event.getUser().getIdLong());
+                        participants.setNickName(event.getUser().getName());
+                        participants.setActiveGiveaways(activeGiveaways);
+
+                        participantsRepository.save(participants);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Thread.currentThread().interrupt();
+                }
+            }).start();
+
+            long startTime = System.currentTimeMillis();
+
+            // TODO: Решит проблему с дубликатами
+            synchronized (this) {
+                if (Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + PRESENT)
+                        && GiveawayRegistry.getInstance().hasGift(guild)
+                        && GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
+                        .getListUsersHash(event.getUser().getId()) == null) {
+                    event.deferEdit().queue();
+
+                    GiveawayRegistry.getInstance()
+                            .getActiveGiveaways()
+                            .get(event.getGuild().getIdLong())
+                            .addUserToPoll(event.getUser());
+                    Statcord.commandPost("gift", event.getUser().getId());
+
+                    return;
+                }
             }
+
+            long endTime = System.currentTimeMillis();
+            System.out.println("Total execution time: " + (endTime - startTime) + " ms");
 
             if (event.getButton().getId().equals(event.getGuild().getId() + ":" + PRESENT)
                     && GiveawayRegistry.getInstance().hasGift(guild)

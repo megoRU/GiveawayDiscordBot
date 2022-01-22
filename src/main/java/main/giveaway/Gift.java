@@ -54,7 +54,7 @@ public class Gift implements GiftHelper {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss.SSS");
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final ParticipantsRepository participantsRepository;
-    private List<Participants> participantsList = new ArrayList<>();
+    private Set<Participants> participantsList = new HashSet<>();
 
     public Gift(long guildId, long textChannelId, ActiveGiveawayRepository activeGiveawayRepository, ParticipantsRepository participantsRepository) {
         this.guildId = guildId;
@@ -212,9 +212,16 @@ public class Gift implements GiftHelper {
     private void executeMultiInsert(long guildIdLong) {
         try {
             if (!participantsList.isEmpty()) {
+                int countParticipants = participantsList.size();
+                Set<Participants> tempParticipantsList = participantsList;
+
                 participantsRepository.saveAll(participantsList);
                 synchronized (this) {
-                    participantsList = new ArrayList<>();
+                    if (countParticipants == participantsList.size()) {
+                        participantsList.clear();
+                    } else {
+                        participantsList.removeAll(tempParticipantsList);
+                    }
                 }
                 updateGiveawayMessage(
                         GiveawayRegistry.getInstance().getCountWinners().get(guildId) == null
@@ -233,7 +240,7 @@ public class Gift implements GiftHelper {
         }
     }
 
-    private void addUserToInsertQuery(String nickName, long userIdLong, long guildIdLong) {
+    private void addUserToInsertQuery(final String nickName, final long userIdLong, final long guildIdLong) {
         ActiveGiveaways activeGiveaways = activeGiveawayRepository.getActiveGiveawaysByGuildIdLong(guildIdLong);
         Participants participants = new Participants();
         participants.setUserIdLong(userIdLong);
