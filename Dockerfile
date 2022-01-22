@@ -14,4 +14,4 @@ ADD . $HOME
 
 RUN ["mvn", "install"]
 
-ENTRYPOINT ["java", "-jar", "./target/GiveawayDiscord-2.1.1-jar-with-dependencies.jar"]
+ENTRYPOINT ["java", "-jar", "./target/giveaway.discord.bot-0.0.1-SNAPSHOT.jar"]
