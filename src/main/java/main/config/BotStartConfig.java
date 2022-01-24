@@ -123,7 +123,7 @@ public class BotStartConfig {
 
         //Обновить команды
 //        updateSlashCommands();
-        System.out.println("21:25");
+        System.out.println("11:51");
     }
 
     @Bean
@@ -142,8 +142,8 @@ public class BotStartConfig {
                             }
                         }
                         executorService.shutdown();
-                        Thread.sleep(2000);
                     }
+                    Thread.sleep(2000);
                 }
             } catch (Exception e) {
                 Thread.currentThread().interrupt();
@@ -194,7 +194,8 @@ public class BotStartConfig {
             guild.upsertCommand("start", "Create giveaway").addOptions(optionsStart).queue();
             guild.upsertCommand("stop", "Stop the Giveaway").addOptions(optionsStop).queue();
             guild.upsertCommand("help", "Bot commands").queue();
-        });
+            guild.upsertCommand("list", "List of participants").queue();
+            });
 
         } catch (Exception e) {
             e.printStackTrace();

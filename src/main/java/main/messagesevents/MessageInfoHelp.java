@@ -86,8 +86,8 @@ public class MessageInfoHelp extends ListenerAdapter implements SenderMessage {
                         + p + jsonParsers.getLocale("messages_events_Language_Reset", guildIdLong)
                 , false);
 
-        info.addField("Giveaway:",
-                jsonParsers.getLocale("messages_events_PS", guildIdLong)
+        info.addField("Giveaway:", jsonParsers.getLocale("messages_events_PS", guildIdLong) +
+                        jsonParsers.getLocale("messages_events_PS2", guildIdLong)
                         + "`"
                         + p + jsonParsers.getLocale("messages_events_Start_Giveaway", guildIdLong)
                         + p + jsonParsers.getLocale("messages_events_Start_Text_Giveaway", guildIdLong)

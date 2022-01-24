@@ -6,6 +6,7 @@
   "messages_events_Language": "lang rus` - Доступные языки: `(rus|eng)`\n",
   "messages_events_Language_Reset": "lang reset` - Сбросить язык на: `ENG`",
   "messages_events_PS": "-------------------------------\n`Внимание:`\n1. Не используйте кавычки `< >`\n2. `<1-99м|ч|д>` используйте только **ОДНУ БУКВУ**.\nИспользовать минуты, часы или дни вместе **НЕЛЬЗЯ**.\n-------------------------------\n",
+  "messages_events_PS2": "`Обратите внимание:`\nНиже команды с 1 мая 2022 будут устаревшими. Используйте Slash commands.\nВ самом внизу есть ссылка на подключение Slash commands на ваш сервер.\n-------------------------------\n",
   "messages_events_Start_Giveaway": "gift start` - Начните Giveaway.\n`",
   "messages_events_Start_Text_Giveaway": "gift start <текст>` - Начните Giveaway со своим текстом.\n`",
   "messages_events_Start_Text_Time_Giveaway": "gift start <текст> <1-99м|ч|д>` - Начните Giveaway со своим текстом и с таймером до остановки.\n`",
@@ -15,7 +16,7 @@
   "messages_events_Stop_Number_Giveaway": "gift stop <число>` - Завершите Giveaway с большим количеством победителей.\n",
   "messages_events_Links": "Ссылки:",
   "messages_events_Site": ":zap: [megoru.ru](https://megoru.ru)\n",
-  "messages_events_Add_Me_To_Other_Guilds": ":robot: [Добавь меня в другие гильдии](https://discord.com/oauth2/authorize?client_id=808277484524011531&permissions=2147511296&scope=applications.commands%20bot)\n",
+  "messages_events_Add_Me_To_Other_Guilds": ":robot: [Добавь меня в другие гильдии | добавить Slash commands](https://discord.com/oauth2/authorize?client_id=808277484524011531&permissions=2147511296&scope=applications.commands%20bot)\n",
   "messages_events_Send_Private_Message": "Я отправил тебе личное сообщение",
   "messages_events_Failed_To_Send_Message": "Не удалось отправить сообщение. Возможно я у тебя черном списке!",
   "prefix_change_Must_have_Permission": "Вы не можете изменить префикс. У вас должно быть разрешение: `УПРАВЛЯТЬ СЕРВЕРОМ`",
@@ -54,5 +55,7 @@
   "slash_Stop_No_Has": "Сейчас нет активного Giveaway",
   "slash_Stop": "Вы завершили Giveaway",
   "slash_Errors": "Вы допустили ошибку, посмотрите документацию",
-  "send_slash_message": "Создал Giveaway в текстовом канале: <#{0}>"
+  "send_slash_message": "Создал Giveaway в текстовом канале: <#{0}>",
+  "slash_list_users": "Список участников",
+  "slash_list_users_empty": "Ещё нет участников"
 }

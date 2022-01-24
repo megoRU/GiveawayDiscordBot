@@ -8,12 +8,15 @@ import main.model.entity.Language;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.LanguageRepository;
 import main.model.repository.ParticipantsRepository;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @AllArgsConstructor
 @Service
@@ -89,7 +92,7 @@ public class SlashCommand extends ListenerAdapter {
                                     count,
                                     time);
 
-                //Если время будет неверным. Сработает try catch
+                    //Если время будет неверным. Сработает try catch
                 } catch (Exception e) {
                     e.printStackTrace();
                     GiveawayRegistry.getInstance().removeGift(event.getGuild().getIdLong());
@@ -161,6 +164,34 @@ public class SlashCommand extends ListenerAdapter {
             language.setServerId(event.getGuild().getId());
             language.setLanguage(event.getOptions().get(0).getAsString());
             languageRepository.save(language);
+            return;
+        }
+
+        if (event.getName().equals("list")) {
+
+            if (GiveawayRegistry.getInstance().hasGift(event.getGuild().getIdLong())) {
+
+                StringBuilder stringBuilder = new StringBuilder();
+                List<String> participantsList = GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong()).getListUsers();
+
+                if (participantsList.isEmpty()) {
+                    event.reply(jsonParsers.getLocale("slash_list_users_empty", event.getGuild().getId())).setEphemeral(true).queue();
+                    return;
+                }
+
+                for (int i = 0; i < participantsList.size(); i++) {
+                    stringBuilder.append(stringBuilder.length() == 0 ? "<@" : ", <@").append(participantsList.get(i)).append(">");
+                }
+
+                EmbedBuilder list = new EmbedBuilder();
+                list.setColor(0x00FF00);
+                list.setTitle(jsonParsers.getLocale("slash_list_users", event.getGuild().getId()));
+                list.setDescription(stringBuilder);
+
+                event.replyEmbeds(list.build()).queue();
+            } else {
+                event.reply(jsonParsers.getLocale("slash_Stop_No_Has", event.getGuild().getId())).setEphemeral(true).queue();
+            }
         }
     }
 }
