@@ -123,7 +123,7 @@ public class BotStartConfig {
 
         //Обновить команды
 //        updateSlashCommands();
-        System.out.println("11:51");
+        System.out.println("15:51");
     }
 
     @Bean
@@ -373,26 +373,27 @@ public class BotStartConfig {
 
     @Scheduled(fixedDelay = 20000L)
     private void topGGAndStatcord() {
-        try {
-            DiscordBotListAPI TOP_GG_API = new DiscordBotListAPI.Builder()
-                    .token(Config.getTopGgApiToken())
-                    .botId(Config.getBotId())
-                    .build();
-            serverCount = jda.getGuilds().size();
-            TOP_GG_API.setStats(serverCount);
-            jda.getPresence().setActivity(Activity.playing(activity + serverCount + " guilds"));
-
-            if (!isLaunched) {
-                Statcord.start(
-                        jda.getSelfUser().getId(),
-                        Config.getStatcord(),
-                        jda,
-                        true,
-                        3);
-                isLaunched = true;
+        if (!Config.isIsDev()) {
+            try {
+                DiscordBotListAPI TOP_GG_API = new DiscordBotListAPI.Builder()
+                        .token(Config.getTopGgApiToken())
+                        .botId(Config.getBotId())
+                        .build();
+                int serverCount = BotStartConfig.jda.getGuilds().size();
+                TOP_GG_API.setStats(serverCount);
+                BotStartConfig.jda.getPresence().setActivity(Activity.playing(BotStartConfig.activity + serverCount + " guilds"));
+                if (!isLaunched) {
+                    Statcord.start(
+                            BotStartConfig.jda.getSelfUser().getId(),
+                            Config.getStatcord(),
+                            BotStartConfig.jda,
+                            true,
+                            3);
+                    isLaunched = true;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
