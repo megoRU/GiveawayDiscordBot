@@ -103,7 +103,6 @@ public class MessageInfoHelp extends ListenerAdapter implements SenderMessage {
 
         List<Button> buttons = new ArrayList<>();
 
-        buttons.add(Button.success(guildIdLong + ":" + ReactionsButton.BUTTON_EXAMPLES, jsonParsers.getLocale("button_Examples", guildIdLong)));
         buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
 
 

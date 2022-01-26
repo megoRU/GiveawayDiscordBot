@@ -37,7 +37,12 @@ public class SlashCommand extends ListenerAdapter {
 
         if (event.getName().equals("start")) {
             if (GiveawayRegistry.getInstance().hasGift(event.getGuild().getIdLong())) {
-                event.reply(jsonParsers.getLocale("message_gift_Need_Stop_Giveaway", event.getGuild().getId())).queue();
+
+                EmbedBuilder errors = new EmbedBuilder();
+                errors.setColor(0x00FF00);
+                errors.setDescription(jsonParsers.getLocale("message_gift_Need_Stop_Giveaway", event.getGuild().getId()));
+
+                event.replyEmbeds(errors.build()).queue();
             } else {
                 try {
                     TextChannel textChannel = null;
@@ -56,8 +61,8 @@ public class SlashCommand extends ListenerAdapter {
                             title = event.getOptions().get(i).getAsString();
                         }
 
-                        if (event.getOptions().get(i).getAsString().matches("[0-9]{1,2}")) {
-                            count = event.getOptions().get(i).getAsString();
+                        if (event.getOptions().get(i).getAsString().matches("^[0-9]{1,2}$")) {
+                            count = String.valueOf(event.getOptions().get(i).getAsLong());
                         }
 
                         if (event.getOptions().get(i).getAsString().matches("[0-9]{1,2}[mмhчdд]")
@@ -69,13 +74,14 @@ public class SlashCommand extends ListenerAdapter {
                             textChannel = event.getOptions().get(i).getAsGuildChannel().getGuild()
                                     .getTextChannelById(event.getOptions().get(i).getAsGuildChannel().getId());
                         }
-
                     }
 
                     GiveawayRegistry.getInstance().setGift(
                             event.getGuild().getIdLong(),
                             new Gift(event.getGuild().getIdLong(),
-                                    textChannel == null ? event.getTextChannel().getIdLong() : textChannel.getIdLong(), activeGiveawayRepository, participantsRepository));
+                                    textChannel == null ? event.getTextChannel().getIdLong() : textChannel.getIdLong(),
+                                    activeGiveawayRepository,
+                                    participantsRepository));
 
                     if (!event.getGuild().getSelfMember()
                             .hasPermission(textChannel == null ? event.getTextChannel() : textChannel, Permission.MESSAGE_SEND) ||
@@ -96,7 +102,12 @@ public class SlashCommand extends ListenerAdapter {
                 } catch (Exception e) {
                     e.printStackTrace();
                     GiveawayRegistry.getInstance().removeGift(event.getGuild().getIdLong());
-                    event.reply(jsonParsers.getLocale("slash_Errors", event.getGuild().getId())).queue();
+
+                    EmbedBuilder errors = new EmbedBuilder();
+                    errors.setColor(0x00FF00);
+                    errors.setDescription(jsonParsers.getLocale("slash_Errors", event.getGuild().getId()));
+
+                    event.replyEmbeds(errors.build()).queue();
                 }
             }
 
@@ -105,18 +116,32 @@ public class SlashCommand extends ListenerAdapter {
 
         if (event.getName().equals("stop")) {
             if (!GiveawayRegistry.getInstance().hasGift(event.getGuild().getIdLong())) {
-                event.reply(jsonParsers.getLocale("slash_Stop_No_Has", event.getGuild().getId())).queue();
+                EmbedBuilder notHas = new EmbedBuilder();
+                notHas.setColor(0x00FF00);
+                notHas.setDescription(jsonParsers.getLocale("slash_Stop_No_Has", event.getGuild().getId()));
+
+                event.replyEmbeds(notHas.build()).queue();
                 return;
             }
 
             if (!event.getMember().hasPermission(event.getTextChannel(), Permission.ADMINISTRATOR)
                     && !event.getMember().hasPermission(event.getTextChannel(), Permission.MESSAGE_MANAGE)) {
-                event.reply(jsonParsers.getLocale("message_gift_Not_Admin", event.getGuild().getId())).queue();
+
+                EmbedBuilder gift = new EmbedBuilder();
+                gift.setColor(0x00FF00);
+                gift.setDescription(jsonParsers.getLocale("message_gift_Not_Admin", event.getGuild().getId()));
+
+                event.replyEmbeds(gift.build()).queue();
                 return;
             }
 
             if (event.getOptions().isEmpty()) {
-                event.reply(jsonParsers.getLocale("slash_Stop", event.getGuild().getId())).queue();
+                EmbedBuilder stop = new EmbedBuilder();
+                stop.setColor(0x00FF00);
+                stop.setDescription(jsonParsers.getLocale("slash_Stop", event.getGuild().getId()));
+
+                event.replyEmbeds(stop.build()).queue();
+
                 GiveawayRegistry.getInstance()
                         .getActiveGiveaways().get(event.getGuild().getIdLong())
                         .stopGift(event.getGuild().getIdLong(),
@@ -127,17 +152,27 @@ public class SlashCommand extends ListenerAdapter {
             }
 
             if (!event.getOptions().get(0).getAsString().matches("[0-9]{1,2}")) {
-                event.reply(jsonParsers.getLocale("slash_Errors", event.getGuild().getId())).queue();
+                EmbedBuilder errors = new EmbedBuilder();
+                errors.setColor(0x00FF00);
+                errors.setDescription(jsonParsers.getLocale("slash_Errors", event.getGuild().getId()));
+
+                event.replyEmbeds(errors.build()).queue();
                 return;
             }
 
-            event.reply(jsonParsers.getLocale("slash_Stop", event.getGuild().getId())).queue();
+            EmbedBuilder stop = new EmbedBuilder();
+            stop.setColor(0x00FF00);
+            stop.setDescription(jsonParsers.getLocale("slash_Stop", event.getGuild().getId()));
+
+            event.replyEmbeds(stop.build()).queue();
+
             GiveawayRegistry.getInstance()
                     .getActiveGiveaways().get(event.getGuild().getIdLong())
                     .stopGift(event.getGuild().getIdLong(), Integer.parseInt(event.getOptions().get(0).getAsString()));
             return;
         }
 
+        //TODO: @Deprecated
         if (event.getName().equals("help")) {
 
             String p = BotStartConfig.getMapPrefix().get(event.getGuild().getId()) == null ? "!" :
@@ -155,10 +190,25 @@ public class SlashCommand extends ListenerAdapter {
         //0 - bot
         if (event.getName().equals("language")) {
 
+            if (!event.getMember().hasPermission(Permission.MANAGE_SERVER)) {
+
+                EmbedBuilder notAdmin = new EmbedBuilder();
+                notAdmin.setColor(0x00FF00);
+                notAdmin.setDescription(jsonParsers.getLocale("language_change_Not_Admin", event.getGuild().getId())
+                        .replaceAll("\\{0}", event.getOptions().get(0).getAsString()));
+
+                event.replyEmbeds(notAdmin.build()).setEphemeral(true).queue();
+                return;
+            }
+
             BotStartConfig.getMapLanguages().put(event.getGuild().getId(), event.getOptions().get(0).getAsString());
 
-            event.reply(jsonParsers.getLocale("button_Language", event.getGuild().getId())
-                    .replaceAll("\\{0}", event.getOptions().get(0).getAsString())).queue();
+            EmbedBuilder button = new EmbedBuilder();
+            button.setColor(0x00FF00);
+            button.setDescription(jsonParsers.getLocale("button_Language", event.getGuild().getId())
+                    .replaceAll("\\{0}", event.getOptions().get(0).getAsString()));
+
+            event.replyEmbeds(button.build()).queue();
 
             Language language = new Language();
             language.setServerId(event.getGuild().getId());
@@ -180,7 +230,12 @@ public class SlashCommand extends ListenerAdapter {
                 }
 
                 for (int i = 0; i < participantsList.size(); i++) {
-                    stringBuilder.append(stringBuilder.length() == 0 ? "<@" : ", <@").append(participantsList.get(i)).append(">");
+                    if (stringBuilder.length() < 4000) {
+                        stringBuilder.append(stringBuilder.length() == 0 ? "<@" : ", <@").append(participantsList.get(i)).append(">");
+                    } else {
+                        stringBuilder.append(" and others...");
+                        break;
+                    }
                 }
 
                 EmbedBuilder list = new EmbedBuilder();
@@ -190,7 +245,11 @@ public class SlashCommand extends ListenerAdapter {
 
                 event.replyEmbeds(list.build()).queue();
             } else {
-                event.reply(jsonParsers.getLocale("slash_Stop_No_Has", event.getGuild().getId())).setEphemeral(true).queue();
+                EmbedBuilder list = new EmbedBuilder();
+                list.setColor(0x00FF00);
+                list.setDescription(jsonParsers.getLocale("slash_Stop_No_Has", event.getGuild().getId()));
+
+                event.replyEmbeds(list.build()).setEphemeral(true).queue();
             }
         }
     }

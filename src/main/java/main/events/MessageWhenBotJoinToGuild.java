@@ -57,7 +57,6 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
                         , false);
 
                 List<Button> buttons = new ArrayList<>();
-                buttons.add(Button.success(event.getGuild().getId() + ":" + ReactionsButton.BUTTON_HELP, jsonParsers.getLocale("button_Help", event.getGuild().getId())));
                 buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
 
 

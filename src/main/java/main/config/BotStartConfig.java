@@ -4,9 +4,7 @@ import main.events.MessageWhenBotJoinToGuild;
 import main.giveaway.*;
 import main.jsonparser.JSONParsers;
 import main.jsonparser.ParserClass;
-import main.messagesevents.LanguageChange;
 import main.messagesevents.MessageInfoHelp;
-import main.messagesevents.PrefixChange;
 import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.LanguageRepository;
@@ -48,7 +46,7 @@ import java.util.concurrent.Executors;
 @EnableScheduling
 public class BotStartConfig {
 
-    public static final String activity = "!help | ";
+    public static final String activity = "/help | ";
     private static final Deque<Giveaway> queue = new ArrayDeque<>();
     //String - guildLongId
     private static final Map<String, String> mapPrefix = new HashMap<>();
@@ -98,18 +96,13 @@ public class BotStartConfig {
             getMessageIdFromDB();
             //Получаем всех участников по гильдиям
             getUsersWhoTakePartFromDB();
-            //Получаем все префиксы из базы данных
-            getPrefixFromDB();
 
             jdaBuilder.setAutoReconnect(true);
             jdaBuilder.setStatus(OnlineStatus.ONLINE);
             jdaBuilder.setActivity(Activity.playing(activity + serverCount + " guilds"));
             jdaBuilder.setBulkDeleteSplittingEnabled(false);
             jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild(prefixRepository, activeGiveawayRepository, languageRepository));
-            jdaBuilder.addEventListeners(new MessageGift(activeGiveawayRepository, participantsRepository));
-            jdaBuilder.addEventListeners(new PrefixChange(prefixRepository));
             jdaBuilder.addEventListeners(new MessageInfoHelp());
-            jdaBuilder.addEventListeners(new LanguageChange(languageRepository));
             jdaBuilder.addEventListeners(new ReactionsButton(languageRepository, participantsRepository, activeGiveawayRepository));
             jdaBuilder.addEventListeners(new SlashCommand(languageRepository, activeGiveawayRepository, participantsRepository));
 
@@ -123,7 +116,7 @@ public class BotStartConfig {
 
         //Обновить команды
 //        updateSlashCommands();
-        System.out.println("15:51");
+        System.out.println("16:00");
     }
 
     @Bean
@@ -172,7 +165,7 @@ public class BotStartConfig {
                     .setName("title")
             );
 
-            optionsStart.add(new OptionData(OptionType.INTEGER, "count", "Set count winners")
+            optionsStart.add(new OptionData(OptionType.INTEGER, "count", "Set count winners. From 1 to 99")
                     .setName("count")
             );
 
