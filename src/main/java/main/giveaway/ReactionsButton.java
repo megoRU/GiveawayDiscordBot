@@ -3,8 +3,6 @@ package main.giveaway;
 import lombok.AllArgsConstructor;
 import main.config.BotStartConfig;
 import main.jsonparser.JSONParsers;
-import main.messagesevents.MessageInfoHelp;
-import main.messagesevents.SenderMessage;
 import main.model.entity.ActiveGiveaways;
 import main.model.entity.Language;
 import main.model.entity.Participants;
@@ -15,7 +13,6 @@ import main.startbot.Statcord;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.Button;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +21,7 @@ import java.util.logging.Logger;
 
 @AllArgsConstructor
 @Service
-public class ReactionsButton extends ListenerAdapter implements SenderMessage {
+public class ReactionsButton extends ListenerAdapter {
 
     public static final String PRESENT = "PRESENT";
     public static final String STOP_ONE = "STOP_ONE";
@@ -60,8 +57,12 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
                             .getLocale("button_Language", event.getGuild().getId())
                             .replaceAll("\\{0}", buttonName))
                     .setEphemeral(true).queue();
+            return;
         }
 
+        /**
+         * Если нет {@link Gift} активного, то делаем {@return}
+         */
         try {
             if (GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().get(event.getGuild().getIdLong()) == null) {
                 return;
@@ -77,6 +78,7 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
         if (!event.getGuild().getSelfMember().hasPermission(event.getGuildChannel(), Permission.MESSAGE_SEND)) {
             return;
         }
+
         try {
 
             LOGGER.info(

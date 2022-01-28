@@ -4,7 +4,6 @@ import main.events.MessageWhenBotJoinToGuild;
 import main.giveaway.*;
 import main.jsonparser.JSONParsers;
 import main.jsonparser.ParserClass;
-import main.messagesevents.MessageInfoHelp;
 import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.LanguageRepository;
@@ -102,7 +101,6 @@ public class BotStartConfig {
             jdaBuilder.setActivity(Activity.playing(activity + serverCount + " guilds"));
             jdaBuilder.setBulkDeleteSplittingEnabled(false);
             jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild(prefixRepository, activeGiveawayRepository, languageRepository));
-            jdaBuilder.addEventListeners(new MessageInfoHelp());
             jdaBuilder.addEventListeners(new ReactionsButton(languageRepository, participantsRepository, activeGiveawayRepository));
             jdaBuilder.addEventListeners(new SlashCommand(languageRepository, activeGiveawayRepository, participantsRepository));
 

@@ -3,19 +3,23 @@ package main.giveaway;
 import lombok.AllArgsConstructor;
 import main.config.BotStartConfig;
 import main.jsonparser.JSONParsers;
-import main.messagesevents.MessageInfoHelp;
 import main.model.entity.Language;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.LanguageRepository;
 import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Button;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @AllArgsConstructor
@@ -34,6 +38,11 @@ public class SlashCommand extends ListenerAdapter {
         if (event.getGuild() == null) return;
 
         if (event.getMember() == null) return;
+
+        if (!event.getGuild().getSelfMember().hasPermission(event.getTextChannel(), Permission.MESSAGE_SEND) ||
+                !event.getGuild().getSelfMember().hasPermission(event.getTextChannel(), Permission.MESSAGE_EMBED_LINKS)) {
+            return;
+        }
 
         if (event.getName().equals("start")) {
             if (GiveawayRegistry.getInstance().hasGift(event.getGuild().getIdLong())) {
@@ -172,18 +181,42 @@ public class SlashCommand extends ListenerAdapter {
             return;
         }
 
-        //TODO: @Deprecated
         if (event.getName().equals("help")) {
 
-            String p = BotStartConfig.getMapPrefix().get(event.getGuild().getId()) == null ? "!" :
-                    BotStartConfig.getMapPrefix().get(event.getGuild().getId());
+            String guildIdLong = event.getGuild().getId();
+            
+            EmbedBuilder info = new EmbedBuilder();
+            info.setColor(0xa224db);
+            info.setTitle("Giveaway");
+            info.addField("Slash Commands", "`/language`, `/start`, `/stop`, `/list`", false);
 
-            new MessageInfoHelp().buildMessage(
-                    p,
-                    event.getTextChannel(),
-                    event.getUser().getAvatarUrl(),
-                    event.getGuild().getId(),
-                    event.getUser().getName(), event);
+            info.addField(jsonParsers.getLocale("messages_events_Links", guildIdLong),
+                    jsonParsers.getLocale("messages_events_Site", guildIdLong) +
+                            jsonParsers.getLocale("messages_events_Add_Me_To_Other_Guilds", guildIdLong), false);
+
+            List<Button> buttons = new ArrayList<>();
+
+            buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
+
+            if (BotStartConfig.getMapLanguages().get(guildIdLong) != null) {
+
+                if (BotStartConfig.getMapLanguages().get(guildIdLong).equals("eng")) {
+
+                    buttons.add(Button.secondary(guildIdLong + ":" + ReactionsButton.CHANGE_LANGUAGE,
+                                    "Сменить язык ")
+                            .withEmoji(Emoji.fromUnicode("U+1F1F7U+1F1FA")));
+                } else {
+                    buttons.add(Button.secondary(guildIdLong + ":" + ReactionsButton.CHANGE_LANGUAGE,
+                                    "Change language ")
+                            .withEmoji(Emoji.fromUnicode("U+1F1ECU+1F1E7")));
+                }
+            } else {
+                buttons.add(Button.secondary(guildIdLong + ":" + ReactionsButton.CHANGE_LANGUAGE,
+                                "Сменить язык ")
+                        .withEmoji(Emoji.fromUnicode("U+1F1F7U+1F1FA")));
+            }
+
+            event.replyEmbeds(info.build()).setEphemeral(true).addActionRow(buttons).queue();
             return;
         }
 
