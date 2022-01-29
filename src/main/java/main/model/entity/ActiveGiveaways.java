@@ -1,12 +1,15 @@
 package main.model.entity;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.sql.Timestamp;
 
 @Getter
 @Setter
@@ -30,7 +33,7 @@ public class ActiveGiveaways {
     private String countWinners;
 
     @Column(name = "date_end_giveaway")
-    private String dateEndGiveaway;
+    private Timestamp dateEndGiveaway;
 
     @Column(name = "giveaway_title")
     private String giveawayTitle;

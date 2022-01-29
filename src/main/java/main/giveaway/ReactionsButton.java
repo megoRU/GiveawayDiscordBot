@@ -145,49 +145,11 @@ public class ReactionsButton extends ListenerAdapter {
             long endTime = System.currentTimeMillis();
             System.out.println("Total execution time: " + (endTime - startTime) + " ms");
 
-            if (event.getButton().getId().equals(event.getGuild().getId() + ":" + PRESENT)
+            if (Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + PRESENT)
                     && GiveawayRegistry.getInstance().hasGift(guild)
                     && GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
                     .getListUsersHash(event.getUser().getId()) != null) {
                 event.deferEdit().queue();
-                return;
-            }
-
-            if (GiveawayRegistry.getInstance().hasGift(guild) && (isUserCanManageServer || isUserAdmin)) {
-
-                if (event.getButton().getId().equals(event.getGuild().getId() + ":" + STOP_ONE)) {
-
-                    GiveawayRegistry.getInstance()
-                            .getActiveGiveaways()
-                            .get(event.getGuild().getIdLong())
-                            .stopGift(event.getGuild().getIdLong(), 1);
-
-                    Statcord.commandPost("gift stop", event.getUser().getId());
-                    return;
-                }
-
-                if (event.getButton().getId().equals(event.getGuild().getId() + ":" + STOP_TWO)) {
-                    event.deferEdit().queue();
-                    GiveawayRegistry.getInstance()
-                            .getActiveGiveaways()
-                            .get(event.getGuild().getIdLong())
-                            .stopGift(event.getGuild().getIdLong(), 2);
-                    Statcord.commandPost("gift stop 2", event.getUser().getId());
-                    return;
-                }
-
-                if (event.getButton().getId().equals(event.getGuild().getId() + ":" + STOP_THREE)) {
-                    event.deferEdit().queue();
-                    GiveawayRegistry.getInstance()
-                            .getActiveGiveaways()
-                            .get(event.getGuild().getIdLong())
-                            .stopGift(event.getGuild().getIdLong(), 3);
-                    Statcord.commandPost("gift stop 3", event.getUser().getId());
-                }
-            } else {
-                event.deferEdit().queue();
-                event.getHook().sendMessage(jsonParsers
-                        .getLocale("message_gift_Not_Admin", event.getGuild().getId())).setEphemeral(true).queue();
             }
         } catch (Exception e) {
             e.printStackTrace();

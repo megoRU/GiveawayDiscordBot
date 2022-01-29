@@ -2,22 +2,21 @@ package main.giveaway;
 
 import main.jsonparser.JSONParsers;
 
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 public class GiveawayRegistry {
 
     //Возвращает Gift по long id
-    private static final ConcurrentMap<Long, Gift> activeGiveaways = new ConcurrentHashMap<>();
+    private static final Map<Long, Gift> activeGiveaways = new HashMap<>();
     //Возвращает String id message с активным Giveaway
-    private static final ConcurrentMap<Long, String> idMessagesWithGiveawayButtons = new ConcurrentHashMap<>();
-    private static final ConcurrentMap<Long, String> channelId = new ConcurrentHashMap<>();
-    private static final ConcurrentMap<Long, String> messageId = new ConcurrentHashMap<>();
+    private static final Map<Long, String> idMessagesWithGiveawayButtons = new HashMap<>();
+    private static final Map<Long, String> channelId = new HashMap<>();
+    private static final Map<Long, String> messageId = new HashMap<>();
     private static final Map<Long, String> countWinners = new HashMap<>();
-    private static final ConcurrentMap<Long, String> title = new ConcurrentHashMap<>();
-    private static final ConcurrentMap<Long, String> endGiveawayDate = new ConcurrentHashMap<>();
+    private static final Map<Long, String> title = new HashMap<>();
+    private static final Map<Long, Timestamp> endGiveawayDate = new HashMap<>();
     private static final JSONParsers jsonParsers = new JSONParsers();
     private static volatile GiveawayRegistry giveawayRegistry;
 
@@ -56,27 +55,27 @@ public class GiveawayRegistry {
         return jsonParsers.getLocale("giveaway_registry_Error", String.valueOf(guildId));
     }
 
-    public ConcurrentMap<Long, String> getIdMessagesWithGiveawayButtons() {
+    public Map<Long, String> getIdMessagesWithGiveawayButtons() {
         return idMessagesWithGiveawayButtons;
     }
 
-    public ConcurrentMap<Long, Gift> getActiveGiveaways() {
+    public Map<Long, Gift> getActiveGiveaways() {
         return activeGiveaways;
     }
 
-    public ConcurrentMap<Long, String> getMessageId() {
+    public Map<Long, String> getMessageId() {
         return messageId;
     }
 
-    public ConcurrentMap<Long, String> getTitle() {
+    public Map<Long, String> getTitle() {
         return title;
     }
 
-    public ConcurrentMap<Long, String> getEndGiveawayDate() {
+    public Map<Long, Timestamp> getEndGiveawayDate() {
         return endGiveawayDate;
     }
 
-    public ConcurrentMap<Long, String> getChannelId() {
+    public Map<Long, String> getChannelId() {
         return channelId;
     }
 

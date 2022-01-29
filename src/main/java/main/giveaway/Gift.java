@@ -23,10 +23,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
+import java.sql.Timestamp;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -81,6 +79,7 @@ public class Gift implements GiftHelper {
         if (time != null) {
 
             if (time.length() > 4) {
+
                 String localTime = time + ":00.001";
                 LocalDateTime dateTime = LocalDateTime.parse(localTime, formatter);
                 ZoneOffset offset = ZoneOffset.UTC;
@@ -89,35 +88,38 @@ public class Gift implements GiftHelper {
                 start.setDescription(jsonParsers.getLocale("gift_Press_Green_Button", guild.getId())
                         .replaceAll("\\{0}", countWinners == null ? "TBA" : countWinners)
                         .replaceAll("\\{1}", setEndingWord(countWinners == null ? "TBA" : countWinners, guildId)) + getCount() + "`");
-                start.setTimestamp(OffsetDateTime.parse(String.valueOf(offsetTime)));
+
+                start.setTimestamp(dateTime);
                 start.setFooter(jsonParsers.getLocale("gift_Ends_At", guild.getId()));
+
                 GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild.getIdLong(),
-                        String.valueOf(OffsetDateTime.parse(String.valueOf(offsetTime))));
+                        new Timestamp(offsetTime.toEpochSecond() * 1000));
 
                 BotStartConfig.getQueue().add(new Giveaway(
                         guildId,
-                        String.valueOf(OffsetDateTime.parse(String.valueOf(offsetTime)))));
-
+                        new Timestamp(offsetTime.toEpochSecond() * 1000)));
             } else {
                 times = getMinutes(time);
                 start.setDescription(jsonParsers.getLocale("gift_Press_Green_Button", guild.getId())
                         .replaceAll("\\{0}", countWinners == null ? "TBA" : countWinners)
                         .replaceAll("\\{1}", setEndingWord(countWinners == null ? "TBA" : countWinners, guildId)) + getCount() + "`");
+
                 start.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times)));
                 start.setFooter(jsonParsers.getLocale("gift_Ends_At", guild.getId()));
+
                 GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild.getIdLong(),
-                        String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times))));
+                        new Timestamp(specificTime.plusSeconds(Long.parseLong(times) * 60).getEpochSecond() * 1000));
 
                 BotStartConfig.getQueue().add(new Giveaway(
                         guildId,
-                        String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times)))));
+                        new Timestamp(specificTime.plusSeconds(Long.parseLong(times) * 60).getEpochSecond() * 1000)));
             }
         }
         if (time == null) {
             start.setDescription(jsonParsers.getLocale("gift_Press_Green_Button", guild.getId())
                     .replaceAll("\\{0}", countWinners == null ? "TBA" : countWinners)
                     .replaceAll("\\{1}", setEndingWord(countWinners == null ? "TBA" : countWinners, guildId)) + getCount() + "`");
-            GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild.getIdLong(), "null");
+            GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild.getIdLong(), null);
         }
 
         if (BotStartConfig.getMapLanguages().get(guild.getId()) != null) {
@@ -133,17 +135,6 @@ public class Gift implements GiftHelper {
             buttons.add(Button.success(guildId + ":" + ReactionsButton.PRESENT,
                     jsonParsers.getLocale("gift_Press_Me_Button", guild.getId()) + "⠀⠀⠀⠀⠀⠀⠀⠀"));
         }
-    }
-
-    protected void startGift(Guild guild, TextChannel textChannel, String newTitle, String countWinners, String time) {
-        EmbedBuilder start = new EmbedBuilder();
-
-        extracted(start, guild, textChannel, newTitle, countWinners, time);
-
-        textChannel.sendMessageEmbeds(start.build()).setActionRow(buttons).queue(message -> updateCollections(guild, countWinners, time, message));
-
-        //Вот мы запускаем бесконечный поток.
-        autoInsert();
     }
 
     protected void startGift(@NotNull SlashCommandEvent event, Guild guild, TextChannel textChannel, String newTitle, String countWinners, String time) {
@@ -175,9 +166,12 @@ public class Gift implements GiftHelper {
         activeGiveaways.setGiveawayTitle(GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
 
         if (time != null && time.length() > 4) {
-            activeGiveaways.setDateEndGiveaway(String.valueOf(OffsetDateTime.parse(String.valueOf(offsetTime))));
+            activeGiveaways.setDateEndGiveaway(new Timestamp(offsetTime.toLocalDateTime().atOffset(ZoneOffset.UTC).toEpochSecond() * 1000));
         } else {
-            activeGiveaways.setDateEndGiveaway(time == null ? null : String.valueOf(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times))));
+            activeGiveaways.setDateEndGiveaway(time == null ? null :
+                    new Timestamp(specificTime.plusSeconds(Long.parseLong(times) * 60)
+                            .atOffset(ZoneOffset.UTC)
+                            .toEpochSecond() * 1000));
         }
         activeGiveawayRepository.save(activeGiveaways);
     }

@@ -164,7 +164,7 @@ public class BotStartConfig {
             );
 
             optionsStart.add(new OptionData(OptionType.INTEGER, "count", "Set count winners. From 1 to 99")
-                    .setName("count")
+                    .setName("count").setMinValue(2).setMaxValue(99)
             );
 
             optionsStart.add(new OptionData(OptionType.STRING, "duration", "Examples: 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style. Preferably immediately in UTC ±0")
@@ -288,7 +288,9 @@ public class BotStartConfig {
                 String count_winners = rs.getString("count_winners");
                 long message_id_long = rs.getLong("message_id_long");
                 String giveaway_title = rs.getString("giveaway_title");
-                String date_end_giveaway = rs.getString("date_end_giveaway");
+                Timestamp date_end_giveaway = rs.getTimestamp("date_end_giveaway");
+
+
 
                 guildIdHashList.put(guildIdHashList.size() + 1, String.valueOf(guild_long_id));
                 GiveawayRegistry.getInstance().setGift(
@@ -301,7 +303,7 @@ public class BotStartConfig {
                 GiveawayRegistry.getInstance().getMessageId().put(guild_long_id, String.valueOf(message_id_long));
                 GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().put(guild_long_id, String.valueOf(message_id_long));
                 GiveawayRegistry.getInstance().getTitle().put(guild_long_id, giveaway_title);
-                GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild_long_id, date_end_giveaway == null ? "null" : date_end_giveaway);
+                GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild_long_id, date_end_giveaway);
                 GiveawayRegistry.getInstance().getChannelId().put(guild_long_id, channel_long_id);
                 GiveawayRegistry.getInstance().getCountWinners().put(guild_long_id, count_winners);
 

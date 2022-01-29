@@ -4,6 +4,7 @@ import main.config.BotStartConfig;
 import main.jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 
@@ -24,6 +25,7 @@ public interface GiftHelper {
         }
     }
 
+    //TODO доделать для Timestamp
     default void updateGiveawayMessage(String endingWord, Long guildId, Long channelId, Integer count) {
         try {
             EmbedBuilder edit = new EmbedBuilder();
@@ -36,8 +38,9 @@ public interface GiftHelper {
                     .replaceAll("\\{1}", setEndingWord(endingWord, guildId)) + count + "`");
 
             //Если есть время окончания включить в EmbedBuilder
-            if (!GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildId).equals("null")) {
-                edit.setTimestamp(OffsetDateTime.parse(String.valueOf(GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildId))));
+            if (GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildId) != null) {
+                Instant specificTime = Instant.ofEpochMilli(GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildId).getTime());
+                edit.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)));
                 edit.setFooter(jsonParsers.getLocale("gift_Ends_At", String.valueOf(guildId)));
             }
             //Отправляет сообщение и если нельзя редактировать то отправляет ошибку
@@ -52,6 +55,7 @@ public interface GiftHelper {
         }
     }
 
+    //TODO доделать для Timestamp
     default void updateGiveawayMessageWithError(String endingWord, Long guildId, Long channelId, Integer count, Integer countWinner) {
         try {
             EmbedBuilder edit = new EmbedBuilder();
@@ -65,13 +69,15 @@ public interface GiftHelper {
 
             edit.addField(jsonParsers.getLocale("gift_Invalid_Number", String.valueOf(guildId)),
                     jsonParsers
-                    .getLocale("gift_Invalid_Number_Description", String.valueOf(guildId))
-                    .replaceAll("\\{0}", String.valueOf(countWinner))
-                    .replaceAll("\\{1}", String.valueOf(count)), false);
+                            .getLocale("gift_Invalid_Number_Description", String.valueOf(guildId))
+                            .replaceAll("\\{0}", String.valueOf(countWinner))
+                            .replaceAll("\\{1}", String.valueOf(count)), false);
 
             //Если есть время окончания включить в EmbedBuilder
-            if (!GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildId).equals("null")) {
-                edit.setTimestamp(OffsetDateTime.parse(String.valueOf(GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildId))));
+            if (GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildId) != null) {
+                Instant specificTime = Instant.ofEpochMilli(GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildId).getTime());
+
+                edit.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)));
                 edit.setFooter(jsonParsers.getLocale("gift_Ends_At", String.valueOf(guildId)));
             }
             //Отправляет сообщение и если нельзя редактировать то отправляет ошибку

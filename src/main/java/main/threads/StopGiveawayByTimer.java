@@ -3,14 +3,14 @@ package main.threads;
 import lombok.Getter;
 import main.giveaway.GiveawayRegistry;
 
-import java.time.Instant;
-import java.time.OffsetDateTime;
+import java.sql.Timestamp;
+import java.time.*;
 
 @Getter
 public class StopGiveawayByTimer implements Runnable {
 
     private final Long ID_GUILD;
-    private final String TIME;
+    private final Timestamp TIME;
 
     public StopGiveawayByTimer(Giveaway giveaway) {
         ID_GUILD = giveaway.getID_GUILD();
@@ -25,11 +25,7 @@ public class StopGiveawayByTimer implements Runnable {
                     return;
                 }
 
-                Instant timestamp = Instant.now();
-                Instant specificTime = Instant.ofEpochMilli(timestamp.toEpochMilli());
-                OffsetDateTime timeFormDB = OffsetDateTime.parse(getTIME());
-
-                if (specificTime.isAfter(Instant.from(timeFormDB))) {
+                if (LocalDateTime.now().isAfter(TIME.toLocalDateTime())) {
 
                     GiveawayRegistry.getInstance()
                             .getActiveGiveaways()
