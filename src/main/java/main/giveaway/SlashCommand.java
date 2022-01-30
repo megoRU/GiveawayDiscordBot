@@ -13,13 +13,11 @@ import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 @AllArgsConstructor
@@ -85,7 +83,7 @@ public class SlashCommand extends ListenerAdapter {
                         }
                     }
 
-                    GiveawayRegistry.getInstance().setGift(
+                    GiveawayRegistry.getInstance().putGift(
                             event.getGuild().getIdLong(),
                             new Gift(event.getGuild().getIdLong(),
                                     textChannel == null ? event.getTextChannel().getIdLong() : textChannel.getIdLong(),
@@ -100,7 +98,7 @@ public class SlashCommand extends ListenerAdapter {
                     }
 
                     GiveawayRegistry.getInstance()
-                            .getActiveGiveaways().get(event.getGuild().getIdLong()).startGift(event,
+                            .getGift(event.getGuild().getIdLong()).startGift(event,
                                     event.getGuild(),
                                     textChannel == null ? event.getTextChannel() : textChannel,
                                     title,
@@ -152,10 +150,11 @@ public class SlashCommand extends ListenerAdapter {
                 event.replyEmbeds(stop.build()).queue();
 
                 GiveawayRegistry.getInstance()
-                        .getActiveGiveaways().get(event.getGuild().getIdLong())
+                        .getGift(event.getGuild().getIdLong())
                         .stopGift(event.getGuild().getIdLong(),
-                                GiveawayRegistry.getInstance().getCountWinners().get(event.getGuild().getIdLong()) == null ? 1 :
-                                        Integer.parseInt(GiveawayRegistry.getInstance().getCountWinners().get(event.getGuild().getIdLong()))
+                                GiveawayRegistry.getInstance().getCountWinners(event.getGuild().getIdLong()) == null
+                                        ? 1
+                                        : Integer.parseInt(GiveawayRegistry.getInstance().getCountWinners(event.getGuild().getIdLong()))
                         );
                 return;
             }
@@ -176,7 +175,7 @@ public class SlashCommand extends ListenerAdapter {
             event.replyEmbeds(stop.build()).queue();
 
             GiveawayRegistry.getInstance()
-                    .getActiveGiveaways().get(event.getGuild().getIdLong())
+                    .getGift(event.getGuild().getIdLong())
                     .stopGift(event.getGuild().getIdLong(), Integer.parseInt(event.getOptions().get(0).getAsString()));
             return;
         }
@@ -184,7 +183,7 @@ public class SlashCommand extends ListenerAdapter {
         if (event.getName().equals("help")) {
 
             String guildIdLong = event.getGuild().getId();
-            
+
             EmbedBuilder info = new EmbedBuilder();
             info.setColor(0xa224db);
             info.setTitle("Giveaway");
@@ -255,7 +254,7 @@ public class SlashCommand extends ListenerAdapter {
             if (GiveawayRegistry.getInstance().hasGift(event.getGuild().getIdLong())) {
 
                 StringBuilder stringBuilder = new StringBuilder();
-                List<String> participantsList = GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong()).getListUsers();
+                List<String> participantsList = GiveawayRegistry.getInstance().getGift(event.getGuild().getIdLong()).getListUsers();
 
                 if (participantsList.isEmpty()) {
                     event.reply(jsonParsers.getLocale("slash_list_users_empty", event.getGuild().getId())).setEphemeral(true).queue();

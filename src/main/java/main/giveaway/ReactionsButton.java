@@ -64,11 +64,11 @@ public class ReactionsButton extends ListenerAdapter {
          * Если нет {@link Gift} активного, то делаем {@return}
          */
         try {
-            if (GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().get(event.getGuild().getIdLong()) == null) {
+            if (GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons(event.getGuild().getIdLong()) == null) {
                 return;
             }
 
-            if (!GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().get(event.getGuild().getIdLong()).equals(event.getMessageId())) {
+            if (!GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons(event.getGuild().getIdLong()).equals(event.getMessageId())) {
                 return;
             }
         } catch (Exception e) {
@@ -86,11 +86,7 @@ public class ReactionsButton extends ListenerAdapter {
                             "\nUser id: " + event.getUser().getId() + "" +
                             "\nButton pressed: " + event.getButton().getId());
 
-            boolean isUserAdmin = event.getMember().hasPermission(event.getGuildChannel(), Permission.ADMINISTRATOR);
-            boolean isUserCanManageServer = event.getMember().hasPermission(event.getGuildChannel(), Permission.MESSAGE_MANAGE);
-
             long guild = event.getGuild().getIdLong();
-
 
             // TODO: Может это слишком жёстко
             new Thread(() -> {
@@ -100,11 +96,11 @@ public class ReactionsButton extends ListenerAdapter {
                     System.out.println("wake up");
 
                     if (GiveawayRegistry.getInstance().hasGift(guild) &&
-                            GiveawayRegistry.getInstance().getActiveGiveaways()
-                                    .get(event.getGuild().getIdLong()).getListUsersHash(event.getUser().getId()) != null &&
+                            GiveawayRegistry.getInstance().getGift(
+                                            event.getGuild().getIdLong()).getListUsersHash(event.getUser().getId()) != null &&
                             participantsRepository.getParticipant(event.getGuild().getIdLong(), event.getUser().getIdLong()) == null) {
 
-                        System.out.println(GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong()).getListUsersHash(event.getUser().getId()) != null);
+                        System.out.println(GiveawayRegistry.getInstance().getGift(event.getGuild().getIdLong()).getListUsersHash(event.getUser().getId()) != null);
                         System.out.println(participantsRepository.getParticipant(event.getUser().getIdLong(), event.getGuild().getIdLong()));
                         System.out.println("Пользователя нет в БД это странно!");
 
@@ -128,13 +124,12 @@ public class ReactionsButton extends ListenerAdapter {
             synchronized (this) {
                 if (Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + PRESENT)
                         && GiveawayRegistry.getInstance().hasGift(guild)
-                        && GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
+                        && GiveawayRegistry.getInstance().getGift(event.getGuild().getIdLong())
                         .getListUsersHash(event.getUser().getId()) == null) {
                     event.deferEdit().queue();
 
                     GiveawayRegistry.getInstance()
-                            .getActiveGiveaways()
-                            .get(event.getGuild().getIdLong())
+                            .getGift(event.getGuild().getIdLong())
                             .addUserToPoll(event.getUser());
                     Statcord.commandPost("gift", event.getUser().getId());
 
@@ -147,7 +142,7 @@ public class ReactionsButton extends ListenerAdapter {
 
             if (Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + PRESENT)
                     && GiveawayRegistry.getInstance().hasGift(guild)
-                    && GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
+                    && GiveawayRegistry.getInstance().getGift(event.getGuild().getIdLong())
                     .getListUsersHash(event.getUser().getId()) != null) {
                 event.deferEdit().queue();
             }

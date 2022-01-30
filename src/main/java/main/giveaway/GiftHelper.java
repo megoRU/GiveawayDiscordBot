@@ -17,7 +17,7 @@ public interface GiftHelper {
             BotStartConfig.getJda()
                     .getGuildById(guildId)
                     .getTextChannelById(textChannel)
-                    .editMessageEmbedsById(GiveawayRegistry.getInstance().getMessageId().get(guildId), embedBuilder.build())
+                    .editMessageEmbedsById(GiveawayRegistry.getInstance().getMessageId(guildId), embedBuilder.build())
                     .setActionRows().setActionRows(new ArrayList<>())
                     .queue();
         } catch (Exception e) {
@@ -30,23 +30,23 @@ public interface GiftHelper {
         try {
             EmbedBuilder edit = new EmbedBuilder();
             edit.setColor(0x00FF00);
-            edit.setTitle(GiveawayRegistry.getInstance().getTitle().get(guildId));
+            edit.setTitle(GiveawayRegistry.getInstance().getTitle(guildId));
 
             edit.setDescription(jsonParsers.getLocale("gift_Press_Green_Button", String.valueOf(guildId))
-                    .replaceAll("\\{0}", GiveawayRegistry.getInstance().getCountWinners().get(guildId) == null ? "TBA"
-                            : GiveawayRegistry.getInstance().getCountWinners().get(guildId))
+                    .replaceAll("\\{0}", GiveawayRegistry.getInstance().getCountWinners(guildId) == null ? "TBA"
+                            : GiveawayRegistry.getInstance().getCountWinners(guildId))
                     .replaceAll("\\{1}", setEndingWord(endingWord, guildId)) + count + "`");
 
             //Если есть время окончания включить в EmbedBuilder
-            if (GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildId) != null) {
-                Instant specificTime = Instant.ofEpochMilli(GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildId).getTime());
+            if (GiveawayRegistry.getInstance().hasGift(guildId)) {
+                Instant specificTime = Instant.ofEpochMilli(GiveawayRegistry.getInstance().getEndGiveawayDate(guildId).getTime());
                 edit.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)));
                 edit.setFooter(jsonParsers.getLocale("gift_Ends_At", String.valueOf(guildId)));
             }
             //Отправляет сообщение и если нельзя редактировать то отправляет ошибку
             BotStartConfig.getJda().getGuildById(guildId)
                     .getTextChannelById(channelId)
-                    .editMessageEmbedsById(GiveawayRegistry.getInstance().getMessageId().get(guildId),
+                    .editMessageEmbedsById(GiveawayRegistry.getInstance().getMessageId(guildId),
                             edit.build()).queue(null, (exception) ->
                             BotStartConfig.getJda().getTextChannelById(channelId).sendMessage(GiveawayRegistry.getInstance().removeGiftExceptions(guildId))
                                     .queue());
@@ -60,11 +60,11 @@ public interface GiftHelper {
         try {
             EmbedBuilder edit = new EmbedBuilder();
             edit.setColor(0x00FF00);
-            edit.setTitle(GiveawayRegistry.getInstance().getTitle().get(guildId));
+            edit.setTitle(GiveawayRegistry.getInstance().getTitle(guildId));
 
             edit.setDescription(jsonParsers.getLocale("gift_Press_Green_Button", String.valueOf(guildId))
-                    .replaceAll("\\{0}", GiveawayRegistry.getInstance().getCountWinners().get(guildId) == null ? "TBA"
-                            : GiveawayRegistry.getInstance().getCountWinners().get(guildId))
+                    .replaceAll("\\{0}", GiveawayRegistry.getInstance().getCountWinners(guildId) == null ? "TBA"
+                            : GiveawayRegistry.getInstance().getCountWinners(guildId))
                     .replaceAll("\\{1}", setEndingWord(endingWord, guildId)) + count + "`");
 
             edit.addField(jsonParsers.getLocale("gift_Invalid_Number", String.valueOf(guildId)),
@@ -74,8 +74,8 @@ public interface GiftHelper {
                             .replaceAll("\\{1}", String.valueOf(count)), false);
 
             //Если есть время окончания включить в EmbedBuilder
-            if (GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildId) != null) {
-                Instant specificTime = Instant.ofEpochMilli(GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildId).getTime());
+            if (GiveawayRegistry.getInstance().hasGift(guildId)) {
+                Instant specificTime = Instant.ofEpochMilli(GiveawayRegistry.getInstance().getEndGiveawayDate(guildId).getTime());
 
                 edit.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)));
                 edit.setFooter(jsonParsers.getLocale("gift_Ends_At", String.valueOf(guildId)));
@@ -83,7 +83,7 @@ public interface GiftHelper {
             //Отправляет сообщение и если нельзя редактировать то отправляет ошибку
             BotStartConfig.getJda().getGuildById(guildId)
                     .getTextChannelById(channelId)
-                    .editMessageEmbedsById(GiveawayRegistry.getInstance().getMessageId().get(guildId),
+                    .editMessageEmbedsById(GiveawayRegistry.getInstance().getMessageId(guildId),
                             edit.build()).queue(null, (exception) ->
                             BotStartConfig.getJda().getTextChannelById(channelId).sendMessage(GiveawayRegistry.getInstance().removeGiftExceptions(guildId))
                                     .queue());
