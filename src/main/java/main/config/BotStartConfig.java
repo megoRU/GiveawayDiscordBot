@@ -51,8 +51,6 @@ public class BotStartConfig {
     public static final String activity = "/help | ";
     private static final Deque<Giveaway> queue = new ArrayDeque<>();
     //String - guildLongId
-    private static final Map<String, String> mapPrefix = new HashMap<>();
-    //String - guildLongId
     private static final ConcurrentMap<String, String> mapLanguages = new ConcurrentHashMap<>();
     private static final Map<Integer, String> guildIdHashList = new HashMap<>();
     private static JDA jda;
@@ -65,7 +63,6 @@ public class BotStartConfig {
     //REPOSITORY
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final LanguageRepository languageRepository;
-    private final PrefixRepository prefixRepository;
     private final ParticipantsRepository participantsRepository;
 
     //DataBase
@@ -78,10 +75,9 @@ public class BotStartConfig {
 
     @Autowired
     public BotStartConfig(ActiveGiveawayRepository activeGiveawayRepository, LanguageRepository
-            languageRepository, PrefixRepository prefixRepository, ParticipantsRepository participantsRepository) {
+            languageRepository, ParticipantsRepository participantsRepository) {
         this.activeGiveawayRepository = activeGiveawayRepository;
         this.languageRepository = languageRepository;
-        this.prefixRepository = prefixRepository;
         this.participantsRepository = participantsRepository;
     }
 
@@ -103,7 +99,7 @@ public class BotStartConfig {
             jdaBuilder.setStatus(OnlineStatus.ONLINE);
             jdaBuilder.setActivity(Activity.playing(activity + serverCount + " guilds"));
             jdaBuilder.setBulkDeleteSplittingEnabled(false);
-            jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild(prefixRepository, activeGiveawayRepository, languageRepository));
+            jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild(activeGiveawayRepository, languageRepository));
             jdaBuilder.addEventListeners(new ReactionsButton(languageRepository, participantsRepository, activeGiveawayRepository));
             jdaBuilder.addEventListeners(new SlashCommand(languageRepository, activeGiveawayRepository, participantsRepository));
 
@@ -223,26 +219,6 @@ public class BotStartConfig {
             }
             System.out.println("setLanguages()");
         } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void getPrefixFromDB() {
-        try {
-            Connection connection = DriverManager.getConnection(URL_CONNECTION, USER_CONNECTION, PASSWORD_CONNECTION);
-            Statement statement = connection.createStatement();
-            String sql = "SELECT * FROM prefixs";
-            ResultSet rs = statement.executeQuery(sql);
-
-            while (rs.next()) {
-                mapPrefix.put(rs.getString("server_id"), rs.getString("prefix"));
-            }
-
-            rs.close();
-            statement.close();
-            connection.close();
-            System.out.println("getPrefixFromDB()");
-        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
@@ -406,11 +382,6 @@ public class BotStartConfig {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-
-    public static Map<String, String> getMapPrefix() {
-        return mapPrefix;
     }
 
     public static Map<String, String> getMapLanguages() {

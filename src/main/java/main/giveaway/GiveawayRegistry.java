@@ -2,7 +2,9 @@ package main.giveaway;
 
 import lombok.Getter;
 import lombok.Setter;
+import main.config.BotStartConfig;
 import main.jsonparser.JSONParsers;
+import main.model.repository.ActiveGiveawayRepository;
 
 import java.sql.Timestamp;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,6 +36,9 @@ public class GiveawayRegistry {
             this.gift = gift;
         }
 
+        private GiveawayData() {
+        }
+
     }
 
     public static GiveawayRegistry getInstance() {
@@ -51,14 +56,29 @@ public class GiveawayRegistry {
         return giveawayDataMap.get(guildId).getGift();
     }
 
-    public GiveawayData getGiveawayDataMap(long guildId) {
-        return giveawayDataMap.get(guildId);
+    public boolean hasGift(long guildId) {
+        return giveawayDataMap.containsKey(guildId);
     }
 
-    public void removeGuildFromGiveaway(long guildId) {
-        giveawayDataMap.remove(guildId);
+    public String getIdMessagesWithGiveawayButtons(long guildId) {
+        return giveawayDataMap.get(guildId).getIdMessagesWithGiveawayButtons();
     }
 
+    public Timestamp getEndGiveawayDate(long guildId) {
+        return giveawayDataMap.get(guildId).getEndGiveawayDate();
+    }
+
+    public String getCountWinners(long guildId) {
+        return giveawayDataMap.get(guildId).getCountWinners();
+    }
+
+    public String getMessageId(long guildId) {
+        return giveawayDataMap.get(guildId).getMessageId();
+    }
+
+    public String getTitle(long guildId) {
+        return giveawayDataMap.get(guildId).getTitle();
+    }
 
     public void putEndGiveawayDate(long guildId, Timestamp timestamp) {
         giveawayDataMap.get(guildId).setEndGiveawayDate(timestamp);
@@ -76,23 +96,6 @@ public class GiveawayRegistry {
         giveawayDataMap.get(guildId).setIdMessagesWithGiveawayButtons(idMessageWithButton);
     }
 
-    public String getIdMessagesWithGiveawayButtons(long guildId) {
-        return giveawayDataMap.get(guildId).getIdMessagesWithGiveawayButtons();
-    }
-
-    public Timestamp getEndGiveawayDate(long guildId) {
-        return giveawayDataMap.get(guildId).getEndGiveawayDate();
-    }
-
-    public String getMessageId(long guildId) {
-        return giveawayDataMap.get(guildId).getMessageId();
-    }
-
-
-    public String getTitle(long guildId) {
-        return giveawayDataMap.get(guildId).getTitle();
-    }
-
     public void putTitle(long guildId, String title) {
         giveawayDataMap.get(guildId).setTitle(title);
     }
@@ -101,19 +104,15 @@ public class GiveawayRegistry {
         giveawayDataMap.put(guildId, new GiveawayData(gift));
     }
 
-    public boolean hasGift(long guildId) {
-        return giveawayDataMap.containsKey(guildId);
-    }
-
-    public String getCountWinners(long guildId) {
-        return giveawayDataMap.get(guildId).getCountWinners();
-    }
-
     public void putCountWinners(long guildId, String countWinners) {
         giveawayDataMap.get(guildId).setCountWinners(countWinners);
     }
 
     public void removeGift(long guildId) {
+        giveawayDataMap.remove(guildId);
+    }
+
+    public void removeGuildFromGiveaway(long guildId) {
         giveawayDataMap.remove(guildId);
     }
 
