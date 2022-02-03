@@ -20,7 +20,7 @@
 
 ### 3. How can I get rid of the data stored?
 #### The bot automatically deletes the data from the database when completing Giveaway.
-#### To delete the prefix data or language, you can reset it to the standard one: `*prefix reset` | `!lang reset`.
+#### To delete the prefix data or language, you can reset it to the standard one: `*prefix reset` | `!lang reset`. | Deprecated 1 may 2022
 
 ### 4. Why does it store the data?
 #### In order not to lose active Giveaways in the event of a reboot.
