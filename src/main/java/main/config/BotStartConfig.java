@@ -20,8 +20,9 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.apache.commons.io.IOUtils;
 import org.discordbots.api.client.DiscordBotListAPI;
 import org.json.simple.JSONObject;
@@ -181,14 +182,20 @@ public class BotStartConfig {
             );
 
 
-            jda.getGuilds().forEach(guild -> {
-                guild.upsertCommand("language", "Setting language").addOptions(optionsLanguage).queue();
-                guild.upsertCommand("start", "Create giveaway").addOptions(optionsStart).queue();
-                guild.upsertCommand("stop", "Stop the Giveaway").addOptions(optionsStop).queue();
-                guild.upsertCommand("help", "Bot commands").queue();
-                guild.upsertCommand("list", "List of participants").queue();
-            });
+            jda.updateCommands().addCommands(Commands.slash("language","Setting language").addOptions(optionsLanguage)).queue();
+            jda.updateCommands().addCommands(Commands.slash("start","Create giveaway").addOptions(optionsStart)).queue();
+            jda.updateCommands().addCommands(Commands.slash("stop","Stop the Giveaway").addOptions(optionsStop)).queue();
+            jda.updateCommands().addCommands(Commands.slash("help","Bot commands").addOptions()).queue();
+            jda.updateCommands().addCommands(Commands.slash("list","List of participants").addOptions()).queue();
 
+//            jda.getGuilds().forEach(guild -> {
+//
+//                guild.upsertCommand("language", "Setting language").addOptions(optionsLanguage).queue();
+//                guild.upsertCommand("start", "Create giveaway").addOptions(optionsStart).queue();
+//                guild.upsertCommand("stop", "Stop the Giveaway").addOptions(optionsStop).queue();
+//                guild.upsertCommand("help", "Bot commands").queue();
+//                guild.upsertCommand("list", "List of participants").queue();
+//            });
         } catch (Exception e) {
             e.printStackTrace();
         }

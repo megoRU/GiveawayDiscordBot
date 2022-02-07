@@ -14,9 +14,9 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.URI;
@@ -77,7 +77,6 @@ public class Gift implements GiftHelper {
 
         start.setColor(0x00FF00);
         start.setTitle(GiveawayRegistry.getInstance().getTitle(guild.getIdLong()));
-        start.addField("Attention for Admins: \nMay 1, 2022 you will not be able to control the bot \nwithout SlashCommands add them: ", "[Add slash commands](https://discord.com/oauth2/authorize?client_id=808277484524011531&scope=applications.commands%20bot)", false);
 
         if (time != null) {
 
@@ -139,7 +138,7 @@ public class Gift implements GiftHelper {
         }
     }
 
-    protected void startGift(@NotNull SlashCommandEvent event, Guild guild, TextChannel textChannel, String newTitle, String countWinners, String time) {
+    protected void startGift(@NotNull SlashCommandInteractionEvent event, Guild guild, TextChannel textChannel, String newTitle, String countWinners, String time) {
         EmbedBuilder start = new EmbedBuilder();
         extracted(start, guild, textChannel, newTitle, countWinners, time);
 

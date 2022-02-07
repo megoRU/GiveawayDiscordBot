@@ -11,7 +11,7 @@ import main.model.repository.LanguageRepository;
 import main.model.repository.ParticipantsRepository;
 import main.startbot.Statcord;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -35,7 +35,7 @@ public class ReactionsButton extends ListenerAdapter {
     private final ActiveGiveawayRepository activeGiveawayRepository;
 
     @Override
-    public void onButtonClick(@NotNull ButtonClickEvent event) {
+    public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
         if (event.getButton() == null) return;
 
         if (event.getGuild() == null || event.getMember() == null) return;

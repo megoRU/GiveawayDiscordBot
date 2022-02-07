@@ -38,7 +38,7 @@ public interface GiftHelper {
                     .replaceAll("\\{1}", setEndingWord(endingWord, guildId)) + count + "`");
 
             //Если есть время окончания включить в EmbedBuilder
-            if (GiveawayRegistry.getInstance().hasGift(guildId)) {
+            if (GiveawayRegistry.getInstance().getEndGiveawayDate(guildId) != null) {
                 Instant specificTime = Instant.ofEpochMilli(GiveawayRegistry.getInstance().getEndGiveawayDate(guildId).getTime());
                 edit.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)));
                 edit.setFooter(jsonParsers.getLocale("gift_Ends_At", String.valueOf(guildId)));
@@ -74,7 +74,7 @@ public interface GiftHelper {
                             .replaceAll("\\{1}", String.valueOf(count)), false);
 
             //Если есть время окончания включить в EmbedBuilder
-            if (GiveawayRegistry.getInstance().hasGift(guildId)) {
+            if (GiveawayRegistry.getInstance().getEndGiveawayDate(guildId) != null) {
                 Instant specificTime = Instant.ofEpochMilli(GiveawayRegistry.getInstance().getEndGiveawayDate(guildId).getTime());
 
                 edit.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)));

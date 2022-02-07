@@ -11,9 +11,9 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +30,7 @@ public class SlashCommand extends ListenerAdapter {
     private final ParticipantsRepository participantsRepository;
 
     @Override
-    public void onSlashCommand(@NotNull SlashCommandEvent event) {
+    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         if (event.getUser().isBot()) return;
 
         if (event.getGuild() == null) return;
@@ -48,6 +48,8 @@ public class SlashCommand extends ListenerAdapter {
                 EmbedBuilder errors = new EmbedBuilder();
                 errors.setColor(0x00FF00);
                 errors.setDescription(jsonParsers.getLocale("message_gift_Need_Stop_Giveaway", event.getGuild().getId()));
+
+                event.getInteraction().deferReply().queue();
 
                 event.replyEmbeds(errors.build()).queue();
             } else {

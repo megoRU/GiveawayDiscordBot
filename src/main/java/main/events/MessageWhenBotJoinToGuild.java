@@ -3,7 +3,6 @@ package main.events;
 import lombok.AllArgsConstructor;
 import main.config.BotStartConfig;
 import main.giveaway.ReactionsButton;
-import main.jsonparser.JSONParsers;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.LanguageRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -13,8 +12,9 @@ import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
@@ -119,10 +119,11 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
                         .setName("stop")
                 );
 
-                event.getGuild().upsertCommand("language", "Setting language").addOptions(optionsLanguage).queue();
-                event.getGuild().upsertCommand("start", "Create giveaway").addOptions(optionsStart).queue();
-                event.getGuild().upsertCommand("stop", "Stop the Giveaway").addOptions(optionsStop).queue();
-                event.getGuild().upsertCommand("help", "Bot commands").queue();
+                event.getGuild().updateCommands().addCommands(Commands.slash("language","Setting language").addOptions(optionsLanguage)).queue();
+                event.getGuild().updateCommands().addCommands(Commands.slash("start","Create giveaway").addOptions(optionsStart)).queue();
+                event.getGuild().updateCommands().addCommands(Commands.slash("stop","Stop the Giveaway").addOptions(optionsStop)).queue();
+                event.getGuild().updateCommands().addCommands(Commands.slash("help","Bot commands").addOptions()).queue();
+                event.getGuild().updateCommands().addCommands(Commands.slash("list","List of participants").addOptions()).queue();
             }
         } catch (Exception e) {
             e.printStackTrace();
