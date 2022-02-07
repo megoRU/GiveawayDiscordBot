@@ -77,61 +77,9 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
                         .setActionRow(buttons).queue();
 
                 welcome.clear();
-
             }
         } catch (Exception e) {
             System.out.println("Скорее всего нет `DefaultChannel`!");
-            e.printStackTrace();
-        }
-
-        try {
-
-//            event.getGuild().updateCommands().queue();
-//
-//
-//            List<OptionData> optionsLanguage = new ArrayList<>();
-//            List<OptionData> optionsStart = new ArrayList<>();
-//
-//            optionsLanguage.add(new OptionData(OptionType.STRING, "bot", "Setting the bot language")
-//                    .addChoice("eng", "eng")
-//                    .addChoice("rus", "rus")
-//                    .setRequired(true));
-//
-//            optionsStart.add(new OptionData(OptionType.STRING, "title", "Title for Giveaway")
-//                    .setName("title")
-//            );
-//
-//            optionsStart.add(new OptionData(OptionType.INTEGER, "count", "Set count winners")
-//                    .setName("count")
-//            );
-//
-//            optionsStart.add(new OptionData(OptionType.STRING, "duration", "Examples: 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style. Preferably immediately in UTC ±0")
-//                    .setName("duration")
-//            );
-//
-//            optionsStart.add(new OptionData(OptionType.CHANNEL, "channel", "#text channel name")
-//                    .setName("channel")
-//            );
-//
-//            event.getGuild().updateCommands().addCommands(Commands.slash("language", "Setting language").addOptions(optionsLanguage)).queue(null, throwable -> {
-//                System.out.println("50001: Missing Access");
-//            });
-//            event.getGuild().updateCommands().addCommands(Commands.slash("start", "Create giveaway").addOptions(optionsStart)).queue(null, throwable -> {
-//                System.out.println("50001: Missing Access");
-//            });
-//            event.getGuild().updateCommands().addCommands(Commands.slash("stop", "Stop the Giveaway")
-//                    .addOption(STRING, "stop", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1")
-//                    .setName("stop")).queue(null, throwable -> {
-//                System.out.println("50001: Missing Access");
-//            });
-//            event.getGuild().updateCommands().addCommands(Commands.slash("help", "Bot commands")).queue(null, throwable -> {
-//                System.out.println("50001: Missing Access");
-//            });
-//            event.getGuild().updateCommands().addCommands(Commands.slash("list", "List of participants")).queue(null, throwable -> {
-//                System.out.println("50001: Missing Access");
-//            });
-
-        } catch (Exception e) {
             e.printStackTrace();
         }
     }
