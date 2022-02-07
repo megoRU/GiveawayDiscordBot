@@ -17,12 +17,12 @@ import main.threads.StopGiveawayByTimer;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import org.apache.commons.io.IOUtils;
 import org.discordbots.api.client.DiscordBotListAPI;
 import org.json.simple.JSONObject;
@@ -46,6 +46,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
 
 @Configuration
 @EnableScheduling
@@ -115,7 +117,7 @@ public class BotStartConfig {
 //        jda.getGuilds().forEach(guild -> guild.updateCommands().queue());
 
         //Обновить команды
-//        updateSlashCommands();
+        updateSlashCommands();
         System.out.println("16:00");
     }
 
@@ -148,54 +150,44 @@ public class BotStartConfig {
 
     private void updateSlashCommands() {
         try {
-            jda.updateCommands().queue();
-
-            jda.getGuilds().forEach(guild -> System.out.println(guild.getName() + " " + guild.getSelfMember().hasPermission(Permission.USE_APPLICATION_COMMANDS)));
+            CommandListUpdateAction commands = jda.updateCommands();
 
             List<OptionData> optionsLanguage = new ArrayList<>();
             List<OptionData> optionsStart = new ArrayList<>();
-            List<OptionData> optionsStop = new ArrayList<>();
 
-            optionsLanguage.add(new OptionData(OptionType.STRING, "bot", "Setting the bot language")
+            optionsLanguage.add(new OptionData(STRING, "bot", "Setting the bot language")
                     .addChoice("eng", "eng")
                     .addChoice("rus", "rus")
                     .setRequired(true));
 
-            optionsStart.add(new OptionData(OptionType.STRING, "title", "Title for Giveaway")
+            optionsStart.add(new OptionData(STRING, "title", "Title for Giveaway")
                     .setName("title")
             );
 
-            optionsStart.add(new OptionData(OptionType.INTEGER, "count", "Set count winners. From 1 to 99")
+            optionsStart.add(new OptionData(INTEGER, "count", "Set count winners. From 1 to 99")
                     .setName("count").setMinValue(2).setMaxValue(99)
             );
 
-            optionsStart.add(new OptionData(OptionType.STRING, "duration", "Examples: 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style. Preferably immediately in UTC ±0")
+            optionsStart.add(new OptionData(STRING, "duration", "Examples: 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style. Preferably immediately in UTC ±0")
                     .setName("duration")
             );
 
-            optionsStart.add(new OptionData(OptionType.CHANNEL, "channel", "#text channel name")
+            optionsStart.add(new OptionData(CHANNEL, "channel", "#text channel name")
                     .setName("channel")
             );
 
-            optionsStop.add(new OptionData(OptionType.STRING, "stop", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1")
-                    .setName("stop")
-            );
+            commands.addCommands(Commands.slash("language", "Setting language").addOptions(optionsLanguage));
+            commands.addCommands(Commands.slash("start", "Create giveaway").addOptions(optionsStart));
+            commands.addCommands(Commands.slash("stop", "Stop the Giveaway")
+                    .addOption(STRING, "stop", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1")
+                    .setName("stop"));
 
+            commands.addCommands(Commands.slash("help", "Bot commands"));
+            commands.addCommands(Commands.slash("list", "List of participants"));
 
-            jda.updateCommands().addCommands(Commands.slash("language","Setting language").addOptions(optionsLanguage)).queue();
-            jda.updateCommands().addCommands(Commands.slash("start","Create giveaway").addOptions(optionsStart)).queue();
-            jda.updateCommands().addCommands(Commands.slash("stop","Stop the Giveaway").addOptions(optionsStop)).queue();
-            jda.updateCommands().addCommands(Commands.slash("help","Bot commands").addOptions()).queue();
-            jda.updateCommands().addCommands(Commands.slash("list","List of participants").addOptions()).queue();
+            commands.addCommands(Commands.slash("netest", "netest netest"));
 
-//            jda.getGuilds().forEach(guild -> {
-//
-//                guild.upsertCommand("language", "Setting language").addOptions(optionsLanguage).queue();
-//                guild.upsertCommand("start", "Create giveaway").addOptions(optionsStart).queue();
-//                guild.upsertCommand("stop", "Stop the Giveaway").addOptions(optionsStop).queue();
-//                guild.upsertCommand("help", "Bot commands").queue();
-//                guild.upsertCommand("list", "List of participants").queue();
-//            });
+            commands.queue();
         } catch (Exception e) {
             e.printStackTrace();
         }
