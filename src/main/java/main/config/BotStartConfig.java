@@ -11,7 +11,6 @@ import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.LanguageRepository;
 import main.model.repository.ParticipantsRepository;
-import main.model.repository.PrefixRepository;
 import main.startbot.Statcord;
 import main.threads.Giveaway;
 import main.threads.StopGiveawayByTimer;
@@ -23,6 +22,7 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.components.Button;
+import org.apache.commons.io.IOUtils;
 import org.discordbots.api.client.DiscordBotListAPI;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -37,6 +37,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -349,6 +351,8 @@ public class BotStartConfig {
                 int serverCount = BotStartConfig.jda.getGuilds().size();
                 TOP_GG_API.setStats(serverCount);
                 BotStartConfig.jda.getPresence().setActivity(Activity.playing(BotStartConfig.activity + serverCount + " guilds"));
+
+                IOUtils.toString(new URL("http://195.2.81.139:3001/api/push/SHAtSCMYvd?msg=OK&ping="), StandardCharsets.UTF_8);
                 if (!isLaunched) {
                     Statcord.start(
                             BotStartConfig.jda.getSelfUser().getId(),
