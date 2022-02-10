@@ -126,9 +126,11 @@ public class BotStartConfig {
 
 //        jda.getGuilds().forEach(guild -> guild.updateCommands().queue());
 
+        System.out.println(jda.retrieveCommands().complete());
+
         //Обновить команды
 //        updateSlashCommands(false);
-        System.out.println("15:51");
+        System.out.println("00:09");
     }
 
     private void updateSlashCommands(boolean isUpdateInGuilds) {
@@ -141,44 +143,31 @@ public class BotStartConfig {
                 System.out.println("Готово");
                 return;
             } else {
-//                jda.updateCommands().queue();
+                CommandListUpdateAction commands = jda.updateCommands();
 
-//                CommandListUpdateAction commands = jda.updateCommands();
-//
-////                jda.getGuildById(940727702225313892L).updateCommands().queue();
-//
-//
-//                List<OptionData> optionsLanguage = new ArrayList<>();
-//                List<OptionData> optionsStart = new ArrayList<>();
-//                List<OptionData> optionsStop = new ArrayList<>();
-//
-//                optionsLanguage.add(new OptionData(STRING, "bot", "Setting the bot language").addChoice("eng", "eng").addChoice("rus", "rus").setRequired(true));
-//
-//                optionsStart.add(new OptionData(STRING, "title", "Title for Giveaway").setName("title"));
-//
-//                optionsStart.add(new OptionData(INTEGER, "count", "Set count winners").setName("count"));
-//
-//                optionsStart.add(new OptionData(STRING, "duration", "Examples: 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style. Preferably immediately in UTC ±0").setName("duration"));
-//
-//                optionsStart.add(new OptionData(CHANNEL, "channel", "#text channel name").setName("channel"));
-//
-//                optionsStop.add(new OptionData(STRING, "stop", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1").setName("stop"));
-//
-//
-//                jda.upsertCommand(Commands.slash("language", "Setting language").addOptions(optionsLanguage)).queue();
-//                jda.upsertCommand(Commands.slash("start", "Create giveaway").addOptions(optionsStart)).queue();
-//                jda.upsertCommand(Commands.slash("stop", "Stop the Giveaway").addOptions(optionsStop)).queue();
-//                jda.upsertCommand(Commands.slash("help", "Bot commands")).queue();
-//                jda.upsertCommand(Commands.slash("list", "List of participants")).queue();
-//
-//
-//                commands.addCommands(Commands.slash("language", "Setting language").addOptions(optionsLanguage));
-//                commands.addCommands(Commands.slash("start", "Create giveaway").addOptions(optionsStart));
-//                commands.addCommands(Commands.slash("stop", "Stop the Giveaway").addOptions(optionsStop));
-//                commands.addCommands(Commands.slash("help", "Bot commands"));
-//                commands.addCommands(Commands.slash("list", "List of participants"));
-//
-//                commands.queue();
+                List<OptionData> optionsLanguage = new ArrayList<>();
+                List<OptionData> optionsStart = new ArrayList<>();
+                List<OptionData> optionsStop = new ArrayList<>();
+
+                optionsLanguage.add(new OptionData(STRING, "bot", "Setting the bot language").addChoice("eng", "eng").addChoice("rus", "rus").setRequired(true));
+
+                optionsStart.add(new OptionData(STRING, "title", "Title for Giveaway").setName("title"));
+
+                optionsStart.add(new OptionData(INTEGER, "count", "Set count winners").setName("count"));
+
+                optionsStart.add(new OptionData(STRING, "duration", "Examples: 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style. Preferably immediately in UTC ±0").setName("duration"));
+
+                optionsStart.add(new OptionData(CHANNEL, "channel", "#text channel name").setName("channel"));
+
+                optionsStop.add(new OptionData(STRING, "stop", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1").setName("stop"));
+
+                commands.addCommands(Commands.slash("language", "Setting language").addOptions(optionsLanguage));
+                commands.addCommands(Commands.slash("start", "Create giveaway").addOptions(optionsStart));
+                commands.addCommands(Commands.slash("stop", "Stop the Giveaway").addOptions(optionsStop));
+                commands.addCommands(Commands.slash("help", "Bot commands"));
+                commands.addCommands(Commands.slash("list", "List of participants"));
+
+                commands.queue();
 
                 System.out.println("Готово");
             }
