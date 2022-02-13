@@ -49,13 +49,13 @@ public class Gift implements GiftHelper, SenderMessage {
     private final long guildId;
     private final long textChannelId;
     private StringBuilder insertQuery = new StringBuilder();
-    private int count;
+    private volatile int count;
     private String times;
     private OffsetDateTime offsetTime;
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss.SSS");
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final ParticipantsRepository participantsRepository;
-    private Set<Participants> participantsList = new HashSet<>();
+    private volatile Set<Participants> participantsList = new HashSet<>();
 
     public Gift(long guildId, long textChannelId, ActiveGiveawayRepository activeGiveawayRepository, ParticipantsRepository participantsRepository) {
         this.guildId = guildId;
@@ -288,7 +288,7 @@ public class Gift implements GiftHelper, SenderMessage {
         }
     }
 
-    public void stopGift(long guildIdLong, int countWinner) {
+    public void stopGift(final long guildIdLong, final int countWinner) {
         LOGGER.info("\nstopGift method" + "\nCount winner: " + countWinner);
         if (listUsers.size() < 2) {
             EmbedBuilder notEnoughUsers = new EmbedBuilder();
@@ -322,8 +322,6 @@ public class Gift implements GiftHelper, SenderMessage {
                     countWinner);
             return;
         }
-        Instant timestamp = Instant.now();
-        Instant specificTime = Instant.ofEpochMilli(timestamp.toEpochMilli());
 
         try {
             //выбираем победителей
@@ -342,45 +340,19 @@ public class Gift implements GiftHelper, SenderMessage {
             return;
         }
 
-        if (countWinner > 1) {
-
-            EmbedBuilder stopWithMoreWinner = new EmbedBuilder();
-            stopWithMoreWinner.setColor(0x00FF00);
-            stopWithMoreWinner.setTitle(jsonParsers.getLocale("gift_Giveaway_End", String.valueOf(guildIdLong)));
-            stopWithMoreWinner.setDescription(jsonParsers
-                    .getLocale("gift_Giveaway_Winners", String.valueOf(guildIdLong))
-                    .replaceAll("\\{0}", String.valueOf(getCount()))
-                    + Arrays.toString(uniqueWinners.toArray())
-                    .replaceAll("\\[", "").replaceAll("]", ""));
-            stopWithMoreWinner.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)));
-            stopWithMoreWinner.setFooter(jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
-
-
-            //Отправляет сообщение
-            editMessage(stopWithMoreWinner, guildId, textChannelId);
-
-            //Удаляет данные из коллекций
-            clearingCollections();
-
-            activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
-            return;
-        }
-
-        EmbedBuilder stop = new EmbedBuilder();
-        stop.setColor(0x00FF00);
-        stop.setTitle(jsonParsers
-                .getLocale("gift_Giveaway_End", String.valueOf(guildIdLong)));
-
-        stop.setDescription(jsonParsers
-                .getLocale("gift_Giveaway_Winner_Mention", String.valueOf(guildIdLong))
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setColor(0x00FF00);
+        embedBuilder.setTitle(jsonParsers.getLocale("gift_Giveaway_End", String.valueOf(guildIdLong)));
+        embedBuilder.setDescription(jsonParsers
+                .getLocale("gift_Giveaway_Winners", String.valueOf(guildIdLong))
                 .replaceAll("\\{0}", String.valueOf(getCount()))
                 + Arrays.toString(uniqueWinners.toArray())
                 .replaceAll("\\[", "").replaceAll("]", ""));
-        stop.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)));
-        stop.setFooter(jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
+        embedBuilder.setTimestamp(Instant.now());
+        embedBuilder.setFooter(jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
 
         //Отправляет сообщение
-        editMessage(stop, guildId, textChannelId);
+        editMessage(embedBuilder, guildId, textChannelId);
 
         //Удаляет данные из коллекций
         clearingCollections();
