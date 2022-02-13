@@ -183,8 +183,7 @@ public class MessageGift extends ListenerAdapter {
                         .stopGift(event.getGuild().getIdLong(), Integer.parseInt(messageSplit[messageSplit.length - 1]));
                 return;
             }
-            GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
-                    .stopGift(event.getGuild().getIdLong(), Integer.parseInt("1"));
+            GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong()).stopGift(event.getGuild().getIdLong(), Integer.parseInt("1"));
         }
     }
 }

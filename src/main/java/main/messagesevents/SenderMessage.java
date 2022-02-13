@@ -1,5 +1,6 @@
 package main.messagesevents;
 
+import main.config.BotStartConfig;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -13,6 +14,19 @@ public interface SenderMessage {
     default void sendMessage(MessageEmbed embedBuilder, TextChannel textChannel, List<Button> buttons) {
         try {
             textChannel.sendMessageEmbeds(embedBuilder).setActionRow(buttons).queue();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    default void sendMessage(MessageEmbed embedBuilder, Long guildId, Long textChannel, List<Button> buttons) {
+        try {
+            BotStartConfig.getJda()
+                    .getGuildById(guildId)
+                    .getTextChannelById(textChannel)
+                    .sendMessageEmbeds(embedBuilder)
+                    .setActionRow(buttons)
+                    .queue();
         } catch (Exception e) {
             e.printStackTrace();
         }

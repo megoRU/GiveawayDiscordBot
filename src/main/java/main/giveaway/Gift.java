@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import main.config.BotStartConfig;
 import main.jsonparser.JSONParsers;
+import main.messagesevents.SenderMessage;
 import main.model.entity.ActiveGiveaways;
 import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
@@ -34,10 +35,10 @@ import java.util.logging.Logger;
 
 @Getter
 @Setter
-public class Gift implements GiftHelper {
+public class Gift implements GiftHelper, SenderMessage {
 
     private final static Logger LOGGER = Logger.getLogger(Gift.class.getName());
-    private final String URL = "http://45.140.167.181:8085/api/winners";
+    private final String URL = "http://195.2.81.139:8085/api/winners";
     private final JSONParsers jsonParsers = new JSONParsers();
     private final List<Button> buttons = new ArrayList<>();
     private final List<String> listUsers = new ArrayList<>();
@@ -263,7 +264,7 @@ public class Gift implements GiftHelper {
         }, 1, 5000);
     }
 
-    private void getWinners(int countWinner) {
+    private void getWinners(int countWinner) throws Exception {
         try {
             Winners winners = new Winners(countWinner, 0, listUsers.size() - 1);
 
@@ -283,8 +284,8 @@ public class Gift implements GiftHelper {
 
         } catch (Exception e) {
             e.printStackTrace();
+            throw new Exception("API not work, or connection refused");
         }
-
     }
 
     public void stopGift(long guildIdLong, int countWinner) {
@@ -323,9 +324,25 @@ public class Gift implements GiftHelper {
         }
         Instant timestamp = Instant.now();
         Instant specificTime = Instant.ofEpochMilli(timestamp.toEpochMilli());
-        if (countWinner > 1) {
+
+        try {
             //выбираем победителей
             getWinners(countWinner);
+        } catch (Exception e) {
+
+            EmbedBuilder errors = new EmbedBuilder();
+            errors.setColor(0x00FF00);
+            errors.setTitle("Errors with API");
+            errors.setDescription("Repeat later. Or write to us about it.");
+
+            List<Button> buttons = new ArrayList<>();
+            buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
+
+            sendMessage(errors.build(), guildId, textChannelId, buttons);
+            return;
+        }
+
+        if (countWinner > 1) {
 
             EmbedBuilder stopWithMoreWinner = new EmbedBuilder();
             stopWithMoreWinner.setColor(0x00FF00);
@@ -349,9 +366,6 @@ public class Gift implements GiftHelper {
             return;
         }
 
-        //выбираем победителей
-        getWinners(countWinner);
-
         EmbedBuilder stop = new EmbedBuilder();
         stop.setColor(0x00FF00);
         stop.setTitle(jsonParsers
@@ -360,7 +374,8 @@ public class Gift implements GiftHelper {
         stop.setDescription(jsonParsers
                 .getLocale("gift_Giveaway_Winner_Mention", String.valueOf(guildIdLong))
                 .replaceAll("\\{0}", String.valueOf(getCount()))
-                + listUsers.get(random.nextInt(listUsers.size())) + ">");
+                + Arrays.toString(uniqueWinners.toArray())
+                .replaceAll("\\[", "").replaceAll("]", ""));
         stop.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)));
         stop.setFooter(jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
 
