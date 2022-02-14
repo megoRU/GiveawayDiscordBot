@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import main.config.BotStartConfig;
 import main.jsonparser.JSONParsers;
+import main.messagesevents.SenderMessage;
 import main.model.entity.ActiveGiveaways;
 import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
@@ -14,9 +15,9 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.URI;
@@ -34,10 +35,10 @@ import java.util.logging.Logger;
 
 @Getter
 @Setter
-public class Gift implements GiftHelper {
+public class Gift implements GiftHelper, SenderMessage {
 
     private final static Logger LOGGER = Logger.getLogger(Gift.class.getName());
-    private final String URL = "http://45.140.167.181:8085/api/winners";
+    private final String URL = "http://195.2.81.139:8085/api/winners";
     private final JSONParsers jsonParsers = new JSONParsers();
     private final List<Button> buttons = new ArrayList<>();
     private final List<String> listUsers = new ArrayList<>();
@@ -48,13 +49,13 @@ public class Gift implements GiftHelper {
     private final long guildId;
     private final long textChannelId;
     private StringBuilder insertQuery = new StringBuilder();
-    private int count;
+    private volatile int count;
     private String times;
     private OffsetDateTime offsetTime;
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss.SSS");
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final ParticipantsRepository participantsRepository;
-    private Set<Participants> participantsList = new HashSet<>();
+    private volatile Set<Participants> participantsList = new HashSet<>();
 
     public Gift(long guildId, long textChannelId, ActiveGiveawayRepository activeGiveawayRepository, ParticipantsRepository participantsRepository) {
         this.guildId = guildId;
@@ -146,7 +147,7 @@ public class Gift implements GiftHelper {
         autoInsert();
     }
 
-    protected void startGift(@NotNull SlashCommandEvent event, Guild guild, TextChannel textChannel, String newTitle, String countWinners, String time) {
+    protected void startGift(@NotNull SlashCommandInteractionEvent event, Guild guild, TextChannel textChannel, String newTitle, String countWinners, String time) {
         EmbedBuilder start = new EmbedBuilder();
         extracted(start, guild, textChannel, newTitle, countWinners, time);
 
@@ -263,7 +264,7 @@ public class Gift implements GiftHelper {
         }, 1, 5000);
     }
 
-    private void getWinners(int countWinner) {
+    private void getWinners(int countWinner) throws Exception {
         try {
             Winners winners = new Winners(countWinner, 0, listUsers.size() - 1);
 
@@ -283,11 +284,11 @@ public class Gift implements GiftHelper {
 
         } catch (Exception e) {
             e.printStackTrace();
+            throw new Exception("API not work, or connection refused");
         }
-
     }
 
-    public void stopGift(long guildIdLong, int countWinner) {
+    public void stopGift(final long guildIdLong, final int countWinner) {
         LOGGER.info("\nstopGift method" + "\nCount winner: " + countWinner);
         if (listUsers.size() < 2) {
             EmbedBuilder notEnoughUsers = new EmbedBuilder();
@@ -321,51 +322,37 @@ public class Gift implements GiftHelper {
                     countWinner);
             return;
         }
-        Instant timestamp = Instant.now();
-        Instant specificTime = Instant.ofEpochMilli(timestamp.toEpochMilli());
-        if (countWinner > 1) {
+
+        try {
             //выбираем победителей
             getWinners(countWinner);
+        } catch (Exception e) {
 
-            EmbedBuilder stopWithMoreWinner = new EmbedBuilder();
-            stopWithMoreWinner.setColor(0x00FF00);
-            stopWithMoreWinner.setTitle(jsonParsers.getLocale("gift_Giveaway_End", String.valueOf(guildIdLong)));
-            stopWithMoreWinner.setDescription(jsonParsers
-                    .getLocale("gift_Giveaway_Winners", String.valueOf(guildIdLong))
-                    .replaceAll("\\{0}", String.valueOf(getCount()))
-                    + Arrays.toString(uniqueWinners.toArray())
-                    .replaceAll("\\[", "").replaceAll("]", ""));
-            stopWithMoreWinner.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)));
-            stopWithMoreWinner.setFooter(jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
+            EmbedBuilder errors = new EmbedBuilder();
+            errors.setColor(0x00FF00);
+            errors.setTitle("Errors with API");
+            errors.setDescription("Repeat later. Or write to us about it.");
 
+            List<Button> buttons = new ArrayList<>();
+            buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
 
-            //Отправляет сообщение
-            editMessage(stopWithMoreWinner, guildId, textChannelId);
-
-            //Удаляет данные из коллекций
-            clearingCollections();
-
-            activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
+            sendMessage(errors.build(), guildId, textChannelId, buttons);
             return;
         }
 
-        //выбираем победителей
-        getWinners(countWinner);
-
-        EmbedBuilder stop = new EmbedBuilder();
-        stop.setColor(0x00FF00);
-        stop.setTitle(jsonParsers
-                .getLocale("gift_Giveaway_End", String.valueOf(guildIdLong)));
-
-        stop.setDescription(jsonParsers
-                .getLocale("gift_Giveaway_Winner_Mention", String.valueOf(guildIdLong))
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setColor(0x00FF00);
+        embedBuilder.setTitle(jsonParsers.getLocale("gift_Giveaway_End", String.valueOf(guildIdLong)));
+        embedBuilder.setDescription(jsonParsers
+                .getLocale("gift_Giveaway_Winners", String.valueOf(guildIdLong))
                 .replaceAll("\\{0}", String.valueOf(getCount()))
-                + listUsers.get(random.nextInt(listUsers.size())) + ">");
-        stop.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)));
-        stop.setFooter(jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
+                + Arrays.toString(uniqueWinners.toArray())
+                .replaceAll("\\[", "").replaceAll("]", ""));
+        embedBuilder.setTimestamp(Instant.now());
+        embedBuilder.setFooter(jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
 
         //Отправляет сообщение
-        editMessage(stop, guildId, textChannelId);
+        editMessage(embedBuilder, guildId, textChannelId);
 
         //Удаляет данные из коллекций
         clearingCollections();

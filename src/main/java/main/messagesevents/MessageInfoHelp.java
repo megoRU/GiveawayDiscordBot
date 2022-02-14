@@ -8,10 +8,10 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -58,7 +58,7 @@ public class MessageInfoHelp extends ListenerAdapter implements SenderMessage {
 
     }
 
-    public void buildMessage(String p, TextChannel textChannel, String avatarUrl, String guildIdLong, String name, SlashCommandEvent event) {
+    public void buildMessage(String p, TextChannel textChannel, String avatarUrl, String guildIdLong, String name, SlashCommandInteractionEvent event) {
 
         if (!textChannel.getGuild().getSelfMember().hasPermission(textChannel, Permission.MESSAGE_SEND) ||
                 !textChannel.getGuild().getSelfMember().hasPermission(textChannel, Permission.MESSAGE_EMBED_LINKS)) {
