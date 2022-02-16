@@ -41,7 +41,7 @@ public class Gift implements GiftHelper, SenderMessage {
     private final String URL = "http://195.2.81.139:8085/api/winners";
     private final JSONParsers jsonParsers = new JSONParsers();
     private final List<Button> buttons = new ArrayList<>();
-    private final List<String> listUsers = new ArrayList<>();
+    private final Set<String> listUsers = new HashSet<>();
     private final Map<String, String> listUsersHash = new HashMap<>();
     private final Set<String> uniqueWinners = new HashSet<>();
     private Instant specificTime = null;
@@ -55,7 +55,7 @@ public class Gift implements GiftHelper, SenderMessage {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss.SSS");
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final ParticipantsRepository participantsRepository;
-    private volatile Set<Participants> participantsList = new HashSet<>();
+    private volatile Queue<Participants> participantsList = new ArrayDeque<>();
 
     public Gift(long guildId, long textChannelId, ActiveGiveawayRepository activeGiveawayRepository, ParticipantsRepository participantsRepository) {
         this.guildId = guildId;
@@ -64,7 +64,9 @@ public class Gift implements GiftHelper, SenderMessage {
         this.participantsRepository = participantsRepository;
     }
 
-    private void extracted(EmbedBuilder start, Guild guild, TextChannel channel, String newTitle, String countWinners, String time) {
+    private void extracted(EmbedBuilder start, Guild guild, TextChannel channel,
+                           String newTitle, String countWinners,
+                           String time, Long role, Boolean isOnlyForSpecificRole) {
         LOGGER.info("\nGuild id: " + guild.getId()
                 + "\nTextChannel: " + channel.getName() + " " + channel.getId()
                 + "\nTitle: " + newTitle
@@ -121,6 +123,21 @@ public class Gift implements GiftHelper, SenderMessage {
             GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild.getIdLong(), "null");
         }
 
+        if (role != null) {
+
+            if (isOnlyForSpecificRole != null && isOnlyForSpecificRole) {
+                channel.sendMessage("Notifying this role: <@&" + role + ">").queue();
+                start.addField("Notification", "This Giveaway only for a Special Role: <@&" + role + ">", false);
+            } else {
+                if (role == guildId) {
+                    channel.sendMessage("Notifying this role: @everyone").queue();
+                } else {
+                    channel.sendMessage("Notifying this role: <@&" + role + ">").queue();
+                }
+            }
+
+        }
+
         if (BotStartConfig.getMapLanguages().get(guild.getId()) != null) {
 
             if (BotStartConfig.getMapLanguages().get(guild.getId()).equals("rus")) {
@@ -139,34 +156,38 @@ public class Gift implements GiftHelper, SenderMessage {
     protected void startGift(Guild guild, TextChannel textChannel, String newTitle, String countWinners, String time) {
         EmbedBuilder start = new EmbedBuilder();
 
-        extracted(start, guild, textChannel, newTitle, countWinners, time);
+        extracted(start, guild, textChannel, newTitle, countWinners, time, null, false);
 
-        textChannel.sendMessageEmbeds(start.build()).setActionRow(buttons).queue(message -> updateCollections(guild, countWinners, time, message));
+        textChannel.sendMessageEmbeds(start.build()).setActionRow(buttons).queue(message -> updateCollections(guild, countWinners, time, message, null, null));
 
         //Вот мы запускаем бесконечный поток.
         autoInsert();
     }
 
-    protected void startGift(@NotNull SlashCommandInteractionEvent event, Guild guild, TextChannel textChannel, String newTitle, String countWinners, String time) {
+    protected void startGift(@NotNull SlashCommandInteractionEvent event, Guild guild,
+                             TextChannel textChannel, String newTitle, String countWinners,
+                             String time, Long role, Boolean isOnlyForSpecificRole) {
         EmbedBuilder start = new EmbedBuilder();
-        extracted(start, guild, textChannel, newTitle, countWinners, time);
+        extracted(start, guild, textChannel, newTitle, countWinners, time, role, isOnlyForSpecificRole);
 
         event.reply(jsonParsers.getLocale("send_slash_message", guild.getId()).replaceAll("\\{0}", textChannel.getId()))
                 .delay(15, TimeUnit.SECONDS)
                 .flatMap(InteractionHook::deleteOriginal)
                 .queue();
 
-        textChannel.sendMessageEmbeds(start.build()).setActionRow(buttons).queue(message -> updateCollections(guild, countWinners, time, message));
+        textChannel.sendMessageEmbeds(start.build()).setActionRow(buttons).queue(message -> updateCollections(guild, countWinners, time, message, role, isOnlyForSpecificRole));
 
         //Вот мы запускаем бесконечный поток.
         autoInsert();
     }
 
-    private void updateCollections(Guild guild, String countWinners, String time, Message message) {
+    private void updateCollections(Guild guild, String countWinners, String time, Message message, Long role, Boolean isOnlyForSpecificRole) {
         GiveawayRegistry.getInstance().getMessageId().put(guild.getIdLong(), message.getId());
         GiveawayRegistry.getInstance().getChannelId().put(guild.getIdLong(), message.getChannel().getId());
         GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().put(guild.getIdLong(), message.getId());
         GiveawayRegistry.getInstance().getCountWinners().put(guild.getIdLong(), countWinners);
+        GiveawayRegistry.getInstance().getRoleId().put(guild.getIdLong(), role);
+        GiveawayRegistry.getInstance().getIsForSpecificRole().put(guild.getIdLong(), isOnlyForSpecificRole);
 
         ActiveGiveaways activeGiveaways = new ActiveGiveaways();
         activeGiveaways.setGuildLongId(guildId);
@@ -174,6 +195,8 @@ public class Gift implements GiftHelper, SenderMessage {
         activeGiveaways.setChannelIdLong(message.getChannel().getIdLong());
         activeGiveaways.setCountWinners(countWinners);
         activeGiveaways.setGiveawayTitle(GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
+        activeGiveaways.setRoleIdLong(role);
+        activeGiveaways.setIsForSpecificRole(isOnlyForSpecificRole);
 
         if (time != null && time.length() > 4) {
             activeGiveaways.setDateEndGiveaway(String.valueOf(OffsetDateTime.parse(String.valueOf(offsetTime))));
@@ -209,21 +232,16 @@ public class Gift implements GiftHelper, SenderMessage {
         addUserToInsertQuery(user.getName(), user.getIdLong(), guildId);
     }
 
+
     //TODO: Может удалять список с кем то. Какой блять список? Уже его нет! А блять понял. Этот participantsList
     private void executeMultiInsert(long guildIdLong) {
         try {
             if (!participantsList.isEmpty()) {
-                int countParticipants = participantsList.size();
-                Set<Participants> tempParticipantsList = participantsList;
-
-                participantsRepository.saveAll(participantsList);
-                synchronized (this) {
-                    if (countParticipants == participantsList.size()) {
-                        participantsList.clear();
-                    } else {
-                        participantsList.removeAll(tempParticipantsList);
-                    }
+                Set<Participants> temp = new HashSet<>();
+                for (int i = 0; i < participantsList.size(); i++) {
+                    temp.add(participantsList.poll());
                 }
+                participantsRepository.saveAll(temp);
                 updateGiveawayMessage(
                         GiveawayRegistry.getInstance().getCountWinners().get(guildId) == null
                                 ? "TBA"
@@ -278,8 +296,11 @@ public class Gift implements GiftHelper, SenderMessage {
 
             String[] winnersArgs = response.body().split(" ");
 
+
+            List<String> temp = new ArrayList<>(listUsers);
+
             for (int i = 0; i < winnersArgs.length; i++) {
-                uniqueWinners.add("<@" + listUsers.get(Integer.parseInt(winnersArgs[i])) + ">");
+                uniqueWinners.add("<@" + temp.get(Integer.parseInt(winnersArgs[i])) + ">");
             }
 
         } catch (Exception e) {

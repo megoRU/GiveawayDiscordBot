@@ -18,6 +18,8 @@ public class GiveawayRegistry {
     private static final Map<Long, String> countWinners = new HashMap<>();
     private static final ConcurrentMap<Long, String> title = new ConcurrentHashMap<>();
     private static final ConcurrentMap<Long, String> endGiveawayDate = new ConcurrentHashMap<>();
+    private static final Map<Long, Long> roleId = new HashMap<>();
+    private static final Map<Long, Boolean> isForSpecificRole = new HashMap<>();
     private static final JSONParsers jsonParsers = new JSONParsers();
     private static volatile GiveawayRegistry giveawayRegistry;
 
@@ -82,6 +84,14 @@ public class GiveawayRegistry {
 
     public Map<Long, String> getCountWinners() {
         return countWinners;
+    }
+
+    public Map<Long, Long> getRoleId() {
+        return roleId;
+    }
+
+    public Map<Long, Boolean> getIsForSpecificRole() {
+        return isForSpecificRole;
     }
 
 }

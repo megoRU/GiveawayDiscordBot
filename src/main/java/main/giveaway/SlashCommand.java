@@ -10,12 +10,17 @@ import main.model.repository.LanguageRepository;
 import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.GuildChannel;
+import net.dv8tion.jda.api.entities.GuildMessageChannel;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor
@@ -44,6 +49,8 @@ public class SlashCommand extends ListenerAdapter {
                     String title = null;
                     String count = null;
                     String time = null;
+                    Long role = null;
+                    boolean isOnlyForSpecificRole = false;
 
                     for (int i = 0; i < event.getOptions().size(); i++) {
 
@@ -52,7 +59,8 @@ public class SlashCommand extends ListenerAdapter {
                                 && !event.getOptions().get(i).getAsString().matches("\\d{18}")
                                 && !event.getOptions().get(i).getAsString().matches("[0-9]{1,2}")
                                 && event.getOptions().get(i).getAsString().matches(".{0,255}")
-                                && !event.getOptions().get(i).getAsString().matches("[0-9]{4}.[0-9]{2}.[0-9]{2}\\s[0-9]{2}:[0-9]{2}")) {
+                                && !event.getOptions().get(i).getAsString().matches("[0-9]{4}.[0-9]{2}.[0-9]{2}\\s[0-9]{2}:[0-9]{2}")
+                                && !event.getOptions().get(i).getAsString().equals("yes")) {
                             title = event.getOptions().get(i).getAsString();
                         }
 
@@ -65,11 +73,31 @@ public class SlashCommand extends ListenerAdapter {
                             time = event.getOptions().get(i).getAsString();
                         }
 
-                        if (event.getOptions().get(i).getAsString().matches("\\d{18}")) {
+                        if (event.getOptions().get(i).getType().equals(OptionType.CHANNEL)) {
                             textChannel = event.getOptions().get(i).getAsGuildChannel().getGuild()
                                     .getTextChannelById(event.getOptions().get(i).getAsGuildChannel().getId());
                         }
 
+                        if (event.getOptions().get(i).getType().equals(OptionType.ROLE)) {
+                            role = event.getOptions().get(i).getAsRole().getIdLong();
+                        }
+
+                        if (event.getOptions().get(i).getAsString().equals("yes")) {
+                            isOnlyForSpecificRole = true;
+                        }
+
+                    }
+
+                    if (role == null && isOnlyForSpecificRole || (role != null && role == event.getGuild().getIdLong() && isOnlyForSpecificRole)) {
+
+                        EmbedBuilder embedBuilder = new EmbedBuilder();
+
+                        embedBuilder.setColor(0xFF0000);
+                        embedBuilder.setDescription("Вы не можете сделать Giveaway только для роли `null`. " +
+                                "\nИли выбранная роль == этим (@everyone, @here)");
+
+                        event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
+                        return;
                     }
 
                     GiveawayRegistry.getInstance().setGift(
@@ -90,7 +118,9 @@ public class SlashCommand extends ListenerAdapter {
                                     textChannel == null ? event.getTextChannel() : textChannel,
                                     title,
                                     count,
-                                    time);
+                                    time,
+                                    role,
+                                    !isOnlyForSpecificRole ? null : isOnlyForSpecificRole);
 
                     //Если время будет неверным. Сработает try catch
                 } catch (Exception e) {
@@ -172,7 +202,9 @@ public class SlashCommand extends ListenerAdapter {
             if (GiveawayRegistry.getInstance().hasGift(event.getGuild().getIdLong())) {
 
                 StringBuilder stringBuilder = new StringBuilder();
-                List<String> participantsList = GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong()).getListUsers();
+                List<String> participantsList = new ArrayList<>(GiveawayRegistry.getInstance()
+                        .getActiveGiveaways().get(event.getGuild().getIdLong())
+                        .getListUsers());
 
                 if (participantsList.isEmpty()) {
                     event.reply(jsonParsers.getLocale("slash_list_users_empty", event.getGuild().getId())).setEphemeral(true).queue();

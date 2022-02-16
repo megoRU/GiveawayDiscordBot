@@ -40,6 +40,12 @@ public interface GiftHelper {
                 edit.setTimestamp(OffsetDateTime.parse(String.valueOf(GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildId))));
                 edit.setFooter(jsonParsers.getLocale("gift_Ends_At", String.valueOf(guildId)));
             }
+
+            if (GiveawayRegistry.getInstance().getRoleId().get(guildId) != null) {
+                edit.addField("Notifying", "This Giveaway only for a Special Role: <@&"
+                        + GiveawayRegistry.getInstance().getRoleId().get(guildId) + ">", false);
+            }
+
             //Отправляет сообщение и если нельзя редактировать то отправляет ошибку
             BotStartConfig.getJda().getGuildById(guildId)
                     .getTextChannelById(channelId)
@@ -74,6 +80,12 @@ public interface GiftHelper {
                 edit.setTimestamp(OffsetDateTime.parse(String.valueOf(GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildId))));
                 edit.setFooter(jsonParsers.getLocale("gift_Ends_At", String.valueOf(guildId)));
             }
+
+            if (GiveawayRegistry.getInstance().getRoleId().get(guildId) != null) {
+                edit.addField("Notifying", "This Giveaway only for a Special Role: <@&"
+                        + GiveawayRegistry.getInstance().getRoleId().get(guildId) + ">", false);
+            }
+
             //Отправляет сообщение и если нельзя редактировать то отправляет ошибку
             BotStartConfig.getJda().getGuildById(guildId)
                     .getTextChannelById(channelId)

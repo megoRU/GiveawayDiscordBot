@@ -5,21 +5,23 @@ import main.config.BotStartConfig;
 import main.jsonparser.JSONParsers;
 import main.messagesevents.MessageInfoHelp;
 import main.messagesevents.SenderMessage;
-import main.model.entity.ActiveGiveaways;
 import main.model.entity.Language;
 import main.model.entity.Participants;
-import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.LanguageRepository;
 import main.model.repository.ParticipantsRepository;
 import main.startbot.Statcord;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
 
 @AllArgsConstructor
@@ -27,9 +29,6 @@ import java.util.logging.Logger;
 public class ReactionsButton extends ListenerAdapter implements SenderMessage {
 
     public static final String PRESENT = "PRESENT";
-    public static final String STOP_ONE = "STOP_ONE";
-    public static final String STOP_TWO = "STOP_TWO";
-    public static final String STOP_THREE = "STOP_THREE";
     public static final String BUTTON_EXAMPLES = "BUTTON_EXAMPLES";
     public static final String BUTTON_HELP = "BUTTON_HELP";
     public static final String CHANGE_LANGUAGE = "CHANGE_LANGUAGE";
@@ -37,8 +36,6 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
     private static final JSONParsers jsonParsers = new JSONParsers();
     private final LanguageRepository languageRepository;
     private final ParticipantsRepository participantsRepository;
-    private final ActiveGiveawayRepository activeGiveawayRepository;
-
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
@@ -118,109 +115,68 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
                             "\nUser id: " + event.getUser().getId() + "" +
                             "\nButton pressed: " + event.getButton().getId());
 
-            boolean isUserAdmin = event.getMember().hasPermission(event.getGuildChannel(), Permission.ADMINISTRATOR);
-            boolean isUserCanManageServer = event.getMember().hasPermission(event.getGuildChannel(), Permission.MESSAGE_MANAGE);
-
             long guild = event.getGuild().getIdLong();
 
-
-            // TODO: Может это слишком жёстко
-            new Thread(() -> {
-                try {
-                    System.out.println("Go to sleep");
-                    Thread.sleep(10000L);
-                    System.out.println("wake up");
-
-                    if (GiveawayRegistry.getInstance().hasGift(guild) &&
-                            GiveawayRegistry.getInstance().getActiveGiveaways()
-                                    .get(event.getGuild().getIdLong()).getListUsersHash(event.getUser().getId()) != null &&
-                            participantsRepository.getParticipant(event.getGuild().getIdLong(), event.getUser().getIdLong()) == null) {
-
-                        System.out.println(GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong()).getListUsersHash(event.getUser().getId()) != null);
-                        System.out.println(participantsRepository.getParticipant(event.getUser().getIdLong(), event.getGuild().getIdLong()));
-                        System.out.println("Пользователя нет в БД это странно!");
-
-                        ActiveGiveaways activeGiveaways = activeGiveawayRepository.getActiveGiveawaysByGuildIdLong(event.getGuild().getIdLong());
-                        Participants participants = new Participants();
-                        participants.setUserIdLong(event.getUser().getIdLong());
-                        participants.setNickName(event.getUser().getName());
-                        participants.setActiveGiveaways(activeGiveaways);
-
-                        participantsRepository.save(participants);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Thread.currentThread().interrupt();
-                }
-            }).start();
-
-            long startTime = System.currentTimeMillis();
-
-            // TODO: Решит проблему с дубликатами
-            synchronized (this) {
-                if (Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + PRESENT)
-                        && GiveawayRegistry.getInstance().hasGift(guild)
-                        && GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
-                        .getListUsersHash(event.getUser().getId()) == null) {
-                    event.deferEdit().queue();
-
-                    GiveawayRegistry.getInstance()
-                            .getActiveGiveaways()
-                            .get(event.getGuild().getIdLong())
-                            .addUserToPoll(event.getUser());
-                    Statcord.commandPost("gift", event.getUser().getId());
-
-                    return;
-                }
-            }
-
-            long endTime = System.currentTimeMillis();
-            System.out.println("Total execution time: " + (endTime - startTime) + " ms");
-
-            if (event.getButton().getId().equals(event.getGuild().getId() + ":" + PRESENT)
+            if (Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + PRESENT)
                     && GiveawayRegistry.getInstance().hasGift(guild)
                     && GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
-                    .getListUsersHash(event.getUser().getId()) != null) {
+                    .getListUsersHash(event.getUser().getId()) == null) {
+
                 event.deferEdit().queue();
+
+                if (GiveawayRegistry.getInstance().getIsForSpecificRole().get(guild) != null
+                        && GiveawayRegistry.getInstance().getIsForSpecificRole().get(guild)
+                        && !event.getMember().getRoles().toString().contains(GiveawayRegistry.getInstance().getRoleId().get(guild).toString())) {
+
+                    EmbedBuilder embedBuilder = new EmbedBuilder();
+                    embedBuilder.setColor(Color.RED);
+                    embedBuilder.setDescription("You don't have access to this Giveaway");
+
+                    event.getHook().sendMessageEmbeds(embedBuilder.build()).setEphemeral(true).queue();
+                    return;
+                }
+
+                GiveawayRegistry.getInstance()
+                        .getActiveGiveaways()
+                        .get(event.getGuild().getIdLong())
+                        .addUserToPoll(event.getUser());
+                Statcord.commandPost("gift", event.getUser().getId());
                 return;
             }
 
-            if (GiveawayRegistry.getInstance().hasGift(guild) && (isUserCanManageServer || isUserAdmin)) {
+            if (Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + PRESENT)
+                    && GiveawayRegistry.getInstance().hasGift(guild)
+                    && GiveawayRegistry.getInstance().getActiveGiveaways()
+                    .get(event.getGuild().getIdLong())
+                    .getListUsersHash().containsKey(event.getUser().getId())) {
 
-                if (event.getButton().getId().equals(event.getGuild().getId() + ":" + STOP_ONE)) {
+                long startTime = System.currentTimeMillis();
 
-                    GiveawayRegistry.getInstance()
-                            .getActiveGiveaways()
-                            .get(event.getGuild().getIdLong())
-                            .stopGift(event.getGuild().getIdLong(), 1);
+                Participants participants = participantsRepository.getParticipant(guild, event.getIdLong());
 
-                    Statcord.commandPost("gift stop", event.getUser().getId());
-                    return;
-                }
+                long endTime = System.currentTimeMillis();
+                System.out.println("Total execution time: " + (endTime - startTime) + " ms");
 
-                if (event.getButton().getId().equals(event.getGuild().getId() + ":" + STOP_TWO)) {
-                    event.deferEdit().queue();
-                    GiveawayRegistry.getInstance()
-                            .getActiveGiveaways()
-                            .get(event.getGuild().getIdLong())
-                            .stopGift(event.getGuild().getIdLong(), 2);
-                    Statcord.commandPost("gift stop 2", event.getUser().getId());
-                    return;
-                }
-
-                if (event.getButton().getId().equals(event.getGuild().getId() + ":" + STOP_THREE)) {
-                    event.deferEdit().queue();
-                    GiveawayRegistry.getInstance()
-                            .getActiveGiveaways()
-                            .get(event.getGuild().getIdLong())
-                            .stopGift(event.getGuild().getIdLong(), 3);
-                    Statcord.commandPost("gift stop 3", event.getUser().getId());
-                }
-            } else {
                 event.deferEdit().queue();
-                event.getHook().sendMessage(jsonParsers
-                        .getLocale("message_gift_Not_Admin", event.getGuild().getId())).setEphemeral(true).queue();
+
+                //TODO: Надо бы это фиксить если такое случиться
+                if (participants != null) {
+
+                    event.getHook().sendMessage("""
+                                    It looks like we haven't registered you yet.\s
+                                    `Try again after 5 seconds`. If it happens again, write to us in support.\s
+                                    The link is available in the bot profile.
+                                    """)
+                            .setEphemeral(true).queue();
+                } else {
+                    EmbedBuilder embedBuilder = new EmbedBuilder();
+                    embedBuilder.setColor(Color.GREEN);
+                    embedBuilder.setDescription("Don't worry, you're a participant. \nWe checked you in the database.");
+                    event.getHook().sendMessageEmbeds(embedBuilder.build()).setEphemeral(true).queue();
+                }
+
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }

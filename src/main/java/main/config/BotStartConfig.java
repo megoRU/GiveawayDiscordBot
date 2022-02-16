@@ -115,7 +115,7 @@ public class BotStartConfig {
             jdaBuilder.addEventListeners(new PrefixChange(prefixRepository));
             jdaBuilder.addEventListeners(new MessageInfoHelp());
             jdaBuilder.addEventListeners(new LanguageChange(languageRepository));
-            jdaBuilder.addEventListeners(new ReactionsButton(languageRepository, participantsRepository, activeGiveawayRepository));
+            jdaBuilder.addEventListeners(new ReactionsButton(languageRepository, participantsRepository));
             jdaBuilder.addEventListeners(new SlashCommand(languageRepository, activeGiveawayRepository, participantsRepository));
 
             jda = jdaBuilder.build();
@@ -123,8 +123,6 @@ public class BotStartConfig {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-//        jda.getGuilds().forEach(guild -> guild.updateCommands().queue());
 
         System.out.println(jda.retrieveCommands().complete());
 
@@ -149,7 +147,10 @@ public class BotStartConfig {
                 List<OptionData> optionsStart = new ArrayList<>();
                 List<OptionData> optionsStop = new ArrayList<>();
 
-                optionsLanguage.add(new OptionData(STRING, "bot", "Setting the bot language").addChoice("eng", "eng").addChoice("rus", "rus").setRequired(true));
+                optionsLanguage.add(new OptionData(STRING, "bot", "Setting the bot language")
+                        .addChoice("eng", "eng")
+                        .addChoice("rus", "rus")
+                        .setRequired(true));
 
                 optionsStart.add(new OptionData(STRING, "title", "Title for Giveaway").setName("title"));
 
@@ -158,6 +159,12 @@ public class BotStartConfig {
                 optionsStart.add(new OptionData(STRING, "duration", "Examples: 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style. Preferably immediately in UTC ±0").setName("duration"));
 
                 optionsStart.add(new OptionData(CHANNEL, "channel", "#text channel name").setName("channel"));
+
+                optionsStart.add(new OptionData(ROLE, "mention", "Mentioning a specific Role").setName("mention"));
+
+                optionsStart.add(new OptionData(STRING, "role", "Giveaway is only for a specific role? Don't forget to specify the Role in the previous choice.")
+                        .addChoice("yes", "yes")
+                        .setName("role"));
 
                 optionsStop.add(new OptionData(STRING, "stop", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1").setName("stop"));
 
@@ -270,18 +277,6 @@ public class BotStartConfig {
                     .add(Button.success(longGuildId + ":" + ReactionsButton.PRESENT,
                             jsonParsers.getLocale("gift_Press_Me_Button", guildId) + "⠀⠀⠀⠀⠀⠀⠀⠀"));
         }
-
-        GiveawayRegistry.getInstance().getActiveGiveaways().get(longGuildId).getButtons()
-                .add(Button.danger(longGuildId + ":" + ReactionsButton.STOP_ONE,
-                        jsonParsers.getLocale("gift_Stop_Button", guildId).replaceAll("\\{0}", "1")));
-
-        GiveawayRegistry.getInstance().getActiveGiveaways().get(longGuildId).getButtons()
-                .add(Button.danger(longGuildId + ":" + ReactionsButton.STOP_TWO,
-                        jsonParsers.getLocale("gift_Stop_Button", guildId).replaceAll("\\{0}", "2")));
-
-        GiveawayRegistry.getInstance().getActiveGiveaways().get(longGuildId).getButtons()
-                .add(Button.danger(longGuildId + ":" + ReactionsButton.STOP_THREE,
-                        jsonParsers.getLocale("gift_Stop_Button", guildId).replaceAll("\\{0}", "3")));
     }
 
     private void getMessageIdFromDB() {
@@ -299,6 +294,8 @@ public class BotStartConfig {
                 long message_id_long = rs.getLong("message_id_long");
                 String giveaway_title = rs.getString("giveaway_title");
                 String date_end_giveaway = rs.getString("date_end_giveaway");
+                Long role_id_long = rs.getLong("role_id_long");
+                Boolean is_for_specific_role = rs.getBoolean("is_for_specific_role");
 
                 guildIdHashList.put(guildIdHashList.size() + 1, String.valueOf(guild_long_id));
                 GiveawayRegistry.getInstance().setGift(
@@ -314,6 +311,8 @@ public class BotStartConfig {
                 GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild_long_id, date_end_giveaway == null ? "null" : date_end_giveaway);
                 GiveawayRegistry.getInstance().getChannelId().put(guild_long_id, channel_long_id);
                 GiveawayRegistry.getInstance().getCountWinners().put(guild_long_id, count_winners);
+                GiveawayRegistry.getInstance().getRoleId().put(guild_long_id, role_id_long);
+                GiveawayRegistry.getInstance().getIsForSpecificRole().put(guild_long_id, is_for_specific_role);
 
                 //Добавляем кнопки для Giveaway в Gift class
                 setButtonsInGift(String.valueOf(guild_long_id), guild_long_id);
