@@ -41,9 +41,11 @@ public interface GiftHelper {
                 edit.setFooter(jsonParsers.getLocale("gift_Ends_At", String.valueOf(guildId)));
             }
 
-            if (GiveawayRegistry.getInstance().getRoleId().get(guildId) != null) {
-                edit.addField("Notifying", "This Giveaway only for a Special Role: <@&"
-                        + GiveawayRegistry.getInstance().getRoleId().get(guildId) + ">", false);
+            if (GiveawayRegistry.getInstance().getIsForSpecificRole().get(guildId) != null
+                    && GiveawayRegistry.getInstance().getIsForSpecificRole().get(guildId)) {
+                edit.addField(jsonParsers.getLocale("gift_notification", String.valueOf(guildId)),
+                        jsonParsers.getLocale("gift_special_role", String.valueOf(guildId))
+                                + "<@&" + GiveawayRegistry.getInstance().getRoleId().get(guildId) + ">", false);
             }
 
             //Отправляет сообщение и если нельзя редактировать то отправляет ошибку
@@ -81,9 +83,11 @@ public interface GiftHelper {
                 edit.setFooter(jsonParsers.getLocale("gift_Ends_At", String.valueOf(guildId)));
             }
 
-            if (GiveawayRegistry.getInstance().getRoleId().get(guildId) != null) {
-                edit.addField("Notifying", "This Giveaway only for a Special Role: <@&"
-                        + GiveawayRegistry.getInstance().getRoleId().get(guildId) + ">", false);
+            if (GiveawayRegistry.getInstance().getIsForSpecificRole().get(guildId) != null
+                    && GiveawayRegistry.getInstance().getIsForSpecificRole().get(guildId)) {
+                edit.addField(jsonParsers.getLocale("gift_notification", String.valueOf(guildId)),
+                        jsonParsers.getLocale("gift_special_role", String.valueOf(guildId))
+                        + "<@&" + GiveawayRegistry.getInstance().getRoleId().get(guildId) + ">", false);
             }
 
             //Отправляет сообщение и если нельзя редактировать то отправляет ошибку

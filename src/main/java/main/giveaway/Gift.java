@@ -126,13 +126,14 @@ public class Gift implements GiftHelper, SenderMessage {
         if (role != null) {
 
             if (isOnlyForSpecificRole != null && isOnlyForSpecificRole) {
-                channel.sendMessage("Notifying this role: <@&" + role + ">").queue();
-                start.addField("Notification", "This Giveaway only for a Special Role: <@&" + role + ">", false);
+                channel.sendMessage(jsonParsers.getLocale("gift_notification_for_this_role", guild.getId()) + "<@&" + role + ">").queue();
+                start.addField(jsonParsers.getLocale("gift_notification", guild.getId()),
+                        jsonParsers.getLocale("gift_special_role", guild.getId()) + "<@&" + role + ">", false);
             } else {
                 if (role == guildId) {
-                    channel.sendMessage("Notifying this role: @everyone").queue();
+                    channel.sendMessage(jsonParsers.getLocale("gift_notification_for_this_role", guild.getId()) + "@everyone").queue();
                 } else {
-                    channel.sendMessage("Notifying this role: <@&" + role + ">").queue();
+                    channel.sendMessage(jsonParsers.getLocale("gift_notification_for_this_role", guild.getId()) + "<@&" + role + ">").queue();
                 }
             }
 

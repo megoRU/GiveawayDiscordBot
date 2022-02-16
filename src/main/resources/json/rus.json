@@ -57,5 +57,10 @@
   "slash_Errors": "Вы допустили ошибку, посмотрите документацию",
   "send_slash_message": "Создал Giveaway в текстовом канале: <#{0}>",
   "slash_list_users": "Список участников",
-  "slash_list_users_empty": "Ещё нет участников"
+  "slash_list_users_empty": "Ещё нет участников",
+  "gift_notification": "Уведомление",
+  "gift_special_role": "Этот розыгрыш только для Этой Роли: ",
+  "gift_notification_for_this_role": "Уведомление для этой роли: ",
+  "slash_error_only_for_this_role": "Вы не можете сделать Giveaway только для Роли: `",
+  "slash_error_role_can_not_be_everyone": "`@everyone` можно использовать только для упоминания!"
 }

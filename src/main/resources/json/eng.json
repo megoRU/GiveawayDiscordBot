@@ -56,5 +56,10 @@
   "slash_Errors": "You made a mistake, look at the documentation",
   "send_slash_message": "Created Giveaway in the text channel: <#{0}>",
   "slash_list_users": "List of participants",
-  "slash_list_users_empty": "There are no participants yet"
+  "slash_list_users_empty": "There are no participants yet",
+  "gift_notification": "Notification",
+  "gift_special_role": "This Giveaway only for a Special Role: ",
+  "gift_notification_for_this_role": "Notification for this role: ",
+  "slash_error_only_for_this_role": "You can't make a Giveaway just for a Role: `",
+  "slash_error_role_can_not_be_everyone": "`@everyone` can only be used to mention!"
 }

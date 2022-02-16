@@ -10,9 +10,6 @@ import main.model.repository.LanguageRepository;
 import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.GuildChannel;
-import net.dv8tion.jda.api.entities.GuildMessageChannel;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -88,14 +85,17 @@ public class SlashCommand extends ListenerAdapter {
 
                     }
 
-                    if (role == null && isOnlyForSpecificRole || (role != null && role == event.getGuild().getIdLong() && isOnlyForSpecificRole)) {
+                    EmbedBuilder embedBuilder = new EmbedBuilder();
+                    embedBuilder.setColor(0xFF0000);
 
-                        EmbedBuilder embedBuilder = new EmbedBuilder();
+                    if (role == null && isOnlyForSpecificRole) {
+                        embedBuilder.setDescription(jsonParsers.getLocale("slash_error_only_for_this_role", event.getGuild().getId()) + role + "`");
+                        event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
+                        return;
+                    }
 
-                        embedBuilder.setColor(0xFF0000);
-                        embedBuilder.setDescription("Вы не можете сделать Giveaway только для роли `null`. " +
-                                "\nИли выбранная роль == этим (@everyone, @here)");
-
+                    if (role != null && role == event.getGuild().getIdLong() && isOnlyForSpecificRole) {
+                        embedBuilder.setDescription(jsonParsers.getLocale("slash_error_role_can_not_be_everyone", event.getGuild().getId()));
                         event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
                         return;
                     }
