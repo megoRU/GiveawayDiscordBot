@@ -12,7 +12,6 @@ import main.model.repository.ParticipantsRepository;
 import main.startbot.Statcord;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.util.Objects;
-import java.util.function.Predicate;
 import java.util.logging.Logger;
 
 @AllArgsConstructor
@@ -130,7 +128,7 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
 
                     EmbedBuilder embedBuilder = new EmbedBuilder();
                     embedBuilder.setColor(Color.RED);
-                    embedBuilder.setDescription("You don't have access to this Giveaway");
+                    embedBuilder.setDescription(jsonParsers.getLocale("button_giveaway_not_access", event.getGuild().getId()));
 
                     event.getHook().sendMessageEmbeds(embedBuilder.build()).setEphemeral(true).queue();
                     return;
@@ -171,12 +169,10 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
                 } else {
                     EmbedBuilder embedBuilder = new EmbedBuilder();
                     embedBuilder.setColor(Color.GREEN);
-                    embedBuilder.setDescription("Don't worry, you're a participant. \nWe checked you in the database.");
+                    embedBuilder.setDescription(jsonParsers.getLocale("button_dont_worry", event.getGuild().getId()));
                     event.getHook().sendMessageEmbeds(embedBuilder.build()).setEphemeral(true).queue();
                 }
-
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
