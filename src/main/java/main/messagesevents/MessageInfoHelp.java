@@ -105,6 +105,7 @@ public class MessageInfoHelp extends ListenerAdapter implements SenderMessage {
 
         buttons.add(Button.success(guildIdLong + ":" + ReactionsButton.BUTTON_EXAMPLES, jsonParsers.getLocale("button_Examples", guildIdLong)));
         buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
+        buttons.add(Button.link("https://patreon.com/ghbots", "Patreon"));
 
 
         if (BotStartConfig.getMapLanguages().get(guildIdLong) != null) {
