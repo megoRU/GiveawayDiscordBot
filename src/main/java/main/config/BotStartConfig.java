@@ -128,7 +128,7 @@ public class BotStartConfig {
 
         //Обновить команды
 //        updateSlashCommands(false);
-        System.out.println("00:09");
+        System.out.println("20:00");
     }
 
     private void updateSlashCommands(boolean isUpdateInGuilds) {
