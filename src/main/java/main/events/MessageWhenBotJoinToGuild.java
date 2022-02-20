@@ -13,12 +13,9 @@ import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
-
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -38,8 +35,9 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
     public void onGuildJoin(@NotNull GuildJoinEvent event) {
 
         try {
-            if (event.getGuild().getDefaultChannel() != null &&
-                    !event.getGuild().getSelfMember().hasPermission(event.getGuild().getDefaultChannel(), Permission.MESSAGE_SEND)) {
+            if (event.getGuild().getDefaultChannel() == null
+                    || !event.getGuild().getSelfMember().hasPermission(event.getGuild().getDefaultChannel(), Permission.MESSAGE_SEND)
+                    || !event.getGuild().getSelfMember().hasPermission(event.getGuild().getDefaultChannel(), Permission.MESSAGE_EMBED_LINKS)) {
                 return;
             }
 
@@ -80,12 +78,9 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
                             .withEmoji(Emoji.fromUnicode("U+1F1F7U+1F1FA")));
                 }
 
-
-                event.getGuild().getDefaultChannel().sendMessageEmbeds(welcome.build())
-                        .setActionRow(buttons).queue();
+                event.getGuild().getDefaultChannel().sendMessageEmbeds(welcome.build()).setActionRow(buttons).queue();
 
                 welcome.clear();
-
             }
         } catch (Exception e) {
             System.out.println("Скорее всего нет `DefaultChannel`!");

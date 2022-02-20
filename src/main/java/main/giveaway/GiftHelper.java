@@ -3,6 +3,7 @@ package main.giveaway;
 import main.config.BotStartConfig;
 import main.jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -13,12 +14,29 @@ public interface GiftHelper {
 
     default void editMessage(EmbedBuilder embedBuilder, Long guildId, Long textChannel) {
         try {
-            BotStartConfig.getJda()
+            if (BotStartConfig.getJda()
                     .getGuildById(guildId)
-                    .getTextChannelById(textChannel)
-                    .editMessageEmbedsById(GiveawayRegistry.getInstance().getMessageId().get(guildId), embedBuilder.build())
-                    .setActionRows().setActionRows(new ArrayList<>())
-                    .queue();
+                    .getSelfMember()
+                    .hasPermission(BotStartConfig.getJda().getTextChannelById(textChannel), Permission.VIEW_CHANNEL)) {
+
+                BotStartConfig.getJda()
+                        .getGuildById(guildId)
+                        .getTextChannelById(textChannel)
+                        .editMessageEmbedsById(GiveawayRegistry.getInstance().getMessageId().get(guildId), embedBuilder.build())
+                        .setActionRows().setActionRows(new ArrayList<>())
+                        .queue();
+            } else {
+                if (BotStartConfig.getJda()
+                        .getGuildById(guildId)
+                        .getSelfMember()
+                        .hasPermission(BotStartConfig.getJda().getTextChannelById(textChannel), Permission.MESSAGE_SEND)) {
+                    BotStartConfig.getJda()
+                            .getGuildById(guildId)
+                            .getTextChannelById(textChannel)
+                            .sendMessage("Cannot perform action due to a lack of Permission. Missing permission: `VIEW_CHANNEL`")
+                            .queue();
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -73,9 +91,9 @@ public interface GiftHelper {
 
             edit.addField(jsonParsers.getLocale("gift_Invalid_Number", String.valueOf(guildId)),
                     jsonParsers
-                    .getLocale("gift_Invalid_Number_Description", String.valueOf(guildId))
-                    .replaceAll("\\{0}", String.valueOf(countWinner))
-                    .replaceAll("\\{1}", String.valueOf(count)), false);
+                            .getLocale("gift_Invalid_Number_Description", String.valueOf(guildId))
+                            .replaceAll("\\{0}", String.valueOf(countWinner))
+                            .replaceAll("\\{1}", String.valueOf(count)), false);
 
             //Если есть время окончания включить в EmbedBuilder
             if (!GiveawayRegistry.getInstance().getEndGiveawayDate().get(guildId).equals("null")) {
@@ -87,7 +105,7 @@ public interface GiftHelper {
                     && GiveawayRegistry.getInstance().getIsForSpecificRole().get(guildId)) {
                 edit.addField(jsonParsers.getLocale("gift_notification", String.valueOf(guildId)),
                         jsonParsers.getLocale("gift_special_role", String.valueOf(guildId))
-                        + "<@&" + GiveawayRegistry.getInstance().getRoleId().get(guildId) + ">", false);
+                                + "<@&" + GiveawayRegistry.getInstance().getRoleId().get(guildId) + ">", false);
             }
 
             //Отправляет сообщение и если нельзя редактировать то отправляет ошибку
