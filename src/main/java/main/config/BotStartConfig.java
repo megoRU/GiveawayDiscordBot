@@ -183,31 +183,25 @@ public class BotStartConfig {
         }
     }
 
-    @Bean
+    @Scheduled(fixedDelay = 2000, initialDelay = 12000)
     public void StopGiveaway() {
-        Thread thread = new Thread(() -> {
-            try {
-                while (true) {
-                    executorService = Executors.newFixedThreadPool(2);
-                    int count = queue.size();
+        try {
+            executorService = Executors.newFixedThreadPool(2);
+            int count = queue.size();
 
-                    if (!queue.isEmpty()) {
-                        for (int i = 0; i < count; i++) {
-                            Giveaway giveaway = queue.poll();
-                            if (giveaway != null) {
-                                executorService.submit(new StopGiveawayByTimer(giveaway));
-                            }
-                        }
-                        executorService.shutdown();
+            if (!queue.isEmpty()) {
+                for (int i = 0; i < count; i++) {
+                    Giveaway giveaway = queue.poll();
+                    if (giveaway != null) {
+                        executorService.submit(new StopGiveawayByTimer(giveaway));
                     }
-                    Thread.sleep(2000);
                 }
-            } catch (Exception e) {
-                Thread.currentThread().interrupt();
-                e.printStackTrace();
+                executorService.shutdown();
             }
-        });
-        thread.start();
+        } catch (Exception e) {
+            Thread.currentThread().interrupt();
+            e.printStackTrace();
+        }
     }
 
     private void setLanguages() {
