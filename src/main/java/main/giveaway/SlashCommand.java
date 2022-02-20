@@ -33,7 +33,13 @@ public class SlashCommand extends ListenerAdapter {
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         if (event.getUser().isBot()) return;
 
-        if (event.getGuild() == null) return;
+        if (!event.isFromGuild()) {
+            EmbedBuilder fromGuild = new EmbedBuilder();
+            fromGuild.setColor(0x00FF00);
+            fromGuild.setDescription("The bot supports `/slash commands` only in guilds!");
+            event.replyEmbeds(fromGuild.build()).queue();
+            return;
+        }
 
         if (event.getMember() == null) return;
 
