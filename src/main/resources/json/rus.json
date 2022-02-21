@@ -43,6 +43,8 @@
   "gift_Invalid_Number_Description_Loop": "Чтобы не попасть в рекурсию, нам пришлось уменьшить количество\nпобедителей на один. Так как их число было равно числу участников",
   "gift_Giveaway_End": "Giveaway завершилась",
   "gift_Giveaway_Winners": "Количество участников: `{0}`\n:trophy: Победители: ",
+  "gift_Giveaway_RANDOMORG_one": "\n\nПобедитель был выбран\nс помощью: RANDOM.ORG",
+  "gift_Giveaway_RANDOMORG_more": "\n\nПобедители были выбраны\nс помощью: RANDOM.ORG",
   "gift_Giveaway_Winner_Mention": "Количество участников: `{0}`\n:trophy: Победитель: ",
   "language_change_Not_Admin": "Вы не являетесь Админом или не можете управлять сервером!",
   "language_change_lang": "Вы изменили язык на: ",
