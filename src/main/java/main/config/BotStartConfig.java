@@ -127,8 +127,8 @@ public class BotStartConfig {
         System.out.println(jda.retrieveCommands().complete());
 
         //Обновить команды
-//        updateSlashCommands(false);
-        System.out.println("20:00");
+        updateSlashCommands(false);
+        System.out.println("15:25");
     }
 
     private void updateSlashCommands(boolean isUpdateInGuilds) {
@@ -148,8 +148,8 @@ public class BotStartConfig {
                 List<OptionData> optionsStop = new ArrayList<>();
 
                 optionsLanguage.add(new OptionData(STRING, "bot", "Setting the bot language")
-                        .addChoice("eng", "eng")
-                        .addChoice("rus", "rus")
+                        .addChoice("\uD83C\uDDEC\uD83C\uDDE7 English Language", "eng")
+                        .addChoice("\uD83C\uDDF7\uD83C\uDDFA Russian Language", "rus")
                         .setRequired(true));
 
                 optionsStart.add(new OptionData(STRING, "title", "Title for Giveaway").setName("title"));
@@ -173,6 +173,7 @@ public class BotStartConfig {
                 commands.addCommands(Commands.slash("stop", "Stop the Giveaway").addOptions(optionsStop));
                 commands.addCommands(Commands.slash("help", "Bot commands"));
                 commands.addCommands(Commands.slash("list", "List of participants"));
+                commands.addCommands(Commands.slash("patreon", "Support us on Patreon"));
 
                 commands.queue();
 
@@ -353,7 +354,8 @@ public class BotStartConfig {
                     //Устанавливаем счетчик на верное число
                     GiveawayRegistry.getInstance()
                             .getActiveGiveaways()
-                            .get(Long.parseLong(guildIdHashList.get(i))).setCount(GiveawayRegistry.getInstance()
+                            .get(Long.parseLong(guildIdHashList.get(i)))
+                            .setCount(GiveawayRegistry.getInstance()
                                     .getActiveGiveaways()
                                     .get(Long.parseLong(guildIdHashList.get(i))).getListUsersHash().size());
                 }

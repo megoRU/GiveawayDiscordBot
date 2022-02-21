@@ -17,6 +17,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +34,13 @@ public class SlashCommand extends ListenerAdapter {
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         if (event.getUser().isBot()) return;
 
-        if (event.getGuild() == null) return;
+        if (!event.isFromGuild()) {
+            EmbedBuilder fromGuild = new EmbedBuilder();
+            fromGuild.setColor(0x00FF00);
+            fromGuild.setDescription("The bot supports `/slash commands` only in guilds!");
+            event.replyEmbeds(fromGuild.build()).queue();
+            return;
+        }
 
         if (event.getMember() == null) return;
 
@@ -185,10 +192,27 @@ public class SlashCommand extends ListenerAdapter {
         //0 - bot
         if (event.getName().equals("language")) {
 
+            if (!event.getMember().hasPermission(Permission.MANAGE_SERVER)) {
+
+                EmbedBuilder notAdmin = new EmbedBuilder();
+                notAdmin.setColor(0x00FF00);
+                notAdmin.setDescription(jsonParsers.getLocale("language_change_Not_Admin", event.getGuild().getId())
+                        .replaceAll("\\{0}", event.getOptions().get(0).getAsString()));
+
+                event.replyEmbeds(notAdmin.build()).setEphemeral(true).queue();
+                return;
+            }
+
             BotStartConfig.getMapLanguages().put(event.getGuild().getId(), event.getOptions().get(0).getAsString());
 
-            event.reply(jsonParsers.getLocale("button_Language", event.getGuild().getId())
-                    .replaceAll("\\{0}", event.getOptions().get(0).getAsString())).queue();
+            EmbedBuilder button = new EmbedBuilder();
+            button.setColor(0x00FF00);
+            button.setDescription(jsonParsers.getLocale("button_Language", event.getGuild().getId())
+                    .replaceAll("\\{0}", event.getOptions().get(0).getAsString().equals("rus")
+                            ? "Русский"
+                            : "English"));
+
+            event.replyEmbeds(button.build()).setEphemeral(true).queue();
 
             Language language = new Language();
             language.setServerId(event.getGuild().getId());
@@ -207,7 +231,10 @@ public class SlashCommand extends ListenerAdapter {
                         .getListUsers());
 
                 if (participantsList.isEmpty()) {
-                    event.reply(jsonParsers.getLocale("slash_list_users_empty", event.getGuild().getId())).setEphemeral(true).queue();
+                    EmbedBuilder list = new EmbedBuilder();
+                    list.setColor(Color.GREEN);
+                    list.setDescription(jsonParsers.getLocale("slash_list_users_empty", event.getGuild().getId()));
+                    event.replyEmbeds(list.build()).setEphemeral(true).queue();
                     return;
                 }
 
@@ -222,8 +249,21 @@ public class SlashCommand extends ListenerAdapter {
 
                 event.replyEmbeds(list.build()).queue();
             } else {
-                event.reply(jsonParsers.getLocale("slash_Stop_No_Has", event.getGuild().getId())).setEphemeral(true).queue();
+                EmbedBuilder noGiveaway = new EmbedBuilder();
+                noGiveaway.setColor(Color.GREEN);
+                noGiveaway.setDescription(jsonParsers.getLocale("slash_Stop_No_Has", event.getGuild().getId()));
+                event.replyEmbeds(noGiveaway.build()).setEphemeral(true).queue();
             }
+            return;
+        }
+
+        if (event.getName().equals("patreon")) {
+            EmbedBuilder patreon = new EmbedBuilder();
+            patreon.setColor(Color.YELLOW);
+            patreon.setTitle("[Patreon](https://www.patreon.com/ghbots)");
+            patreon.setDescription("If you want to finacially support my work and motivate me to keep adding more\n" +
+                    "features, put more effort and time into this and other bots, click [here](https://www.patreon.com/ghbots)");
+            event.replyEmbeds(patreon.build()).setEphemeral(true).queue();
         }
     }
 }

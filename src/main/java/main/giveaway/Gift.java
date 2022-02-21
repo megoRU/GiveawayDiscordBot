@@ -31,6 +31,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 @Getter
@@ -49,7 +50,7 @@ public class Gift implements GiftHelper, SenderMessage {
     private final long guildId;
     private final long textChannelId;
     private StringBuilder insertQuery = new StringBuilder();
-    private volatile int count;
+    private AtomicInteger count = new AtomicInteger(0);
     private String times;
     private OffsetDateTime offsetTime;
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss.SSS");
@@ -227,29 +228,31 @@ public class Gift implements GiftHelper, SenderMessage {
 
     //Добавляет пользователя в StringBuilder
     protected void addUserToPoll(final User user) {
-        setCount(getCount() + 1);
+        count.incrementAndGet();
         listUsers.add(user.getId());
         listUsersHash.put(user.getId(), user.getId());
         addUserToInsertQuery(user.getName(), user.getIdLong(), guildId);
     }
 
-
     //TODO: Может удалять список с кем то. Какой блять список? Уже его нет! А блять понял. Этот participantsList
+    //Fixed
     private void executeMultiInsert(long guildIdLong) {
         try {
-            if (!participantsList.isEmpty()) {
-                Set<Participants> temp = new HashSet<>();
-                for (int i = 0; i < participantsList.size(); i++) {
-                    temp.add(participantsList.poll());
+            if (GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
+                if (!participantsList.isEmpty()) {
+                    Set<Participants> temp = new HashSet<>();
+                    for (int i = 0; i < participantsList.size(); i++) {
+                        temp.add(participantsList.poll());
+                    }
+                    participantsRepository.saveAll(temp);
+                    updateGiveawayMessage(
+                            GiveawayRegistry.getInstance().getCountWinners().get(guildId) == null
+                                    ? "TBA"
+                                    : GiveawayRegistry.getInstance().getCountWinners().get(guildId),
+                            this.guildId,
+                            this.textChannelId,
+                            getCount());
                 }
-                participantsRepository.saveAll(temp);
-                updateGiveawayMessage(
-                        GiveawayRegistry.getInstance().getCountWinners().get(guildId) == null
-                                ? "TBA"
-                                : GiveawayRegistry.getInstance().getCountWinners().get(guildId),
-                        this.guildId,
-                        this.textChannelId,
-                        getCount());
             }
         } catch (Exception e) {
             insertQuery = new StringBuilder();
@@ -274,7 +277,11 @@ public class Gift implements GiftHelper, SenderMessage {
         new Timer().scheduleAtFixedRate(new TimerTask() {
             public void run() throws NullPointerException {
                 try {
-                    executeMultiInsert(guildId);
+                    if (GiveawayRegistry.getInstance().hasGift(guildId)) {
+                        executeMultiInsert(guildId);
+                    } else {
+                        Thread.currentThread().interrupt();
+                    }
                 } catch (Exception e) {
                     Thread.currentThread().interrupt();
                     e.printStackTrace();
@@ -283,6 +290,9 @@ public class Gift implements GiftHelper, SenderMessage {
         }, 1, 5000);
     }
 
+    /**
+     * @throws Exception Throws an exception
+     */
     private void getWinners(int countWinner) throws Exception {
         try {
             Winners winners = new Winners(countWinner, 0, listUsers.size() - 1);
@@ -365,11 +375,22 @@ public class Gift implements GiftHelper, SenderMessage {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setColor(0x00FF00);
         embedBuilder.setTitle(jsonParsers.getLocale("gift_Giveaway_End", String.valueOf(guildIdLong)));
-        embedBuilder.setDescription(jsonParsers
-                .getLocale("gift_Giveaway_Winners", String.valueOf(guildIdLong))
-                .replaceAll("\\{0}", String.valueOf(getCount()))
-                + Arrays.toString(uniqueWinners.toArray())
-                .replaceAll("\\[", "").replaceAll("]", ""));
+
+        if (uniqueWinners.size() == 1) {
+            embedBuilder.setDescription(jsonParsers
+                    .getLocale("gift_Giveaway_Winner_Mention", String.valueOf(guildIdLong))
+                    .replaceAll("\\{0}", String.valueOf(getCount()))
+                    + Arrays.toString(uniqueWinners.toArray())
+                    .replaceAll("\\[", "").replaceAll("]", "") +
+                    jsonParsers.getLocale("gift_Giveaway_RANDOMORG_one", String.valueOf(guildIdLong)));
+        } else {
+            embedBuilder.setDescription(jsonParsers
+                    .getLocale("gift_Giveaway_Winners", String.valueOf(guildIdLong))
+                    .replaceAll("\\{0}", String.valueOf(getCount()))
+                    + Arrays.toString(uniqueWinners.toArray())
+                    .replaceAll("\\[", "").replaceAll("]", "") +
+                    jsonParsers.getLocale("gift_Giveaway_RANDOMORG_more", String.valueOf(guildIdLong)));
+        }
         embedBuilder.setTimestamp(Instant.now());
         embedBuilder.setFooter(jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
 
@@ -391,6 +412,7 @@ public class Gift implements GiftHelper, SenderMessage {
             GiveawayRegistry.getInstance().removeGift(guildId);
             GiveawayRegistry.getInstance().getEndGiveawayDate().remove(guildId);
             GiveawayRegistry.getInstance().getCountWinners().remove(guildId);
+            setCount(0);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -400,4 +422,11 @@ public class Gift implements GiftHelper, SenderMessage {
         return listUsersHash.get(id);
     }
 
+    public int getCount() {
+        return count.intValue();
+    }
+
+    public void setCount(int count) {
+        this.count.set(count);
+    }
 }
