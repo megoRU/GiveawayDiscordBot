@@ -261,8 +261,8 @@ public class SlashCommand extends ListenerAdapter {
             EmbedBuilder patreon = new EmbedBuilder();
             patreon.setColor(Color.YELLOW);
             patreon.setTitle("Patreon", "https://www.patreon.com/ghbots");
-            patreon.setDescription("If you want to finacially support my work and motivate me to keep adding more\n" +
-                    "features, put more effort and time into this and other bots, click [here](https://www.patreon.com/ghbots)");
+            patreon.setDescription("If you want to support the work of our bots." +
+                    "\nYou can do it here click: [here](https://www.patreon.com/ghbots)");
             event.replyEmbeds(patreon.build()).setEphemeral(true).queue();
         }
     }
