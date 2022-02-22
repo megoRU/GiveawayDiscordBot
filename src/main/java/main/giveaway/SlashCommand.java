@@ -205,7 +205,6 @@ public class SlashCommand extends ListenerAdapter {
             }
 
             EmbedBuilder stop = new EmbedBuilder();
-            stop.setColor(0x00FF00);
 
             int count = Integer.parseInt(event.getOptions().get(0).getAsString());
             boolean isHasErrors = false;
@@ -215,9 +214,11 @@ public class SlashCommand extends ListenerAdapter {
             }
 
             if (!isHasErrors) {
+                stop.setColor(Color.GREEN);
                 stop.setDescription(jsonParsers.getLocale("slash_Stop", event.getGuild().getId()));
                 event.replyEmbeds(stop.build()).queue();
             } else {
+                stop.setColor(Color.RED);
                 stop.setDescription(jsonParsers.getLocale("slash_Stop_Errors", event.getGuild().getId()));
                 event.replyEmbeds(stop.build()).queue();
             }

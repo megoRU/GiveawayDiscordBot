@@ -33,6 +33,7 @@ public class StopGiveawayByTimer implements Runnable {
                                     GiveawayRegistry.getInstance().getCountWinners(getID_GUILD())
                                             == null ? 1
                                             : Integer.parseInt(GiveawayRegistry.getInstance().getCountWinners(getID_GUILD())));
+                    return;
                 }
 
                 Thread.sleep(5000L);

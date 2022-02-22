@@ -175,13 +175,18 @@ public class Gift implements GiftHelper, SenderMessage {
     protected void startGift(@NotNull SlashCommandInteractionEvent event, Guild guild,
                              TextChannel textChannel, String newTitle, String countWinners,
                              String time, Long role, Boolean isOnlyForSpecificRole) {
+
         EmbedBuilder start = new EmbedBuilder();
         extracted(start, guild, textChannel, newTitle, countWinners, time, role, isOnlyForSpecificRole);
 
-        event.reply(jsonParsers.getLocale("send_slash_message", guild.getId()).replaceAll("\\{0}", textChannel.getId()))
-                .delay(15, TimeUnit.SECONDS)
-                .flatMap(InteractionHook::deleteOriginal)
-                .queue();
+        try {
+            event.reply(jsonParsers.getLocale("send_slash_message", guild.getId()).replaceAll("\\{0}", textChannel.getId()))
+                    .delay(15, TimeUnit.SECONDS)
+                    .flatMap(InteractionHook::deleteOriginal)
+                    .queue();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         textChannel.sendMessageEmbeds(start.build()).setActionRow(buttons).queue(message -> updateCollections(guild, countWinners, time, message, role, isOnlyForSpecificRole));
 
@@ -292,8 +297,8 @@ public class Gift implements GiftHelper, SenderMessage {
                         Thread.currentThread().interrupt();
                     }
                 } catch (Exception e) {
-                    Thread.currentThread().interrupt();
                     e.printStackTrace();
+                    Thread.currentThread().interrupt();
                 }
             }
         }, 2000, 5000);
