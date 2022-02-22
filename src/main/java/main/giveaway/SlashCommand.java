@@ -44,9 +44,19 @@ public class SlashCommand extends ListenerAdapter {
 
         if (event.getMember() == null) return;
 
+        if (!event.getGuild().getSelfMember().hasPermission(event.getTextChannel(), Permission.MESSAGE_SEND) ||
+                !event.getGuild().getSelfMember().hasPermission(event.getTextChannel(), Permission.MESSAGE_EMBED_LINKS)) {
+            return;
+        }
+
         if (event.getName().equals("start")) {
             if (GiveawayRegistry.getInstance().hasGift(event.getGuild().getIdLong())) {
-                event.reply(jsonParsers.getLocale("message_gift_Need_Stop_Giveaway", event.getGuild().getId())).queue();
+
+                EmbedBuilder errors = new EmbedBuilder();
+                errors.setColor(0x00FF00);
+                errors.setDescription(jsonParsers.getLocale("message_gift_Need_Stop_Giveaway", event.getGuild().getId()));
+
+                event.replyEmbeds(errors.build()).queue();
             } else {
                 try {
                     TextChannel textChannel = null;
@@ -107,10 +117,12 @@ public class SlashCommand extends ListenerAdapter {
                         return;
                     }
 
-                    GiveawayRegistry.getInstance().setGift(
+                    GiveawayRegistry.getInstance().putGift(
                             event.getGuild().getIdLong(),
                             new Gift(event.getGuild().getIdLong(),
-                                    textChannel == null ? event.getTextChannel().getIdLong() : textChannel.getIdLong(), activeGiveawayRepository, participantsRepository));
+                                    textChannel == null ? event.getTextChannel().getIdLong() : textChannel.getIdLong(),
+                                    activeGiveawayRepository,
+                                    participantsRepository));
 
                     if (!event.getGuild().getSelfMember()
                             .hasPermission(textChannel == null ? event.getTextChannel() : textChannel, Permission.MESSAGE_SEND) ||
@@ -120,7 +132,7 @@ public class SlashCommand extends ListenerAdapter {
                     }
 
                     GiveawayRegistry.getInstance()
-                            .getActiveGiveaways().get(event.getGuild().getIdLong()).startGift(event,
+                            .getGift(event.getGuild().getIdLong()).startGift(event,
                                     event.getGuild(),
                                     textChannel == null ? event.getTextChannel() : textChannel,
                                     title,
@@ -133,7 +145,12 @@ public class SlashCommand extends ListenerAdapter {
                 } catch (Exception e) {
                     e.printStackTrace();
                     GiveawayRegistry.getInstance().removeGift(event.getGuild().getIdLong());
-                    event.reply(jsonParsers.getLocale("slash_Errors", event.getGuild().getId())).queue();
+
+                    EmbedBuilder errors = new EmbedBuilder();
+                    errors.setColor(0x00FF00);
+                    errors.setDescription(jsonParsers.getLocale("slash_Errors", event.getGuild().getId()));
+
+                    event.replyEmbeds(errors.build()).queue();
                 }
             }
 
@@ -142,35 +159,72 @@ public class SlashCommand extends ListenerAdapter {
 
         if (event.getName().equals("stop")) {
             if (!GiveawayRegistry.getInstance().hasGift(event.getGuild().getIdLong())) {
-                event.reply(jsonParsers.getLocale("slash_Stop_No_Has", event.getGuild().getId())).queue();
+                EmbedBuilder notHas = new EmbedBuilder();
+                notHas.setColor(0x00FF00);
+                notHas.setDescription(jsonParsers.getLocale("slash_Stop_No_Has", event.getGuild().getId()));
+
+                event.replyEmbeds(notHas.build()).queue();
                 return;
             }
 
             if (!event.getMember().hasPermission(event.getTextChannel(), Permission.ADMINISTRATOR)
                     && !event.getMember().hasPermission(event.getTextChannel(), Permission.MESSAGE_MANAGE)) {
-                event.reply(jsonParsers.getLocale("message_gift_Not_Admin", event.getGuild().getId())).queue();
+
+                EmbedBuilder gift = new EmbedBuilder();
+                gift.setColor(0x00FF00);
+                gift.setDescription(jsonParsers.getLocale("message_gift_Not_Admin", event.getGuild().getId()));
+
+                event.replyEmbeds(gift.build()).queue();
                 return;
             }
 
             if (event.getOptions().isEmpty()) {
-                event.reply(jsonParsers.getLocale("slash_Stop", event.getGuild().getId())).queue();
+                EmbedBuilder stop = new EmbedBuilder();
+                stop.setColor(0x00FF00);
+                stop.setDescription(jsonParsers.getLocale("slash_Stop", event.getGuild().getId()));
+
+                event.replyEmbeds(stop.build()).queue();
+
                 GiveawayRegistry.getInstance()
-                        .getActiveGiveaways().get(event.getGuild().getIdLong())
+                        .getGift(event.getGuild().getIdLong())
                         .stopGift(event.getGuild().getIdLong(),
-                                GiveawayRegistry.getInstance().getCountWinners().get(event.getGuild().getIdLong()) == null ? 1 :
-                                        Integer.parseInt(GiveawayRegistry.getInstance().getCountWinners().get(event.getGuild().getIdLong()))
+                                GiveawayRegistry.getInstance().getCountWinners(event.getGuild().getIdLong()) == null
+                                        ? 1
+                                        : Integer.parseInt(GiveawayRegistry.getInstance().getCountWinners(event.getGuild().getIdLong()))
                         );
                 return;
             }
 
             if (!event.getOptions().get(0).getAsString().matches("[0-9]{1,2}")) {
-                event.reply(jsonParsers.getLocale("slash_Errors", event.getGuild().getId())).queue();
+                EmbedBuilder errors = new EmbedBuilder();
+                errors.setColor(0x00FF00);
+                errors.setDescription(jsonParsers.getLocale("slash_Errors", event.getGuild().getId()));
+
+                event.replyEmbeds(errors.build()).queue();
                 return;
             }
 
-            event.reply(jsonParsers.getLocale("slash_Stop", event.getGuild().getId())).queue();
+            EmbedBuilder stop = new EmbedBuilder();
+
+            int count = Integer.parseInt(event.getOptions().get(0).getAsString());
+            boolean isHasErrors = false;
+
+            if (GiveawayRegistry.getInstance().getGift(event.getGuild().getIdLong()).getListUsers().size() == count) {
+                isHasErrors = true;
+            }
+
+            if (!isHasErrors) {
+                stop.setColor(Color.GREEN);
+                stop.setDescription(jsonParsers.getLocale("slash_Stop", event.getGuild().getId()));
+                event.replyEmbeds(stop.build()).queue();
+            } else {
+                stop.setColor(Color.RED);
+                stop.setDescription(jsonParsers.getLocale("slash_Stop_Errors", event.getGuild().getId()));
+                event.replyEmbeds(stop.build()).queue();
+            }
+
             GiveawayRegistry.getInstance()
-                    .getActiveGiveaways().get(event.getGuild().getIdLong())
+                    .getGift(event.getGuild().getIdLong())
                     .stopGift(event.getGuild().getIdLong(), Integer.parseInt(event.getOptions().get(0).getAsString()));
             return;
         }
@@ -185,7 +239,8 @@ public class SlashCommand extends ListenerAdapter {
                     event.getTextChannel(),
                     event.getUser().getAvatarUrl(),
                     event.getGuild().getId(),
-                    event.getUser().getName(), event);
+                    event.getUser().getName(),
+                    event);
             return;
         }
 
@@ -227,7 +282,7 @@ public class SlashCommand extends ListenerAdapter {
 
                 StringBuilder stringBuilder = new StringBuilder();
                 List<String> participantsList = new ArrayList<>(GiveawayRegistry.getInstance()
-                        .getActiveGiveaways().get(event.getGuild().getIdLong())
+                        .getGift(event.getGuild().getIdLong())
                         .getListUsers());
 
                 if (participantsList.isEmpty()) {
@@ -239,7 +294,12 @@ public class SlashCommand extends ListenerAdapter {
                 }
 
                 for (int i = 0; i < participantsList.size(); i++) {
-                    stringBuilder.append(stringBuilder.length() == 0 ? "<@" : ", <@").append(participantsList.get(i)).append(">");
+                    if (stringBuilder.length() < 4000) {
+                        stringBuilder.append(stringBuilder.length() == 0 ? "<@" : ", <@").append(participantsList.get(i)).append(">");
+                    } else {
+                        stringBuilder.append(" and others...");
+                        break;
+                    }
                 }
 
                 EmbedBuilder list = new EmbedBuilder();
