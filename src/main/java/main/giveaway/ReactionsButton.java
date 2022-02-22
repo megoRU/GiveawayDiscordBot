@@ -125,8 +125,8 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
 
             if (Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + PRESENT)
                     && GiveawayRegistry.getInstance().hasGift(guild)
-                    && GiveawayRegistry.getInstance().getGift(event.getGuild().getIdLong())
-                    .getListUsersHash(event.getUser().getId()) == null) {
+                    && !GiveawayRegistry.getInstance().getGift(event.getGuild().getIdLong())
+                    .getListUsersHash(event.getUser().getId())) {
 
                 event.deferEdit().queue();
 

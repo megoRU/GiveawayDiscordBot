@@ -83,7 +83,9 @@ public class Gift implements GiftHelper, SenderMessage {
 
         start.setColor(0x00FF00);
         start.setTitle(GiveawayRegistry.getInstance().getTitle(guild.getIdLong()));
-        start.addField("Attention for Admins: \nMay 1, 2022 you will not be able to control the bot \nwithout Slash Commands, add them: ", "[Add slash commands](https://discord.com/oauth2/authorize?client_id=808277484524011531&scope=applications.commands%20bot)", false);
+        start.addField("Attention for Admins: \nMay 1, 2022 you will not be able to control the bot \nwithout Slash Commands, add them: ",
+                "[Add slash commands](https://discord.com/oauth2/authorize?client_id=808277484524011531&scope=applications.commands%20bot)",
+                false);
 
         if (time != null) {
 
@@ -426,8 +428,8 @@ public class Gift implements GiftHelper, SenderMessage {
         }
     }
 
-    public String getListUsersHash(String id) {
-        return listUsersHash.get(id);
+    public boolean getListUsersHash(String id) {
+        return listUsersHash.containsKey(id);
     }
 
     public int getCount() {
