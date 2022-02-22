@@ -3,7 +3,6 @@ package main.events;
 import lombok.AllArgsConstructor;
 import main.config.BotStartConfig;
 import main.giveaway.ReactionsButton;
-import main.jsonparser.JSONParsers;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.LanguageRepository;
 import main.model.repository.PrefixRepository;
@@ -25,7 +24,6 @@ import java.util.List;
 @Service
 public class MessageWhenBotJoinToGuild extends ListenerAdapter {
 
-    private final JSONParsers jsonParsers = new JSONParsers();
     private final PrefixRepository prefixRepository;
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final LanguageRepository languageRepository;
@@ -56,7 +54,6 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
                         , false);
 
                 List<Button> buttons = new ArrayList<>();
-                buttons.add(Button.success(event.getGuild().getId() + ":" + ReactionsButton.BUTTON_HELP, jsonParsers.getLocale("button_Help", event.getGuild().getId())));
                 buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
                 buttons.add(Button.link("https://patreon.com/ghbots", "Patreon"));
 
@@ -94,8 +91,8 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
         try {
             System.out.println("Удаляем данные после удаления бота из Guild");
             languageRepository.deleteLanguage(event.getGuild().getId());
-            prefixRepository.deletePrefix(event.getGuild().getId());
             activeGiveawayRepository.deleteActiveGiveaways(event.getGuild().getIdLong());
+            prefixRepository.deletePrefix(event.getGuild().getId());
         } catch (Exception e) {
             e.printStackTrace();
         }

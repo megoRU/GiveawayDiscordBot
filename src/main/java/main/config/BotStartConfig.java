@@ -25,6 +25,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import org.apache.commons.io.IOUtils;
 import org.discordbots.api.client.DiscordBotListAPI;
+import org.jetbrains.annotations.Nullable;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,12 +54,11 @@ import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
 @EnableScheduling
 public class BotStartConfig {
 
-    public static final String activity = "!help | ";
+    public static final String activity = "/help | ";
     private static final Deque<Giveaway> queue = new ArrayDeque<>();
     //String - guildLongId
-    private static final Map<String, String> mapPrefix = new HashMap<>();
-    //String - guildLongId
     private static final ConcurrentMap<String, String> mapLanguages = new ConcurrentHashMap<>();
+    private static final Map<String, String> mapPrefix = new HashMap<>();
     private static final Map<Integer, String> guildIdHashList = new HashMap<>();
     private static JDA jda;
     private final JSONParsers jsonParsers = new JSONParsers();
@@ -83,7 +83,7 @@ public class BotStartConfig {
 
     @Autowired
     public BotStartConfig(ActiveGiveawayRepository activeGiveawayRepository, LanguageRepository
-            languageRepository, PrefixRepository prefixRepository, ParticipantsRepository participantsRepository) {
+            languageRepository, ParticipantsRepository participantsRepository, PrefixRepository prefixRepository) {
         this.activeGiveawayRepository = activeGiveawayRepository;
         this.languageRepository = languageRepository;
         this.prefixRepository = prefixRepository;
@@ -115,7 +115,7 @@ public class BotStartConfig {
             jdaBuilder.addEventListeners(new PrefixChange(prefixRepository));
             jdaBuilder.addEventListeners(new MessageInfoHelp());
             jdaBuilder.addEventListeners(new LanguageChange(languageRepository));
-            jdaBuilder.addEventListeners(new ReactionsButton(languageRepository, participantsRepository));
+            jdaBuilder.addEventListeners(new ReactionsButton(languageRepository, participantsRepository, activeGiveawayRepository));
             jdaBuilder.addEventListeners(new SlashCommand(languageRepository, activeGiveawayRepository, participantsRepository));
 
             jda = jdaBuilder.build();
@@ -259,16 +259,16 @@ public class BotStartConfig {
     private void setButtonsInGift(String guildId, long longGuildId) {
         if (getMapLanguages().get(guildId) != null) {
             if (getMapLanguages().get(guildId).equals("rus")) {
-                GiveawayRegistry.getInstance().getActiveGiveaways().get(longGuildId).getButtons()
+                GiveawayRegistry.getInstance().getGift(longGuildId).getButtons()
                         .add(Button.success(longGuildId + ":" + ReactionsButton.PRESENT,
                                 jsonParsers.getLocale("gift_Press_Me_Button", guildId) + "⠀ ⠀⠀"));
             } else {
-                GiveawayRegistry.getInstance().getActiveGiveaways().get(longGuildId).getButtons()
+                GiveawayRegistry.getInstance().getGift(longGuildId).getButtons()
                         .add(Button.success(longGuildId + ":" + ReactionsButton.PRESENT,
                                 jsonParsers.getLocale("gift_Press_Me_Button", guildId) + "⠀⠀⠀⠀⠀⠀⠀⠀"));
             }
         } else {
-            GiveawayRegistry.getInstance().getActiveGiveaways().get(longGuildId).getButtons()
+            GiveawayRegistry.getInstance().getGift(longGuildId).getButtons()
                     .add(Button.success(longGuildId + ":" + ReactionsButton.PRESENT,
                             jsonParsers.getLocale("gift_Press_Me_Button", guildId) + "⠀⠀⠀⠀⠀⠀⠀⠀"));
         }
@@ -288,26 +288,26 @@ public class BotStartConfig {
                 String count_winners = rs.getString("count_winners");
                 long message_id_long = rs.getLong("message_id_long");
                 String giveaway_title = rs.getString("giveaway_title");
-                String date_end_giveaway = rs.getString("date_end_giveaway");
+                Timestamp date_end_giveaway = rs.getTimestamp("date_end_giveaway");
                 Long role_id_long = rs.getLong("role_id_long");
                 Boolean is_for_specific_role = rs.getBoolean("is_for_specific_role");
 
                 guildIdHashList.put(guildIdHashList.size() + 1, String.valueOf(guild_long_id));
-                GiveawayRegistry.getInstance().setGift(
+                GiveawayRegistry.getInstance().putGift(
                         guild_long_id,
                         new Gift(guild_long_id,
                                 Long.parseLong(channel_long_id),
                                 activeGiveawayRepository,
                                 participantsRepository));
-                GiveawayRegistry.getInstance().getActiveGiveaways().get(guild_long_id).autoInsert();
-                GiveawayRegistry.getInstance().getMessageId().put(guild_long_id, String.valueOf(message_id_long));
-                GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().put(guild_long_id, String.valueOf(message_id_long));
-                GiveawayRegistry.getInstance().getTitle().put(guild_long_id, giveaway_title);
-                GiveawayRegistry.getInstance().getEndGiveawayDate().put(guild_long_id, date_end_giveaway == null ? "null" : date_end_giveaway);
-                GiveawayRegistry.getInstance().getChannelId().put(guild_long_id, channel_long_id);
-                GiveawayRegistry.getInstance().getCountWinners().put(guild_long_id, count_winners);
-                GiveawayRegistry.getInstance().getRoleId().put(guild_long_id, role_id_long);
-                GiveawayRegistry.getInstance().getIsForSpecificRole().put(guild_long_id, is_for_specific_role);
+                GiveawayRegistry.getInstance().getGift(guild_long_id).autoInsert();
+                GiveawayRegistry.getInstance().putMessageId(guild_long_id, String.valueOf(message_id_long));
+                GiveawayRegistry.getInstance().putIdMessagesWithGiveawayButtons(guild_long_id, String.valueOf(message_id_long));
+                GiveawayRegistry.getInstance().putTitle(guild_long_id, giveaway_title);
+                GiveawayRegistry.getInstance().putEndGiveawayDate(guild_long_id, date_end_giveaway);
+                GiveawayRegistry.getInstance().putChannelId(guild_long_id, channel_long_id);
+                GiveawayRegistry.getInstance().putCountWinners(guild_long_id, count_winners);
+                GiveawayRegistry.getInstance().putRoleId(guild_long_id, role_id_long);
+                GiveawayRegistry.getInstance().putIsForSpecificRole(guild_long_id, is_for_specific_role);
 
                 //Добавляем кнопки для Giveaway в Gift class
                 setButtonsInGift(String.valueOf(guild_long_id), guild_long_id);
@@ -341,23 +341,18 @@ public class BotStartConfig {
 
                     //Добавляем пользователей в hashmap
                     GiveawayRegistry.getInstance()
-                            .getActiveGiveaways()
-                            .get(Long.parseLong(guildIdHashList.get(i))).getListUsersHash()
+                            .getGift(Long.parseLong(guildIdHashList.get(i))).getListUsersHash()
                             .put(String.valueOf(userIdLong), String.valueOf(userIdLong));
 
                     //Считаем пользователей в hashmap и устанавливаем верное значение
                     GiveawayRegistry.getInstance()
-                            .getActiveGiveaways()
-                            .get(Long.parseLong(guildIdHashList.get(i))).getListUsers()
+                            .getGift(Long.parseLong(guildIdHashList.get(i))).getListUsers()
                             .add(String.valueOf(userIdLong));
 
                     //Устанавливаем счетчик на верное число
                     GiveawayRegistry.getInstance()
-                            .getActiveGiveaways()
-                            .get(Long.parseLong(guildIdHashList.get(i)))
-                            .setCount(GiveawayRegistry.getInstance()
-                                    .getActiveGiveaways()
-                                    .get(Long.parseLong(guildIdHashList.get(i))).getListUsersHash().size());
+                            .getGift(Long.parseLong(guildIdHashList.get(i)))
+                            .setCount(participantsList.size());
                 }
             }
             System.out.println("getUsersWhoTakePartFromDB()");

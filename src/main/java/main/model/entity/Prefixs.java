@@ -15,6 +15,7 @@ import javax.persistence.Table;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Deprecated
 @Table(name = "prefixs")
 public class Prefixs {
 
