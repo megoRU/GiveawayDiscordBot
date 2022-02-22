@@ -19,7 +19,9 @@
   "gift_Invalid_Number_Description_Loop": "In order not to get loop, we had to reduce the number\nof winners by one. Since their number was equal to the participants",
   "gift_Giveaway_End": "Giveaway the end",
   "gift_Giveaway_Winners": "Number of participants: `{0}`\n:trophy: Winners: ",
-  "gift_Giveaway_Winner_Mention": "Number of participants: `{0}`\n:trophy: Winner: <@",
+  "gift_Giveaway_RANDOMORG_one": "\n\nWinner was selected by:\nRANDOM.ORG",
+  "gift_Giveaway_RANDOMORG_more": "\n\nWinners were selected by:\nRANDOM.ORG",
+  "gift_Giveaway_Winner_Mention": "Number of participants: `{0}`\n:trophy: Winner: ",
   "language_change_Not_Admin": "You are not Admin or you can't managed server",
   "button_Help": "/help",
   "button_Language": "You changed the language to: `{0}`",
@@ -28,5 +30,13 @@
   "slash_Errors": "You made a mistake, look at the documentation",
   "send_slash_message": "Created Giveaway in the text channel: <#{0}>",
   "slash_list_users": "List of participants",
-  "slash_list_users_empty": "There are no participants yet"
+  "slash_list_users_empty": "There are no participants yet",
+  "gift_notification": "Notification",
+  "gift_special_role": "This Giveaway only for a Special Role: ",
+  "gift_notification_for_this_role": "Notification for this role: ",
+  "slash_error_only_for_this_role": "You can't make a Giveaway just for a Role: `",
+  "slash_error_role_can_not_be_everyone": "`@everyone` can only be used to mention!",
+  "button_giveaway_not_access": "You don't have access to this Giveaway",
+  "button_dont_worry": "Don't worry, you're a participant.\nWe checked you in the database.",
+  "button_you_not_register": "It looks like we haven't registered you yet.\n`Try again after 5 seconds`. If it happens again, write to us in support.\nThe link is available in the bot profile."
 }

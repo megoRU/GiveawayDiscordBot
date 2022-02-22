@@ -3,20 +3,21 @@ package main.giveaway;
 import lombok.AllArgsConstructor;
 import main.config.BotStartConfig;
 import main.jsonparser.JSONParsers;
+import main.messagesevents.MessageInfoHelp;
 import main.model.entity.Language;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.LanguageRepository;
 import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,10 +31,16 @@ public class SlashCommand extends ListenerAdapter {
     private final ParticipantsRepository participantsRepository;
 
     @Override
-    public void onSlashCommand(@NotNull SlashCommandEvent event) {
+    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         if (event.getUser().isBot()) return;
 
-        if (event.getGuild() == null) return;
+        if (!event.isFromGuild()) {
+            EmbedBuilder fromGuild = new EmbedBuilder();
+            fromGuild.setColor(0x00FF00);
+            fromGuild.setDescription("The bot supports `/slash commands` only in guilds!");
+            event.replyEmbeds(fromGuild.build()).queue();
+            return;
+        }
 
         if (event.getMember() == null) return;
 
@@ -56,6 +63,8 @@ public class SlashCommand extends ListenerAdapter {
                     String title = null;
                     String count = null;
                     String time = null;
+                    Long role = null;
+                    boolean isOnlyForSpecificRole = false;
 
                     for (int i = 0; i < event.getOptions().size(); i++) {
 
@@ -64,12 +73,13 @@ public class SlashCommand extends ListenerAdapter {
                                 && !event.getOptions().get(i).getAsString().matches("\\d{18}")
                                 && !event.getOptions().get(i).getAsString().matches("[0-9]{1,2}")
                                 && event.getOptions().get(i).getAsString().matches(".{0,255}")
-                                && !event.getOptions().get(i).getAsString().matches("[0-9]{4}.[0-9]{2}.[0-9]{2}\\s[0-9]{2}:[0-9]{2}")) {
+                                && !event.getOptions().get(i).getAsString().matches("[0-9]{4}.[0-9]{2}.[0-9]{2}\\s[0-9]{2}:[0-9]{2}")
+                                && !event.getOptions().get(i).getAsString().equals("yes")) {
                             title = event.getOptions().get(i).getAsString();
                         }
 
-                        if (event.getOptions().get(i).getAsString().matches("^[0-9]{1,2}$")) {
-                            count = String.valueOf(event.getOptions().get(i).getAsLong());
+                        if (event.getOptions().get(i).getAsString().matches("[0-9]{1,2}")) {
+                            count = event.getOptions().get(i).getAsString();
                         }
 
                         if (event.getOptions().get(i).getAsString().matches("[0-9]{1,2}[mмhчdд]")
@@ -77,10 +87,34 @@ public class SlashCommand extends ListenerAdapter {
                             time = event.getOptions().get(i).getAsString();
                         }
 
-                        if (event.getOptions().get(i).getAsString().matches("\\d{18}")) {
+                        if (event.getOptions().get(i).getType().equals(OptionType.CHANNEL)) {
                             textChannel = event.getOptions().get(i).getAsGuildChannel().getGuild()
                                     .getTextChannelById(event.getOptions().get(i).getAsGuildChannel().getId());
                         }
+
+                        if (event.getOptions().get(i).getType().equals(OptionType.ROLE)) {
+                            role = event.getOptions().get(i).getAsRole().getIdLong();
+                        }
+
+                        if (event.getOptions().get(i).getAsString().equals("yes")) {
+                            isOnlyForSpecificRole = true;
+                        }
+
+                    }
+
+                    EmbedBuilder embedBuilder = new EmbedBuilder();
+                    embedBuilder.setColor(0xFF0000);
+
+                    if (role == null && isOnlyForSpecificRole) {
+                        embedBuilder.setDescription(jsonParsers.getLocale("slash_error_only_for_this_role", event.getGuild().getId()) + role + "`");
+                        event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
+                        return;
+                    }
+
+                    if (role != null && role == event.getGuild().getIdLong() && isOnlyForSpecificRole) {
+                        embedBuilder.setDescription(jsonParsers.getLocale("slash_error_role_can_not_be_everyone", event.getGuild().getId()));
+                        event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
+                        return;
                     }
 
                     GiveawayRegistry.getInstance().putGift(
@@ -103,7 +137,9 @@ public class SlashCommand extends ListenerAdapter {
                                     textChannel == null ? event.getTextChannel() : textChannel,
                                     title,
                                     count,
-                                    time);
+                                    time,
+                                    role,
+                                    !isOnlyForSpecificRole ? null : isOnlyForSpecificRole);
 
                     //Если время будет неверным. Сработает try catch
                 } catch (Exception e) {
@@ -182,40 +218,15 @@ public class SlashCommand extends ListenerAdapter {
 
         if (event.getName().equals("help")) {
 
-            String guildIdLong = event.getGuild().getId();
+            String p = BotStartConfig.getMapPrefix().get(event.getGuild().getId()) == null ? "!" :
+                    BotStartConfig.getMapPrefix().get(event.getGuild().getId());
 
-            EmbedBuilder info = new EmbedBuilder();
-            info.setColor(0xa224db);
-            info.setTitle("Giveaway");
-            info.addField("Slash Commands", "`/language`, `/start`, `/stop`, `/list`", false);
-
-            info.addField(jsonParsers.getLocale("messages_events_Links", guildIdLong),
-                    jsonParsers.getLocale("messages_events_Site", guildIdLong) +
-                            jsonParsers.getLocale("messages_events_Add_Me_To_Other_Guilds", guildIdLong), false);
-
-            List<Button> buttons = new ArrayList<>();
-
-            buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
-
-            if (BotStartConfig.getMapLanguages().get(guildIdLong) != null) {
-
-                if (BotStartConfig.getMapLanguages().get(guildIdLong).equals("eng")) {
-
-                    buttons.add(Button.secondary(guildIdLong + ":" + ReactionsButton.CHANGE_LANGUAGE,
-                                    "Сменить язык ")
-                            .withEmoji(Emoji.fromUnicode("U+1F1F7U+1F1FA")));
-                } else {
-                    buttons.add(Button.secondary(guildIdLong + ":" + ReactionsButton.CHANGE_LANGUAGE,
-                                    "Change language ")
-                            .withEmoji(Emoji.fromUnicode("U+1F1ECU+1F1E7")));
-                }
-            } else {
-                buttons.add(Button.secondary(guildIdLong + ":" + ReactionsButton.CHANGE_LANGUAGE,
-                                "Сменить язык ")
-                        .withEmoji(Emoji.fromUnicode("U+1F1F7U+1F1FA")));
-            }
-
-            event.replyEmbeds(info.build()).setEphemeral(true).addActionRow(buttons).queue();
+            new MessageInfoHelp().buildMessage(
+                    p,
+                    event.getTextChannel(),
+                    event.getUser().getAvatarUrl(),
+                    event.getGuild().getId(),
+                    event.getUser().getName(), event);
             return;
         }
 
@@ -238,9 +249,11 @@ public class SlashCommand extends ListenerAdapter {
             EmbedBuilder button = new EmbedBuilder();
             button.setColor(0x00FF00);
             button.setDescription(jsonParsers.getLocale("button_Language", event.getGuild().getId())
-                    .replaceAll("\\{0}", event.getOptions().get(0).getAsString()));
+                    .replaceAll("\\{0}", event.getOptions().get(0).getAsString().equals("rus")
+                            ? "Русский"
+                            : "English"));
 
-            event.replyEmbeds(button.build()).queue();
+            event.replyEmbeds(button.build()).setEphemeral(true).queue();
 
             Language language = new Language();
             language.setServerId(event.getGuild().getId());
@@ -254,10 +267,15 @@ public class SlashCommand extends ListenerAdapter {
             if (GiveawayRegistry.getInstance().hasGift(event.getGuild().getIdLong())) {
 
                 StringBuilder stringBuilder = new StringBuilder();
-                List<String> participantsList = GiveawayRegistry.getInstance().getGift(event.getGuild().getIdLong()).getListUsers();
+                List<String> participantsList = new ArrayList<>(GiveawayRegistry.getInstance()
+                        .getActiveGiveaways().get(event.getGuild().getIdLong())
+                        .getListUsers());
 
                 if (participantsList.isEmpty()) {
-                    event.reply(jsonParsers.getLocale("slash_list_users_empty", event.getGuild().getId())).setEphemeral(true).queue();
+                    EmbedBuilder list = new EmbedBuilder();
+                    list.setColor(Color.GREEN);
+                    list.setDescription(jsonParsers.getLocale("slash_list_users_empty", event.getGuild().getId()));
+                    event.replyEmbeds(list.build()).setEphemeral(true).queue();
                     return;
                 }
 
@@ -277,12 +295,21 @@ public class SlashCommand extends ListenerAdapter {
 
                 event.replyEmbeds(list.build()).queue();
             } else {
-                EmbedBuilder list = new EmbedBuilder();
-                list.setColor(0x00FF00);
-                list.setDescription(jsonParsers.getLocale("slash_Stop_No_Has", event.getGuild().getId()));
-
-                event.replyEmbeds(list.build()).setEphemeral(true).queue();
+                EmbedBuilder noGiveaway = new EmbedBuilder();
+                noGiveaway.setColor(Color.GREEN);
+                noGiveaway.setDescription(jsonParsers.getLocale("slash_Stop_No_Has", event.getGuild().getId()));
+                event.replyEmbeds(noGiveaway.build()).setEphemeral(true).queue();
             }
+            return;
+        }
+
+        if (event.getName().equals("patreon")) {
+            EmbedBuilder patreon = new EmbedBuilder();
+            patreon.setColor(Color.YELLOW);
+            patreon.setTitle("Patreon", "https://www.patreon.com/ghbots");
+            patreon.setDescription("If you want to support the work of our bots." +
+                    "\nYou can do it here click: [here](https://www.patreon.com/ghbots)");
+            event.replyEmbeds(patreon.build()).setEphemeral(true).queue();
         }
     }
 }

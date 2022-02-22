@@ -19,7 +19,9 @@
   "gift_Invalid_Number_Description_Loop": "Чтобы не попасть в рекурсию, нам пришлось уменьшить количество\nпобедителей на один. Так как их число было равно числу участников",
   "gift_Giveaway_End": "Giveaway завершилась",
   "gift_Giveaway_Winners": "Количество участников: `{0}`\n:trophy: Победители: ",
-  "gift_Giveaway_Winner_Mention": "Количество участников: `{0}`\n:trophy: Победитель: <@",
+  "gift_Giveaway_RANDOMORG_one": "\n\nПобедитель был выбран\nс помощью: RANDOM.ORG",
+  "gift_Giveaway_RANDOMORG_more": "\n\nПобедители были выбраны\nс помощью: RANDOM.ORG",
+  "gift_Giveaway_Winner_Mention": "Количество участников: `{0}`\n:trophy: Победитель: ",
   "language_change_Not_Admin": "Вы не являетесь Админом или не можете управлять сервером!",
   "button_Help": "/help",
   "button_Language": "Вы сменили язык на: `{0}`",
@@ -28,5 +30,13 @@
   "slash_Errors": "Вы допустили ошибку, посмотрите документацию",
   "send_slash_message": "Создал Giveaway в текстовом канале: <#{0}>",
   "slash_list_users": "Список участников",
-  "slash_list_users_empty": "Ещё нет участников"
+  "slash_list_users_empty": "Ещё нет участников",
+  "gift_notification": "Уведомление",
+  "gift_special_role": "Этот розыгрыш только для Этой Роли: ",
+  "gift_notification_for_this_role": "Уведомление для этой роли: ",
+  "slash_error_only_for_this_role": "Вы не можете сделать Giveaway только для Роли: `",
+  "slash_error_role_can_not_be_everyone": "`@everyone` можно использовать только для упоминания!",
+  "button_giveaway_not_access": "У вас нет доступа к этой раздаче",
+  "button_dont_worry": "Не волнуйся, ты участник.\nМы проверили тебя в базе данных.",
+  "button_you_not_register": "Похоже, мы вас еще не зарегистрировали.\n`Повторите попытку через 5 секунд`. Если это случится снова, напишите нам в службу поддержки.\nСсылка доступна в профиле бота."
 }

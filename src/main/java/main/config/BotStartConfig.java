@@ -22,7 +22,6 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.components.Button;
-import org.apache.commons.io.IOUtils;
 import org.discordbots.api.client.DiscordBotListAPI;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -37,8 +36,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -65,6 +62,7 @@ public class BotStartConfig {
     //REPOSITORY
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final LanguageRepository languageRepository;
+    private final PrefixRepository prefixRepository;
     private final ParticipantsRepository participantsRepository;
 
     //DataBase
@@ -80,6 +78,7 @@ public class BotStartConfig {
             languageRepository, ParticipantsRepository participantsRepository) {
         this.activeGiveawayRepository = activeGiveawayRepository;
         this.languageRepository = languageRepository;
+        this.prefixRepository = prefixRepository;
         this.participantsRepository = participantsRepository;
     }
 
@@ -96,13 +95,19 @@ public class BotStartConfig {
             getMessageIdFromDB();
             //Получаем всех участников по гильдиям
             getUsersWhoTakePartFromDB();
+            //Получаем все префиксы из базы данных
+            getPrefixFromDB();
 
             jdaBuilder.setAutoReconnect(true);
             jdaBuilder.setStatus(OnlineStatus.ONLINE);
             jdaBuilder.setActivity(Activity.playing(activity + serverCount + " guilds"));
             jdaBuilder.setBulkDeleteSplittingEnabled(false);
-            jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild(activeGiveawayRepository, languageRepository));
-            jdaBuilder.addEventListeners(new ReactionsButton(languageRepository, participantsRepository, activeGiveawayRepository));
+            jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild(prefixRepository, activeGiveawayRepository, languageRepository));
+            jdaBuilder.addEventListeners(new MessageGift(activeGiveawayRepository, participantsRepository));
+            jdaBuilder.addEventListeners(new PrefixChange(prefixRepository));
+            jdaBuilder.addEventListeners(new MessageInfoHelp());
+            jdaBuilder.addEventListeners(new LanguageChange(languageRepository));
+            jdaBuilder.addEventListeners(new ReactionsButton(languageRepository, participantsRepository));
             jdaBuilder.addEventListeners(new SlashCommand(languageRepository, activeGiveawayRepository, participantsRepository));
 
             jda = jdaBuilder.build();
@@ -111,85 +116,83 @@ public class BotStartConfig {
             e.printStackTrace();
         }
 
-//        jda.getGuilds().forEach(guild -> guild.updateCommands().queue());
+        System.out.println(jda.retrieveCommands().complete());
 
         //Обновить команды
-//        updateSlashCommands();
-        System.out.println("16:00");
+//        updateSlashCommands(false);
+        System.out.println("15:25");
     }
 
-    @Bean
-    public void StopGiveaway() {
-        Thread thread = new Thread(() -> {
-            try {
-                while (true) {
-                    executorService = Executors.newFixedThreadPool(2);
-                    int count = queue.size();
-
-                    if (!queue.isEmpty()) {
-                        for (int i = 0; i < count; i++) {
-                            Giveaway giveaway = queue.poll();
-                            if (giveaway != null) {
-                                executorService.submit(new StopGiveawayByTimer(giveaway));
-                            }
-                        }
-                        executorService.shutdown();
-                    }
-                    Thread.sleep(2000);
-                }
-            } catch (Exception e) {
-                Thread.currentThread().interrupt();
-                e.printStackTrace();
-            }
-        });
-        thread.start();
-    }
-
-    private void updateSlashCommands() {
+    private void updateSlashCommands(boolean isUpdateInGuilds) {
         try {
-            jda.updateCommands().queue();
+            if (isUpdateInGuilds) {
+                for (int i = 0; i < jda.getGuilds().size(); i++) {
+                    jda.getGuilds().get(i).updateCommands().queue(null, throwable -> {
+                    });
+                }
+                System.out.println("Готово");
+                return;
+            } else {
+                CommandListUpdateAction commands = jda.updateCommands();
 
-            jda.getGuilds().forEach(guild -> System.out.println(guild.getName() + " " + guild.getSelfMember().hasPermission(Permission.USE_APPLICATION_COMMANDS)));
+                List<OptionData> optionsLanguage = new ArrayList<>();
+                List<OptionData> optionsStart = new ArrayList<>();
+                List<OptionData> optionsStop = new ArrayList<>();
 
-            List<OptionData> optionsLanguage = new ArrayList<>();
-            List<OptionData> optionsStart = new ArrayList<>();
-            List<OptionData> optionsStop = new ArrayList<>();
+                optionsLanguage.add(new OptionData(STRING, "bot", "Setting the bot language")
+                        .addChoice("\uD83C\uDDEC\uD83C\uDDE7 English Language", "eng")
+                        .addChoice("\uD83C\uDDF7\uD83C\uDDFA Russian Language", "rus")
+                        .setRequired(true));
 
-            optionsLanguage.add(new OptionData(OptionType.STRING, "bot", "Setting the bot language")
-                    .addChoice("eng", "eng")
-                    .addChoice("rus", "rus")
-                    .setRequired(true));
+                optionsStart.add(new OptionData(STRING, "title", "Title for Giveaway").setName("title"));
 
-            optionsStart.add(new OptionData(OptionType.STRING, "title", "Title for Giveaway")
-                    .setName("title")
-            );
+                optionsStart.add(new OptionData(INTEGER, "count", "Set count winners").setName("count"));
 
-            optionsStart.add(new OptionData(OptionType.INTEGER, "count", "Set count winners. From 1 to 99")
-                    .setName("count").setMinValue(2).setMaxValue(99)
-            );
+                optionsStart.add(new OptionData(STRING, "duration", "Examples: 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style. Preferably immediately in UTC ±0").setName("duration"));
 
-            optionsStart.add(new OptionData(OptionType.STRING, "duration", "Examples: 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style. Preferably immediately in UTC ±0")
-                    .setName("duration")
-            );
+                optionsStart.add(new OptionData(CHANNEL, "channel", "#text channel name").setName("channel"));
 
-            optionsStart.add(new OptionData(OptionType.CHANNEL, "channel", "#text channel name")
-                    .setName("channel")
-            );
+                optionsStart.add(new OptionData(ROLE, "mention", "Mentioning a specific Role").setName("mention"));
 
-            optionsStop.add(new OptionData(OptionType.STRING, "stop", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1")
-                    .setName("stop")
-            );
+                optionsStart.add(new OptionData(STRING, "role", "Giveaway is only for a specific role? Don't forget to specify the Role in the previous choice.")
+                        .addChoice("yes", "yes")
+                        .setName("role"));
 
+                optionsStop.add(new OptionData(STRING, "stop", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1").setName("stop"));
 
-            jda.getGuilds().forEach(guild -> {
-                guild.upsertCommand("language", "Setting language").addOptions(optionsLanguage).queue();
-                guild.upsertCommand("start", "Create giveaway").addOptions(optionsStart).queue();
-                guild.upsertCommand("stop", "Stop the Giveaway").addOptions(optionsStop).queue();
-                guild.upsertCommand("help", "Bot commands").queue();
-                guild.upsertCommand("list", "List of participants").queue();
-            });
+                commands.addCommands(Commands.slash("language", "Setting language").addOptions(optionsLanguage));
+                commands.addCommands(Commands.slash("start", "Create giveaway").addOptions(optionsStart));
+                commands.addCommands(Commands.slash("stop", "Stop the Giveaway").addOptions(optionsStop));
+                commands.addCommands(Commands.slash("help", "Bot commands"));
+                commands.addCommands(Commands.slash("list", "List of participants"));
+                commands.addCommands(Commands.slash("patreon", "Support us on Patreon"));
 
+                commands.queue();
+
+                System.out.println("Готово");
+            }
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Scheduled(fixedDelay = 2000, initialDelay = 12000)
+    public void StopGiveaway() {
+        try {
+            executorService = Executors.newFixedThreadPool(2);
+            int count = queue.size();
+
+            if (!queue.isEmpty()) {
+                for (int i = 0; i < count; i++) {
+                    Giveaway giveaway = queue.poll();
+                    if (giveaway != null) {
+                        executorService.submit(new StopGiveawayByTimer(giveaway));
+                    }
+                }
+                executorService.shutdown();
+            }
+        } catch (Exception e) {
+            Thread.currentThread().interrupt();
             e.printStackTrace();
         }
     }
@@ -221,6 +224,26 @@ public class BotStartConfig {
             }
             System.out.println("setLanguages()");
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void getPrefixFromDB() {
+        try {
+            Connection connection = DriverManager.getConnection(URL_CONNECTION, USER_CONNECTION, PASSWORD_CONNECTION);
+            Statement statement = connection.createStatement();
+            String sql = "SELECT * FROM prefixs";
+            ResultSet rs = statement.executeQuery(sql);
+
+            while (rs.next()) {
+                mapPrefix.put(rs.getString("server_id"), rs.getString("prefix"));
+            }
+
+            rs.close();
+            statement.close();
+            connection.close();
+            System.out.println("getPrefixFromDB()");
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
@@ -270,7 +293,8 @@ public class BotStartConfig {
                 long message_id_long = rs.getLong("message_id_long");
                 String giveaway_title = rs.getString("giveaway_title");
                 Timestamp date_end_giveaway = rs.getTimestamp("date_end_giveaway");
-
+                Long role_id_long = rs.getLong("role_id_long");
+                Boolean is_for_specific_role = rs.getBoolean("is_for_specific_role");
 
                 guildIdHashList.put(guildIdHashList.size() + 1, String.valueOf(guild_long_id));
                 GiveawayRegistry.getInstance().putGift(
@@ -286,6 +310,8 @@ public class BotStartConfig {
                 GiveawayRegistry.getInstance().putEndGiveawayDate(guild_long_id, date_end_giveaway);
                 GiveawayRegistry.getInstance().putChannelId(guild_long_id, channel_long_id);
                 GiveawayRegistry.getInstance().putCountWinners(guild_long_id, count_winners);
+                GiveawayRegistry.getInstance().getRoleId().put(guild_long_id, role_id_long);
+                GiveawayRegistry.getInstance().getIsForSpecificRole().put(guild_long_id, is_for_specific_role);
 
                 //Добавляем кнопки для Giveaway в Gift class
                 setButtonsInGift(String.valueOf(guild_long_id), guild_long_id);
@@ -329,6 +355,11 @@ public class BotStartConfig {
 
                     //Устанавливаем счетчик на верное число
                     GiveawayRegistry.getInstance()
+                            .getActiveGiveaways()
+                            .get(Long.parseLong(guildIdHashList.get(i)))
+                            .setCount(GiveawayRegistry.getInstance()
+                                    .getActiveGiveaways()
+                                    .get(Long.parseLong(guildIdHashList.get(i))).getListUsersHash().size());
                             .getGift(Long.parseLong(guildIdHashList.get(i)))
                             .setCount(GiveawayRegistry.getInstance().getGift(Long.parseLong(guildIdHashList.get(i))).getListUsersHash().size());
                 }
@@ -351,7 +382,6 @@ public class BotStartConfig {
                 int serverCount = BotStartConfig.jda.getGuilds().size();
                 TOP_GG_API.setStats(serverCount);
                 BotStartConfig.jda.getPresence().setActivity(Activity.playing(BotStartConfig.activity + serverCount + " guilds"));
-
                 IOUtils.toString(new URL("http://195.2.81.139:3001/api/push/SHAtSCMYvd?msg=OK&ping="), StandardCharsets.UTF_8);
                 if (!isLaunched) {
                     Statcord.start(
@@ -386,6 +416,11 @@ public class BotStartConfig {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+
+    public static Map<String, String> getMapPrefix() {
+        return mapPrefix;
     }
 
     public static Map<String, String> getMapLanguages() {

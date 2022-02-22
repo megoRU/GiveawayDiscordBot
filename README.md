@@ -1,5 +1,5 @@
 # GiveawayDiscordBot
-[![Java CI](https://github.com/megoRU/GiveawayDiscordBot/actions/workflows/build.yml/badge.svg)](https://github.com/megoRU/GiveawayDiscordBot/actions/workflows/build.yml) 
+[![CI/CD](https://github.com/megoRU/GiveawayDiscordBot/actions/workflows/ci_cd.yml/badge.svg?branch=main)](https://github.com/megoRU/GiveawayDiscordBot/actions/workflows/ci_cd.yml)
 [![Discord](https://img.shields.io/discord/779317239722672128?label=Discord)](https://discord.gg/UrWG3R683d)
 [![Add](https://img.shields.io/badge/invite-Giveaway-blue?logo=discord)](https://top.gg/bot/808277484524011531/invite/)
 [![top](https://img.shields.io/badge/TOP.GG-pink?logo=discord)](https://top.gg/bot/808277484524011531) [![Discord Bots](https://top.gg/api/widget/servers/808277484524011531.svg)](https://top.gg/bot/808277484524011531)

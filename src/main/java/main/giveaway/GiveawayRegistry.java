@@ -12,7 +12,11 @@ import java.util.concurrent.ConcurrentMap;
 
 public class GiveawayRegistry {
 
-    //Возвращает GiftData по long id
+    //Возвращает Gift по long id
+    private static final ConcurrentMap<Long, Gift> activeGiveaways = new ConcurrentHashMap<>();
+    //Возвращает String id message с активным Giveaway
+    private static final Map<Long, Long> roleId = new HashMap<>();
+    private static final Map<Long, Boolean> isForSpecificRole = new HashMap<>();
     private static final ConcurrentMap<Long, GiveawayData> giveawayDataMap = new ConcurrentHashMap<>();
     private static final JSONParsers jsonParsers = new JSONParsers();
     private static volatile GiveawayRegistry giveawayRegistry;

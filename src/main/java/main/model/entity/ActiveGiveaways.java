@@ -37,4 +37,10 @@ public class ActiveGiveaways {
 
     @Column(name = "giveaway_title")
     private String giveawayTitle;
+
+    @Column(name = "role_id_long")
+    private Long roleIdLong;
+
+    @Column(name = "is_for_specific_role")
+    private Boolean isForSpecificRole;
 }
