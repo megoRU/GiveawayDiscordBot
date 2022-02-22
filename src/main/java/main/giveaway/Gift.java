@@ -20,6 +20,7 @@ import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.*;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -31,6 +32,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
@@ -340,7 +342,7 @@ public class Gift implements GiftHelper, SenderMessage {
         LOGGER.info("\nstopGift method" + "\nCount winner: " + countWinner);
         if (listUsers.size() < 2) {
             EmbedBuilder notEnoughUsers = new EmbedBuilder();
-            notEnoughUsers.setColor(0xFF0000);
+            notEnoughUsers.setColor(Color.GREEN);
             notEnoughUsers.setTitle(jsonParsers.getLocale("gift_Not_Enough_Users", String.valueOf(guildIdLong)));
             notEnoughUsers.setDescription(jsonParsers.getLocale("gift_Giveaway_Deleted", String.valueOf(guildIdLong)));
             //Отправляет сообщение
@@ -376,7 +378,7 @@ public class Gift implements GiftHelper, SenderMessage {
             getWinners(countWinner);
         } catch (Exception e) {
             EmbedBuilder errors = new EmbedBuilder();
-            errors.setColor(0x00FF00);
+            errors.setColor(Color.GREEN);
             errors.setTitle("Errors with API");
             errors.setDescription("Repeat later. Or write to us about it.");
 
@@ -388,7 +390,7 @@ public class Gift implements GiftHelper, SenderMessage {
         }
 
         EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setColor(0x00FF00);
+        embedBuilder.setColor(Color.GREEN);
         embedBuilder.setTitle(jsonParsers.getLocale("gift_Giveaway_End", String.valueOf(guildIdLong)));
 
         if (uniqueWinners.size() == 1) {
@@ -406,6 +408,13 @@ public class Gift implements GiftHelper, SenderMessage {
                     .replaceAll("\\[", "").replaceAll("]", "") +
                     jsonParsers.getLocale("gift_Giveaway_RANDOMORG_more", String.valueOf(guildIdLong)));
         }
+
+        if (!GiveawayRegistry.getInstance().getTitle(guildId).equals("Giveaway")) {
+            embedBuilder
+                    .addField(jsonParsers.getLocale("gift_what_was_giveaway", String.valueOf(guildIdLong)),
+                    GiveawayRegistry.getInstance().getTitle(guildId), false);
+        }
+
         embedBuilder.setTimestamp(Instant.now());
         embedBuilder.setFooter(jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
 

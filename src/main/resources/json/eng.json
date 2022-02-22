@@ -61,5 +61,6 @@
   "slash_error_role_can_not_be_everyone": "`@everyone` can only be used to mention!",
   "button_giveaway_not_access": "You don't have access to this Giveaway",
   "button_dont_worry": "Don't worry, you're a participant.\nWe checked you in the database.",
-  "button_you_not_register": "It looks like we haven't registered you yet.\n`Try again after 5 seconds`. If it happens again, write to us in support.\nThe link is available in the bot profile."
+  "button_you_not_register": "It looks like we haven't registered you yet.\n`Try again after 5 seconds`. If it happens again, write to us in support.\nThe link is available in the bot profile.",
+  "gift_what_was_giveaway": "What was in Giveaway"
 }
