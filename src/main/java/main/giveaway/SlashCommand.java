@@ -206,9 +206,21 @@ public class SlashCommand extends ListenerAdapter {
 
             EmbedBuilder stop = new EmbedBuilder();
             stop.setColor(0x00FF00);
-            stop.setDescription(jsonParsers.getLocale("slash_Stop", event.getGuild().getId()));
 
-            event.replyEmbeds(stop.build()).queue();
+            int count = Integer.parseInt(event.getOptions().get(0).getAsString());
+            boolean isHasErrors = false;
+
+            if (GiveawayRegistry.getInstance().getGift(event.getGuild().getIdLong()).getListUsers().size() == count) {
+                isHasErrors = true;
+            }
+
+            if (!isHasErrors) {
+                stop.setDescription(jsonParsers.getLocale("slash_Stop", event.getGuild().getId()));
+                event.replyEmbeds(stop.build()).queue();
+            } else {
+                stop.setDescription(jsonParsers.getLocale("slash_Stop_Errors", event.getGuild().getId()));
+                event.replyEmbeds(stop.build()).queue();
+            }
 
             GiveawayRegistry.getInstance()
                     .getGift(event.getGuild().getIdLong())
@@ -226,7 +238,8 @@ public class SlashCommand extends ListenerAdapter {
                     event.getTextChannel(),
                     event.getUser().getAvatarUrl(),
                     event.getGuild().getId(),
-                    event.getUser().getName(), event);
+                    event.getUser().getName(),
+                    event);
             return;
         }
 
@@ -268,7 +281,7 @@ public class SlashCommand extends ListenerAdapter {
 
                 StringBuilder stringBuilder = new StringBuilder();
                 List<String> participantsList = new ArrayList<>(GiveawayRegistry.getInstance()
-                        .getActiveGiveaways().get(event.getGuild().getIdLong())
+                        .getGift(event.getGuild().getIdLong())
                         .getListUsers());
 
                 if (participantsList.isEmpty()) {

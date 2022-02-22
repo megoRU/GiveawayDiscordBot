@@ -73,14 +73,16 @@ public class Gift implements GiftHelper, SenderMessage {
                 + "\nTextChannel: " + channel.getName() + " " + channel.getId()
                 + "\nTitle: " + newTitle
                 + "\nCount winners: " + countWinners
-                + "\nTime: " + time);
+                + "\nTime: " + time
+                + "\nRole: " + role
+                + "\nisOnlyForSpecificRole: " + isOnlyForSpecificRole);
 
         GiveawayRegistry.getInstance().putTitle(guild.getIdLong(), newTitle == null ? "Giveaway" : newTitle);
         //Instant для timestamp
         specificTime = Instant.ofEpochMilli(Instant.now().toEpochMilli());
 
         start.setColor(0x00FF00);
-        start.setTitle(GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
+        start.setTitle(GiveawayRegistry.getInstance().getTitle(guild.getIdLong()));
         start.addField("Attention for Admins: \nMay 1, 2022 you will not be able to control the bot \nwithout Slash Commands, add them: ", "[Add slash commands](https://discord.com/oauth2/authorize?client_id=808277484524011531&scope=applications.commands%20bot)", false);
 
         if (time != null) {
@@ -162,15 +164,17 @@ public class Gift implements GiftHelper, SenderMessage {
     protected void startGift(Guild guild, TextChannel textChannel, String newTitle, String countWinners, String time) {
         EmbedBuilder start = new EmbedBuilder();
 
-        extracted(start, guild, textChannel, newTitle, countWinners, time);
+        extracted(start, guild, textChannel, newTitle, countWinners, time, null, false);
 
-        textChannel.sendMessageEmbeds(start.build()).setActionRow(buttons).queue(message -> updateCollections(guild, countWinners, time, message));
+        textChannel.sendMessageEmbeds(start.build()).setActionRow(buttons).queue(message -> updateCollections(guild, countWinners, time, message, null, null));
 
         //Вот мы запускаем бесконечный поток.
         autoInsert();
     }
 
-    protected void startGift(@NotNull SlashCommandEvent event, Guild guild, TextChannel textChannel, String newTitle, String countWinners, String time) {
+    protected void startGift(@NotNull SlashCommandInteractionEvent event, Guild guild,
+                             TextChannel textChannel, String newTitle, String countWinners,
+                             String time, Long role, Boolean isOnlyForSpecificRole) {
         EmbedBuilder start = new EmbedBuilder();
         extracted(start, guild, textChannel, newTitle, countWinners, time, role, isOnlyForSpecificRole);
 
@@ -185,20 +189,20 @@ public class Gift implements GiftHelper, SenderMessage {
         autoInsert();
     }
 
-    private void updateCollections(Guild guild, String countWinners, String time, Message message) {
+    private void updateCollections(Guild guild, String countWinners, String time, Message message, Long role, Boolean isOnlyForSpecificRole) {
         GiveawayRegistry.getInstance().putMessageId(guild.getIdLong(), message.getId());
         GiveawayRegistry.getInstance().putChannelId(guild.getIdLong(), message.getChannel().getId());
         GiveawayRegistry.getInstance().putIdMessagesWithGiveawayButtons(guild.getIdLong(), message.getId());
         GiveawayRegistry.getInstance().putCountWinners(guild.getIdLong(), countWinners);
-        GiveawayRegistry.getInstance().getRoleId().put(guild.getIdLong(), role);
-        GiveawayRegistry.getInstance().getIsForSpecificRole().put(guild.getIdLong(), isOnlyForSpecificRole);
+        GiveawayRegistry.getInstance().putRoleId(guild.getIdLong(), role);
+        GiveawayRegistry.getInstance().putIsForSpecificRole(guild.getIdLong(), isOnlyForSpecificRole);
 
         ActiveGiveaways activeGiveaways = new ActiveGiveaways();
         activeGiveaways.setGuildLongId(guildId);
         activeGiveaways.setMessageIdLong(message.getIdLong());
         activeGiveaways.setChannelIdLong(message.getChannel().getIdLong());
         activeGiveaways.setCountWinners(countWinners);
-        activeGiveaways.setGiveawayTitle(GiveawayRegistry.getInstance().getTitle().get(guild.getIdLong()));
+        activeGiveaways.setGiveawayTitle(GiveawayRegistry.getInstance().getTitle(guild.getIdLong()));
         activeGiveaways.setRoleIdLong(role);
         activeGiveaways.setIsForSpecificRole(isOnlyForSpecificRole);
 
@@ -251,9 +255,9 @@ public class Gift implements GiftHelper, SenderMessage {
                     }
                     participantsRepository.saveAll(temp);
                     updateGiveawayMessage(
-                            GiveawayRegistry.getInstance().getCountWinners().get(guildId) == null
+                            GiveawayRegistry.getInstance().getCountWinners(guildId) == null
                                     ? "TBA"
-                                    : GiveawayRegistry.getInstance().getCountWinners().get(guildId),
+                                    : GiveawayRegistry.getInstance().getCountWinners(guildId),
                             this.guildId,
                             this.textChannelId,
                             getCount());
@@ -292,7 +296,7 @@ public class Gift implements GiftHelper, SenderMessage {
                     e.printStackTrace();
                 }
             }
-        }, 1, 5000);
+        }, 2000, 5000);
     }
 
     /**
@@ -359,13 +363,11 @@ public class Gift implements GiftHelper, SenderMessage {
                     countWinner);
             return;
         }
-        Instant timestamp = Instant.now();
-        Instant specificTime = Instant.ofEpochMilli(timestamp.toEpochMilli());
-        if (countWinner > 1) {
+
+        try {
             //выбираем победителей
             getWinners(countWinner);
         } catch (Exception e) {
-
             EmbedBuilder errors = new EmbedBuilder();
             errors.setColor(0x00FF00);
             errors.setTitle("Errors with API");
@@ -412,6 +414,7 @@ public class Gift implements GiftHelper, SenderMessage {
     private void clearingCollections() {
         try {
             GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildId);
+            buttons.clear();
             setCount(0);
         } catch (Exception e) {
             e.printStackTrace();

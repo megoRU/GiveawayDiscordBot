@@ -8,6 +8,7 @@ import main.messagesevents.SenderMessage;
 import main.model.entity.ActiveGiveaways;
 import main.model.entity.Language;
 import main.model.entity.Participants;
+import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.LanguageRepository;
 import main.model.repository.ParticipantsRepository;
 import main.startbot.Statcord;
@@ -30,9 +31,6 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
     public static final String PRESENT = "PRESENT";
     public static final String BUTTON_EXAMPLES = "BUTTON_EXAMPLES";
     public static final String BUTTON_HELP = "BUTTON_HELP";
-    public static final String STOP_ONE = "STOP_ONE";
-    public static final String STOP_TWO = "STOP_TWO";
-    public static final String STOP_THREE = "STOP_THREE";
     public static final String CHANGE_LANGUAGE = "CHANGE_LANGUAGE";
     private final static Logger LOGGER = Logger.getLogger(ReactionsButton.class.getName());
     private static final JSONParsers jsonParsers = new JSONParsers();
@@ -101,19 +99,19 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
          * Если нет {@link Gift} активного, то делаем {@return}
          */
         try {
-            if (GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons().get(event.getGuild().getIdLong()) == null) {
+            if (!GiveawayRegistry.getInstance().hasGift(event.getGuild().getIdLong())) return;
+
+            if (GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons(event.getGuild().getIdLong()) == null) {
                 return;
             }
 
             if (!GiveawayRegistry.getInstance().getIdMessagesWithGiveawayButtons(event.getGuild().getIdLong()).equals(event.getMessageId())) {
                 return;
             }
+
+            if (!event.getGuild().getSelfMember().hasPermission(event.getGuildChannel(), Permission.MESSAGE_SEND)) return;
         } catch (Exception e) {
             e.printStackTrace();
-        }
-
-        if (!event.getGuild().getSelfMember().hasPermission(event.getGuildChannel(), Permission.MESSAGE_SEND)) {
-            return;
         }
 
         try {
@@ -127,14 +125,14 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
 
             if (Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + PRESENT)
                     && GiveawayRegistry.getInstance().hasGift(guild)
-                    && GiveawayRegistry.getInstance().getActiveGiveaways().get(event.getGuild().getIdLong())
+                    && GiveawayRegistry.getInstance().getGift(event.getGuild().getIdLong())
                     .getListUsersHash(event.getUser().getId()) == null) {
 
                 event.deferEdit().queue();
 
-                if (GiveawayRegistry.getInstance().getIsForSpecificRole().get(guild) != null
-                        && GiveawayRegistry.getInstance().getIsForSpecificRole().get(guild)
-                        && !event.getMember().getRoles().toString().contains(GiveawayRegistry.getInstance().getRoleId().get(guild).toString())) {
+                if (GiveawayRegistry.getInstance().getIsForSpecificRole(guild) != null
+                        && GiveawayRegistry.getInstance().getIsForSpecificRole(guild)
+                        && !event.getMember().getRoles().toString().contains(GiveawayRegistry.getInstance().getRoleId(guild).toString())) {
 
                     EmbedBuilder embedBuilder = new EmbedBuilder();
                     embedBuilder.setColor(Color.RED);
@@ -145,8 +143,7 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
                 }
 
                 GiveawayRegistry.getInstance()
-                        .getActiveGiveaways()
-                        .get(event.getGuild().getIdLong())
+                        .getGift(event.getGuild().getIdLong())
                         .addUserToPoll(event.getUser());
                 Statcord.commandPost("gift", event.getUser().getId());
                 return;
@@ -154,8 +151,7 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
 
             if (Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + PRESENT)
                     && GiveawayRegistry.getInstance().hasGift(guild)
-                    && GiveawayRegistry.getInstance().getActiveGiveaways()
-                    .get(event.getGuild().getIdLong())
+                    && GiveawayRegistry.getInstance().getGift(event.getGuild().getIdLong())
                     .getListUsersHash().containsKey(event.getUser().getId())) {
 
                 long startTime = System.currentTimeMillis();

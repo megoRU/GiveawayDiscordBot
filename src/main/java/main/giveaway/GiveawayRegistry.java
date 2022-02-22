@@ -2,22 +2,19 @@ package main.giveaway;
 
 import lombok.Getter;
 import lombok.Setter;
-import main.config.BotStartConfig;
 import main.jsonparser.JSONParsers;
-import main.model.repository.ActiveGiveawayRepository;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public class GiveawayRegistry {
 
-    //Возвращает Gift по long id
-    private static final ConcurrentMap<Long, Gift> activeGiveaways = new ConcurrentHashMap<>();
-    //Возвращает String id message с активным Giveaway
-    private static final Map<Long, Long> roleId = new HashMap<>();
-    private static final Map<Long, Boolean> isForSpecificRole = new HashMap<>();
-    private static final ConcurrentMap<Long, GiveawayData> giveawayDataMap = new ConcurrentHashMap<>();
+    //Возвращает GiveawayData по long id
+    private static final Map<Long, GiveawayData> giveawayDataMap = new HashMap<>();
     private static final JSONParsers jsonParsers = new JSONParsers();
     private static volatile GiveawayRegistry giveawayRegistry;
 
@@ -35,6 +32,8 @@ public class GiveawayRegistry {
         private String countWinners;
         private String title;
         private Timestamp endGiveawayDate;
+        private Long roleId;
+        private Boolean isForSpecificRole;
 
         public GiveawayData(Gift gift) {
             this.gift = gift;
@@ -54,6 +53,23 @@ public class GiveawayRegistry {
             }
         }
         return giveawayRegistry;
+    }
+
+
+    public Boolean getIsForSpecificRole(long guildId) {
+        return giveawayDataMap.get(guildId).getIsForSpecificRole();
+    }
+
+    public void putIsForSpecificRole(long guildId, Boolean is_for_specific_role) {
+        giveawayDataMap.get(guildId).setIsForSpecificRole(is_for_specific_role);
+    }
+
+    public Long getRoleId(long guildId) {
+        return giveawayDataMap.get(guildId).getRoleId();
+    }
+
+    public void putRoleId(long guildId, Long roleIdLong) {
+        giveawayDataMap.get(guildId).setRoleId(roleIdLong);
     }
 
     public Gift getGift(long guildId) {
