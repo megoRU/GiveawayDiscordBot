@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @AllArgsConstructor
 @Service
@@ -59,48 +61,12 @@ public class SlashCommand extends ListenerAdapter {
                 event.replyEmbeds(errors.build()).queue();
             } else {
                 try {
-                    TextChannel textChannel = null;
-                    String title = null;
-                    String count = null;
-                    String time = null;
-                    Long role = null;
-                    boolean isOnlyForSpecificRole = false;
-
-                    for (int i = 0; i < event.getOptions().size(); i++) {
-
-                        if (title == null
-                                && !event.getOptions().get(i).getAsString().matches("[0-9]{1,2}[mмhчdд]")
-                                && !event.getOptions().get(i).getAsString().matches("\\d{18}")
-                                && !event.getOptions().get(i).getAsString().matches("[0-9]{1,2}")
-                                && event.getOptions().get(i).getAsString().matches(".{0,255}")
-                                && !event.getOptions().get(i).getAsString().matches("[0-9]{4}.[0-9]{2}.[0-9]{2}\\s[0-9]{2}:[0-9]{2}")
-                                && !event.getOptions().get(i).getAsString().equals("yes")) {
-                            title = event.getOptions().get(i).getAsString();
-                        }
-
-                        if (event.getOptions().get(i).getAsString().matches("[0-9]{1,2}")) {
-                            count = event.getOptions().get(i).getAsString();
-                        }
-
-                        if (event.getOptions().get(i).getAsString().matches("[0-9]{1,2}[mмhчdд]")
-                                || event.getOptions().get(i).getAsString().matches("[0-9]{4}.[0-9]{2}.[0-9]{2}\\s[0-9]{2}:[0-9]{2}")) {
-                            time = event.getOptions().get(i).getAsString();
-                        }
-
-                        if (event.getOptions().get(i).getType().equals(OptionType.CHANNEL)) {
-                            textChannel = event.getOptions().get(i).getAsGuildChannel().getGuild()
-                                    .getTextChannelById(event.getOptions().get(i).getAsGuildChannel().getId());
-                        }
-
-                        if (event.getOptions().get(i).getType().equals(OptionType.ROLE)) {
-                            role = event.getOptions().get(i).getAsRole().getIdLong();
-                        }
-
-                        if (event.getOptions().get(i).getAsString().equals("yes")) {
-                            isOnlyForSpecificRole = true;
-                        }
-
-                    }
+                    String title = event.getOption("title", OptionMapping::getAsString);
+                    String count = event.getOption("count", OptionMapping::getAsString);
+                    String time = event.getOption("duration", OptionMapping::getAsString);
+                    TextChannel textChannel = event.getOption("channel", OptionMapping::getAsTextChannel);
+                    Long role = event.getOption("mention", OptionMapping::getAsLong);
+                    boolean isOnlyForSpecificRole = Objects.equals(event.getOption("role", OptionMapping::getAsString), "yes");
 
                     EmbedBuilder embedBuilder = new EmbedBuilder();
                     embedBuilder.setColor(0xFF0000);
@@ -125,9 +91,9 @@ public class SlashCommand extends ListenerAdapter {
                                     participantsRepository));
 
                     if (!event.getGuild().getSelfMember()
-                            .hasPermission(textChannel == null ? event.getTextChannel() : textChannel, Permission.MESSAGE_SEND) ||
-                            !event.getGuild().getSelfMember()
-                                    .hasPermission(textChannel == null ? event.getTextChannel() : textChannel, Permission.MESSAGE_EMBED_LINKS)) {
+                            .hasPermission(textChannel == null ? event.getTextChannel() : textChannel, Permission.MESSAGE_SEND)
+                            || !event.getGuild().getSelfMember()
+                            .hasPermission(textChannel == null ? event.getTextChannel() : textChannel, Permission.MESSAGE_EMBED_LINKS)) {
                         return;
                     }
 
