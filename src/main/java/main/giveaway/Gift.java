@@ -223,25 +223,7 @@ public class Gift implements GiftHelper, SenderMessage {
                             .atOffset(ZoneOffset.UTC)
                             .toEpochSecond() * 1000));
         }
-        activeGiveawayRepository.save(activeGiveaways);
-    }
-
-    private String getMinutes(String time) {
-        String symbol = time.substring(time.length() - 1);
-        time = time.substring(0, time.length() - 1);
-
-        if (symbol.equals("m") || symbol.equals("м")) {
-            return time;
-        }
-
-        if (symbol.equals("h") || symbol.equals("ч")) {
-            return String.valueOf(Integer.parseInt(time) * 60);
-        }
-
-        if (symbol.equals("d") || symbol.equals("д")) {
-            return String.valueOf(Integer.parseInt(time) * 1440);
-        }
-        return "5";
+        activeGiveawayRepository.saveAndFlush(activeGiveaways);
     }
 
     //Добавляет пользователя в StringBuilder
@@ -262,7 +244,7 @@ public class Gift implements GiftHelper, SenderMessage {
                     for (int i = 0; i < participantsList.size(); i++) {
                         temp.add(participantsList.poll());
                     }
-                    participantsRepository.saveAll(temp);
+                    participantsRepository.saveAllAndFlush(temp);
                     updateGiveawayMessage(
                             GiveawayRegistry.getInstance().getCountWinners(guildId) == null
                                     ? "TBA"

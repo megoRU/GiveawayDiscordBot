@@ -127,7 +127,6 @@ public interface GiftHelper {
         }
     }
 
-
     default String setEndingWord(Object num, long guildId) {
         String language = "eng";
         if (BotStartConfig.getMapLanguages().get(String.valueOf(guildId)) != null) {
@@ -146,6 +145,24 @@ public interface GiftHelper {
             case 2, 3, 4 -> language.equals("eng") ? "Winners" : "Победителя";
             default -> language.equals("eng") ? "Winners" : "Победителей";
         };
+    }
+
+    default String getMinutes(String time) {
+        String symbol = time.substring(time.length() - 1);
+        time = time.substring(0, time.length() - 1);
+
+        if (symbol.equals("m") || symbol.equals("м")) {
+            return time;
+        }
+
+        if (symbol.equals("h") || symbol.equals("ч")) {
+            return String.valueOf(Integer.parseInt(time) * 60);
+        }
+
+        if (symbol.equals("d") || symbol.equals("д")) {
+            return String.valueOf(Integer.parseInt(time) * 1440);
+        }
+        return "5";
     }
 
 }
