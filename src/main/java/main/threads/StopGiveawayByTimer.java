@@ -21,9 +21,7 @@ public class StopGiveawayByTimer implements Runnable {
     public void run() {
         try {
             while (true) {
-                if (!GiveawayRegistry.getInstance().hasGift(getID_GUILD())) {
-                    return;
-                }
+                if (!GiveawayRegistry.getInstance().hasGift(ID_GUILD)) return;
 
                 if (LocalDateTime.now().isAfter(TIME.toLocalDateTime())) {
 
@@ -35,10 +33,8 @@ public class StopGiveawayByTimer implements Runnable {
                                             : Integer.parseInt(GiveawayRegistry.getInstance().getCountWinners(getID_GUILD())));
                     return;
                 }
-
                 Thread.sleep(5000L);
             }
-
         } catch (Exception e) {
             Thread.currentThread().interrupt();
             e.printStackTrace();

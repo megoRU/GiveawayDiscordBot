@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface SenderMessage {
 
-    default void sendMessage(MessageEmbed embedBuilder, TextChannel textChannel, List<Button> buttons) {
+    static void sendMessage(MessageEmbed embedBuilder, TextChannel textChannel, List<Button> buttons) {
         try {
             textChannel.sendMessageEmbeds(embedBuilder).setActionRow(buttons).queue();
         } catch (Exception e) {
@@ -19,7 +19,7 @@ public interface SenderMessage {
         }
     }
 
-    default void sendMessage(MessageEmbed embedBuilder, Long guildId, Long textChannel, List<Button> buttons) {
+    static void sendMessage(MessageEmbed embedBuilder, Long guildId, Long textChannel, List<Button> buttons) {
         try {
             BotStartConfig.getJda()
                     .getGuildById(guildId)
@@ -32,7 +32,7 @@ public interface SenderMessage {
         }
     }
 
-    default void sendMessage(MessageEmbed embedBuilder, @NotNull SlashCommandInteractionEvent event, List<Button> buttons) {
+    static void sendMessage(MessageEmbed embedBuilder, @NotNull SlashCommandInteractionEvent event, List<Button> buttons) {
         try {
             event.replyEmbeds(embedBuilder).addActionRow(buttons).queue();
         } catch (Exception e) {

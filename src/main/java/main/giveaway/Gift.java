@@ -3,6 +3,8 @@ package main.giveaway;
 import lombok.Getter;
 import lombok.Setter;
 import main.config.BotStartConfig;
+import main.giveaway.impl.GiftHelper;
+import main.giveaway.impl.SetButtons;
 import main.jsonparser.JSONParsers;
 import main.messagesevents.SenderMessage;
 import main.model.entity.ActiveGiveaways;
@@ -39,12 +41,11 @@ import java.util.logging.Logger;
 
 @Getter
 @Setter
-public class Gift implements GiftHelper, SenderMessage {
+public class Gift {
 
     private final static Logger LOGGER = Logger.getLogger(Gift.class.getName());
     private final String URL = "http://195.2.81.139:8085/api/winners";
     private final JSONParsers jsonParsers = new JSONParsers();
-    private final List<Button> buttons = new ArrayList<>();
     private final Set<String> listUsers = new HashSet<>();
     private final Map<String, String> listUsersHash = new HashMap<>();
     private final Set<String> uniqueWinners = new HashSet<>();
@@ -54,6 +55,7 @@ public class Gift implements GiftHelper, SenderMessage {
     private final long textChannelId;
     private StringBuilder insertQuery = new StringBuilder();
     private AtomicInteger count = new AtomicInteger(0);
+    private int localCountUsers = 0;
     private String times;
     private OffsetDateTime offsetTime;
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss.SSS");
@@ -100,7 +102,7 @@ public class Gift implements GiftHelper, SenderMessage {
 
                 start.setDescription(jsonParsers.getLocale("gift_Press_Green_Button", guild.getId())
                         .replaceAll("\\{0}", countWinners == null ? "TBA" : countWinners)
-                        .replaceAll("\\{1}", setEndingWord(countWinners == null ? "TBA" : countWinners, guildId)) + getCount() + "`");
+                        .replaceAll("\\{1}", GiftHelper.setEndingWord(countWinners == null ? "TBA" : countWinners, guildId)) + getCount() + "`");
 
                 start.setTimestamp(dateTime);
                 start.setFooter(jsonParsers.getLocale("gift_Ends_At", guild.getId()));
@@ -111,10 +113,10 @@ public class Gift implements GiftHelper, SenderMessage {
                 BotStartConfig.getQueue().add(new Giveaway(guildId,
                         new Timestamp(offsetTime.toEpochSecond() * 1000)));
             } else {
-                times = getMinutes(time);
+                times = GiftHelper.getMinutes(time);
                 start.setDescription(jsonParsers.getLocale("gift_Press_Green_Button", guild.getId())
                         .replaceAll("\\{0}", countWinners == null ? "TBA" : countWinners)
-                        .replaceAll("\\{1}", setEndingWord(countWinners == null ? "TBA" : countWinners, guildId)) + getCount() + "`");
+                        .replaceAll("\\{1}", GiftHelper.setEndingWord(countWinners == null ? "TBA" : countWinners, guildId)) + getCount() + "`");
 
                 start.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times)));
                 start.setFooter(jsonParsers.getLocale("gift_Ends_At", guild.getId()));
@@ -130,7 +132,7 @@ public class Gift implements GiftHelper, SenderMessage {
         if (time == null) {
             start.setDescription(jsonParsers.getLocale("gift_Press_Green_Button", guild.getId())
                     .replaceAll("\\{0}", countWinners == null ? "TBA" : countWinners)
-                    .replaceAll("\\{1}", setEndingWord(countWinners == null ? "TBA" : countWinners, guildId)) + getCount() + "`");
+                    .replaceAll("\\{1}", GiftHelper.setEndingWord(countWinners == null ? "TBA" : countWinners, guildId)) + getCount() + "`");
             GiveawayRegistry.getInstance().putEndGiveawayDate(guild.getIdLong(), null);
         }
 
@@ -149,20 +151,6 @@ public class Gift implements GiftHelper, SenderMessage {
             }
 
         }
-
-        if (BotStartConfig.getMapLanguages().get(guild.getId()) != null) {
-
-            if (BotStartConfig.getMapLanguages().get(guild.getId()).equals("rus")) {
-                buttons.add(Button.success(guildId + ":" + ReactionsButton.PRESENT,
-                        jsonParsers.getLocale("gift_Press_Me_Button", guild.getId()) + "⠀ "));
-            } else {
-                buttons.add(Button.success(guildId + ":" + ReactionsButton.PRESENT,
-                        jsonParsers.getLocale("gift_Press_Me_Button", guild.getId()) + "⠀⠀⠀⠀⠀⠀⠀⠀"));
-            }
-        } else {
-            buttons.add(Button.success(guildId + ":" + ReactionsButton.PRESENT,
-                    jsonParsers.getLocale("gift_Press_Me_Button", guild.getId()) + "⠀⠀⠀⠀⠀⠀⠀⠀"));
-        }
     }
 
     protected void startGift(Guild guild, TextChannel textChannel, String newTitle, String countWinners, String time) {
@@ -170,7 +158,8 @@ public class Gift implements GiftHelper, SenderMessage {
 
         extracted(start, guild, textChannel, newTitle, countWinners, time, null, false);
 
-        textChannel.sendMessageEmbeds(start.build()).setActionRow(buttons).queue(message -> updateCollections(guild, countWinners, time, message, null, null));
+        textChannel.sendMessageEmbeds(start.build()).setActionRow(SetButtons.getListButtons(String.valueOf(guildId)))
+                .queue(message -> updateCollections(guild, countWinners, time, message, null, null));
 
         //Вот мы запускаем бесконечный поток.
         autoInsert();
@@ -192,7 +181,8 @@ public class Gift implements GiftHelper, SenderMessage {
             e.printStackTrace();
         }
 
-        textChannel.sendMessageEmbeds(start.build()).setActionRow(buttons).queue(message -> updateCollections(guild, countWinners, time, message, role, isOnlyForSpecificRole));
+        textChannel.sendMessageEmbeds(start.build()).setActionRow(SetButtons.getListButtons(String.valueOf(guildId)))
+                .queue(message -> updateCollections(guild, countWinners, time, message, role, isOnlyForSpecificRole));
 
         //Вот мы запускаем бесконечный поток.
         autoInsert();
@@ -238,14 +228,15 @@ public class Gift implements GiftHelper, SenderMessage {
     //Fixed
     private void executeMultiInsert(long guildIdLong) {
         try {
-            if (GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
+            if (count.get() > localCountUsers && GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
+                localCountUsers = count.get();
                 if (!participantsList.isEmpty()) {
                     Set<Participants> temp = new HashSet<>();
                     for (int i = 0; i < participantsList.size(); i++) {
                         temp.add(participantsList.poll());
                     }
                     participantsRepository.saveAllAndFlush(temp);
-                    updateGiveawayMessage(
+                    GiftHelper.updateGiveawayMessage(
                             GiveawayRegistry.getInstance().getCountWinners(guildId) == null
                                     ? "TBA"
                                     : GiveawayRegistry.getInstance().getCountWinners(guildId),
@@ -328,7 +319,7 @@ public class Gift implements GiftHelper, SenderMessage {
             notEnoughUsers.setTitle(jsonParsers.getLocale("gift_Not_Enough_Users", String.valueOf(guildIdLong)));
             notEnoughUsers.setDescription(jsonParsers.getLocale("gift_Giveaway_Deleted", String.valueOf(guildIdLong)));
             //Отправляет сообщение
-            editMessage(notEnoughUsers, guildIdLong, textChannelId);
+            GiftHelper.editMessage(notEnoughUsers, guildIdLong, textChannelId);
             //Удаляет данные из коллекций
             clearingCollections();
 
@@ -346,7 +337,7 @@ public class Gift implements GiftHelper, SenderMessage {
                     .replaceAll("\\{0}", String.valueOf(countWinner))
                     .replaceAll("\\{1}", String.valueOf(getCount())));
             //Отправляет сообщение
-            updateGiveawayMessageWithError(
+            GiftHelper.updateGiveawayMessageWithError(
                     GiveawayRegistry.getInstance().getCountWinners(guildId) == null ? "TBA" : GiveawayRegistry.getInstance().getCountWinners(guildId),
                     this.guildId,
                     this.textChannelId,
@@ -367,7 +358,7 @@ public class Gift implements GiftHelper, SenderMessage {
             List<Button> buttons = new ArrayList<>();
             buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
 
-            sendMessage(errors.build(), guildId, textChannelId, buttons);
+            SenderMessage.sendMessage(errors.build(), guildId, textChannelId, buttons);
             return;
         }
 
@@ -401,7 +392,7 @@ public class Gift implements GiftHelper, SenderMessage {
         embedBuilder.setFooter(jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
 
         //Отправляет сообщение
-        editMessage(embedBuilder, guildId, textChannelId);
+        GiftHelper.editMessage(embedBuilder, guildId, textChannelId);
 
         //Удаляет данные из коллекций
         clearingCollections();
@@ -412,7 +403,6 @@ public class Gift implements GiftHelper, SenderMessage {
     private void clearingCollections() {
         try {
             GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildId);
-            buttons.clear();
             setCount(0);
         } catch (Exception e) {
             e.printStackTrace();
@@ -429,5 +419,6 @@ public class Gift implements GiftHelper, SenderMessage {
 
     public void setCount(int count) {
         this.count.set(count);
+        this.localCountUsers = count;
     }
 }
