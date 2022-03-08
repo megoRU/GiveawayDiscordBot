@@ -25,7 +25,6 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import org.apache.commons.io.IOUtils;
 import org.discordbots.api.client.DiscordBotListAPI;
-import org.jetbrains.annotations.Nullable;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -256,23 +255,23 @@ public class BotStartConfig {
         }
     }
 
-    private void setButtonsInGift(String guildId, long longGuildId) {
-        if (getMapLanguages().get(guildId) != null) {
-            if (getMapLanguages().get(guildId).equals("rus")) {
-                GiveawayRegistry.getInstance().getGift(longGuildId).getButtons()
-                        .add(Button.success(longGuildId + ":" + ReactionsButton.PRESENT,
-                                jsonParsers.getLocale("gift_Press_Me_Button", guildId) + "⠀ ⠀⠀"));
-            } else {
-                GiveawayRegistry.getInstance().getGift(longGuildId).getButtons()
-                        .add(Button.success(longGuildId + ":" + ReactionsButton.PRESENT,
-                                jsonParsers.getLocale("gift_Press_Me_Button", guildId) + "⠀⠀⠀⠀⠀⠀⠀⠀"));
-            }
-        } else {
-            GiveawayRegistry.getInstance().getGift(longGuildId).getButtons()
-                    .add(Button.success(longGuildId + ":" + ReactionsButton.PRESENT,
-                            jsonParsers.getLocale("gift_Press_Me_Button", guildId) + "⠀⠀⠀⠀⠀⠀⠀⠀"));
-        }
-    }
+//    private void setButtonsInGift(String guildId, long longGuildId) {
+//        if (getMapLanguages().get(guildId) != null) {
+//            if (getMapLanguages().get(guildId).equals("rus")) {
+//                GiveawayRegistry.getInstance().getGift(longGuildId).getButtons()
+//                        .add(Button.success(longGuildId + ":" + ReactionsButton.PRESENT,
+//                                jsonParsers.getLocale("gift_Press_Me_Button", guildId) + "⠀ ⠀⠀"));
+//            } else {
+//                GiveawayRegistry.getInstance().getGift(longGuildId).getButtons()
+//                        .add(Button.success(longGuildId + ":" + ReactionsButton.PRESENT,
+//                                jsonParsers.getLocale("gift_Press_Me_Button", guildId) + "⠀⠀⠀⠀⠀⠀⠀⠀"));
+//            }
+//        } else {
+//            GiveawayRegistry.getInstance().getGift(longGuildId).getButtons()
+//                    .add(Button.success(longGuildId + ":" + ReactionsButton.PRESENT,
+//                            jsonParsers.getLocale("gift_Press_Me_Button", guildId) + "⠀⠀⠀⠀⠀⠀⠀⠀"));
+//        }
+//    }
 
     private void getMessageIdFromDB() {
         try {
@@ -308,9 +307,6 @@ public class BotStartConfig {
                 GiveawayRegistry.getInstance().putCountWinners(guild_long_id, count_winners);
                 GiveawayRegistry.getInstance().putRoleId(guild_long_id, role_id_long);
                 GiveawayRegistry.getInstance().putIsForSpecificRole(guild_long_id, is_for_specific_role);
-
-                //Добавляем кнопки для Giveaway в Gift class
-                setButtonsInGift(String.valueOf(guild_long_id), guild_long_id);
 
                 if (date_end_giveaway != null) {
                     queue.add(new Giveaway(guild_long_id, date_end_giveaway));

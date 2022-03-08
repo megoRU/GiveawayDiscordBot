@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MessageInfoHelp extends ListenerAdapter implements SenderMessage {
+public class MessageInfoHelp extends ListenerAdapter {
 
     private static final String HELP = "!help";
     private static final String PREFIX = "!";
@@ -125,9 +125,9 @@ public class MessageInfoHelp extends ListenerAdapter implements SenderMessage {
         }
 
         if (event == null) {
-            sendMessage(info.build(), textChannel, buttons);
+            SenderMessage.sendMessage(info.build(), textChannel, buttons);
         } else {
-            sendMessage(info.build(), event, buttons);
+            SenderMessage.sendMessage(info.build(), event, buttons);
         }
     }
 }

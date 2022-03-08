@@ -1,6 +1,7 @@
-package main.giveaway;
+package main.giveaway.impl;
 
 import main.config.BotStartConfig;
+import main.giveaway.GiveawayRegistry;
 import main.jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -13,8 +14,10 @@ public interface GiftHelper {
 
     JSONParsers jsonParsers = new JSONParsers();
 
-    default void editMessage(EmbedBuilder embedBuilder, Long guildId, Long textChannel) {
+    static void editMessage(EmbedBuilder embedBuilder, final long guildId, final long textChannel) {
         try {
+            if (BotStartConfig.getJda().getGuildById(guildId) == null) return;
+
             if (BotStartConfig.getJda()
                     .getGuildById(guildId)
                     .getSelfMember()
@@ -44,8 +47,10 @@ public interface GiftHelper {
     }
 
     //TODO доделать для Timestamp
-    default void updateGiveawayMessage(String endingWord, Long guildId, Long channelId, Integer count) {
+    static void updateGiveawayMessage(String endingWord, final long guildId, final long channelId, Integer count) {
         try {
+            if (BotStartConfig.getJda().getGuildById(guildId) == null) return;
+
             EmbedBuilder edit = new EmbedBuilder();
             edit.setColor(0x00FF00);
             edit.setTitle(GiveawayRegistry.getInstance().getTitle(guildId));
@@ -83,8 +88,10 @@ public interface GiftHelper {
     }
 
     //TODO доделать для Timestamp
-    default void updateGiveawayMessageWithError(String endingWord, Long guildId, Long channelId, Integer count, Integer countWinner) {
+    static void updateGiveawayMessageWithError(String endingWord, final long guildId, final long channelId, Integer count, Integer countWinner) {
         try {
+            if (BotStartConfig.getJda().getGuildById(guildId) == null) return;
+
             EmbedBuilder edit = new EmbedBuilder();
             edit.setColor(0x00FF00);
             edit.setTitle(GiveawayRegistry.getInstance().getTitle(guildId));
@@ -127,7 +134,7 @@ public interface GiftHelper {
         }
     }
 
-    default String setEndingWord(Object num, long guildId) {
+    static String setEndingWord(Object num, final long guildId) {
         String language = "eng";
         if (BotStartConfig.getMapLanguages().get(String.valueOf(guildId)) != null) {
             language = BotStartConfig.getMapLanguages().get(String.valueOf(guildId));
@@ -147,7 +154,7 @@ public interface GiftHelper {
         };
     }
 
-    default String getMinutes(String time) {
+    static String getMinutes(String time) {
         String symbol = time.substring(time.length() - 1);
         time = time.substring(0, time.length() - 1);
 
