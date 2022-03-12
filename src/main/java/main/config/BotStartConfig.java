@@ -2,7 +2,6 @@ package main.config;
 
 import main.events.MessageWhenBotJoinToGuild;
 import main.giveaway.*;
-import main.jsonparser.JSONParsers;
 import main.jsonparser.ParserClass;
 import main.messagesevents.LanguageChange;
 import main.messagesevents.MessageInfoHelp;
@@ -21,7 +20,6 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import org.apache.commons.io.IOUtils;
 import org.discordbots.api.client.DiscordBotListAPI;
@@ -60,7 +58,6 @@ public class BotStartConfig {
     private static final Map<String, String> mapPrefix = new HashMap<>();
     private static final Map<Integer, String> guildIdHashList = new HashMap<>();
     private static JDA jda;
-    private final JSONParsers jsonParsers = new JSONParsers();
     private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
     public static ExecutorService executorService;
     public static int serverCount;
@@ -107,7 +104,7 @@ public class BotStartConfig {
 
             jdaBuilder.setAutoReconnect(true);
             jdaBuilder.setStatus(OnlineStatus.ONLINE);
-            jdaBuilder.setActivity(Activity.playing(activity + serverCount + " guilds"));
+            jdaBuilder.setActivity(Activity.playing("Starting..."));
             jdaBuilder.setBulkDeleteSplittingEnabled(false);
             jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild(prefixRepository, activeGiveawayRepository, languageRepository));
             jdaBuilder.addEventListeners(new MessageGift(activeGiveawayRepository, participantsRepository));
@@ -138,7 +135,6 @@ public class BotStartConfig {
                     });
                 }
                 System.out.println("Готово");
-                return;
             } else {
                 CommandListUpdateAction commands = jda.updateCommands();
 
@@ -164,6 +160,8 @@ public class BotStartConfig {
                 optionsStart.add(new OptionData(STRING, "role", "Giveaway is only for a specific role? Don't forget to specify the Role in the previous choice.")
                         .addChoice("yes", "yes")
                         .setName("role"));
+
+                optionsStart.add(new OptionData(ATTACHMENT, "image", "Your Giveaway Image").setName("image"));
 
                 optionsStop.add(new OptionData(STRING, "stop", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1").setName("stop"));
 
@@ -255,24 +253,6 @@ public class BotStartConfig {
         }
     }
 
-//    private void setButtonsInGift(String guildId, long longGuildId) {
-//        if (getMapLanguages().get(guildId) != null) {
-//            if (getMapLanguages().get(guildId).equals("rus")) {
-//                GiveawayRegistry.getInstance().getGift(longGuildId).getButtons()
-//                        .add(Button.success(longGuildId + ":" + ReactionsButton.PRESENT,
-//                                jsonParsers.getLocale("gift_Press_Me_Button", guildId) + "⠀ ⠀⠀"));
-//            } else {
-//                GiveawayRegistry.getInstance().getGift(longGuildId).getButtons()
-//                        .add(Button.success(longGuildId + ":" + ReactionsButton.PRESENT,
-//                                jsonParsers.getLocale("gift_Press_Me_Button", guildId) + "⠀⠀⠀⠀⠀⠀⠀⠀"));
-//            }
-//        } else {
-//            GiveawayRegistry.getInstance().getGift(longGuildId).getButtons()
-//                    .add(Button.success(longGuildId + ":" + ReactionsButton.PRESENT,
-//                            jsonParsers.getLocale("gift_Press_Me_Button", guildId) + "⠀⠀⠀⠀⠀⠀⠀⠀"));
-//        }
-//    }
-
     private void getMessageIdFromDB() {
         try {
             Connection connection = DriverManager.getConnection(URL_CONNECTION, USER_CONNECTION, PASSWORD_CONNECTION);
@@ -290,6 +270,7 @@ public class BotStartConfig {
                 Timestamp date_end_giveaway = rs.getTimestamp("date_end_giveaway");
                 Long role_id_long = rs.getLong("role_id_long");
                 Boolean is_for_specific_role = rs.getBoolean("is_for_specific_role");
+                String url_image = rs.getString("url_image");
 
                 guildIdHashList.put(guildIdHashList.size() + 1, String.valueOf(guild_long_id));
                 GiveawayRegistry.getInstance().putGift(
@@ -307,6 +288,7 @@ public class BotStartConfig {
                 GiveawayRegistry.getInstance().putCountWinners(guild_long_id, count_winners);
                 GiveawayRegistry.getInstance().putRoleId(guild_long_id, role_id_long);
                 GiveawayRegistry.getInstance().putIsForSpecificRole(guild_long_id, is_for_specific_role);
+                GiveawayRegistry.getInstance().putUrlImage(guild_long_id, url_image);
 
                 if (date_end_giveaway != null) {
                     queue.add(new Giveaway(guild_long_id, date_end_giveaway));

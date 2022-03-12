@@ -10,6 +10,7 @@ import main.model.repository.LanguageRepository;
 import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -65,6 +66,13 @@ public class SlashCommand extends ListenerAdapter {
                     String time = event.getOption("duration", OptionMapping::getAsString);
                     TextChannel textChannel = event.getOption("channel", OptionMapping::getAsTextChannel);
                     Long role = event.getOption("mention", OptionMapping::getAsLong);
+                    Message.Attachment image = event.getOption("image", OptionMapping::getAsAttachment);
+                    String urlImage = null;
+
+                    if (image != null && image.isImage()) {
+                        urlImage = image.getUrl();
+                    }
+
                     boolean isOnlyForSpecificRole = Objects.equals(event.getOption("role", OptionMapping::getAsString), "yes");
 
                     EmbedBuilder embedBuilder = new EmbedBuilder();
@@ -104,7 +112,8 @@ public class SlashCommand extends ListenerAdapter {
                                     count,
                                     time,
                                     role,
-                                    !isOnlyForSpecificRole ? null : isOnlyForSpecificRole);
+                                    !isOnlyForSpecificRole ? null : isOnlyForSpecificRole,
+                                    urlImage);
 
                     //Если время будет неверным. Сработает try catch
                 } catch (Exception e) {

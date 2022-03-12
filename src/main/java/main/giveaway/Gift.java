@@ -72,26 +72,49 @@ public class Gift {
 
     private void extracted(EmbedBuilder start, Guild guild, TextChannel channel,
                            String newTitle, String countWinners,
-                           String time, Long role, Boolean isOnlyForSpecificRole) {
+                           String time, Long role, Boolean isOnlyForSpecificRole, String urlImage) {
         LOGGER.info("\nGuild id: " + guild.getId()
                 + "\nTextChannel: " + channel.getName() + " " + channel.getId()
                 + "\nTitle: " + newTitle
                 + "\nCount winners: " + countWinners
                 + "\nTime: " + time
                 + "\nRole: " + role
-                + "\nisOnlyForSpecificRole: " + isOnlyForSpecificRole);
+                + "\nisOnlyForSpecificRole: " + isOnlyForSpecificRole
+                + "\nurlImage: " + urlImage);
 
         GiveawayRegistry.getInstance().putTitle(guild.getIdLong(), newTitle == null ? "Giveaway" : newTitle);
         //Instant для timestamp
         specificTime = Instant.ofEpochMilli(Instant.now().toEpochMilli());
 
-        start.setColor(0x00FF00);
+        start.setColor(Color.GREEN);
         start.setTitle(GiveawayRegistry.getInstance().getTitle(guild.getIdLong()));
-        start.addField("Attention for Admins: \nMay 1, 2022 you will not be able to control the bot \nwithout Slash Commands, add them: ",
-                "[Add slash commands](https://discord.com/oauth2/authorize?client_id=808277484524011531&scope=applications.commands%20bot)",
+
+        start.addField(jsonParsers.getLocale("gift_Participants", String.valueOf(guildId)), "`" + count + "`", true);
+        start.addField(GiftHelper.setEndingWord(countWinners == null ? "TBA" : countWinners, guildId), countWinners == null ? "TBA" : countWinners, true);
+
+        if (role != null) {
+
+            if (isOnlyForSpecificRole != null && isOnlyForSpecificRole) {
+                channel.sendMessage(jsonParsers.getLocale("gift_notification_for_this_role", guild.getId()) + "<@&" + role + ">").queue();
+                start.addField("Только для", "<@&" + role + ">", true);
+            } else {
+                if (role == guildId) {
+                    channel.sendMessage(jsonParsers.getLocale("gift_notification_for_this_role", guild.getId()) + "@everyone").queue();
+                } else {
+                    channel.sendMessage(jsonParsers.getLocale("gift_notification_for_this_role", guild.getId()) + "<@&" + role + ">").queue();
+                }
+            }
+        }
+
+        start.addField("Attention for Admins: ",
+                """
+                        May 1, 2022 you will not be able to control the bot
+                        without Slash Commands, add them:
+                        [Add slash commands](https://discord.com/oauth2/authorize?client_id=808277484524011531&scope=applications.commands%20bot)""",
                 false);
 
         if (time != null) {
+            start.setFooter(jsonParsers.getLocale("gift_Ends_At", guild.getId()));
 
             if (time.length() > 4) {
 
@@ -100,66 +123,33 @@ public class Gift {
                 ZoneOffset offset = ZoneOffset.UTC;
                 offsetTime = OffsetDateTime.of(dateTime, offset);
 
-                start.setDescription(jsonParsers.getLocale("gift_Press_Green_Button", guild.getId())
-                        .replaceAll("\\{0}", countWinners == null ? "TBA" : countWinners)
-                        .replaceAll("\\{1}", GiftHelper.setEndingWord(countWinners == null ? "TBA" : countWinners, guildId)) + getCount() + "`");
-
                 start.setTimestamp(dateTime);
-                start.setFooter(jsonParsers.getLocale("gift_Ends_At", guild.getId()));
 
-                GiveawayRegistry.getInstance().putEndGiveawayDate(guild.getIdLong(),
-                        new Timestamp(offsetTime.toEpochSecond() * 1000));
+                putTimestamp(new Timestamp(offsetTime.toEpochSecond() * 1000));
 
-                BotStartConfig.getQueue().add(new Giveaway(guildId,
-                        new Timestamp(offsetTime.toEpochSecond() * 1000)));
             } else {
                 times = GiftHelper.getMinutes(time);
-                start.setDescription(jsonParsers.getLocale("gift_Press_Green_Button", guild.getId())
-                        .replaceAll("\\{0}", countWinners == null ? "TBA" : countWinners)
-                        .replaceAll("\\{1}", GiftHelper.setEndingWord(countWinners == null ? "TBA" : countWinners, guildId)) + getCount() + "`");
 
                 start.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times)));
-                start.setFooter(jsonParsers.getLocale("gift_Ends_At", guild.getId()));
 
-                GiveawayRegistry.getInstance().putEndGiveawayDate(guild.getIdLong(),
-                        new Timestamp(specificTime.plusSeconds(Long.parseLong(times) * 60).getEpochSecond() * 1000));
-
-                BotStartConfig.getQueue().add(new Giveaway(
-                        guildId,
-                        new Timestamp(specificTime.plusSeconds(Long.parseLong(times) * 60).getEpochSecond() * 1000)));
+                putTimestamp(new Timestamp(specificTime.plusSeconds(Long.parseLong(times) * 60).getEpochSecond() * 1000));
             }
         }
-        if (time == null) {
-            start.setDescription(jsonParsers.getLocale("gift_Press_Green_Button", guild.getId())
-                    .replaceAll("\\{0}", countWinners == null ? "TBA" : countWinners)
-                    .replaceAll("\\{1}", GiftHelper.setEndingWord(countWinners == null ? "TBA" : countWinners, guildId)) + getCount() + "`");
-            GiveawayRegistry.getInstance().putEndGiveawayDate(guild.getIdLong(), null);
+
+        if (urlImage != null) {
+            start.setImage(urlImage);
         }
 
-        if (role != null) {
-
-            if (isOnlyForSpecificRole != null && isOnlyForSpecificRole) {
-                channel.sendMessage(jsonParsers.getLocale("gift_notification_for_this_role", guild.getId()) + "<@&" + role + ">").queue();
-                start.addField(jsonParsers.getLocale("gift_notification", guild.getId()),
-                        jsonParsers.getLocale("gift_special_role", guild.getId()) + "<@&" + role + ">", false);
-            } else {
-                if (role == guildId) {
-                    channel.sendMessage(jsonParsers.getLocale("gift_notification_for_this_role", guild.getId()) + "@everyone").queue();
-                } else {
-                    channel.sendMessage(jsonParsers.getLocale("gift_notification_for_this_role", guild.getId()) + "<@&" + role + ">").queue();
-                }
-            }
-
-        }
     }
 
     protected void startGift(Guild guild, TextChannel textChannel, String newTitle, String countWinners, String time) {
         EmbedBuilder start = new EmbedBuilder();
 
-        extracted(start, guild, textChannel, newTitle, countWinners, time, null, false);
+        extracted(start, guild, textChannel, newTitle, countWinners, time, null, false, null);
 
-        textChannel.sendMessageEmbeds(start.build()).setActionRow(SetButtons.getListButtons(String.valueOf(guildId)))
-                .queue(message -> updateCollections(guild, countWinners, time, message, null, null));
+        textChannel.sendMessageEmbeds(start.build())
+                .setActionRow(SetButtons.getListButtons(String.valueOf(guildId)))
+                .queue(message -> updateCollections(guild, countWinners, time, message, null, null, null, newTitle));
 
         //Вот мы запускаем бесконечный поток.
         autoInsert();
@@ -167,43 +157,48 @@ public class Gift {
 
     protected void startGift(@NotNull SlashCommandInteractionEvent event, Guild guild,
                              TextChannel textChannel, String newTitle, String countWinners,
-                             String time, Long role, Boolean isOnlyForSpecificRole) {
+                             String time, Long role, Boolean isOnlyForSpecificRole, String urlImage) {
 
         EmbedBuilder start = new EmbedBuilder();
-        extracted(start, guild, textChannel, newTitle, countWinners, time, role, isOnlyForSpecificRole);
+
+        extracted(start, guild, textChannel, newTitle, countWinners, time, role, isOnlyForSpecificRole, urlImage);
 
         try {
             event.reply(jsonParsers.getLocale("send_slash_message", guild.getId()).replaceAll("\\{0}", textChannel.getId()))
-                    .delay(15, TimeUnit.SECONDS)
+                    .delay(7, TimeUnit.SECONDS)
                     .flatMap(InteractionHook::deleteOriginal)
                     .queue();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        textChannel.sendMessageEmbeds(start.build()).setActionRow(SetButtons.getListButtons(String.valueOf(guildId)))
-                .queue(message -> updateCollections(guild, countWinners, time, message, role, isOnlyForSpecificRole));
+        textChannel.sendMessageEmbeds(start.build())
+                .setActionRow(SetButtons.getListButtons(String.valueOf(guildId)))
+                .queue(message -> updateCollections(guild, countWinners, time, message, role, isOnlyForSpecificRole, urlImage, newTitle));
 
         //Вот мы запускаем бесконечный поток.
         autoInsert();
     }
 
-    private void updateCollections(Guild guild, String countWinners, String time, Message message, Long role, Boolean isOnlyForSpecificRole) {
+    private void updateCollections(Guild guild, String countWinners, String time, Message message, Long role, Boolean isOnlyForSpecificRole, String urlImage, String title) {
         GiveawayRegistry.getInstance().putMessageId(guild.getIdLong(), message.getId());
         GiveawayRegistry.getInstance().putChannelId(guild.getIdLong(), message.getChannel().getId());
         GiveawayRegistry.getInstance().putIdMessagesWithGiveawayButtons(guild.getIdLong(), message.getId());
         GiveawayRegistry.getInstance().putCountWinners(guild.getIdLong(), countWinners);
         GiveawayRegistry.getInstance().putRoleId(guild.getIdLong(), role);
         GiveawayRegistry.getInstance().putIsForSpecificRole(guild.getIdLong(), isOnlyForSpecificRole);
+        GiveawayRegistry.getInstance().putUrlImage(guildId, urlImage);
+        GiveawayRegistry.getInstance().putTitle(guild.getIdLong(), title == null ? "Giveaway" : title);
 
         ActiveGiveaways activeGiveaways = new ActiveGiveaways();
         activeGiveaways.setGuildLongId(guildId);
         activeGiveaways.setMessageIdLong(message.getIdLong());
         activeGiveaways.setChannelIdLong(message.getChannel().getIdLong());
         activeGiveaways.setCountWinners(countWinners);
-        activeGiveaways.setGiveawayTitle(GiveawayRegistry.getInstance().getTitle(guild.getIdLong()));
+        activeGiveaways.setGiveawayTitle(title);
         activeGiveaways.setRoleIdLong(role);
         activeGiveaways.setIsForSpecificRole(isOnlyForSpecificRole);
+        activeGiveaways.setUrlImage(urlImage);
 
         if (time != null && time.length() > 4) {
             activeGiveaways.setDateEndGiveaway(new Timestamp(offsetTime.toLocalDateTime().atOffset(ZoneOffset.UTC).toEpochSecond() * 1000));
@@ -398,6 +393,11 @@ public class Gift {
         clearingCollections();
 
         activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
+    }
+
+    private void putTimestamp(Timestamp timestamp) {
+        GiveawayRegistry.getInstance().putEndGiveawayDate(guildId, timestamp);
+        BotStartConfig.getQueue().add(new Giveaway(guildId, timestamp));
     }
 
     private void clearingCollections() {
