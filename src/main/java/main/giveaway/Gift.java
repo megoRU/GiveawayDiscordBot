@@ -81,13 +81,11 @@ public class Gift {
                 + "\nRole: " + role
                 + "\nisOnlyForSpecificRole: " + isOnlyForSpecificRole
                 + "\nurlImage: " + urlImage);
-
-        GiveawayRegistry.getInstance().putTitle(guild.getIdLong(), newTitle == null ? "Giveaway" : newTitle);
         //Instant для timestamp
         specificTime = Instant.ofEpochMilli(Instant.now().toEpochMilli());
 
         start.setColor(Color.GREEN);
-        start.setTitle(GiveawayRegistry.getInstance().getTitle(guild.getIdLong()));
+        start.setTitle(newTitle == null ? "Giveaway" : newTitle);
 
         start.addField(jsonParsers.getLocale("gift_Participants", String.valueOf(guildId)), "`" + count + "`", true);
         start.addField(GiftHelper.setEndingWord(countWinners == null ? "TBA" : countWinners, guildId), countWinners == null ? "TBA" : countWinners, true);
