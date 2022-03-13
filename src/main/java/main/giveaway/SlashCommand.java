@@ -1,7 +1,10 @@
 package main.giveaway;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import lombok.AllArgsConstructor;
 import main.config.BotStartConfig;
+import main.giveaway.participants.ParticipantsJSONResponse;
 import main.jsonparser.JSONParsers;
 import main.messagesevents.MessageInfoHelp;
 import main.model.entity.Language;
@@ -19,6 +22,12 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -113,7 +122,11 @@ public class SlashCommand extends ListenerAdapter {
                                     time,
                                     role,
                                     !isOnlyForSpecificRole ? null : isOnlyForSpecificRole,
-                                    urlImage);
+                                    urlImage,
+                                    event.getUser().getIdLong());
+
+                    //Мы не будет очищать это, всё равно рано или поздно будет перезаписываться или даже не будет в случае Exception
+                    GiveawayRegistry.getInstance().putIdUserWhoCreateGiveaway(event.getGuild().getIdLong(), event.getUser().getId());
 
                     //Если время будет неверным. Сработает try catch
                 } catch (Exception e) {
@@ -289,6 +302,43 @@ public class SlashCommand extends ListenerAdapter {
                 event.replyEmbeds(noGiveaway.build()).setEphemeral(true).queue();
             }
             return;
+        }
+
+        if (event.getName().equals("participants")) {
+            try {
+                event.deferReply().setEphemeral(true).queue();
+                String id = event.getOption("id", OptionMapping::getAsString);
+                final String URL = "http://localhost:8085/api/get-participants";
+
+                HttpClient client = HttpClient.newHttpClient();
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(URL))
+                        .POST(HttpRequest.BodyPublishers.ofString(new UserData(event.getUser().getId(), id).toString()))
+                        .header("Content-Type", "application/json")
+                        .build();
+
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+                File file = new File("participants.json");
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+                ParticipantsJSONResponse yourList = gson.fromJson(response.body(), ParticipantsJSONResponse.class);
+
+                String json = gson.toJson(yourList);
+
+                // Создание объекта FileWriter
+                FileWriter writer = new FileWriter(file);
+
+                // Запись содержимого в файл
+                writer.write(json);
+                writer.flush();
+                writer.close();
+
+                event.getHook().sendFile(file).setEphemeral(true).queue();
+                return;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         if (event.getName().equals("patreon")) {

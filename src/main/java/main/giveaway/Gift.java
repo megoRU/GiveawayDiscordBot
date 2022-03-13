@@ -1,10 +1,14 @@
 package main.giveaway;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import main.config.BotStartConfig;
 import main.giveaway.impl.GiftHelper;
 import main.giveaway.impl.SetButtons;
+import main.giveaway.participants.ParticipantsJSON;
+import main.giveaway.participants.ParticipantsJSONResponse;
 import main.jsonparser.JSONParsers;
 import main.messagesevents.SenderMessage;
 import main.model.entity.ActiveGiveaways;
@@ -33,8 +37,9 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
 import java.util.List;
+import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
@@ -44,11 +49,12 @@ import java.util.logging.Logger;
 public class Gift {
 
     private final static Logger LOGGER = Logger.getLogger(Gift.class.getName());
-    private final String URL = "http://195.2.81.139:8085/api/winners";
+    private final static String URL = "http://195.2.81.139:8085/api/winners";
+    private final static String URL_USERS = "http://195.2.81.139:8085/api/winners";
     private final JSONParsers jsonParsers = new JSONParsers();
-    private final Set<String> listUsers = new HashSet<>();
+    private final Set<String> listUsers = new LinkedHashSet<>();
     private final Map<String, String> listUsersHash = new HashMap<>();
-    private final Set<String> uniqueWinners = new HashSet<>();
+    private final Set<String> uniqueWinners = new LinkedHashSet<>();
     private Instant specificTime = null;
     private final Random random = new Random();
     private final long guildId;
@@ -62,6 +68,7 @@ public class Gift {
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final ParticipantsRepository participantsRepository;
     private volatile Queue<Participants> participantsList = new ArrayDeque<>();
+    private volatile Set<ParticipantsJSON> participantsJSON = new LinkedHashSet<>();
 
     public Gift(long guildId, long textChannelId, ActiveGiveawayRepository activeGiveawayRepository, ParticipantsRepository participantsRepository) {
         this.guildId = guildId;
@@ -140,14 +147,15 @@ public class Gift {
 
     }
 
-    protected void startGift(Guild guild, TextChannel textChannel, String newTitle, String countWinners, String time) {
+    protected void startGift(Guild guild, TextChannel textChannel, String newTitle,
+                             String countWinners, String time, Long idUserWhoCreateGiveaway) {
         EmbedBuilder start = new EmbedBuilder();
 
         extracted(start, guild, textChannel, newTitle, countWinners, time, null, false, null);
 
         textChannel.sendMessageEmbeds(start.build())
                 .setActionRow(SetButtons.getListButtons(String.valueOf(guildId)))
-                .queue(message -> updateCollections(guild, countWinners, time, message, null, null, null, newTitle));
+                .queue(message -> updateCollections(guild, countWinners, time, message, null, null, null, newTitle, idUserWhoCreateGiveaway));
 
         //Вот мы запускаем бесконечный поток.
         autoInsert();
@@ -155,7 +163,8 @@ public class Gift {
 
     protected void startGift(@NotNull SlashCommandInteractionEvent event, Guild guild,
                              TextChannel textChannel, String newTitle, String countWinners,
-                             String time, Long role, Boolean isOnlyForSpecificRole, String urlImage) {
+                             String time, Long role, Boolean isOnlyForSpecificRole,
+                             String urlImage, Long idUserWhoCreateGiveaway) {
 
         EmbedBuilder start = new EmbedBuilder();
 
@@ -172,13 +181,14 @@ public class Gift {
 
         textChannel.sendMessageEmbeds(start.build())
                 .setActionRow(SetButtons.getListButtons(String.valueOf(guildId)))
-                .queue(message -> updateCollections(guild, countWinners, time, message, role, isOnlyForSpecificRole, urlImage, newTitle));
+                .queue(message -> updateCollections(guild, countWinners, time, message, role, isOnlyForSpecificRole, urlImage, newTitle, idUserWhoCreateGiveaway));
 
         //Вот мы запускаем бесконечный поток.
         autoInsert();
     }
 
-    private void updateCollections(Guild guild, String countWinners, String time, Message message, Long role, Boolean isOnlyForSpecificRole, String urlImage, String title) {
+    private void updateCollections(Guild guild, String countWinners, String time, Message message, Long role,
+                                   Boolean isOnlyForSpecificRole, String urlImage, String title, Long idUserWhoCreateGiveaway) {
         GiveawayRegistry.getInstance().putMessageId(guild.getIdLong(), message.getId());
         GiveawayRegistry.getInstance().putChannelId(guild.getIdLong(), message.getChannel().getId());
         GiveawayRegistry.getInstance().putIdMessagesWithGiveawayButtons(guild.getIdLong(), message.getId());
@@ -197,6 +207,7 @@ public class Gift {
         activeGiveaways.setRoleIdLong(role);
         activeGiveaways.setIsForSpecificRole(isOnlyForSpecificRole);
         activeGiveaways.setUrlImage(urlImage);
+        activeGiveaways.setIdUserWhoCreateGiveaway(idUserWhoCreateGiveaway);
 
         if (time != null && time.length() > 4) {
             activeGiveaways.setDateEndGiveaway(new Timestamp(offsetTime.toLocalDateTime().atOffset(ZoneOffset.UTC).toEpochSecond() * 1000));
@@ -214,7 +225,7 @@ public class Gift {
         count.incrementAndGet();
         listUsers.add(user.getId());
         listUsersHash.put(user.getId(), user.getId());
-        addUserToInsertQuery(user.getName(), user.getIdLong(), guildId);
+        addUserToInsertQuery(user.getName(), user.getAsTag(), user.getIdLong(), guildId);
     }
 
     //TODO: Может удалять список с кем то. Какой блять список? Уже его нет! А блять понял. Этот participantsList
@@ -247,13 +258,23 @@ public class Gift {
         }
     }
 
-    private void addUserToInsertQuery(final String nickName, final long userIdLong, final long guildIdLong) {
+    private void addUserToInsertQuery(final String nickName, final String nickNameTag, final long userIdLong, final long guildIdLong) {
         ActiveGiveaways activeGiveaways = activeGiveawayRepository.getActiveGiveawaysByGuildIdLong(guildIdLong);
         Participants participants = new Participants();
         participants.setUserIdLong(userIdLong);
         participants.setNickName(nickName);
+        participants.setNickNameTag(nickNameTag);
         participants.setActiveGiveaways(activeGiveaways);
         participantsList.add(participants);
+
+        participantsJSON.add(new ParticipantsJSON(
+                GiveawayRegistry.getInstance().getIdUserWhoCreateGiveaway(guildId),
+                String.valueOf(guildIdLong + Long.parseLong(GiveawayRegistry.getInstance().getMessageId(guildId))),
+                guildIdLong,
+                userIdLong,
+                nickName,
+                nickNameTag)
+        );
     }
 
     //Автоматически отправляет в БД данные которые в буфере StringBuilder
@@ -277,6 +298,29 @@ public class Gift {
     /**
      * @throws Exception Throws an exception
      */
+    private void sendListUsers() throws Exception {
+        try {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            ParticipantsJSONResponse participantsJSONCore = new ParticipantsJSONResponse(participantsJSON);
+            String json = gson.toJson(participantsJSONCore);
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(URL_USERS))
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .header("Content-Type", "application/json")
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception("API not work, or connection refused");
+        }
+    }
+
+    /**
+     * @throws Exception Throws an exception
+     */
     private void getWinners(int countWinner) throws Exception {
         try {
             Winners winners = new Winners(countWinner, 0, listUsers.size() - 1);
@@ -290,7 +334,6 @@ public class Gift {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             String[] winnersArgs = response.body().split(" ");
-
 
             List<String> temp = new ArrayList<>(listUsers);
 
@@ -340,6 +383,7 @@ public class Gift {
         }
 
         try {
+            sendListUsers();
             //выбираем победителей
             getWinners(countWinner);
         } catch (Exception e) {
@@ -375,10 +419,11 @@ public class Gift {
                     jsonParsers.getLocale("gift_Giveaway_RANDOMORG_more", String.valueOf(guildIdLong)));
         }
 
-        if (!GiveawayRegistry.getInstance().getTitle(guildId).equals("Giveaway")) {
+        if (GiveawayRegistry.getInstance().getTitle(guildId) != null
+                && !GiveawayRegistry.getInstance().getTitle(guildId).equals("Giveaway")) {
             embedBuilder
                     .addField(jsonParsers.getLocale("gift_what_was_giveaway", String.valueOf(guildIdLong)),
-                    GiveawayRegistry.getInstance().getTitle(guildId), false);
+                            GiveawayRegistry.getInstance().getTitle(guildId), false);
         }
 
         embedBuilder.setTimestamp(Instant.now());

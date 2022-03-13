@@ -1,7 +1,10 @@
 package main.model.entity;
 
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 
@@ -27,6 +30,9 @@ public class Participants {
 
     @Column(name = "nick_name", nullable = false)
     private String nickName;
+
+    @Column(name = "nick_name_tag", nullable = false)
+    private String nickNameTag;
 
     public Participants(ActiveGiveaways activeGiveaways, Long userIdLong, String nickName) {
         this.activeGiveaways = activeGiveaways;

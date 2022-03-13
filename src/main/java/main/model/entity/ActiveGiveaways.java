@@ -46,4 +46,7 @@ public class ActiveGiveaways {
 
     @Column(name = "url_image")
     private String urlImage;
+
+    @Column(name = "id_user_who_create_giveaway", nullable = false)
+    private Long idUserWhoCreateGiveaway;
 }
