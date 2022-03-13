@@ -6,6 +6,7 @@ import main.jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 
+import java.awt.*;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public interface GiftHelper {
                         .getGuildById(guildId)
                         .getTextChannelById(textChannel)
                         .editMessageEmbedsById(GiveawayRegistry.getInstance().getMessageId(guildId), embedBuilder.build())
-                        .setActionRows().setActionRows(new ArrayList<>())
+                        .setActionRows(new ArrayList<>())
                         .queue();
             } else {
                 if (BotStartConfig.getJda()
@@ -52,13 +53,13 @@ public interface GiftHelper {
             if (BotStartConfig.getJda().getGuildById(guildId) == null) return;
 
             EmbedBuilder edit = new EmbedBuilder();
-            edit.setColor(0x00FF00);
+            edit.setColor(Color.GREEN);
             edit.setTitle(GiveawayRegistry.getInstance().getTitle(guildId));
 
-            edit.setDescription(jsonParsers.getLocale("gift_Press_Green_Button", String.valueOf(guildId))
-                    .replaceAll("\\{0}", GiveawayRegistry.getInstance().getCountWinners(guildId) == null ? "TBA"
-                            : GiveawayRegistry.getInstance().getCountWinners(guildId))
-                    .replaceAll("\\{1}", setEndingWord(endingWord, guildId)) + count + "`");
+            edit.addField(jsonParsers.getLocale("gift_Participants", String.valueOf(guildId)), "`" + count + "`", true);
+
+            edit.addField(GiftHelper.setEndingWord(GiveawayRegistry.getInstance().getCountWinners(guildId) == null ? "TBA"
+                    : (GiveawayRegistry.getInstance().getCountWinners(guildId)), guildId), endingWord, true);
 
             //Если есть время окончания включить в EmbedBuilder
             if (GiveawayRegistry.getInstance().getEndGiveawayDate(guildId) != null) {
@@ -69,20 +70,24 @@ public interface GiftHelper {
 
             if (GiveawayRegistry.getInstance().getIsForSpecificRole(guildId) != null
                     && GiveawayRegistry.getInstance().getIsForSpecificRole(guildId)) {
-                edit.addField(jsonParsers.getLocale("gift_notification", String.valueOf(guildId)),
-                        jsonParsers.getLocale("gift_special_role", String.valueOf(guildId))
-                                + "<@&" + GiveawayRegistry.getInstance().getRoleId(guildId) + ">", false);
+                edit.addField(jsonParsers.getLocale("gift_OnlyFor", String.valueOf(guildId)),
+                        "<@&" + GiveawayRegistry.getInstance().getRoleId(guildId) + ">", true);
+            }
+
+            edit.setDescription(jsonParsers.getLocale("gift_Press_Green_Button", String.valueOf(guildId)));
+
+            if (GiveawayRegistry.getInstance().getUrlImage(guildId) != null) {
+                edit.setImage(GiveawayRegistry.getInstance().getUrlImage(guildId));
             }
 
             //Отправляет сообщение и если нельзя редактировать то отправляет ошибку
-            BotStartConfig.getJda().getGuildById(guildId)
+            BotStartConfig.getJda()
+                    .getGuildById(guildId)
                     .getTextChannelById(channelId)
-                    .editMessageEmbedsById(GiveawayRegistry.getInstance().getMessageId(guildId),
-                            edit.build()).queue(null, (exception) ->
-                            BotStartConfig.getJda().getTextChannelById(channelId)
-                                    .sendMessage(GiveawayRegistry.getInstance().removeGiftExceptions(guildId))
-                                    .queue());
+                    .editMessageEmbedsById(GiveawayRegistry.getInstance().getMessageId(guildId), edit.build())
+                    .queue();
         } catch (Exception e) {
+            GiveawayRegistry.getInstance().removeGiftExceptions(guildId);
             e.printStackTrace();
         }
     }
@@ -93,13 +98,11 @@ public interface GiftHelper {
             if (BotStartConfig.getJda().getGuildById(guildId) == null) return;
 
             EmbedBuilder edit = new EmbedBuilder();
-            edit.setColor(0x00FF00);
+            edit.setColor(Color.GREEN);
             edit.setTitle(GiveawayRegistry.getInstance().getTitle(guildId));
 
-            edit.setDescription(jsonParsers.getLocale("gift_Press_Green_Button", String.valueOf(guildId))
-                    .replaceAll("\\{0}", GiveawayRegistry.getInstance().getCountWinners(guildId) == null ? "TBA"
-                            : GiveawayRegistry.getInstance().getCountWinners(guildId))
-                    .replaceAll("\\{1}", setEndingWord(endingWord, guildId)) + count + "`");
+            edit.addField(GiftHelper.setEndingWord(GiveawayRegistry.getInstance().getCountWinners(guildId) == null ? "TBA"
+                    : (GiveawayRegistry.getInstance().getCountWinners(guildId)), guildId), endingWord, true);
 
             edit.addField(jsonParsers.getLocale("gift_Invalid_Number", String.valueOf(guildId)),
                     jsonParsers
@@ -116,20 +119,24 @@ public interface GiftHelper {
 
             if (GiveawayRegistry.getInstance().getIsForSpecificRole(guildId) != null
                     && GiveawayRegistry.getInstance().getIsForSpecificRole(guildId)) {
-                edit.addField(jsonParsers.getLocale("gift_notification", String.valueOf(guildId)),
-                        jsonParsers.getLocale("gift_special_role", String.valueOf(guildId))
-                                + "<@&" + GiveawayRegistry.getInstance().getRoleId(guildId) + ">", false);
+                edit.addField(jsonParsers.getLocale("gift_OnlyFor", String.valueOf(guildId)),
+                        "<@&" + GiveawayRegistry.getInstance().getRoleId(guildId) + ">", true);
+            }
+
+            edit.setDescription(jsonParsers.getLocale("gift_Press_Green_Button", String.valueOf(guildId)));
+
+            if (GiveawayRegistry.getInstance().getUrlImage(guildId) != null) {
+                edit.setImage(GiveawayRegistry.getInstance().getUrlImage(guildId));
             }
 
             //Отправляет сообщение и если нельзя редактировать то отправляет ошибку
-            BotStartConfig.getJda().getGuildById(guildId)
+            BotStartConfig.getJda()
+                    .getGuildById(guildId)
                     .getTextChannelById(channelId)
-                    .editMessageEmbedsById(GiveawayRegistry.getInstance().getMessageId(guildId),
-                            edit.build()).queue(null, (exception) ->
-                            BotStartConfig.getJda().getTextChannelById(channelId)
-                                    .sendMessage(GiveawayRegistry.getInstance().removeGiftExceptions(guildId))
-                                    .queue());
+                    .editMessageEmbedsById(GiveawayRegistry.getInstance().getMessageId(guildId), edit.build())
+                    .queue();
         } catch (Exception e) {
+            GiveawayRegistry.getInstance().removeGiftExceptions(guildId);
             e.printStackTrace();
         }
     }

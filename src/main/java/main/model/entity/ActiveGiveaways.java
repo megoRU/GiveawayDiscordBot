@@ -43,4 +43,10 @@ public class ActiveGiveaways {
 
     @Column(name = "is_for_specific_role")
     private Boolean isForSpecificRole;
+
+    @Column(name = "url_image")
+    private String urlImage;
+
+    @Column(name = "id_user_who_create_giveaway", nullable = false)
+    private Long idUserWhoCreateGiveaway;
 }

@@ -31,6 +31,8 @@ public class GiveawayRegistry {
         private Timestamp endGiveawayDate;
         private Long roleId;
         private Boolean isForSpecificRole;
+        private String urlImage;
+        private String idUserWhoCreateGiveaway;
 
         public GiveawayData(Gift gift) {
             this.gift = gift;
@@ -50,6 +52,22 @@ public class GiveawayRegistry {
             }
         }
         return giveawayRegistry;
+    }
+
+    public String getIdUserWhoCreateGiveaway(long guildId) {
+        return giveawayDataMap.get(guildId).getIdUserWhoCreateGiveaway();
+    }
+
+    public void putIdUserWhoCreateGiveaway(long guildId, String userId) {
+        giveawayDataMap.get(guildId).setIdUserWhoCreateGiveaway(userId);
+    }
+
+    public String getUrlImage(long guildId) {
+        return giveawayDataMap.get(guildId).getUrlImage();
+    }
+
+    public void putUrlImage(long guildId, String urlImage) {
+        giveawayDataMap.get(guildId).setUrlImage(urlImage);
     }
 
     public Boolean getIsForSpecificRole(long guildId) {

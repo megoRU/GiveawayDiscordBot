@@ -1,7 +1,14 @@
-package main.giveaway;
+package main.giveaway.slash;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import lombok.AllArgsConstructor;
 import main.config.BotStartConfig;
+import main.giveaway.Gift;
+import main.giveaway.GiveawayRegistry;
+import main.giveaway.api.response.ParticipantsResponse;
+import main.giveaway.api.response.UserData;
+import main.giveaway.impl.URLS;
 import main.jsonparser.JSONParsers;
 import main.messagesevents.MessageInfoHelp;
 import main.model.entity.Language;
@@ -10,6 +17,7 @@ import main.model.repository.LanguageRepository;
 import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -18,6 +26,12 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -65,6 +79,13 @@ public class SlashCommand extends ListenerAdapter {
                     String time = event.getOption("duration", OptionMapping::getAsString);
                     TextChannel textChannel = event.getOption("channel", OptionMapping::getAsTextChannel);
                     Long role = event.getOption("mention", OptionMapping::getAsLong);
+                    Message.Attachment image = event.getOption("image", OptionMapping::getAsAttachment);
+                    String urlImage = null;
+
+                    if (image != null && image.isImage()) {
+                        urlImage = image.getUrl();
+                    }
+
                     boolean isOnlyForSpecificRole = Objects.equals(event.getOption("role", OptionMapping::getAsString), "yes");
 
                     EmbedBuilder embedBuilder = new EmbedBuilder();
@@ -104,7 +125,12 @@ public class SlashCommand extends ListenerAdapter {
                                     count,
                                     time,
                                     role,
-                                    !isOnlyForSpecificRole ? null : isOnlyForSpecificRole);
+                                    !isOnlyForSpecificRole ? null : isOnlyForSpecificRole,
+                                    urlImage,
+                                    event.getUser().getIdLong());
+
+                    //Мы не будет очищать это, всё равно рано или поздно будет перезаписываться или даже не будет в случае Exception
+                    GiveawayRegistry.getInstance().putIdUserWhoCreateGiveaway(event.getGuild().getIdLong(), event.getUser().getId());
 
                     //Если время будет неверным. Сработает try catch
                 } catch (Exception e) {
@@ -280,6 +306,47 @@ public class SlashCommand extends ListenerAdapter {
                 event.replyEmbeds(noGiveaway.build()).setEphemeral(true).queue();
             }
             return;
+        }
+
+        if (event.getName().equals("participants")) {
+            try {
+                event.deferReply().setEphemeral(true).queue();
+                String id = event.getOption("id", OptionMapping::getAsString);
+
+                HttpClient client = HttpClient.newHttpClient();
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(URLS.GET_PARTICIPANTS))
+                        .POST(HttpRequest.BodyPublishers.ofString(new UserData(event.getUser().getId(), id).toString()))
+                        .header("Content-Type", "application/json")
+                        .build();
+
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+                if (response.statusCode() != 200) {
+                    event.getHook().sendMessage(response.body()).setEphemeral(true).queue();
+                    return;
+                }
+
+                File file = new File("participants.json");
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+                ParticipantsResponse yourList = gson.fromJson(response.body(), ParticipantsResponse.class);
+
+                String json = gson.toJson(yourList);
+
+                // Создание объекта FileWriter
+                FileWriter writer = new FileWriter(file);
+
+                // Запись содержимого в файл
+                writer.write(json);
+                writer.flush();
+                writer.close();
+
+                event.getHook().sendFile(file).setEphemeral(true).queue();
+                return;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         if (event.getName().equals("patreon")) {

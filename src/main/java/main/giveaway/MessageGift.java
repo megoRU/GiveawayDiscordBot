@@ -134,13 +134,19 @@ public class MessageGift extends ListenerAdapter {
                                 event.getTextChannel(),
                                 event.getMessage().getContentDisplay().substring(12, message.length() - len - 1),
                                 messageSplit[messageSplit.length - 1],
-                                messageSplit[messageSplit.length - 2]);
+                                messageSplit[messageSplit.length - 2],
+                                event.getAuthor().getIdLong());
                 return;
             }
 
             if (messageWithOutPrefix.matches(GIFT_START_COUNT_WITH_MINUTES)) {
                 GiveawayRegistry.getInstance().getGift(event.getGuild().getIdLong())
-                        .startGift(event.getGuild(), event.getTextChannel(), null, messageSplit[3], messageSplit[2]);
+                        .startGift(event.getGuild(),
+                                event.getTextChannel(),
+                                null,
+                                messageSplit[3],
+                                messageSplit[2],
+                                event.getAuthor().getIdLong());
                 return;
             }
 
@@ -151,13 +157,14 @@ public class MessageGift extends ListenerAdapter {
                                 event.getTextChannel(),
                                 event.getMessage().getContentDisplay().substring(12, message.length() - 3),
                                 null,
-                                messageSplit[messageSplit.length - 1]);
+                                messageSplit[messageSplit.length - 1], event.getAuthor().getIdLong());
                 return;
             }
 
             if (messageWithOutPrefix.matches(GIFT_START_WITH_MINUTES)) {
                 GiveawayRegistry.getInstance().getGift(event.getGuild().getIdLong())
-                        .startGift(event.getGuild(), event.getTextChannel(), null, null, messageSplit[2]);
+                        .startGift(event.getGuild(), event.getTextChannel(), null, null, messageSplit[2],
+                                event.getAuthor().getIdLong());
                 return;
             }
 
@@ -165,11 +172,13 @@ public class MessageGift extends ListenerAdapter {
                 GiveawayRegistry.getInstance().getGift(event.getGuild().getIdLong())
                         .startGift(
                                 event.getGuild(), event.getTextChannel(),
-                                event.getMessage().getContentDisplay().substring(12, message.length()), null, null);
+                                event.getMessage().getContentDisplay().substring(12, message.length()), null, null,
+                                event.getAuthor().getIdLong());
                 return;
             } else {
                 GiveawayRegistry.getInstance().getGift(event.getGuild().getIdLong())
-                        .startGift(event.getGuild(), event.getTextChannel(), null, null, null);
+                        .startGift(event.getGuild(), event.getTextChannel(), null, null, null,
+                                event.getAuthor().getIdLong());
             }
         }
 
