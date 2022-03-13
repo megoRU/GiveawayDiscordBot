@@ -1,4 +1,4 @@
-package main.giveaway;
+package main.giveaway.api.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

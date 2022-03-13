@@ -1,4 +1,4 @@
-package main.giveaway.participants;
+package main.giveaway.api.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,11 +13,11 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ParticipantsJSONResponse {
+public class ParticipantsResponse {
 
-    List<ParticipantsJSON> participantsJSONList;
+    List<ParticipantsPOJO> participantsJSONList;
 
-    public ParticipantsJSONResponse(Set<ParticipantsJSON> participantsJSONList) {
+    public ParticipantsResponse(Set<ParticipantsPOJO> participantsJSONList) {
         this.participantsJSONList = new ArrayList<>(participantsJSONList);
     }
 }

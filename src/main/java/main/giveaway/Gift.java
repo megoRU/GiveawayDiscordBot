@@ -5,10 +5,11 @@ import com.google.gson.GsonBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import main.config.BotStartConfig;
+import main.giveaway.api.response.ParticipantsPOJO;
+import main.giveaway.api.response.ParticipantsResponse;
 import main.giveaway.impl.GiftHelper;
 import main.giveaway.impl.SetButtons;
-import main.giveaway.participants.ParticipantsJSON;
-import main.giveaway.participants.ParticipantsJSONResponse;
+import main.giveaway.impl.URLS;
 import main.jsonparser.JSONParsers;
 import main.messagesevents.SenderMessage;
 import main.model.entity.ActiveGiveaways;
@@ -49,8 +50,6 @@ import java.util.logging.Logger;
 public class Gift {
 
     private final static Logger LOGGER = Logger.getLogger(Gift.class.getName());
-    private final static String URL = "http://195.2.81.139:8085/api/winners";
-    private final static String URL_USERS = "http://195.2.81.139:8085/api/winners";
     private final JSONParsers jsonParsers = new JSONParsers();
     private final Set<String> listUsers = new LinkedHashSet<>();
     private final Map<String, String> listUsersHash = new HashMap<>();
@@ -68,7 +67,7 @@ public class Gift {
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final ParticipantsRepository participantsRepository;
     private volatile Queue<Participants> participantsList = new ArrayDeque<>();
-    private volatile Set<ParticipantsJSON> participantsJSON = new LinkedHashSet<>();
+    private volatile Set<ParticipantsPOJO> participantsJSON = new LinkedHashSet<>();
 
     public Gift(long guildId, long textChannelId, ActiveGiveawayRepository activeGiveawayRepository, ParticipantsRepository participantsRepository) {
         this.guildId = guildId;
@@ -161,10 +160,10 @@ public class Gift {
         autoInsert();
     }
 
-    protected void startGift(@NotNull SlashCommandInteractionEvent event, Guild guild,
-                             TextChannel textChannel, String newTitle, String countWinners,
-                             String time, Long role, Boolean isOnlyForSpecificRole,
-                             String urlImage, Long idUserWhoCreateGiveaway) {
+    public void startGift(@NotNull SlashCommandInteractionEvent event, Guild guild,
+                          TextChannel textChannel, String newTitle, String countWinners,
+                          String time, Long role, Boolean isOnlyForSpecificRole,
+                          String urlImage, Long idUserWhoCreateGiveaway) {
 
         EmbedBuilder start = new EmbedBuilder();
 
@@ -221,7 +220,7 @@ public class Gift {
     }
 
     //Добавляет пользователя в StringBuilder
-    protected void addUserToPoll(final User user) {
+    void addUserToPoll(final User user) {
         count.incrementAndGet();
         listUsers.add(user.getId());
         listUsersHash.put(user.getId(), user.getId());
@@ -267,7 +266,7 @@ public class Gift {
         participants.setActiveGiveaways(activeGiveaways);
         participantsList.add(participants);
 
-        participantsJSON.add(new ParticipantsJSON(
+        participantsJSON.add(new ParticipantsPOJO(
                 GiveawayRegistry.getInstance().getIdUserWhoCreateGiveaway(guildId),
                 String.valueOf(guildIdLong + Long.parseLong(GiveawayRegistry.getInstance().getMessageId(guildId))),
                 guildIdLong,
@@ -301,17 +300,22 @@ public class Gift {
     private void sendListUsers() throws Exception {
         try {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            ParticipantsJSONResponse participantsJSONCore = new ParticipantsJSONResponse(participantsJSON);
+            ParticipantsResponse participantsJSONCore = new ParticipantsResponse(participantsJSON);
             String json = gson.toJson(participantsJSONCore);
 
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(URL_USERS))
+                    .uri(URI.create(URLS.SAVE_PARTICIPANTS))
                     .POST(HttpRequest.BodyPublishers.ofString(json))
                     .header("Content-Type", "application/json")
+                    .header("Authorization", BotStartConfig.getBase64())
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
+            if (response.statusCode() != 200) {
+                System.out.println(response.statusCode());
+                throw new Exception("API not work, or connection refused");
+            }
         } catch (Exception e) {
             e.printStackTrace();
             throw new Exception("API not work, or connection refused");
@@ -327,7 +331,7 @@ public class Gift {
 
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(URL))
+                    .uri(URI.create(URLS.WINNERS))
                     .POST(HttpRequest.BodyPublishers.ofString(winners.toString()))
                     .header("Content-Type", "application/json")
                     .build();

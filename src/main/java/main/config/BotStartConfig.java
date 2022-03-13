@@ -1,8 +1,12 @@
 package main.config;
 
 import main.events.MessageWhenBotJoinToGuild;
-import main.giveaway.*;
-import main.giveaway.participants.ParticipantsJSON;
+import main.giveaway.Gift;
+import main.giveaway.GiveawayRegistry;
+import main.giveaway.MessageGift;
+import main.giveaway.ReactionsButton;
+import main.giveaway.api.response.ParticipantsPOJO;
+import main.giveaway.slash.SlashCommand;
 import main.jsonparser.ParserClass;
 import main.messagesevents.LanguageChange;
 import main.messagesevents.MessageInfoHelp;
@@ -77,6 +81,9 @@ public class BotStartConfig {
     private String USER_CONNECTION;
     @Value("${spring.datasource.password}")
     private String PASSWORD_CONNECTION;
+    @Value("${base64}")
+    private String base64;
+    private static String getBase64;
 
     @Autowired
     public BotStartConfig(ActiveGiveawayRepository activeGiveawayRepository, LanguageRepository
@@ -117,6 +124,8 @@ public class BotStartConfig {
 
             jda = jdaBuilder.build();
             jda.awaitReady();
+
+            getBase64 = base64;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -337,7 +346,7 @@ public class BotStartConfig {
 
                     GiveawayRegistry.getInstance()
                             .getGift(Long.parseLong(guildIdHashList.get(i))).getParticipantsJSON()
-                            .add(new ParticipantsJSON(
+                            .add(new ParticipantsPOJO(
                                     String.valueOf(participantsList.get(j).getActiveGiveaways().getIdUserWhoCreateGiveaway()),
                                     String.valueOf(participantsList.get(j).getActiveGiveaways().getGuildLongId() + participantsList.get(j).getActiveGiveaways().getMessageIdLong()),
                                     participantsList.get(j).getActiveGiveaways().getGuildLongId(),
@@ -400,6 +409,9 @@ public class BotStartConfig {
         }
     }
 
+    public static String getBase64() {
+        return getBase64;
+    }
 
     public static Map<String, String> getMapPrefix() {
         return mapPrefix;

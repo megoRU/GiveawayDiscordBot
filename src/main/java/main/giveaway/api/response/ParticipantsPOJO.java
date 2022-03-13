@@ -1,4 +1,4 @@
-package main.giveaway.participants;
+package main.giveaway.api.response;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 @Getter
 @RequiredArgsConstructor
-public final class ParticipantsJSON {
+public final class ParticipantsPOJO {
 
     //UserId
     private final String idUserWhoCreateGiveaway;

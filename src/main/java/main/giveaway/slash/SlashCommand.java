@@ -1,10 +1,14 @@
-package main.giveaway;
+package main.giveaway.slash;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.AllArgsConstructor;
 import main.config.BotStartConfig;
-import main.giveaway.participants.ParticipantsJSONResponse;
+import main.giveaway.Gift;
+import main.giveaway.GiveawayRegistry;
+import main.giveaway.api.response.ParticipantsResponse;
+import main.giveaway.api.response.UserData;
+import main.giveaway.impl.URLS;
 import main.jsonparser.JSONParsers;
 import main.messagesevents.MessageInfoHelp;
 import main.model.entity.Language;
@@ -308,21 +312,25 @@ public class SlashCommand extends ListenerAdapter {
             try {
                 event.deferReply().setEphemeral(true).queue();
                 String id = event.getOption("id", OptionMapping::getAsString);
-                final String URL = "http://localhost:8085/api/get-participants";
 
                 HttpClient client = HttpClient.newHttpClient();
                 HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(URL))
+                        .uri(URI.create(URLS.GET_PARTICIPANTS))
                         .POST(HttpRequest.BodyPublishers.ofString(new UserData(event.getUser().getId(), id).toString()))
                         .header("Content-Type", "application/json")
                         .build();
 
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
+                if (response.statusCode() != 200) {
+                    event.getHook().sendMessage(response.body()).setEphemeral(true).queue();
+                    return;
+                }
+
                 File file = new File("participants.json");
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-                ParticipantsJSONResponse yourList = gson.fromJson(response.body(), ParticipantsJSONResponse.class);
+                ParticipantsResponse yourList = gson.fromJson(response.body(), ParticipantsResponse.class);
 
                 String json = gson.toJson(yourList);
 

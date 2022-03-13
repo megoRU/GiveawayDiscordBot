@@ -5,7 +5,6 @@ import main.config.BotStartConfig;
 import main.jsonparser.JSONParsers;
 import main.messagesevents.MessageInfoHelp;
 import main.messagesevents.SenderMessage;
-import main.model.entity.ActiveGiveaways;
 import main.model.entity.Language;
 import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
