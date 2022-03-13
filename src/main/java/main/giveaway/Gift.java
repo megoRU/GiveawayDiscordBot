@@ -430,6 +430,8 @@ public class Gift {
                             GiveawayRegistry.getInstance().getTitle(guildId), false);
         }
 
+        embedBuilder.addField("Giveaway ID", String.valueOf(guildIdLong + Long.parseLong(GiveawayRegistry.getInstance().getMessageId(guildId))), false);
+
         embedBuilder.setTimestamp(Instant.now());
         embedBuilder.setFooter(jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
 
