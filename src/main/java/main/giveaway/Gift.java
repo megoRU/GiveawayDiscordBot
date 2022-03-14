@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 import main.config.BotStartConfig;
 import main.giveaway.api.response.ParticipantsPOJO;
-import main.giveaway.api.response.ParticipantsResponse;
 import main.giveaway.impl.GiftHelper;
 import main.giveaway.impl.SetButtons;
 import main.giveaway.impl.URLS;
@@ -300,8 +299,9 @@ public class Gift {
     private void sendListUsers() throws Exception {
         try {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            ParticipantsResponse participantsJSONCore = new ParticipantsResponse(participantsJSON);
-            String json = gson.toJson(participantsJSONCore);
+            String json = gson.toJson(participantsJSON);
+
+            LOGGER.info(json);
 
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
@@ -328,6 +328,8 @@ public class Gift {
     private void getWinners(int countWinner) throws Exception {
         try {
             Winners winners = new Winners(countWinner, 0, listUsers.size() - 1);
+
+            LOGGER.info(winners.toString());
 
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()

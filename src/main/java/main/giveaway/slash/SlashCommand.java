@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import main.config.BotStartConfig;
 import main.giveaway.Gift;
 import main.giveaway.GiveawayRegistry;
-import main.giveaway.api.response.ParticipantsResponse;
+import main.giveaway.api.response.ParticipantsPOJO;
 import main.giveaway.api.response.UserData;
 import main.giveaway.impl.URLS;
 import main.jsonparser.JSONParsers;
@@ -330,7 +330,7 @@ public class SlashCommand extends ListenerAdapter {
                 File file = new File("participants.json");
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-                ParticipantsResponse yourList = gson.fromJson(response.body(), ParticipantsResponse.class);
+                ParticipantsPOJO[] yourList = gson.fromJson(response.body(), ParticipantsPOJO[].class);
 
                 String json = gson.toJson(yourList);
 
