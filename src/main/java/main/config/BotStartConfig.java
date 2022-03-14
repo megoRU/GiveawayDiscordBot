@@ -4,8 +4,8 @@ import main.events.MessageWhenBotJoinToGuild;
 import main.giveaway.Gift;
 import main.giveaway.GiveawayRegistry;
 import main.giveaway.MessageGift;
-import main.giveaway.ReactionsButton;
 import main.giveaway.api.response.ParticipantsPOJO;
+import main.giveaway.buttons.ReactionsButton;
 import main.giveaway.slash.SlashCommand;
 import main.jsonparser.ParserClass;
 import main.messagesevents.LanguageChange;
@@ -373,7 +373,7 @@ public class BotStartConfig {
                 int serverCount = BotStartConfig.jda.getGuilds().size();
                 TOP_GG_API.setStats(serverCount);
                 BotStartConfig.jda.getPresence().setActivity(Activity.playing(BotStartConfig.activity + serverCount + " guilds"));
-                IOUtils.toString(new URL("http://195.2.81.139:3001/api/push/SHAtSCMYvd?msg=OK&ping="), StandardCharsets.UTF_8);
+                IOUtils.toString(new URL("http://193.163.203.77:3001/api/push/SHAtSCMYvd?msg=OK&ping="), StandardCharsets.UTF_8);
                 if (!isLaunched) {
                     Statcord.start(
                             BotStartConfig.jda.getSelfUser().getId(),

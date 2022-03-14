@@ -220,7 +220,7 @@ public class Gift {
     }
 
     //Добавляет пользователя в StringBuilder
-    void addUserToPoll(final User user) {
+    public void addUserToPoll(final User user) {
         count.incrementAndGet();
         listUsers.add(user.getId());
         listUsersHash.put(user.getId(), user.getId());
