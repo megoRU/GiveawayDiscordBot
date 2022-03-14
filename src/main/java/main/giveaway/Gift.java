@@ -308,7 +308,7 @@ public class Gift {
                     .uri(URI.create(URLS.SAVE_PARTICIPANTS))
                     .POST(HttpRequest.BodyPublishers.ofString(json))
                     .header("Content-Type", "application/json")
-                    .header("Authorization", BotStartConfig.getBase64())
+                    .header("Authorization", System.getenv("BASE64_PASSWORD"))
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 

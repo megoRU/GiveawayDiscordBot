@@ -81,9 +81,6 @@ public class BotStartConfig {
     private String USER_CONNECTION;
     @Value("${spring.datasource.password}")
     private String PASSWORD_CONNECTION;
-    @Value("${base64}")
-    private String base64;
-    private static String getBase64;
 
     @Autowired
     public BotStartConfig(ActiveGiveawayRepository activeGiveawayRepository, LanguageRepository
@@ -125,7 +122,6 @@ public class BotStartConfig {
             jda = jdaBuilder.build();
             jda.awaitReady();
 
-            getBase64 = base64;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -407,10 +403,6 @@ public class BotStartConfig {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    public static String getBase64() {
-        return getBase64;
     }
 
     public static Map<String, String> getMapPrefix() {
