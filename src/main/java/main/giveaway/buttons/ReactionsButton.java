@@ -1,7 +1,9 @@
-package main.giveaway;
+package main.giveaway.buttons;
 
 import lombok.AllArgsConstructor;
 import main.config.BotStartConfig;
+import main.giveaway.Gift;
+import main.giveaway.GiveawayRegistry;
 import main.jsonparser.JSONParsers;
 import main.messagesevents.MessageInfoHelp;
 import main.messagesevents.SenderMessage;

@@ -1,7 +1,7 @@
 package main.messagesevents;
 
 import main.config.BotStartConfig;
-import main.giveaway.ReactionsButton;
+import main.giveaway.buttons.ReactionsButton;
 import main.jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;

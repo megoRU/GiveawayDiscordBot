@@ -2,7 +2,7 @@ package main.events;
 
 import lombok.AllArgsConstructor;
 import main.config.BotStartConfig;
-import main.giveaway.ReactionsButton;
+import main.giveaway.buttons.ReactionsButton;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.LanguageRepository;
 import main.model.repository.PrefixRepository;
