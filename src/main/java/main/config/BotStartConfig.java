@@ -390,7 +390,6 @@ public class BotStartConfig {
                         .build();
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-
                 if (!isLaunched) {
                     Statcord.start(
                             BotStartConfig.jda.getSelfUser().getId(),
