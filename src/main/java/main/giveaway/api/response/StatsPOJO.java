@@ -14,9 +14,9 @@ public class StatsPOJO {
     @Override
     public String toString() {
         return "{" +
-                "\"servers:\"" + servers +
-                ", \"shards:\"" + shards  +
-                ", \"users:\"" + users +
+                "\"servers\":" + servers +
+                ", \"shards\":" + shards  +
+                ", \"users\":" + users +
                 "}";
     }
 }
