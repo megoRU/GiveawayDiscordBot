@@ -5,6 +5,7 @@ import main.giveaway.Gift;
 import main.giveaway.GiveawayRegistry;
 import main.giveaway.MessageGift;
 import main.giveaway.api.response.ParticipantsPOJO;
+import main.giveaway.api.response.StatsPOJO;
 import main.giveaway.buttons.ReactionsButton;
 import main.giveaway.slash.SlashCommand;
 import main.jsonparser.ParserClass;
@@ -41,7 +42,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.*;
@@ -49,6 +54,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
 
@@ -367,9 +373,24 @@ public class BotStartConfig {
                         .botId(Config.getBotId())
                         .build();
                 int serverCount = BotStartConfig.jda.getGuilds().size();
+
                 TOP_GG_API.setStats(serverCount);
                 BotStartConfig.jda.getPresence().setActivity(Activity.playing(BotStartConfig.activity + serverCount + " guilds"));
                 IOUtils.toString(new URL("http://193.163.203.77:3001/api/push/SHAtSCMYvd?msg=OK&ping="), StandardCharsets.UTF_8);
+
+                AtomicInteger usersCount = new AtomicInteger();
+                BotStartConfig.jda.getGuilds().forEach(g -> usersCount.addAndGet(g.getMembers().size()));
+
+                HttpClient client = HttpClient.newHttpClient();
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create("https://api.boticord.top/v1/stats"))
+                        .POST(HttpRequest.BodyPublishers.ofString(new StatsPOJO(serverCount, 1, usersCount.get()).toString()))
+                        .header("Content-Type", "application/json")
+                        .header("Authorization", System.getenv("BOTICORD"))
+                        .build();
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+
                 if (!isLaunched) {
                     Statcord.start(
                             BotStartConfig.jda.getSelfUser().getId(),
