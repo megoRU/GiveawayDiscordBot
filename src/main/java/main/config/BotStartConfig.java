@@ -5,7 +5,6 @@ import main.giveaway.Gift;
 import main.giveaway.GiveawayRegistry;
 import main.giveaway.MessageGift;
 import main.giveaway.api.response.ParticipantsPOJO;
-import main.giveaway.api.response.StatsPOJO;
 import main.giveaway.buttons.ReactionsButton;
 import main.giveaway.slash.SlashCommand;
 import main.jsonparser.ParserClass;
@@ -28,6 +27,8 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import org.apache.commons.io.IOUtils;
+import org.boticordjava.api.BotiCordAPI;
+import org.boticordjava.api.impl.BotiCordAPIAPIImpl;
 import org.discordbots.api.client.DiscordBotListAPI;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -42,11 +43,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.*;
@@ -378,17 +375,14 @@ public class BotStartConfig {
                 BotStartConfig.jda.getPresence().setActivity(Activity.playing(BotStartConfig.activity + serverCount + " guilds"));
                 IOUtils.toString(new URL("http://193.163.203.77:3001/api/push/SHAtSCMYvd?msg=OK&ping="), StandardCharsets.UTF_8);
 
+
+                //BOTICORD API
                 AtomicInteger usersCount = new AtomicInteger();
                 BotStartConfig.jda.getGuilds().forEach(g -> usersCount.addAndGet(g.getMembers().size()));
 
-                HttpClient client = HttpClient.newHttpClient();
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create("https://api.boticord.top/v1/stats"))
-                        .POST(HttpRequest.BodyPublishers.ofString(new StatsPOJO(serverCount, 1, usersCount.get()).toString()))
-                        .header("Content-Type", "application/json")
-                        .header("Authorization", System.getenv("BOTICORD"))
-                        .build();
-                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                BotiCordAPI api = new BotiCordAPIAPIImpl(System.getenv("BOTICORD"), Config.getBotId());
+                api.setStats(serverCount, 1, usersCount.get());
+
 
                 if (!isLaunched) {
                     Statcord.start(

@@ -65,6 +65,12 @@
             <version>1.1.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.megoRU</groupId>
+            <artifactId>boticordjava</artifactId>
+            <version>e5e609fae4</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/com.github.oshi/oshi-core -->
         <dependency>
             <groupId>com.github.oshi</groupId>
