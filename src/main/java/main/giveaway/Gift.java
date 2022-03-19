@@ -354,38 +354,42 @@ public class Gift {
     }
 
     public void stopGift(final long guildIdLong, final int countWinner) {
-        LOGGER.info("\nstopGift method" + "\nCount winner: " + countWinner);
-        if (listUsers.size() < 2) {
-            EmbedBuilder notEnoughUsers = new EmbedBuilder();
-            notEnoughUsers.setColor(Color.GREEN);
-            notEnoughUsers.setTitle(jsonParsers.getLocale("gift_Not_Enough_Users", String.valueOf(guildIdLong)));
-            notEnoughUsers.setDescription(jsonParsers.getLocale("gift_Giveaway_Deleted", String.valueOf(guildIdLong)));
-            //Отправляет сообщение
-            GiftHelper.editMessage(notEnoughUsers, guildIdLong, textChannelId);
-            //Удаляет данные из коллекций
-            clearingCollections();
+        try {
+            LOGGER.info("\nstopGift method" + "\nCount winner: " + countWinner);
+            if (listUsers.size() < 2) {
+                EmbedBuilder notEnoughUsers = new EmbedBuilder();
+                notEnoughUsers.setColor(Color.GREEN);
+                notEnoughUsers.setTitle(jsonParsers.getLocale("gift_Not_Enough_Users", String.valueOf(guildIdLong)));
+                notEnoughUsers.setDescription(jsonParsers.getLocale("gift_Giveaway_Deleted", String.valueOf(guildIdLong)));
+                //Отправляет сообщение
+                GiftHelper.editMessage(notEnoughUsers, guildIdLong, textChannelId);
+                //Удаляет данные из коллекций
+                clearingCollections();
 
-            activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
-            return;
-        }
+                activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
+                return;
+            }
 
-        if (countWinner == 0 || countWinner >= listUsers.size()) {
-            EmbedBuilder zero = new EmbedBuilder();
-            zero.setColor(0xFF8000);
-            zero.setTitle(jsonParsers.getLocale("gift_Invalid_Number", String.valueOf(guildIdLong)));
+            if (countWinner == 0 || countWinner >= listUsers.size()) {
+                EmbedBuilder zero = new EmbedBuilder();
+                zero.setColor(0xFF8000);
+                zero.setTitle(jsonParsers.getLocale("gift_Invalid_Number", String.valueOf(guildIdLong)));
 
-            zero.setDescription(jsonParsers
-                    .getLocale("gift_Invalid_Number_Description", String.valueOf(guildIdLong))
-                    .replaceAll("\\{0}", String.valueOf(countWinner))
-                    .replaceAll("\\{1}", String.valueOf(getCount())));
-            //Отправляет сообщение
-            GiftHelper.updateGiveawayMessageWithError(
-                    GiveawayRegistry.getInstance().getCountWinners(guildId) == null ? "TBA" : GiveawayRegistry.getInstance().getCountWinners(guildId),
-                    this.guildId,
-                    this.textChannelId,
-                    getCount(),
-                    countWinner);
-            return;
+                zero.setDescription(jsonParsers
+                        .getLocale("gift_Invalid_Number_Description", String.valueOf(guildIdLong))
+                        .replaceAll("\\{0}", String.valueOf(countWinner))
+                        .replaceAll("\\{1}", String.valueOf(getCount())));
+                //Отправляет сообщение
+                GiftHelper.updateGiveawayMessageWithError(
+                        GiveawayRegistry.getInstance().getCountWinners(guildId) == null ? "TBA" : GiveawayRegistry.getInstance().getCountWinners(guildId),
+                        this.guildId,
+                        this.textChannelId,
+                        getCount(),
+                        countWinner);
+                return;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         try {
