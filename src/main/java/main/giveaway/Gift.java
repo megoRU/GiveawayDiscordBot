@@ -429,16 +429,18 @@ public class Gift {
                         .getLocale("gift_Invalid_Number_Description", String.valueOf(guildIdLong))
                         .replaceAll("\\{0}", String.valueOf(countWinner))
                         .replaceAll("\\{1}", String.valueOf(getCount())));
-                //Отправляет сообщение
-                giftHelper.editMessage(zero, guildIdLong, textChannelId);
 
                 giftHelper.getMessageDescription(guildId, textChannelId).whenComplete((m, throwable) -> {
+
+                    //Отправляет сообщение
+                    giftHelper.editMessage(zero, guildIdLong, textChannelId);
 
                     try {
                         Thread.sleep(15000L);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+
                     zero.setTitle(GiveawayRegistry.getInstance().getTitle(guildId));
                     zero.setColor(Color.GREEN);
                     zero.setTitle(GiveawayRegistry.getInstance().getTitle(guildId));
