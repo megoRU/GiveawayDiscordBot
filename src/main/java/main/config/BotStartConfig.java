@@ -171,7 +171,7 @@ public class BotStartConfig {
 
             optionsStart.add(new OptionData(STRING, "title", "Title for Giveaway").setName("title"));
 
-            optionsStart.add(new OptionData(INTEGER, "count", "Set count winners").setName("count"));
+            optionsStart.add(new OptionData(INTEGER, "count", "Set count winners").setName("count").setMinValue(1).setMaxValue(30));
 
             optionsStart.add(new OptionData(STRING, "duration", "Examples: 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style. Preferably immediately in UTC ±0").setName("duration"));
 
@@ -185,7 +185,7 @@ public class BotStartConfig {
 
             optionsStart.add(new OptionData(ATTACHMENT, "image", "Your Giveaway Image").setName("image"));
 
-            optionsStop.add(new OptionData(STRING, "stop", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1").setName("stop"));
+            optionsStop.add(new OptionData(INTEGER, "count", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1").setName("count").setMinValue(1).setMaxValue(30));
 
 
             commands.addCommands(Commands.slash("language", "Setting language").addOptions(optionsLanguage));

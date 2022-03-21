@@ -166,7 +166,7 @@ public class SlashCommand extends ListenerAdapter {
                 gift.setColor(0x00FF00);
                 gift.setDescription(jsonParsers.getLocale("message_gift_Not_Admin", event.getGuild().getId()));
 
-                event.replyEmbeds(gift.build()).queue();
+                event.replyEmbeds(gift.build()).setEphemeral(true).queue();
                 return;
             }
 
@@ -198,8 +198,10 @@ public class SlashCommand extends ListenerAdapter {
 
             EmbedBuilder stop = new EmbedBuilder();
 
-            int count = Integer.parseInt(event.getOptions().get(0).getAsString());
+            Long count = event.getOption("count", OptionMapping::getAsLong);
             boolean isHasErrors = false;
+
+            if (count == null) return;
 
             if (GiveawayRegistry.getInstance().getGift(event.getGuild().getIdLong()).getListUsers().size() == count) {
                 isHasErrors = true;
