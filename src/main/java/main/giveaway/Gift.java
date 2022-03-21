@@ -432,13 +432,28 @@ public class Gift {
                 //Отправляет сообщение
                 giftHelper.editMessage(zero, guildIdLong, textChannelId);
 
-                Thread.sleep(15000L);
+                giftHelper.getMessageDescription(guildId, textChannelId).whenComplete((m, throwable) -> {
 
-                zero.setColor(Color.GREEN);
-                zero.setTitle(GiveawayRegistry.getInstance().getTitle(guildId));
-                zero.setDescription(giftHelper.getMessageDescription(guildId, textChannelId).get().getEmbeds().get(0).getDescription());
+                    try {
+                        Thread.sleep(15000L);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    zero.setTitle(GiveawayRegistry.getInstance().getTitle(guildId));
+                    zero.setColor(Color.GREEN);
+                    zero.setTitle(GiveawayRegistry.getInstance().getTitle(guildId));
+                    zero.setDescription(m.getEmbeds().get(0).getDescription());
 
-                giftHelper.editMessage(zero, guildIdLong, textChannelId);
+                    giftHelper.editMessage(zero, guildIdLong, textChannelId);
+                    if (throwable != null) {
+                        System.out.println(throwable.getMessage());
+                        if (throwable.getMessage().contains("10008: Unknown Message")) {
+                            activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
+                            clearingCollections();
+                            System.out.println("gift stop: Удаляем Giveaway");
+                        }
+                    }
+                });
                 return;
             }
         } catch (Exception e) {

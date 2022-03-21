@@ -203,7 +203,9 @@ public class SlashCommand extends ListenerAdapter {
 
             if (count == null) return;
 
-            if (GiveawayRegistry.getInstance().getGift(event.getGuild().getIdLong()).getListUsers().size() == count) {
+            Gift gift = GiveawayRegistry.getInstance().getGift(event.getGuild().getIdLong());
+
+            if (gift.getListUsers().size() <= count) {
                 isHasErrors = true;
             }
 

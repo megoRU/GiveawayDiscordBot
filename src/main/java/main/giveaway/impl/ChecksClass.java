@@ -1,6 +1,7 @@
 package main.giveaway.impl;
 
 import main.config.BotStartConfig;
+import main.giveaway.GiveawayRegistry;
 import main.model.repository.ActiveGiveawayRepository;
 
 public class ChecksClass {
@@ -17,6 +18,7 @@ public class ChecksClass {
         } else {
             System.out.println("Бота нет в Guild -> Удаляем Giveaway!");
             activeGiveawayRepository.deleteActiveGiveaways(guildId);
+            GiveawayRegistry.getInstance().removeGift(guildId);
             return true;
         }
     }
