@@ -107,6 +107,7 @@ public class SlashCommand extends ListenerAdapter {
                             event.getGuild().getIdLong(),
                             new Gift(event.getGuild().getIdLong(),
                                     textChannel == null ? event.getTextChannel().getIdLong() : textChannel.getIdLong(),
+                                    event.getUser().getIdLong(),
                                     activeGiveawayRepository,
                                     participantsRepository));
 
@@ -125,7 +126,7 @@ public class SlashCommand extends ListenerAdapter {
                                     count,
                                     time,
                                     role,
-                                    !isOnlyForSpecificRole ? null : isOnlyForSpecificRole,
+                                    isOnlyForSpecificRole,
                                     urlImage,
                                     event.getUser().getIdLong());
 

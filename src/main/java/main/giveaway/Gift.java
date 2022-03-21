@@ -6,9 +6,10 @@ import lombok.Getter;
 import lombok.Setter;
 import main.config.BotStartConfig;
 import main.giveaway.api.response.ParticipantsPOJO;
+import main.giveaway.impl.ChecksClass;
 import main.giveaway.impl.GiftHelper;
-import main.giveaway.impl.SetButtons;
 import main.giveaway.impl.URLS;
+import main.giveaway.reactions.Reactions;
 import main.jsonparser.JSONParsers;
 import main.messagesevents.SenderMessage;
 import main.model.entity.ActiveGiveaways;
@@ -57,6 +58,7 @@ public class Gift {
     private final Random random = new Random();
     private final long guildId;
     private final long textChannelId;
+    private final long userIdLong;
     private StringBuilder insertQuery = new StringBuilder();
     private AtomicInteger count = new AtomicInteger(0);
     private int localCountUsers = 0;
@@ -68,16 +70,17 @@ public class Gift {
     private volatile Queue<Participants> participantsList = new ArrayDeque<>();
     private volatile Set<ParticipantsPOJO> participantsJSON = new LinkedHashSet<>();
 
-    public Gift(long guildId, long textChannelId, ActiveGiveawayRepository activeGiveawayRepository, ParticipantsRepository participantsRepository) {
+    public Gift(long guildId, long textChannelId, long userIdLong, ActiveGiveawayRepository activeGiveawayRepository, ParticipantsRepository participantsRepository) {
         this.guildId = guildId;
         this.textChannelId = textChannelId;
+        this.userIdLong = userIdLong;
         this.activeGiveawayRepository = activeGiveawayRepository;
         this.participantsRepository = participantsRepository;
     }
 
     private void extracted(EmbedBuilder start, Guild guild, TextChannel channel,
                            String newTitle, String countWinners,
-                           String time, Long role, Boolean isOnlyForSpecificRole, String urlImage) {
+                           String time, Long role, boolean isOnlyForSpecificRole, String urlImage) {
         LOGGER.info("\nGuild id: " + guild.getId()
                 + "\nTextChannel: " + channel.getName() + " " + channel.getId()
                 + "\nTitle: " + newTitle
@@ -89,17 +92,17 @@ public class Gift {
         //Instant для timestamp
         specificTime = Instant.ofEpochMilli(Instant.now().toEpochMilli());
 
-        start.setColor(Color.GREEN);
-        start.setTitle(newTitle == null ? "Giveaway" : newTitle);
+        String title = newTitle == null ? "Giveaway" : newTitle;
 
-        start.addField(jsonParsers.getLocale("gift_Participants", String.valueOf(guildId)), "`" + count + "`", true);
-        start.addField(GiftHelper.setEndingWord(countWinners == null ? "TBA" : countWinners, guildId), countWinners == null ? "TBA" : countWinners, true);
+        start.setColor(Color.GREEN);
+        start.setTitle(title);
+        start.appendDescription("React with :tada: to enter!");
 
         if (role != null) {
 
-            if (isOnlyForSpecificRole != null && isOnlyForSpecificRole) {
+            if (isOnlyForSpecificRole) {
                 channel.sendMessage(jsonParsers.getLocale("gift_notification_for_this_role", guild.getId()) + "<@&" + role + ">").queue();
-                start.addField("Только для", "<@&" + role + ">", true);
+                start.appendDescription("\nOnly for: <@&" + role + ">");
             } else {
                 if (role == guildId) {
                     channel.sendMessage(jsonParsers.getLocale("gift_notification_for_this_role", guild.getId()) + "@everyone").queue();
@@ -109,15 +112,11 @@ public class Gift {
             }
         }
 
-        start.addField("Attention for Admins: ",
-                """
-                        May 1, 2022 you will not be able to control the bot
-                        without Slash Commands, add them:
-                        [Add slash commands](https://discord.com/oauth2/authorize?client_id=808277484524011531&scope=applications.commands%20bot)""",
-                false);
+        String footer = countWinners == null ? "1 Winner" : countWinners + " Winners";
+        start.setFooter(footer);
 
         if (time != null) {
-            start.setFooter(jsonParsers.getLocale("gift_Ends_At", guild.getId()));
+            start.setFooter(footer + " | " + jsonParsers.getLocale("gift_Ends_At", guild.getId()));
 
             if (time.length() > 4) {
 
@@ -128,16 +127,23 @@ public class Gift {
 
                 start.setTimestamp(dateTime);
 
+                start.appendDescription("\nEnds: <t:" + offsetTime.toEpochSecond() + ":R> (<t:" + offsetTime.toEpochSecond() + ":f>)");
+
                 putTimestamp(new Timestamp(offsetTime.toEpochSecond() * 1000));
 
             } else {
                 times = GiftHelper.getMinutes(time);
 
+                long toEpochSecond = OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times)).toEpochSecond();
                 start.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times)));
+
+                start.appendDescription("\nEnds: <t:" + toEpochSecond + ":R> (<t:" + toEpochSecond + ":f>)");
 
                 putTimestamp(new Timestamp(specificTime.plusSeconds(Long.parseLong(times) * 60).getEpochSecond() * 1000));
             }
         }
+
+        start.appendDescription("\nHosted by: " + "<@" + userIdLong + ">");
 
         if (urlImage != null) {
             start.setImage(urlImage);
@@ -152,8 +158,11 @@ public class Gift {
         extracted(start, guild, textChannel, newTitle, countWinners, time, null, false, null);
 
         textChannel.sendMessageEmbeds(start.build())
-                .setActionRow(SetButtons.getListButtons(String.valueOf(guildId)))
-                .queue(message -> updateCollections(guild, countWinners, time, message, null, null, null, newTitle, idUserWhoCreateGiveaway));
+                .queue(message -> {
+                            message.addReaction(Reactions.TADA).queue();
+                            updateCollections(guild, countWinners, time, message, null, false, null, newTitle, idUserWhoCreateGiveaway);
+                        }
+                );
 
         //Вот мы запускаем бесконечный поток.
         autoInsert();
@@ -161,7 +170,7 @@ public class Gift {
 
     public void startGift(@NotNull SlashCommandInteractionEvent event, Guild guild,
                           TextChannel textChannel, String newTitle, String countWinners,
-                          String time, Long role, Boolean isOnlyForSpecificRole,
+                          String time, Long role, boolean isOnlyForSpecificRole,
                           String urlImage, Long idUserWhoCreateGiveaway) {
 
         EmbedBuilder start = new EmbedBuilder();
@@ -178,8 +187,10 @@ public class Gift {
         }
 
         textChannel.sendMessageEmbeds(start.build())
-                .setActionRow(SetButtons.getListButtons(String.valueOf(guildId)))
-                .queue(message -> updateCollections(guild, countWinners, time, message, role, isOnlyForSpecificRole, urlImage, newTitle, idUserWhoCreateGiveaway));
+                .queue(message -> {
+                    message.addReaction(Reactions.TADA).queue();
+                    updateCollections(guild, countWinners, time, message, role, isOnlyForSpecificRole, urlImage, newTitle, idUserWhoCreateGiveaway);
+                });
 
         //Вот мы запускаем бесконечный поток.
         autoInsert();
@@ -220,10 +231,53 @@ public class Gift {
 
     //Добавляет пользователя в StringBuilder
     public void addUserToPoll(final User user) {
-        count.incrementAndGet();
-        listUsers.add(user.getId());
-        listUsersHash.put(user.getId(), user.getId());
-        addUserToInsertQuery(user.getName(), user.getAsTag(), user.getIdLong(), guildId);
+        if (!listUsersHash.containsKey(user.getId())) {
+            count.incrementAndGet();
+            listUsers.add(user.getId());
+            listUsersHash.put(user.getId(), user.getId());
+            addUserToInsertQuery(user.getName(), user.getAsTag(), user.getIdLong(), guildId);
+        }
+    }
+
+    private EmbedBuilder embedBuilder(Color color, String winners, final int countWinner) {
+        EmbedBuilder embedBuilder = null;
+        try {
+            embedBuilder = new EmbedBuilder();
+            LOGGER.info("\nwinners: " + winners);
+            embedBuilder.setColor(color);
+            embedBuilder.setTitle(GiveawayRegistry.getInstance().getTitle(guildId));
+
+
+            if (countWinner == 1) {
+                embedBuilder.appendDescription(jsonParsers.getLocale("gift_winner", String.valueOf(guildId)) + winners);
+            } else {
+                embedBuilder.appendDescription(jsonParsers.getLocale("gift_winners", String.valueOf(guildId)) + winners);
+            }
+
+            String footer = GiftHelper.setEndingWord(countWinner, guildId);
+            embedBuilder.setTimestamp(Instant.now());
+            embedBuilder.setFooter(countWinner + " " + footer + " | " + jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
+
+
+            if (GiveawayRegistry.getInstance().getIsForSpecificRole(guildId)) {
+                embedBuilder.appendDescription(jsonParsers.getLocale("gift_OnlyFor", String.valueOf(guildId))
+                        + " <@&" + GiveawayRegistry.getInstance().getRoleId(guildId) + ">");
+            }
+
+            embedBuilder.appendDescription("\nHosted by: " + "<@" + userIdLong + ">");
+            embedBuilder.appendDescription("\nGiveaway ID: `" + (guildId + Long.parseLong(GiveawayRegistry.getInstance().getMessageId(guildId))) + "`");
+
+            if (GiveawayRegistry.getInstance().getUrlImage(guildId) != null) {
+                embedBuilder.setImage(GiveawayRegistry.getInstance().getUrlImage(guildId));
+            }
+
+
+        } catch (
+                Exception e) {
+            e.printStackTrace();
+        }
+
+        return embedBuilder;
     }
 
     //TODO: Может удалять список с кем то. Какой блять список? Уже его нет! А блять понял. Этот participantsList
@@ -238,13 +292,6 @@ public class Gift {
                         temp.add(participantsList.poll());
                     }
                     participantsRepository.saveAllAndFlush(temp);
-                    GiftHelper.updateGiveawayMessage(
-                            GiveawayRegistry.getInstance().getCountWinners(guildId) == null
-                                    ? "TBA"
-                                    : GiveawayRegistry.getInstance().getCountWinners(guildId),
-                            this.guildId,
-                            this.textChannelId,
-                            getCount());
                 }
             }
         } catch (Exception e) {
@@ -354,15 +401,18 @@ public class Gift {
     }
 
     public void stopGift(final long guildIdLong, final int countWinner) {
+        LOGGER.info("\nstopGift method" + "\nCount winner: " + countWinner);
+        ChecksClass checksClass = new ChecksClass(activeGiveawayRepository);
+        GiftHelper giftHelper = new GiftHelper(activeGiveawayRepository);
+        if (checksClass.isGuildDeleted(guildId)) return;
         try {
-            LOGGER.info("\nstopGift method" + "\nCount winner: " + countWinner);
             if (listUsers.size() < 2) {
                 EmbedBuilder notEnoughUsers = new EmbedBuilder();
                 notEnoughUsers.setColor(Color.GREEN);
                 notEnoughUsers.setTitle(jsonParsers.getLocale("gift_Not_Enough_Users", String.valueOf(guildIdLong)));
                 notEnoughUsers.setDescription(jsonParsers.getLocale("gift_Giveaway_Deleted", String.valueOf(guildIdLong)));
                 //Отправляет сообщение
-                GiftHelper.editMessage(notEnoughUsers, guildIdLong, textChannelId);
+                giftHelper.editMessage(notEnoughUsers, guildIdLong, textChannelId);
                 //Удаляет данные из коллекций
                 clearingCollections();
 
@@ -380,12 +430,15 @@ public class Gift {
                         .replaceAll("\\{0}", String.valueOf(countWinner))
                         .replaceAll("\\{1}", String.valueOf(getCount())));
                 //Отправляет сообщение
-                GiftHelper.updateGiveawayMessageWithError(
-                        GiveawayRegistry.getInstance().getCountWinners(guildId) == null ? "TBA" : GiveawayRegistry.getInstance().getCountWinners(guildId),
-                        this.guildId,
-                        this.textChannelId,
-                        getCount(),
-                        countWinner);
+                giftHelper.editMessage(zero, guildIdLong, textChannelId);
+
+                Thread.sleep(15000L);
+
+                zero.setColor(Color.GREEN);
+                zero.setTitle(GiveawayRegistry.getInstance().getTitle(guildId));
+                zero.setDescription(giftHelper.getMessageDescription(guildId, textChannelId).get().getEmbeds().get(0).getDescription());
+
+                giftHelper.editMessage(zero, guildIdLong, textChannelId);
                 return;
             }
         } catch (Exception e) {
@@ -409,40 +462,21 @@ public class Gift {
             return;
         }
 
-        EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setColor(Color.GREEN);
-        embedBuilder.setTitle(jsonParsers.getLocale("gift_Giveaway_End", String.valueOf(guildIdLong)));
-
         if (uniqueWinners.size() == 1) {
-            embedBuilder.setDescription(jsonParsers
-                    .getLocale("gift_Giveaway_Winner_Mention", String.valueOf(guildIdLong))
-                    .replaceAll("\\{0}", String.valueOf(getCount()))
-                    + Arrays.toString(uniqueWinners.toArray())
-                    .replaceAll("\\[", "").replaceAll("]", "") +
-                    jsonParsers.getLocale("gift_Giveaway_RANDOMORG_one", String.valueOf(guildIdLong)));
+            giftHelper.editMessage(
+                    embedBuilder(Color.GREEN, Arrays.toString(uniqueWinners.toArray())
+                            .replaceAll("\\[", "")
+                            .replaceAll("]", ""), countWinner),
+                    guildId,
+                    textChannelId);
         } else {
-            embedBuilder.setDescription(jsonParsers
-                    .getLocale("gift_Giveaway_Winners", String.valueOf(guildIdLong))
-                    .replaceAll("\\{0}", String.valueOf(getCount()))
-                    + Arrays.toString(uniqueWinners.toArray())
-                    .replaceAll("\\[", "").replaceAll("]", "") +
-                    jsonParsers.getLocale("gift_Giveaway_RANDOMORG_more", String.valueOf(guildIdLong)));
+            giftHelper.editMessage(
+                    embedBuilder(Color.GREEN, Arrays.toString(uniqueWinners.toArray())
+                            .replaceAll("\\[", "")
+                            .replaceAll("]", ""), countWinner),
+                    guildId,
+                    textChannelId);
         }
-
-        if (GiveawayRegistry.getInstance().getTitle(guildId) != null
-                && !GiveawayRegistry.getInstance().getTitle(guildId).equals("Giveaway")) {
-            embedBuilder
-                    .addField(jsonParsers.getLocale("gift_what_was_giveaway", String.valueOf(guildIdLong)),
-                            GiveawayRegistry.getInstance().getTitle(guildId), false);
-        }
-
-        embedBuilder.addField("Giveaway ID", String.valueOf(guildIdLong + Long.parseLong(GiveawayRegistry.getInstance().getMessageId(guildId))), false);
-
-        embedBuilder.setTimestamp(Instant.now());
-        embedBuilder.setFooter(jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
-
-        //Отправляет сообщение
-        GiftHelper.editMessage(embedBuilder, guildId, textChannelId);
 
         //Удаляет данные из коллекций
         clearingCollections();
