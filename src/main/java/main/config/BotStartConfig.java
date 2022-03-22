@@ -432,10 +432,6 @@ public class BotStartConfig {
         return mapLanguages;
     }
 
-//    public static JDA getJda() {
-//        return jda;
-//    }
-
     public static Deque<Giveaway> getQueue() {
         return queue;
     }
