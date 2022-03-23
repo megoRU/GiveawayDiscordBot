@@ -4,7 +4,6 @@ import main.events.MessageWhenBotJoinToGuild;
 import main.giveaway.Gift;
 import main.giveaway.GiveawayRegistry;
 import main.giveaway.MessageGift;
-import main.giveaway.api.response.ParticipantsPOJO;
 import main.giveaway.buttons.ReactionsButton;
 import main.giveaway.reactions.Reactions;
 import main.giveaway.slash.SlashCommand;
@@ -226,7 +225,7 @@ public class BotStartConfig {
         }
     }
 
-    @Scheduled(fixedDelay = 20000L)
+    @Scheduled(fixedDelay = 120000L)
     private void topGGAndStatcord() {
         if (!Config.isIsDev()) {
             try {
@@ -385,10 +384,9 @@ public class BotStartConfig {
                             .getGift(Long.parseLong(guildIdHashList.get(i)))
                             .setCount(participantsList.size());
 
-
                     GiveawayRegistry.getInstance()
                             .getGift(Long.parseLong(guildIdHashList.get(i))).getParticipantsJSON()
-                            .add(new ParticipantsPOJO(
+                            .add(new api.megoru.ru.entity.Participants(
                                     String.valueOf(participantsList.get(j).getActiveGiveaways().getIdUserWhoCreateGiveaway()),
                                     String.valueOf(participantsList.get(j).getActiveGiveaways().getGuildLongId() + participantsList.get(j).getActiveGiveaways().getMessageIdLong()),
                                     participantsList.get(j).getActiveGiveaways().getGuildLongId(),

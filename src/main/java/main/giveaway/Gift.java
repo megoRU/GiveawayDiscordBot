@@ -1,14 +1,13 @@
 package main.giveaway;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import api.megoru.ru.MegoruAPI;
+import api.megoru.ru.entity.Winners;
+import api.megoru.ru.impl.MegoruAPIImpl;
 import lombok.Getter;
 import lombok.Setter;
 import main.config.BotStartConfig;
-import main.giveaway.api.response.ParticipantsPOJO;
 import main.giveaway.impl.ChecksClass;
 import main.giveaway.impl.GiftHelper;
-import main.giveaway.impl.URLS;
 import main.giveaway.reactions.Reactions;
 import main.jsonparser.JSONParsers;
 import main.messagesevents.SenderMessage;
@@ -28,10 +27,6 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -68,7 +63,7 @@ public class Gift {
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final ParticipantsRepository participantsRepository;
     private volatile Queue<Participants> participantsList = new ArrayDeque<>();
-    private volatile Set<ParticipantsPOJO> participantsJSON = new LinkedHashSet<>();
+    private volatile Set<api.megoru.ru.entity.Participants> participantsJSON = new LinkedHashSet<>();
 
     public Gift(long guildId, long textChannelId, long userIdLong, ActiveGiveawayRepository activeGiveawayRepository, ParticipantsRepository participantsRepository) {
         this.guildId = guildId;
@@ -312,7 +307,7 @@ public class Gift {
         participants.setActiveGiveaways(activeGiveaways);
         participantsList.add(participants);
 
-        participantsJSON.add(new ParticipantsPOJO(
+        participantsJSON.add(new api.megoru.ru.entity.Participants(
                 GiveawayRegistry.getInstance().getIdUserWhoCreateGiveaway(guildId),
                 String.valueOf(guildIdLong + Long.parseLong(GiveawayRegistry.getInstance().getMessageId(guildId))),
                 guildIdLong,
@@ -345,24 +340,9 @@ public class Gift {
      */
     private void sendListUsers() throws Exception {
         try {
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            String json = gson.toJson(participantsJSON);
-
-            LOGGER.info(json);
-
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(URLS.SAVE_PARTICIPANTS))
-                    .POST(HttpRequest.BodyPublishers.ofString(json))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", System.getenv("BASE64_PASSWORD"))
-                    .build();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() != 200) {
-                System.out.println(response.statusCode());
-                throw new Exception("API not work, or connection refused");
-            }
+            MegoruAPI api = new MegoruAPIImpl(System.getenv("BASE64_PASSWORD"));
+            List<api.megoru.ru.entity.Participants> participantsList = new ArrayList<>(participantsJSON);
+            api.setListUsers(participantsList);
         } catch (Exception e) {
             e.printStackTrace();
             throw new Exception("API not work, or connection refused");
@@ -374,24 +354,17 @@ public class Gift {
      */
     private void getWinners(int countWinner) throws Exception {
         try {
+            MegoruAPI api = new MegoruAPIImpl(System.getenv("BASE64_PASSWORD"));
             Winners winners = new Winners(countWinner, 0, listUsers.size() - 1);
-
             LOGGER.info(winners.toString());
-
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(URLS.WINNERS))
-                    .POST(HttpRequest.BodyPublishers.ofString(winners.toString()))
-                    .header("Content-Type", "application/json")
-                    .build();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            String[] winnersArgs = response.body().split(" ");
+            String[] strings = api.setWinners(winners);
 
             List<String> temp = new ArrayList<>(listUsers);
 
-            for (int i = 0; i < winnersArgs.length; i++) {
-                uniqueWinners.add("<@" + temp.get(Integer.parseInt(winnersArgs[i])) + ">");
+            if (strings == null) throw new Exception("API not work, or connection refused");
+
+            for (int i = 0; i < strings.length; i++) {
+                uniqueWinners.add("<@" + temp.get(Integer.parseInt(strings[i])) + ">");
             }
 
         } catch (Exception e) {
@@ -468,9 +441,10 @@ public class Gift {
             getWinners(countWinner);
         } catch (Exception e) {
             EmbedBuilder errors = new EmbedBuilder();
-            errors.setColor(Color.GREEN);
+            errors.setColor(Color.RED);
             errors.setTitle("Errors with API");
             errors.setDescription("Repeat later. Or write to us about it.");
+            errors.appendDescription("\nYou have not completed the Giveaway");
 
             List<Button> buttons = new ArrayList<>();
             buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));

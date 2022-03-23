@@ -91,6 +91,12 @@
             <version>8.0.28</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.megoRU</groupId>
+            <artifactId>api.megoru.ru</artifactId>
+            <version>v1.1</version>
+        </dependency>
+
     </dependencies>
 
     <build>
