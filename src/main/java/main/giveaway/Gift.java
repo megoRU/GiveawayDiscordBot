@@ -40,6 +40,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
+import static main.giveaway.impl.URLS.getDiscordUrlMessage;
+
 @Getter
 @Setter
 public class Gift {
@@ -468,6 +470,28 @@ public class Gift {
                     guildId,
                     textChannelId);
         }
+
+        String messageId = GiveawayRegistry.getInstance().getMessageId(guildId);
+        String url = getDiscordUrlMessage(String.valueOf(this.guildId), String.valueOf(this.textChannelId), messageId);
+
+        EmbedBuilder winners = new EmbedBuilder();
+        winners.setColor(Color.GREEN);
+
+        if (uniqueWinners.size() == 1) {
+            winners.setDescription(jsonParsers.getLocale("gift_congratulations",
+                    String.valueOf(guildIdLong)).replaceAll("\\{0}", url)
+                    + Arrays.toString(uniqueWinners.toArray())
+                    .replaceAll("\\[", "")
+                    .replaceAll("]", ""));
+        } else {
+            winners.setDescription(jsonParsers.getLocale("gift_congratulations_many",
+                    String.valueOf(guildIdLong)).replaceAll("\\{0}", url)
+                    + Arrays.toString(uniqueWinners.toArray())
+                    .replaceAll("\\[", "")
+                    .replaceAll("]", ""));
+        }
+
+        SenderMessage.sendMessage(winners.build(), guildId, textChannelId);
 
         //Удаляет данные из коллекций
         clearingCollections();

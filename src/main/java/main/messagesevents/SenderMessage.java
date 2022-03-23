@@ -11,6 +11,18 @@ import java.util.List;
 
 public interface SenderMessage {
 
+    static void sendMessage(MessageEmbed embedBuilder, Long guildId, Long textChannel) {
+        try {
+            BotStartConfig.jda
+                    .getGuildById(guildId)
+                    .getTextChannelById(textChannel)
+                    .sendMessageEmbeds(embedBuilder)
+                    .queue();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     static void sendMessage(MessageEmbed embedBuilder, TextChannel textChannel, List<Button> buttons) {
         try {
             textChannel.sendMessageEmbeds(embedBuilder).setActionRow(buttons).queue();

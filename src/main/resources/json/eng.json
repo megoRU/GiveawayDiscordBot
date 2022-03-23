@@ -1,6 +1,5 @@
 {
   "_comment1": "Это нужно удалить 1 мая 2022",
-
   "messages_events_Prefix": "Prefix:",
   "messages_events_Changes_Prefix": "`*prefix <symbol>` - Changes the prefix.\n",
   "messages_events_Reset_Prefix": "`*prefix reset` - Reset the prefix.",
@@ -16,15 +15,12 @@
   "messages_events_Start_Time_Count_Giveaway": "gift start <1-99m|h|d> <number>` - Start Giveaway with a by timer stop and certain number of winners.\n`",
   "messages_events_Stop_Giveaway": "gift stop` - Stop Giveaway.\n`",
   "messages_events_Stop_Number_Giveaway": "gift stop <number>` - Stop Giveaway with more winners.\n",
-
   "_comment2": "Это нужно оставить",
-
   "messages_events_Links": "Links:",
   "messages_events_Site": ":zap: [megoru.ru](https://megoru.ru)\n",
   "messages_events_Add_Me_To_Other_Guilds": ":robot: [Add me to other guilds | add Slash commands](https://discord.com/oauth2/authorize?client_id=808277484524011531&permissions=2147511296&scope=applications.commands%20bot)\n",
   "messages_events_Send_Private_Message": "I sent you a private message",
   "messages_events_Failed_To_Send_Message": "Failed to send message. Maybe I'm on your blacklist!",
-
   "message_gift_Not_Admin": "You are not Admin or you can't managed messages!",
   "message_gift_Need_Stop_Giveaway": "First you need to stop Giveaway",
   "giveaway_registry_Error": "The giveaway was canceled because the bot was unable to get the ID\nyour post for editing. Please try again. **Write us what exactly happened.\nWe are trying to fix this bug. Support guild:** https://discord.gg/UrWG3R683d",
@@ -59,5 +55,7 @@
   "button_dont_worry": "Don't worry, you're a participant.\nWe checked you in the database.",
   "button_you_not_register": "It looks like we haven't registered you yet.\n`Try again after 5 seconds`. If it happens again, write to us in support.\nThe link is available in the bot profile.",
   "gift_winners": "Winners: ",
-  "gift_winner": "Winner: "
+  "gift_winner": "Winner: ",
+  "gift_congratulations": "Congratulations to the winner!\n[Link to Giveaway]({0})\n",
+  "gift_congratulations_many": "Congratulations to the winners!\n[Link to Giveaway]({0})\n"
 }
