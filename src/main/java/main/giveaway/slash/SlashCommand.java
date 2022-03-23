@@ -3,6 +3,7 @@ package main.giveaway.slash;
 import api.megoru.ru.MegoruAPI;
 import api.megoru.ru.entity.Participants;
 import api.megoru.ru.impl.MegoruAPIImpl;
+import api.megoru.ru.io.UnsuccessfulHttpException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.AllArgsConstructor;
@@ -319,20 +320,23 @@ public class SlashCommand extends ListenerAdapter {
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
                 MegoruAPI api = new MegoruAPIImpl(System.getenv("BASE64_PASSWORD"));
+                Participants[] listUsers;
+                try {
+                    listUsers = api.getListUsers(event.getUser().getId(), id);
+                } catch (UnsuccessfulHttpException exception) {
+                    if (exception.getCode() == 404) {
+                        event.getHook().sendMessage(exception.getMessage()).setEphemeral(true).queue();
+                    } else {
+                        EmbedBuilder errors = new EmbedBuilder();
+                        errors.setColor(Color.RED);
+                        errors.setTitle("Errors with API");
+                        errors.setDescription("Repeat later. Or write to us about it.");
 
-                Participants[] listUsers = api.getListUsers(event.getUser().getId(), id);
+                        List<net.dv8tion.jda.api.interactions.components.buttons.Button> buttons = new ArrayList<>();
+                        buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
 
-                if (listUsers == null) {
-                    EmbedBuilder errors = new EmbedBuilder();
-                    errors.setColor(Color.RED);
-                    errors.setTitle("Errors with API");
-                    errors.setDescription("Repeat later. Or write to us about it.");
-                    errors.appendDescription("\nYou have not completed the Giveaway");
-
-                    List<net.dv8tion.jda.api.interactions.components.buttons.Button> buttons = new ArrayList<>();
-                    buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
-
-                    event.getHook().sendMessageEmbeds(errors.build()).addActionRow(buttons).queue();
+                        event.getHook().sendMessageEmbeds(errors.build()).addActionRow(buttons).queue();
+                    }
                     return;
                 }
 
