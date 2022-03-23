@@ -1,6 +1,5 @@
 {
   "_comment1": "Это нужно удалить 1 мая 2022",
-
   "messages_events_Prefix": "Prefix:",
   "messages_events_Changes_Prefix": "`*prefix <symbol>` - Changes the prefix.\n",
   "messages_events_Reset_Prefix": "`*prefix reset` - Reset the prefix.",
@@ -16,25 +15,18 @@
   "messages_events_Start_Time_Count_Giveaway": "gift start <1-99m|h|d> <number>` - Start Giveaway with a by timer stop and certain number of winners.\n`",
   "messages_events_Stop_Giveaway": "gift stop` - Stop Giveaway.\n`",
   "messages_events_Stop_Number_Giveaway": "gift stop <number>` - Stop Giveaway with more winners.\n",
-
   "_comment2": "Это нужно оставить",
-
   "messages_events_Links": "Links:",
   "messages_events_Site": ":zap: [megoru.ru](https://megoru.ru)\n",
   "messages_events_Add_Me_To_Other_Guilds": ":robot: [Add me to other guilds | add Slash commands](https://discord.com/oauth2/authorize?client_id=808277484524011531&permissions=2147511296&scope=applications.commands%20bot)\n",
   "messages_events_Send_Private_Message": "I sent you a private message",
   "messages_events_Failed_To_Send_Message": "Failed to send message. Maybe I'm on your blacklist!",
-
   "message_gift_Not_Admin": "You are not Admin or you can't managed messages!",
   "message_gift_Need_Stop_Giveaway": "First you need to stop Giveaway",
   "giveaway_registry_Error": "The giveaway was canceled because the bot was unable to get the ID\nyour post for editing. Please try again. **Write us what exactly happened.\nWe are trying to fix this bug. Support guild:** https://discord.gg/UrWG3R683d",
-  "gift_Press_Green_Button": "Press green button to enter!",
-  "gift_Press_How": "How to participate",
-  "gift_Press_Me_Button": "Click me to enter! ",
-  "gift_Stop_Button": "Stop Giveaway with {0} winners",
   "gift_Ends_At": "Ends at:",
   "gift_Participants": "Participants",
-  "gift_OnlyFor": "Only for",
+  "gift_OnlyFor": "Only for: ",
   "gift_Ends": "Ended in",
   "gift_Not_Enough_Users": "Not enough users",
   "gift_Giveaway_Deleted": ":x: The giveaway deleted!",
@@ -42,10 +34,8 @@
   "gift_Invalid_Number_Description": "The number of winners must be less than the number of participants!\nYou entered a number: `{0}`\nNumber of participants: `{1}`\nThis action did not cause the deletion: **Giveaway**!",
   "gift_Invalid_Number_Description_Loop": "In order not to get loop, we had to reduce the number\nof winners by one. Since their number was equal to the participants",
   "gift_Giveaway_End": "Giveaway the end",
-  "gift_Giveaway_Winners": "Number of participants: `{0}`\n:trophy: Winners: ",
   "gift_Giveaway_RANDOMORG_one": "\n\nWinner was selected by:\nRANDOM.ORG",
   "gift_Giveaway_RANDOMORG_more": "\n\nWinners were selected by:\nRANDOM.ORG",
-  "gift_Giveaway_Winner_Mention": "Number of participants: `{0}`\n:trophy: Winner: ",
   "language_change_Not_Admin": "You are not Admin or you can't managed server",
   "button_Help": "/help",
   "button_Language": "You changed the language to: `{0}`",
@@ -61,8 +51,11 @@
   "gift_notification_for_this_role": "Notification for this role: ",
   "slash_error_only_for_this_role": "You can't make a Giveaway just for a Role: `",
   "slash_error_role_can_not_be_everyone": "`@everyone` can only be used to mention!",
-  "button_giveaway_not_access": "You don't have access to this Giveaway",
+  "button_giveaway_not_access": "You don't have access to [this]({0}) Giveaway!",
   "button_dont_worry": "Don't worry, you're a participant.\nWe checked you in the database.",
   "button_you_not_register": "It looks like we haven't registered you yet.\n`Try again after 5 seconds`. If it happens again, write to us in support.\nThe link is available in the bot profile.",
-  "gift_what_was_giveaway": "What was in Giveaway"
+  "gift_winners": "Winners: ",
+  "gift_winner": "Winner: ",
+  "gift_congratulations": "Congratulations to the winner!\n[Link to Giveaway]({0})\n",
+  "gift_congratulations_many": "Congratulations to the winners!\n[Link to Giveaway]({0})\n"
 }

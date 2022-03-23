@@ -68,7 +68,7 @@
         <dependency>
             <groupId>com.github.megoRU</groupId>
             <artifactId>boticordjava</artifactId>
-            <version>v2.1</version>
+            <version>v2.8</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.github.oshi/oshi-core -->
@@ -89,6 +89,12 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.28</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.megoRU</groupId>
+            <artifactId>api.megoru.ru</artifactId>
+            <version>v1.6</version>
         </dependency>
 
     </dependencies>

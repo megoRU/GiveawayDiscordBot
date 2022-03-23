@@ -1,14 +1,15 @@
 package main.giveaway.slash;
 
+import api.megoru.ru.MegoruAPI;
+import api.megoru.ru.entity.Participants;
+import api.megoru.ru.impl.MegoruAPIImpl;
+import api.megoru.ru.io.UnsuccessfulHttpException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.AllArgsConstructor;
 import main.config.BotStartConfig;
 import main.giveaway.Gift;
 import main.giveaway.GiveawayRegistry;
-import main.giveaway.api.response.ParticipantsPOJO;
-import main.giveaway.api.response.UserData;
-import main.giveaway.impl.URLS;
 import main.jsonparser.JSONParsers;
 import main.messagesevents.MessageInfoHelp;
 import main.model.entity.Language;
@@ -22,16 +23,13 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -107,6 +105,7 @@ public class SlashCommand extends ListenerAdapter {
                             event.getGuild().getIdLong(),
                             new Gift(event.getGuild().getIdLong(),
                                     textChannel == null ? event.getTextChannel().getIdLong() : textChannel.getIdLong(),
+                                    event.getUser().getIdLong(),
                                     activeGiveawayRepository,
                                     participantsRepository));
 
@@ -125,7 +124,7 @@ public class SlashCommand extends ListenerAdapter {
                                     count,
                                     time,
                                     role,
-                                    !isOnlyForSpecificRole ? null : isOnlyForSpecificRole,
+                                    isOnlyForSpecificRole,
                                     urlImage,
                                     event.getUser().getIdLong());
 
@@ -165,7 +164,7 @@ public class SlashCommand extends ListenerAdapter {
                 gift.setColor(0x00FF00);
                 gift.setDescription(jsonParsers.getLocale("message_gift_Not_Admin", event.getGuild().getId()));
 
-                event.replyEmbeds(gift.build()).queue();
+                event.replyEmbeds(gift.build()).setEphemeral(true).queue();
                 return;
             }
 
@@ -188,7 +187,7 @@ public class SlashCommand extends ListenerAdapter {
 
             if (!event.getOptions().get(0).getAsString().matches("[0-9]{1,2}")) {
                 EmbedBuilder errors = new EmbedBuilder();
-                errors.setColor(0x00FF00);
+                errors.setColor(Color.RED);
                 errors.setDescription(jsonParsers.getLocale("slash_Errors", event.getGuild().getId()));
 
                 event.replyEmbeds(errors.build()).queue();
@@ -197,10 +196,14 @@ public class SlashCommand extends ListenerAdapter {
 
             EmbedBuilder stop = new EmbedBuilder();
 
-            int count = Integer.parseInt(event.getOptions().get(0).getAsString());
+            Long count = event.getOption("count", OptionMapping::getAsLong);
             boolean isHasErrors = false;
 
-            if (GiveawayRegistry.getInstance().getGift(event.getGuild().getIdLong()).getListUsers().size() == count) {
+            if (count == null) return;
+
+            Gift gift = GiveawayRegistry.getInstance().getGift(event.getGuild().getIdLong());
+
+            if (gift.getListUsers().size() <= count) {
                 isHasErrors = true;
             }
 
@@ -241,7 +244,7 @@ public class SlashCommand extends ListenerAdapter {
             if (!event.getMember().hasPermission(Permission.MANAGE_SERVER)) {
 
                 EmbedBuilder notAdmin = new EmbedBuilder();
-                notAdmin.setColor(0x00FF00);
+                notAdmin.setColor(Color.GREEN);
                 notAdmin.setDescription(jsonParsers.getLocale("language_change_Not_Admin", event.getGuild().getId())
                         .replaceAll("\\{0}", event.getOptions().get(0).getAsString()));
 
@@ -252,7 +255,7 @@ public class SlashCommand extends ListenerAdapter {
             BotStartConfig.getMapLanguages().put(event.getGuild().getId(), event.getOptions().get(0).getAsString());
 
             EmbedBuilder button = new EmbedBuilder();
-            button.setColor(0x00FF00);
+            button.setColor(Color.GREEN);
             button.setDescription(jsonParsers.getLocale("button_Language", event.getGuild().getId())
                     .replaceAll("\\{0}", event.getOptions().get(0).getAsString().equals("rus")
                             ? "Русский"
@@ -294,14 +297,14 @@ public class SlashCommand extends ListenerAdapter {
                 }
 
                 EmbedBuilder list = new EmbedBuilder();
-                list.setColor(0x00FF00);
+                list.setColor(Color.GREEN);
                 list.setTitle(jsonParsers.getLocale("slash_list_users", event.getGuild().getId()));
                 list.setDescription(stringBuilder);
 
                 event.replyEmbeds(list.build()).queue();
             } else {
                 EmbedBuilder noGiveaway = new EmbedBuilder();
-                noGiveaway.setColor(Color.GREEN);
+                noGiveaway.setColor(Color.orange);
                 noGiveaway.setDescription(jsonParsers.getLocale("slash_Stop_No_Has", event.getGuild().getId()));
                 event.replyEmbeds(noGiveaway.build()).setEphemeral(true).queue();
             }
@@ -313,26 +316,31 @@ public class SlashCommand extends ListenerAdapter {
                 event.deferReply().setEphemeral(true).queue();
                 String id = event.getOption("id", OptionMapping::getAsString);
 
-                HttpClient client = HttpClient.newHttpClient();
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(URLS.GET_PARTICIPANTS))
-                        .POST(HttpRequest.BodyPublishers.ofString(new UserData(event.getUser().getId(), id).toString()))
-                        .header("Content-Type", "application/json")
-                        .build();
-
-                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-                if (response.statusCode() != 200) {
-                    event.getHook().sendMessage(response.body()).setEphemeral(true).queue();
-                    return;
-                }
-
                 File file = new File("participants.json");
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-                ParticipantsPOJO[] yourList = gson.fromJson(response.body(), ParticipantsPOJO[].class);
+                MegoruAPI api = new MegoruAPIImpl(System.getenv("BASE64_PASSWORD"));
+                Participants[] listUsers;
+                try {
+                    listUsers = api.getListUsers(event.getUser().getId(), id);
+                } catch (UnsuccessfulHttpException exception) {
+                    if (exception.getCode() == 404) {
+                        event.getHook().sendMessage(exception.getMessage()).setEphemeral(true).queue();
+                    } else {
+                        EmbedBuilder errors = new EmbedBuilder();
+                        errors.setColor(Color.RED);
+                        errors.setTitle("Errors with API");
+                        errors.setDescription("Repeat later. Or write to us about it.");
 
-                String json = gson.toJson(yourList);
+                        List<net.dv8tion.jda.api.interactions.components.buttons.Button> buttons = new ArrayList<>();
+                        buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
+
+                        event.getHook().sendMessageEmbeds(errors.build()).addActionRow(buttons).queue();
+                    }
+                    return;
+                }
+
+                String json = gson.toJson(listUsers);
 
                 // Создание объекта FileWriter
                 FileWriter writer = new FileWriter(file);

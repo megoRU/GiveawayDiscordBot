@@ -4,8 +4,8 @@ import main.events.MessageWhenBotJoinToGuild;
 import main.giveaway.Gift;
 import main.giveaway.GiveawayRegistry;
 import main.giveaway.MessageGift;
-import main.giveaway.api.response.ParticipantsPOJO;
 import main.giveaway.buttons.ReactionsButton;
+import main.giveaway.reactions.Reactions;
 import main.giveaway.slash.SlashCommand;
 import main.jsonparser.ParserClass;
 import main.messagesevents.LanguageChange;
@@ -16,7 +16,6 @@ import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.LanguageRepository;
 import main.model.repository.ParticipantsRepository;
 import main.model.repository.PrefixRepository;
-import main.startbot.Statcord;
 import main.threads.Giveaway;
 import main.threads.StopGiveawayByTimer;
 import net.dv8tion.jda.api.JDA;
@@ -25,7 +24,9 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
+import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.apache.commons.io.IOUtils;
 import org.boticordjava.api.BotiCordAPI;
 import org.boticordjava.api.impl.BotiCordAPIImpl;
@@ -65,11 +66,9 @@ public class BotStartConfig {
     private static final ConcurrentMap<String, String> mapLanguages = new ConcurrentHashMap<>();
     private static final Map<String, String> mapPrefix = new HashMap<>();
     private static final Map<Integer, String> guildIdHashList = new HashMap<>();
-    private static JDA jda;
+    public static JDA jda;
     private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
     public static ExecutorService executorService;
-    public static int serverCount;
-    private volatile boolean isLaunched;
 
     //REPOSITORY
     private final ActiveGiveawayRepository activeGiveawayRepository;
@@ -110,6 +109,21 @@ public class BotStartConfig {
             //Получаем все префиксы из базы данных
             getPrefixFromDB();
 
+            List<GatewayIntent> intents = new ArrayList<>(
+                    Arrays.asList(
+                            GatewayIntent.GUILD_MESSAGES,
+                            GatewayIntent.GUILD_EMOJIS,
+                            GatewayIntent.GUILD_MESSAGE_REACTIONS,
+                            GatewayIntent.DIRECT_MESSAGES,
+                            GatewayIntent.DIRECT_MESSAGE_TYPING,
+                            GatewayIntent.GUILD_MEMBERS));
+
+            jdaBuilder.disableCache(
+                    CacheFlag.ROLE_TAGS,
+                    CacheFlag.ACTIVITY,
+                    CacheFlag.MEMBER_OVERRIDES);
+
+            jdaBuilder.enableIntents(intents);
             jdaBuilder.setAutoReconnect(true);
             jdaBuilder.setStatus(OnlineStatus.ONLINE);
             jdaBuilder.setActivity(Activity.playing("Starting..."));
@@ -119,7 +133,8 @@ public class BotStartConfig {
             jdaBuilder.addEventListeners(new PrefixChange(prefixRepository));
             jdaBuilder.addEventListeners(new MessageInfoHelp());
             jdaBuilder.addEventListeners(new LanguageChange(languageRepository));
-            jdaBuilder.addEventListeners(new ReactionsButton(languageRepository, participantsRepository, activeGiveawayRepository));
+            jdaBuilder.addEventListeners(new ReactionsButton(languageRepository));
+            jdaBuilder.addEventListeners(new Reactions());
             jdaBuilder.addEventListeners(new SlashCommand(languageRepository, activeGiveawayRepository, participantsRepository));
 
             jda = jdaBuilder.build();
@@ -132,7 +147,7 @@ public class BotStartConfig {
         System.out.println(jda.retrieveCommands().complete());
 
         //Обновить команды
-//        updateSlashCommands();
+        updateSlashCommands();
         System.out.println("15:25");
     }
 
@@ -155,7 +170,7 @@ public class BotStartConfig {
 
             optionsStart.add(new OptionData(STRING, "title", "Title for Giveaway").setName("title"));
 
-            optionsStart.add(new OptionData(INTEGER, "count", "Set count winners").setName("count"));
+            optionsStart.add(new OptionData(INTEGER, "count", "Set count winners").setName("count").setMinValue(1).setMaxValue(30));
 
             optionsStart.add(new OptionData(STRING, "duration", "Examples: 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style. Preferably immediately in UTC ±0").setName("duration"));
 
@@ -169,7 +184,7 @@ public class BotStartConfig {
 
             optionsStart.add(new OptionData(ATTACHMENT, "image", "Your Giveaway Image").setName("image"));
 
-            optionsStop.add(new OptionData(STRING, "stop", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1").setName("stop"));
+            optionsStop.add(new OptionData(INTEGER, "count", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1").setName("count").setMinValue(1).setMaxValue(30));
 
 
             commands.addCommands(Commands.slash("language", "Setting language").addOptions(optionsLanguage));
@@ -207,6 +222,32 @@ public class BotStartConfig {
         } catch (Exception e) {
             Thread.currentThread().interrupt();
             e.printStackTrace();
+        }
+    }
+
+    @Scheduled(fixedDelay = 120000L)
+    private void topGGAndStatcord() {
+        if (!Config.isIsDev()) {
+            try {
+                DiscordBotListAPI TOP_GG_API = new DiscordBotListAPI.Builder()
+                        .token(Config.getTopGgApiToken())
+                        .botId(Config.getBotId())
+                        .build();
+                int serverCount = BotStartConfig.jda.getGuilds().size();
+
+                TOP_GG_API.setStats(serverCount);
+                BotStartConfig.jda.getPresence().setActivity(Activity.playing(BotStartConfig.activity + serverCount + " guilds"));
+                IOUtils.toString(new URL("http://193.163.203.77:3001/api/push/SHAtSCMYvd?msg=OK&ping="), StandardCharsets.UTF_8);
+
+                //BOTICORD API
+                AtomicInteger usersCount = new AtomicInteger();
+                BotStartConfig.jda.getGuilds().forEach(g -> usersCount.addAndGet(g.getMembers().size()));
+
+                BotiCordAPI api = new BotiCordAPIImpl(System.getenv("BOTICORD"), Config.getBotId());
+                api.setStats(serverCount, 1, usersCount.get());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -286,6 +327,7 @@ public class BotStartConfig {
                         guild_long_id,
                         new Gift(guild_long_id,
                                 Long.parseLong(channel_long_id),
+                                Long.parseLong(id_user_who_create_giveaway),
                                 activeGiveawayRepository,
                                 participantsRepository));
                 GiveawayRegistry.getInstance().getGift(guild_long_id).autoInsert();
@@ -342,10 +384,9 @@ public class BotStartConfig {
                             .getGift(Long.parseLong(guildIdHashList.get(i)))
                             .setCount(participantsList.size());
 
-
                     GiveawayRegistry.getInstance()
                             .getGift(Long.parseLong(guildIdHashList.get(i))).getParticipantsJSON()
-                            .add(new ParticipantsPOJO(
+                            .add(new api.megoru.ru.entity.Participants(
                                     String.valueOf(participantsList.get(j).getActiveGiveaways().getIdUserWhoCreateGiveaway()),
                                     String.valueOf(participantsList.get(j).getActiveGiveaways().getGuildLongId() + participantsList.get(j).getActiveGiveaways().getMessageIdLong()),
                                     participantsList.get(j).getActiveGiveaways().getGuildLongId(),
@@ -359,44 +400,6 @@ public class BotStartConfig {
             e.printStackTrace();
         }
         guildIdHashList.clear();
-    }
-
-    @Scheduled(fixedDelay = 20000L)
-    private void topGGAndStatcord() {
-        if (!Config.isIsDev()) {
-            try {
-                DiscordBotListAPI TOP_GG_API = new DiscordBotListAPI.Builder()
-                        .token(Config.getTopGgApiToken())
-                        .botId(Config.getBotId())
-                        .build();
-                int serverCount = BotStartConfig.jda.getGuilds().size();
-
-                TOP_GG_API.setStats(serverCount);
-                BotStartConfig.jda.getPresence().setActivity(Activity.playing(BotStartConfig.activity + serverCount + " guilds"));
-                IOUtils.toString(new URL("http://193.163.203.77:3001/api/push/SHAtSCMYvd?msg=OK&ping="), StandardCharsets.UTF_8);
-
-
-                //BOTICORD API
-                AtomicInteger usersCount = new AtomicInteger();
-                BotStartConfig.jda.getGuilds().forEach(g -> usersCount.addAndGet(g.getMembers().size()));
-
-                BotiCordAPI api = new BotiCordAPIImpl(System.getenv("BOTICORD"), Config.getBotId());
-                api.setStats(serverCount, 1, usersCount.get());
-
-
-                if (!isLaunched) {
-                    Statcord.start(
-                            BotStartConfig.jda.getSelfUser().getId(),
-                            Config.getStatcord(),
-                            BotStartConfig.jda,
-                            true,
-                            3);
-                    isLaunched = true;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     private void getLocalizationFromDB() {
@@ -425,10 +428,6 @@ public class BotStartConfig {
 
     public static Map<String, String> getMapLanguages() {
         return mapLanguages;
-    }
-
-    public static JDA getJda() {
-        return jda;
     }
 
     public static Deque<Giveaway> getQueue() {

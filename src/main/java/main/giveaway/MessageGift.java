@@ -5,7 +5,6 @@ import main.config.BotStartConfig;
 import main.jsonparser.JSONParsers;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.ParticipantsRepository;
-import main.startbot.Statcord;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -63,21 +62,12 @@ public class MessageGift extends ListenerAdapter {
             prefix = BotStartConfig.getMapPrefix().get(event.getGuild().getId());
         }
 
-
         //TODO: Нужно это тестировать!
         if ((message.contains(prefix_GIFT_START + " ") && (message.length() - 11) >= 256)) {
             event.getChannel()
                     .sendMessage(jsonParsers.getLocale("message_gift_Long_Title", event.getGuild().getId()))
                     .queue();
             return;
-        }
-
-        if (messageWithOutPrefix.matches(GIFT_STOP) || messageWithOutPrefix.matches(GIFT_STOP_COUNT)) {
-            Statcord.commandPost("gift stop", event.getAuthor().getId());
-        }
-
-        if (messageWithOutPrefix.matches(GIFT_START_TITLE) || messageWithOutPrefix.matches(GIFT_START_WITHOUT_PREFIX)) {
-            Statcord.commandPost("gift start", event.getAuthor().getId());
         }
 
         long guildLongId = event.getGuild().getIdLong();
@@ -124,7 +114,7 @@ public class MessageGift extends ListenerAdapter {
                 messageSplit[2] = "1";
             }
 
-            GiveawayRegistry.getInstance().putGift(event.getGuild().getIdLong(), new Gift(event.getGuild().getIdLong(), event.getChannel().getIdLong(), activeGiveawayRepository, participantsRepository));
+            GiveawayRegistry.getInstance().putGift(event.getGuild().getIdLong(), new Gift(event.getGuild().getIdLong(), event.getChannel().getIdLong(), event.getAuthor().getIdLong(), activeGiveawayRepository, participantsRepository));
 
             if (messageWithOutPrefix.matches(GIFT_START_TITLE_MINUTES_WITH_COUNT)) {
                 int len = messageSplit[messageSplit.length - 1].length() + messageSplit[messageSplit.length - 2].length();
