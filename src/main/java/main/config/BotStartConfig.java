@@ -204,7 +204,7 @@ public class BotStartConfig {
     public void StopGiveaway() {
         try {
             int count = queue.size();
-            System.out.println(count);
+//            System.out.println(count);
             for (int i = 0; i < count; i++) {
                 if (!queue.isEmpty()) {
                     final Giveaway giveaway = queue.poll();
