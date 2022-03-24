@@ -50,8 +50,6 @@ import java.sql.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
@@ -68,7 +66,6 @@ public class BotStartConfig {
     private static final Map<Integer, String> guildIdHashList = new HashMap<>();
     public static JDA jda;
     private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
-    public static ExecutorService executorService;
 
     //REPOSITORY
     private final ActiveGiveawayRepository activeGiveawayRepository;
@@ -146,7 +143,7 @@ public class BotStartConfig {
         System.out.println(jda.retrieveCommands().complete());
 
         //Обновить команды
-        updateSlashCommands();
+//        updateSlashCommands();
         System.out.println("15:25");
     }
 
@@ -203,20 +200,19 @@ public class BotStartConfig {
         }
     }
 
-    @Scheduled(fixedDelay = 2000, initialDelay = 12000)
+    @Scheduled(fixedDelay = 2000, initialDelay = 10000)
     public void StopGiveaway() {
         try {
-            executorService = Executors.newFixedThreadPool(2);
             int count = queue.size();
-
-            if (!queue.isEmpty()) {
-                for (int i = 0; i < count; i++) {
-                    Giveaway giveaway = queue.poll();
+            System.out.println(count);
+            for (int i = 0; i < count; i++) {
+                if (!queue.isEmpty()) {
+                    final Giveaway giveaway = queue.poll();
                     if (giveaway != null) {
-                        executorService.submit(new StopGiveawayByTimer(giveaway));
+                        Thread t2 = new Thread(() -> new StopGiveawayByTimer(giveaway).run());
+                        t2.start();
                     }
                 }
-                executorService.shutdown();
             }
         } catch (Exception e) {
             Thread.currentThread().interrupt();
@@ -342,6 +338,7 @@ public class BotStartConfig {
                 GiveawayRegistry.getInstance().putIdUserWhoCreateGiveaway(guild_long_id, id_user_who_create_giveaway);
 
                 if (date_end_giveaway != null) {
+                    System.out.println("date_end_giveaway: " + date_end_giveaway);
                     queue.add(new Giveaway(guild_long_id, date_end_giveaway));
                 }
             }
