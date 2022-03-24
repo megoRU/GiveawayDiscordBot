@@ -1,10 +1,11 @@
 package main.threads;
 
 import lombok.Getter;
+import main.config.BotStartConfig;
 import main.giveaway.GiveawayRegistry;
 
 import java.sql.Timestamp;
-import java.time.*;
+import java.time.LocalDateTime;
 
 @Getter
 public class StopGiveawayByTimer implements Runnable {
@@ -22,6 +23,14 @@ public class StopGiveawayByTimer implements Runnable {
         try {
             while (true) {
                 if (!GiveawayRegistry.getInstance().hasGift(ID_GUILD)) return;
+
+                synchronized (BotStartConfig.getQueue()) {
+                    System.out.println();
+                    System.out.println(ID_GUILD);
+                    System.out.println("LocalDateTime.now() " + LocalDateTime.now());
+                    System.out.println("TIME.toLocalDateTime() " + TIME.toLocalDateTime());
+                    System.out.println(LocalDateTime.now().isAfter(TIME.toLocalDateTime()));
+                }
 
                 if (LocalDateTime.now().isAfter(TIME.toLocalDateTime())) {
 
