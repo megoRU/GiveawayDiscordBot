@@ -93,13 +93,12 @@ public class Gift {
 
         start.setColor(Color.GREEN);
         start.setTitle(title);
-        start.appendDescription("React with :tada: to enter!");
+        start.appendDescription(jsonParsers.getLocale("git_react", guild.getId()));
 
         if (role != null) {
-
             if (isOnlyForSpecificRole) {
                 channel.sendMessage(jsonParsers.getLocale("gift_notification_for_this_role", guild.getId()) + "<@&" + role + ">").queue();
-                start.appendDescription("\nOnly for: <@&" + role + ">");
+                start.appendDescription(jsonParsers.getLocale("gift_OnlyFor", guild.getId()) + "<@&" + role + ">");
             } else {
                 if (role == guildId) {
                     channel.sendMessage(jsonParsers.getLocale("gift_notification_for_this_role", guild.getId()) + "@everyone").queue();
@@ -109,7 +108,13 @@ public class Gift {
             }
         }
 
-        String footer = countWinners == null ? "1 Winner" : countWinners + " Winners";
+        String footer;
+        if (countWinners == null) {
+            footer = "1 " + GiftHelper.setEndingWord(1, guildId);
+        } else {
+            footer = countWinners + " " + GiftHelper.setEndingWord(Integer.parseInt(countWinners), guildId);
+        }
+
         start.setFooter(footer);
 
         if (time != null) {

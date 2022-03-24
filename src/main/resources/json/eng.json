@@ -26,7 +26,7 @@
   "giveaway_registry_Error": "The giveaway was canceled because the bot was unable to get the ID\nyour post for editing. Please try again. **Write us what exactly happened.\nWe are trying to fix this bug. Support guild:** https://discord.gg/UrWG3R683d",
   "gift_Ends_At": "Ends at:",
   "gift_Participants": "Participants",
-  "gift_OnlyFor": "Only for: ",
+  "gift_OnlyFor": "\nOnly for: ",
   "gift_Ends": "Ended in",
   "gift_Not_Enough_Users": "Not enough users",
   "gift_Giveaway_Deleted": ":x: The giveaway deleted!",
@@ -57,5 +57,6 @@
   "gift_winners": "Winners: ",
   "gift_winner": "Winner: ",
   "gift_congratulations": "Congratulations to the winner!\n[Link to Giveaway]({0})\n",
-  "gift_congratulations_many": "Congratulations to the winners!\n[Link to Giveaway]({0})\n"
+  "gift_congratulations_many": "Congratulations to the winners!\n[Link to Giveaway]({0})\n",
+  "git_react": "React with :tada: to enter!"
 }
