@@ -35,11 +35,17 @@ public class Reactions extends ListenerAdapter {
 
             if (GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
                 if (emoji.equals(TADA)) {
+                    //Проверяем event id message с Giveaway message id
+                    String messageIdWithReactionCurrent = event.getMessageId();
+                    String messageIdWithReaction = GiveawayRegistry.getInstance().getMessageId(guildIdLong);
+
+                    if (!messageIdWithReactionCurrent.equals(messageIdWithReaction)) return;
+
                     Gift gift = GiveawayRegistry.getInstance().getGift(guildIdLong);
                     String roleId = String.valueOf(GiveawayRegistry.getInstance().getRoleId(guildIdLong));
 
                     if (GiveawayRegistry.getInstance().getIsForSpecificRole(guildIdLong) && !event.getMember().getRoles().toString().contains(roleId)) {
-                        LOGGER.info("Нажал на эмодзи, но у него нет доступа к розыгрышу: " + user.getId());
+                        LOGGER.info("\nНажал на эмодзи, но у него нет доступа к розыгрышу: " + user.getId());
                         //Получаем ссылку до сообщения
                         String url = getDiscordUrlMessage(event.getGuild().getId(), event.getTextChannel().getId(), event.getReaction().getMessageId());
 
@@ -52,7 +58,7 @@ public class Reactions extends ListenerAdapter {
                     }
 
                     if (!gift.getListUsersHash(user.getId())) {
-                        LOGGER.info("Новый участник: " + user.getId() + "\nСервер: " + event.getGuild().getId());
+                        LOGGER.info("\nНовый участник: " + user.getId() + "\nСервер: " + event.getGuild().getId());
                         GiveawayRegistry.getInstance().getGift(guildIdLong).addUserToPoll(user);
                     }
                 }

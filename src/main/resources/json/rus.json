@@ -31,7 +31,7 @@
   "gift_Ends_At": "Завершится:",
   "gift_Ends": "Завершилась",
   "gift_Participants": "Участников",
-  "gift_OnlyFor": "Только для: ",
+  "gift_OnlyFor": "\nТолько для: ",
   "gift_Not_Enough_Users": "Недостаточно участников",
   "gift_Giveaway_Deleted": ":x: Giveaway удалена!",
   "gift_Invalid_Number": ":warning: Неверное число",
@@ -61,5 +61,6 @@
   "gift_winners": "Победители: ",
   "gift_winner": "Победитель: ",
   "gift_congratulations": "Поздравляем победителя!\n[Ссылка на Giveaway]({0})\n",
-  "gift_congratulations_many": "Поздравляем победителей!\n[Ссылка на Giveaway]({0})\n"
+  "gift_congratulations_many": "Поздравляем победителей!\n[Ссылка на Giveaway]({0})\n",
+  "git_react": "Ставьте :tada: чтобы участвовать!"
 }

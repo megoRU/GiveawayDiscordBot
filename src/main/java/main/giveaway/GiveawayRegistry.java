@@ -23,7 +23,6 @@ public class GiveawayRegistry {
     public static class GiveawayData {
 
         private Gift gift;
-        private String idMessagesWithGiveawayButtons;
         private String channelId;
         private String messageId;
         private String countWinners;
@@ -94,10 +93,6 @@ public class GiveawayRegistry {
         return giveawayDataMap.containsKey(guildId);
     }
 
-    public String getIdMessagesWithGiveawayButtons(long guildId) {
-        return giveawayDataMap.get(guildId).getIdMessagesWithGiveawayButtons();
-    }
-
     public Timestamp getEndGiveawayDate(long guildId) {
         return giveawayDataMap.get(guildId).getEndGiveawayDate();
     }
@@ -124,10 +119,6 @@ public class GiveawayRegistry {
 
     public void putChannelId(long guildId, String channelId) {
         giveawayDataMap.get(guildId).setChannelId(channelId);
-    }
-
-    public void putIdMessagesWithGiveawayButtons(long guildId, String idMessageWithButton) {
-        giveawayDataMap.get(guildId).setIdMessagesWithGiveawayButtons(idMessageWithButton);
     }
 
     public void putTitle(long guildId, String title) {
