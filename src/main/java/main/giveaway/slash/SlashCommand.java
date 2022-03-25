@@ -169,7 +169,7 @@ public class SlashCommand extends ListenerAdapter {
             }
 
             if (event.getOptions().isEmpty()) {
-                EmbedBuilder stop = new EmbedBuilder();
+                    EmbedBuilder stop = new EmbedBuilder();
                 stop.setColor(0x00FF00);
                 stop.setDescription(jsonParsers.getLocale("slash_Stop", event.getGuild().getId()));
 

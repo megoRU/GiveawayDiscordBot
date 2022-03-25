@@ -327,7 +327,6 @@ public class BotStartConfig {
                                 participantsRepository));
                 GiveawayRegistry.getInstance().getGift(guild_long_id).autoInsert();
                 GiveawayRegistry.getInstance().putMessageId(guild_long_id, String.valueOf(message_id_long));
-                GiveawayRegistry.getInstance().putIdMessagesWithGiveawayButtons(guild_long_id, String.valueOf(message_id_long));
                 GiveawayRegistry.getInstance().putTitle(guild_long_id, giveaway_title);
                 GiveawayRegistry.getInstance().putEndGiveawayDate(guild_long_id, date_end_giveaway);
                 GiveawayRegistry.getInstance().putChannelId(guild_long_id, channel_long_id);

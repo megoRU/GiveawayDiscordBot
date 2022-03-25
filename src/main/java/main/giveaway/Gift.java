@@ -202,7 +202,6 @@ public class Gift {
                                    Boolean isOnlyForSpecificRole, String urlImage, String title, Long idUserWhoCreateGiveaway) {
         GiveawayRegistry.getInstance().putMessageId(guild.getIdLong(), message.getId());
         GiveawayRegistry.getInstance().putChannelId(guild.getIdLong(), message.getChannel().getId());
-        GiveawayRegistry.getInstance().putIdMessagesWithGiveawayButtons(guild.getIdLong(), message.getId());
         GiveawayRegistry.getInstance().putCountWinners(guild.getIdLong(), countWinners);
         GiveawayRegistry.getInstance().putRoleId(guild.getIdLong(), role);
         GiveawayRegistry.getInstance().putIsForSpecificRole(guild.getIdLong(), isOnlyForSpecificRole);
