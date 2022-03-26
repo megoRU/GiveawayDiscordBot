@@ -47,6 +47,7 @@ import static main.giveaway.impl.URLS.getDiscordUrlMessage;
 public class Gift {
 
     private final static Logger LOGGER = Logger.getLogger(Gift.class.getName());
+    private final MegoruAPI api = new MegoruAPIImpl(System.getenv("BASE64_PASSWORD"));
     private final JSONParsers jsonParsers = new JSONParsers();
     private final Set<String> listUsers = new LinkedHashSet<>();
     private final Map<String, String> listUsersHash = new HashMap<>();
@@ -346,7 +347,6 @@ public class Gift {
      */
     private void sendListUsers() throws Exception {
         try {
-            MegoruAPI api = new MegoruAPIImpl(System.getenv("BASE64_PASSWORD"));
             List<api.megoru.ru.entity.Participants> participantsList = new ArrayList<>(participantsJSON);
             api.setListUsers(participantsList);
         } catch (Exception e) {
@@ -360,7 +360,6 @@ public class Gift {
      */
     private void getWinners(int countWinner) throws Exception {
         try {
-            MegoruAPI api = new MegoruAPIImpl(System.getenv("BASE64_PASSWORD"));
             Winners winners = new Winners(countWinner, 0, listUsers.size() - 1);
             LOGGER.info(winners.toString());
             String[] strings = api.setWinners(winners);
