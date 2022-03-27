@@ -4,11 +4,11 @@ import main.config.BotStartConfig;
 
 public class JSONParsers {
 
-    public String getLocale(String key, String userIdLong) {
+    public String getLocale(String key, String guildIdLong) {
         try {
             return ParserClass.getInstance().getTranslation(key,
-                    BotStartConfig.getMapLanguages().get(userIdLong) != null
-                    ? BotStartConfig.getMapLanguages().get(userIdLong) : "eng");
+                    BotStartConfig.getMapLanguages().get(guildIdLong) != null
+                    ? BotStartConfig.getMapLanguages().get(guildIdLong) : "eng");
         } catch (Exception e) {
             e.printStackTrace();
         }

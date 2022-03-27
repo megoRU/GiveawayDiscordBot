@@ -61,6 +61,7 @@
   "gift_winners": "Winners: ",
   "gift_winner": "Winner: ",
   "gift_congratulations": "Congratulations to the winner!\n[Link to Giveaway]({0})\n",
+  "gift_congratulations_reroll": "The new winner is: {0}! Congratulations!",
   "gift_congratulations_many": "Congratulations to the winners!\n[Link to Giveaway]({0})\n",
   "git_react": "React with :tada: to enter!"
 }

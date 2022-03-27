@@ -61,6 +61,7 @@
   "gift_winners": "Победители: ",
   "gift_winner": "Победитель: ",
   "gift_congratulations": "Поздравляем победителя!\n[Ссылка на Giveaway]({0})\n",
+  "gift_congratulations_reroll": "Новый победитель: {0}! Поздравляем!\n",
   "gift_congratulations_many": "Поздравляем победителей!\n[Ссылка на Giveaway]({0})\n",
   "git_react": "Ставьте :tada: чтобы участвовать!"
 }

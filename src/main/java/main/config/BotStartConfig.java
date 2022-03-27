@@ -143,7 +143,7 @@ public class BotStartConfig {
         System.out.println(jda.retrieveCommands().complete());
 
         //Обновить команды
-//        updateSlashCommands();
+        updateSlashCommands();
         System.out.println("15:25");
     }
 
@@ -151,45 +151,48 @@ public class BotStartConfig {
         try {
             CommandListUpdateAction commands = jda.updateCommands();
 
-            List<OptionData> optionsLanguage = new ArrayList<>();
-            List<OptionData> optionsStart = new ArrayList<>();
+            //Get participants
+            List<OptionData> participants = new ArrayList<>();
+            participants.add(new OptionData(STRING, "id", "Giveaway ID").setName("id").setRequired(true));
+
+            //Stop
             List<OptionData> optionsStop = new ArrayList<>();
+            optionsStop.add(new OptionData(INTEGER, "count", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1").setName("count").setMinValue(1).setMaxValue(30));
 
-            List<OptionData> option = new ArrayList<>();
-
-            option.add(new OptionData(STRING, "id", "Giveaway ID").setName("id").setRequired(true));
-
+            //Set language
+            List<OptionData> optionsLanguage = new ArrayList<>();
             optionsLanguage.add(new OptionData(STRING, "bot", "Setting the bot language")
                     .addChoice("\uD83C\uDDEC\uD83C\uDDE7 English Language", "eng")
                     .addChoice("\uD83C\uDDF7\uD83C\uDDFA Russian Language", "rus")
                     .setRequired(true));
 
+            //Start Giveaway
+            List<OptionData> optionsStart = new ArrayList<>();
             optionsStart.add(new OptionData(STRING, "title", "Title for Giveaway").setName("title"));
-
             optionsStart.add(new OptionData(INTEGER, "count", "Set count winners").setName("count").setMinValue(1).setMaxValue(30));
-
-            optionsStart.add(new OptionData(STRING, "duration", "Examples: 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style. Preferably immediately in UTC ±0").setName("duration"));
-
+            optionsStart.add(new OptionData(STRING, "duration", "Examples: 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style. Preferably immediately in UTC ±0")
+                    .setName("duration"));
             optionsStart.add(new OptionData(CHANNEL, "channel", "#text channel name").setName("channel"));
-
             optionsStart.add(new OptionData(ROLE, "mention", "Mentioning a specific Role").setName("mention"));
-
             optionsStart.add(new OptionData(STRING, "role", "Giveaway is only for a specific role? Don't forget to specify the Role in the previous choice.")
                     .addChoice("yes", "yes")
                     .setName("role"));
-
             optionsStart.add(new OptionData(ATTACHMENT, "image", "Your Giveaway Image").setName("image"));
 
-            optionsStop.add(new OptionData(INTEGER, "count", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1").setName("count").setMinValue(1).setMaxValue(30));
+
+            List<OptionData> reroll = new ArrayList<>();
+            reroll.add(new OptionData(STRING, "id", "Giveaway ID").setName("id").setRequired(true));
 
 
+            //Build
             commands.addCommands(Commands.slash("language", "Setting language").addOptions(optionsLanguage));
             commands.addCommands(Commands.slash("start", "Create giveaway").addOptions(optionsStart));
             commands.addCommands(Commands.slash("stop", "Stop the Giveaway").addOptions(optionsStop));
             commands.addCommands(Commands.slash("help", "Bot commands"));
             commands.addCommands(Commands.slash("list", "List of participants"));
             commands.addCommands(Commands.slash("patreon", "Support us on Patreon"));
-            commands.addCommands(Commands.slash("participants", "Get file with all participants by ID Giveaway").addOptions(option));
+            commands.addCommands(Commands.slash("participants", "Get file with all participants by Giveaway ID").addOptions(participants));
+            commands.addCommands(Commands.slash("reroll", "Reroll one winner by Giveaway ID").addOptions(reroll));
 
 
             commands.queue();
@@ -366,13 +369,9 @@ public class BotStartConfig {
 
                     //Добавляем пользователей в hashmap
                     GiveawayRegistry.getInstance()
-                            .getGift(Long.parseLong(guildIdHashList.get(i))).getListUsersHash()
+                            .getGift(Long.parseLong(guildIdHashList.get(i)))
+                            .getListUsersHash()
                             .put(String.valueOf(userIdLong), String.valueOf(userIdLong));
-
-                    //Считаем пользователей в hashmap и устанавливаем верное значение
-                    GiveawayRegistry.getInstance()
-                            .getGift(Long.parseLong(guildIdHashList.get(i))).getListUsers()
-                            .add(String.valueOf(userIdLong));
 
                     //Устанавливаем счетчик на верное число
                     GiveawayRegistry.getInstance()
