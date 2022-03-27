@@ -203,7 +203,7 @@ public class SlashCommand extends ListenerAdapter {
 
             Gift gift = GiveawayRegistry.getInstance().getGift(event.getGuild().getIdLong());
 
-            if (gift.getListUsers().size() <= count) {
+            if (gift.getListUsersSize() <= count) {
                 isHasErrors = true;
             }
 
@@ -277,7 +277,7 @@ public class SlashCommand extends ListenerAdapter {
                 StringBuilder stringBuilder = new StringBuilder();
                 List<String> participantsList = new ArrayList<>(GiveawayRegistry.getInstance()
                         .getGift(event.getGuild().getIdLong())
-                        .getListUsers());
+                        .getListUsersHash().values());
 
                 if (participantsList.isEmpty()) {
                     EmbedBuilder list = new EmbedBuilder();

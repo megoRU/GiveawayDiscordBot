@@ -366,13 +366,9 @@ public class BotStartConfig {
 
                     //Добавляем пользователей в hashmap
                     GiveawayRegistry.getInstance()
-                            .getGift(Long.parseLong(guildIdHashList.get(i))).getListUsersHash()
+                            .getGift(Long.parseLong(guildIdHashList.get(i)))
+                            .getListUsersHash()
                             .put(String.valueOf(userIdLong), String.valueOf(userIdLong));
-
-                    //Считаем пользователей в hashmap и устанавливаем верное значение
-                    GiveawayRegistry.getInstance()
-                            .getGift(Long.parseLong(guildIdHashList.get(i))).getListUsers()
-                            .add(String.valueOf(userIdLong));
 
                     //Устанавливаем счетчик на верное число
                     GiveawayRegistry.getInstance()
