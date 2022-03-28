@@ -2,6 +2,7 @@ package main.giveaway;
 
 import api.megoru.ru.MegoruAPI;
 import api.megoru.ru.entity.Winners;
+import api.megoru.ru.entity.WinnersAndParticipants;
 import api.megoru.ru.impl.MegoruAPIImpl;
 import lombok.Getter;
 import lombok.Setter;
@@ -355,29 +356,19 @@ public class Gift {
     /**
      * @throws Exception Throws an exception
      */
-    private void sendListUsers() throws Exception {
-        LOGGER.info("participantsJSON size: " + participantsJSON.size());
-
-        if (participantsJSON.isEmpty()) {
-            throw new Exception("participantsJSON is Empty");
-        }
-
-        try {
-            api.setListUsers(participantsJSON);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new Exception("API not work, or connection refused");
-        }
-    }
-
-    /**
-     * @throws Exception Throws an exception
-     */
     private void getWinners(int countWinner) throws Exception {
+        if (participantsJSON.isEmpty()) throw new Exception("participantsJSON is Empty");
+
         try {
             Winners winners = new Winners(countWinner, 0, listUsersHash.size() - 1);
+
+            WinnersAndParticipants winnersAndParticipants = new WinnersAndParticipants();
+            winnersAndParticipants.setWinners(winners);
+            winnersAndParticipants.setUserList(participantsJSON);
+
             LOGGER.info(winners.toString());
-            String[] strings = api.setWinners(winners);
+
+            String[] strings = api.setWinners(winnersAndParticipants);
 
             List<String> temp = new LinkedList<>(listUsersHash.values());
 
@@ -457,7 +448,6 @@ public class Gift {
         }
 
         try {
-            sendListUsers();
             //выбираем победителей
             getWinners(countWinner);
         } catch (Exception e) {
