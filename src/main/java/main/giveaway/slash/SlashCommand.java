@@ -340,6 +340,7 @@ public class SlashCommand extends ListenerAdapter {
                 Winners winners = new Winners(1, 0, listUsers.length - 1);
 
                 WinnersAndParticipants winnersAndParticipants = new WinnersAndParticipants();
+                winnersAndParticipants.setUpdate(false);
                 winnersAndParticipants.setWinners(winners);
                 winnersAndParticipants.setUserList(List.of(listUsers));
 

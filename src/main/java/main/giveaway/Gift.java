@@ -363,6 +363,7 @@ public class Gift {
             Winners winners = new Winners(countWinner, 0, listUsersHash.size() - 1);
 
             WinnersAndParticipants winnersAndParticipants = new WinnersAndParticipants();
+            winnersAndParticipants.setUpdate(true);
             winnersAndParticipants.setWinners(winners);
             winnersAndParticipants.setUserList(participantsJSON);
 
