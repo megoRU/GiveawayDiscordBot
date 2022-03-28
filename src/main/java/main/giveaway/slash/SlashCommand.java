@@ -3,6 +3,7 @@ package main.giveaway.slash;
 import api.megoru.ru.MegoruAPI;
 import api.megoru.ru.entity.Participants;
 import api.megoru.ru.entity.Winners;
+import api.megoru.ru.entity.WinnersAndParticipants;
 import api.megoru.ru.impl.MegoruAPIImpl;
 import api.megoru.ru.io.UnsuccessfulHttpException;
 import com.google.gson.Gson;
@@ -335,8 +336,15 @@ public class SlashCommand extends ListenerAdapter {
 
             try {
                 listUsers = api.getListUsers(event.getUser().getId(), String.valueOf(id));
+
                 Winners winners = new Winners(1, 0, listUsers.length - 1);
-                String[] strings = api.setWinners(winners);
+
+                WinnersAndParticipants winnersAndParticipants = new WinnersAndParticipants();
+                winnersAndParticipants.setWinners(winners);
+                winnersAndParticipants.setUserList(List.of(listUsers));
+
+                String[] strings = api.setWinners(winnersAndParticipants);
+
                 final Set<String> uniqueWinners = new LinkedHashSet<>();
 
 
