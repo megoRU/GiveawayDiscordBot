@@ -143,15 +143,14 @@ public class BotStartConfig {
             jda.awaitReady();
 
 
+            System.out.println(jda.retrieveCommands().complete());
+            //Обновляем список участников при запуске бота
+            updateUserList();
+            System.out.println("updateUserList()");
 
-        System.out.println(jda.retrieveCommands().complete());
-        //Обновляем список участников при запуске бота
-        updateUserList();
-        System.out.println("updateUserList()");
-
-        //Обновить команды
+            //Обновить команды
 //        updateSlashCommands();
-        System.out.println("15:25");
+            System.out.println("15:25");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -397,7 +396,6 @@ public class BotStartConfig {
                                 .submit();
 
                         try {
-                            System.out.println("test");
                             List<MessageReaction> reactions = action.
                                     whenComplete((message, throwable) -> {
                                         if (throwable != null) {
@@ -409,10 +407,9 @@ public class BotStartConfig {
                                             }
                                         }
                                     })
-                                    .orTimeout(6000L, TimeUnit.MILLISECONDS)
+                                    .orTimeout(10000L, TimeUnit.MILLISECONDS)
                                     .get()
                                     .getReactions();
-                            System.out.println("test2");
 
 //                            System.out.println("Reaction count: " + reactions.size());
                             for (int i = 0; i < reactions.size(); i++)
@@ -441,13 +438,17 @@ public class BotStartConfig {
 
                                 }
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            if (!e.getMessage().contains("java.util.concurrent.TimeoutException")) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            if (!e.getMessage().contains("java.util.concurrent.TimeoutException")) {
+                e.printStackTrace();
+            }
         }
     }
 
