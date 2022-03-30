@@ -412,7 +412,7 @@ public class BotStartConfig {
                                     .getReactions();
 
 //                            System.out.println("Reaction count: " + reactions.size());
-                            for (int i = 0; i < reactions.size(); i++)
+                            for (int i = 0; i < reactions.size(); i++) {
 
                                 if (reactions.get(i).getReactionEmote().isEmoji() &&
                                         reactions.get(i).getReactionEmote().getEmoji().equals(Reactions.TADA)) {
@@ -437,6 +437,7 @@ public class BotStartConfig {
                                     }
 
                                 }
+                            }
                         } catch (Exception e) {
                             if (!e.getMessage().contains("java.util.concurrent.TimeoutException")) {
                                 e.printStackTrace();
