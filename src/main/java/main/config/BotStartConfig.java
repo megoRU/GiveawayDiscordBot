@@ -22,6 +22,9 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageReaction;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -48,9 +51,11 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
 
@@ -141,6 +146,9 @@ public class BotStartConfig {
         }
 
         System.out.println(jda.retrieveCommands().complete());
+        //Обновляем список участников при запуске бота
+        updateUserList();
+        System.out.println("updateUserList()");
 
         //Обновить команды
 //        updateSlashCommands();
@@ -204,7 +212,7 @@ public class BotStartConfig {
     }
 
     @Scheduled(fixedDelay = 2000, initialDelay = 10000)
-    public void StopGiveaway() {
+    public void stopGiveaway() {
         try {
             int count = queue.size();
 //            System.out.println(count);
@@ -246,6 +254,16 @@ public class BotStartConfig {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    @Scheduled(fixedDelay = 240000, initialDelay = 200000)
+    public void updateUser() {
+        try {
+          updateUserList();
+        } catch (Exception e) {
+            Thread.currentThread().interrupt();
+            e.printStackTrace();
         }
     }
 
@@ -340,7 +358,6 @@ public class BotStartConfig {
                 GiveawayRegistry.getInstance().putIdUserWhoCreateGiveaway(guild_long_id, id_user_who_create_giveaway);
 
                 if (date_end_giveaway != null) {
-                    System.out.println("date_end_giveaway: " + date_end_giveaway);
                     queue.add(new Giveaway(guild_long_id, date_end_giveaway));
                 }
             }
@@ -349,6 +366,68 @@ public class BotStartConfig {
             connection.close();
             System.out.println("getMessageIdFromDB()");
         } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateUserList() {
+        try {
+            List<GiveawayRegistry.GiveawayData> giveawayDataList = new ArrayList<>(GiveawayRegistry.getGiveawayDataMap().values());
+
+            for (int l = 0; l < giveawayDataList.size(); l++) {
+
+                long guildIdLong = giveawayDataList.get(l).getGift().getGuildId();
+                Boolean isForSpecificRole =  giveawayDataList.get(l).getIsForSpecificRole();
+
+                if (GiveawayRegistry.getInstance().hasGift(guildIdLong) && !isForSpecificRole) {
+
+                    String messageId = giveawayDataList.get(l).getMessageId();
+                    long channelId = GiveawayRegistry.getInstance().getGift(guildIdLong).getTextChannelId();
+//                    System.out.println("Guild ID: " + guildIdLong);
+
+                    if (jda.getGuildById(guildIdLong) != null) {
+
+                        CompletableFuture<Message> action = jda
+                                .getGuildById(guildIdLong)
+                                .getTextChannelById(channelId)
+                                .retrieveMessageById(messageId)
+                                .submit();
+
+                        try {
+                            List<MessageReaction> reactions = action.get().getReactions();
+//                            System.out.println("Reaction count: " + reactions.size());
+                            for (int i = 0; i < reactions.size(); i++)
+
+                                if (reactions.get(i).getReactionEmote().isEmoji() &&
+                                        reactions.get(i).getReactionEmote().getEmoji().equals(Reactions.TADA)) {
+
+                                    List<User> userList = reactions.get(i)
+                                            .retrieveUsers()
+                                            .complete()
+                                            .stream()
+                                            .filter(user -> !user.isBot())
+                                            .collect(Collectors.toList());
+//                                    System.out.println("UserList count: " + userList.size());
+
+                                    //Перебираем Users в реакциях
+                                    for (int o = 0; o < userList.size(); o++) {
+                                        User user = userList.get(o);
+                                        Gift gift = GiveawayRegistry.getInstance().getGift(guildIdLong);
+                                        //Если User`a нет в активном Giveaway добавляем. (Скорее всего нажал когда бот не работал)
+                                        if (!gift.getListUsersHash(user.getId())) {
+                                            gift.addUserToPoll(user);
+//                                            System.out.println("User id: " + user.getIdLong());
+                                        }
+                                    }
+
+                                }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
