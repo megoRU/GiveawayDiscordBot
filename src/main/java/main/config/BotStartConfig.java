@@ -54,6 +54,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -141,9 +142,7 @@ public class BotStartConfig {
             jda = jdaBuilder.build();
             jda.awaitReady();
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
 
         System.out.println(jda.retrieveCommands().complete());
         //Обновляем список участников при запуске бота
@@ -153,6 +152,9 @@ public class BotStartConfig {
         //Обновить команды
 //        updateSlashCommands();
         System.out.println("15:25");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void updateSlashCommands() {
@@ -395,7 +397,7 @@ public class BotStartConfig {
                                 .submit();
 
                         try {
-
+                            System.out.println("test");
                             List<MessageReaction> reactions = action.
                                     whenComplete((message, throwable) -> {
                                         if (throwable != null) {
@@ -407,8 +409,10 @@ public class BotStartConfig {
                                             }
                                         }
                                     })
+                                    .orTimeout(6000L, TimeUnit.MILLISECONDS)
                                     .get()
                                     .getReactions();
+                            System.out.println("test2");
 
 //                            System.out.println("Reaction count: " + reactions.size());
                             for (int i = 0; i < reactions.size(); i++)
