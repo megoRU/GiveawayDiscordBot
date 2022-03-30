@@ -74,7 +74,7 @@ public class Gift {
 
     //DTO
     private volatile Queue<Participants> participantsList = new ArrayDeque<>();
-    private volatile Set<api.megoru.ru.entity.Participants> participantsJSON = new LinkedHashSet<>();
+    private volatile List<api.megoru.ru.entity.Participants> participantsJSON = new LinkedList<>();
 
     //REPO
     private final ActiveGiveawayRepository activeGiveawayRepository;
@@ -358,6 +358,15 @@ public class Gift {
      */
     private void getWinners(int countWinner) throws Exception {
         if (participantsJSON.isEmpty()) throw new Exception("participantsJSON is Empty");
+
+        LOGGER.info("\nlistUsersHash size: " + listUsersHash.size());
+        LOGGER.info("\nparticipantsJSON size: " + participantsJSON.size());
+
+        for (int i = 0; i < participantsJSON.size(); i++) {
+            System.out.println(participantsJSON.get(i).getUserIdLong());
+            System.out.println(participantsJSON.get(i).getNickNameTag());
+            System.out.println(participantsJSON.get(i).getGiveawayId());
+        }
 
         try {
             Winners winners = new Winners(countWinner, 0, listUsersHash.size() - 1);
