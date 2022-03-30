@@ -144,11 +144,14 @@ public class BotStartConfig {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        try {
+            List<String> stringList = new ArrayList<>(guildIdHashList.values());
 
-        List<String> stringList = new ArrayList<>(guildIdHashList.values());
-
-        for (int i = 0; i < stringList.size(); i++) {
-            System.out.println("stringList: " + jda.getGuilds().contains(stringList.get(i)));
+            for (int i = 0; i < stringList.size(); i++) {
+                System.out.println("stringList: " + jda.getGuildById(stringList.get(i)).getId());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         System.out.println(jda.retrieveCommands().complete());
