@@ -493,7 +493,6 @@ public class BotStartConfig {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        guildIdHashList.clear();
     }
 
     private void getLocalizationFromDB() {
