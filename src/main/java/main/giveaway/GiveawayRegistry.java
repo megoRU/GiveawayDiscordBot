@@ -53,6 +53,10 @@ public class GiveawayRegistry {
         return giveawayRegistry;
     }
 
+    public static Map<Long, GiveawayData> getGiveawayDataMap() {
+        return giveawayDataMap;
+    }
+
     public String getIdUserWhoCreateGiveaway(long guildId) {
         return giveawayDataMap.get(guildId).getIdUserWhoCreateGiveaway();
     }
