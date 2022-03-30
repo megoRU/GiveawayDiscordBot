@@ -144,15 +144,6 @@ public class BotStartConfig {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        try {
-            List<String> stringList = new ArrayList<>(guildIdHashList.values());
-
-            for (int i = 0; i < stringList.size(); i++) {
-                System.out.println("stringList: " + jda.getGuildById(stringList.get(i)).getId());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         System.out.println(jda.retrieveCommands().complete());
         //Обновляем список участников при запуске бота
@@ -405,20 +396,20 @@ public class BotStartConfig {
 
                         try {
 
-//                              List<MessageReaction> reactions = action.
-//                                    whenComplete((message, throwable) -> {
-//                                        if (throwable != null) {
-//                                            System.out.println(throwable.getMessage());
-//                                            if (throwable.getMessage().contains("10008: Unknown Message")) {
-//                                                System.out.println("10008: Unknown Message: Удаляем Giveaway!");
-//                                                activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
-//                                            }
-//                                        }
-//                                    })
-//                                    .get()
-//                                    .getReactions();
+                            List<MessageReaction> reactions = action.
+                                    whenComplete((message, throwable) -> {
+                                        if (throwable != null) {
+                                            System.out.println(throwable.getMessage());
+                                            if (throwable.getMessage().contains("10008: Unknown Message")) {
+                                                System.out.println("10008: Unknown Message: Удаляем Giveaway!");
+                                                activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
+                                                GiveawayRegistry.getInstance().removeGift(guildIdLong);
+                                            }
+                                        }
+                                    })
+                                    .get()
+                                    .getReactions();
 
-                            List<MessageReaction> reactions = action.get().getReactions();
 //                            System.out.println("Reaction count: " + reactions.size());
                             for (int i = 0; i < reactions.size(); i++)
 
