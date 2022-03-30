@@ -145,6 +145,12 @@ public class BotStartConfig {
             e.printStackTrace();
         }
 
+        List<String> stringList = new ArrayList<>(guildIdHashList.values());
+
+        for (int i = 0; i < stringList.size(); i++) {
+            System.out.println("stringList: " + jda.getGuilds().contains(stringList.get(i)));
+        }
+
         System.out.println(jda.retrieveCommands().complete());
         //Обновляем список участников при запуске бота
         updateUserList();
@@ -260,7 +266,7 @@ public class BotStartConfig {
     @Scheduled(fixedDelay = 240000, initialDelay = 200000)
     public void updateUser() {
         try {
-          updateUserList();
+            updateUserList();
         } catch (Exception e) {
             Thread.currentThread().interrupt();
             e.printStackTrace();
@@ -370,6 +376,7 @@ public class BotStartConfig {
         }
     }
 
+    //TODO: Сделать задержку в 1000 ms
     private void updateUserList() {
         try {
             List<GiveawayRegistry.GiveawayData> giveawayDataList = new ArrayList<>(GiveawayRegistry.getGiveawayDataMap().values());
@@ -377,7 +384,7 @@ public class BotStartConfig {
             for (int l = 0; l < giveawayDataList.size(); l++) {
 
                 long guildIdLong = giveawayDataList.get(l).getGift().getGuildId();
-                Boolean isForSpecificRole =  giveawayDataList.get(l).getIsForSpecificRole();
+                Boolean isForSpecificRole = giveawayDataList.get(l).getIsForSpecificRole();
 
                 if (GiveawayRegistry.getInstance().hasGift(guildIdLong) && !isForSpecificRole) {
 
@@ -394,6 +401,20 @@ public class BotStartConfig {
                                 .submit();
 
                         try {
+
+//                              List<MessageReaction> reactions = action.
+//                                    whenComplete((message, throwable) -> {
+//                                        if (throwable != null) {
+//                                            System.out.println(throwable.getMessage());
+//                                            if (throwable.getMessage().contains("10008: Unknown Message")) {
+//                                                System.out.println("10008: Unknown Message: Удаляем Giveaway!");
+//                                                activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
+//                                            }
+//                                        }
+//                                    })
+//                                    .get()
+//                                    .getReactions();
+
                             List<MessageReaction> reactions = action.get().getReactions();
 //                            System.out.println("Reaction count: " + reactions.size());
                             for (int i = 0; i < reactions.size(); i++)
