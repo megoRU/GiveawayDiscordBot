@@ -8,14 +8,11 @@ import main.giveaway.buttons.ReactionsButton;
 import main.giveaway.reactions.Reactions;
 import main.giveaway.slash.SlashCommand;
 import main.jsonparser.ParserClass;
-import main.messagesevents.LanguageChange;
 import main.messagesevents.MessageInfoHelp;
-import main.messagesevents.PrefixChange;
 import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.LanguageRepository;
 import main.model.repository.ParticipantsRepository;
-import main.model.repository.PrefixRepository;
 import main.threads.Giveaway;
 import main.threads.StopGiveawayByTimer;
 import net.dv8tion.jda.api.JDA;
@@ -76,7 +73,6 @@ public class BotStartConfig {
     //REPOSITORY
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final LanguageRepository languageRepository;
-    private final PrefixRepository prefixRepository;
     private final ParticipantsRepository participantsRepository;
 
     //DataBase
@@ -89,10 +85,9 @@ public class BotStartConfig {
 
     @Autowired
     public BotStartConfig(ActiveGiveawayRepository activeGiveawayRepository, LanguageRepository
-            languageRepository, ParticipantsRepository participantsRepository, PrefixRepository prefixRepository) {
+            languageRepository, ParticipantsRepository participantsRepository) {
         this.activeGiveawayRepository = activeGiveawayRepository;
         this.languageRepository = languageRepository;
-        this.prefixRepository = prefixRepository;
         this.participantsRepository = participantsRepository;
     }
 
@@ -130,11 +125,9 @@ public class BotStartConfig {
             jdaBuilder.setStatus(OnlineStatus.ONLINE);
             jdaBuilder.setActivity(Activity.playing("Starting..."));
             jdaBuilder.setBulkDeleteSplittingEnabled(false);
-            jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild(prefixRepository, activeGiveawayRepository, languageRepository));
-            jdaBuilder.addEventListeners(new MessageGift(activeGiveawayRepository, participantsRepository));
-            jdaBuilder.addEventListeners(new PrefixChange(prefixRepository));
+            jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild(activeGiveawayRepository, languageRepository));
+            jdaBuilder.addEventListeners(new MessageGift());
             jdaBuilder.addEventListeners(new MessageInfoHelp());
-            jdaBuilder.addEventListeners(new LanguageChange(languageRepository));
             jdaBuilder.addEventListeners(new ReactionsButton(languageRepository));
             jdaBuilder.addEventListeners(new Reactions());
             jdaBuilder.addEventListeners(new SlashCommand(languageRepository, activeGiveawayRepository, participantsRepository));

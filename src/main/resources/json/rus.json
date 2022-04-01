@@ -1,27 +1,7 @@
 {
-  "_comment1": "Это нужно удалить 1 мая 2022",
-
-  "messages_events_Prefix": "Префикс:",
-  "messages_events_Changes_Prefix": "`*prefix <символ>` - Изменяет префикс.\n",
-  "messages_events_Reset_Prefix": "`*prefix reset` - Сбрасывает префикс.",
-  "messages_events_Language_Title": "Изменение языка:",
-  "messages_events_Language": "lang rus` - Доступные языки: `(rus|eng)`\n",
-  "messages_events_Language_Reset": "lang reset` - Сбросить язык на: `ENG`",
-  "messages_events_PS": "-------------------------------\n`Внимание:`\n1. Не используйте кавычки `< >`\n2. `<1-99м|ч|д>` используйте только **ОДНУ БУКВУ**.\nИспользовать минуты, часы или дни вместе **НЕЛЬЗЯ**.\n-------------------------------\n",
-  "messages_events_PS2": "`Обратите внимание:`\nНиже команды с 1 мая 2022 будут устаревшими. Используйте Slash commands.\nВ самом внизу есть ссылка на подключение Slash commands на ваш сервер.\n-------------------------------\n",
-  "messages_events_Start_Giveaway": "gift start` - Начните Giveaway.\n`",
-  "messages_events_Start_Text_Giveaway": "gift start <текст>` - Начните Giveaway со своим текстом.\n`",
-  "messages_events_Start_Text_Time_Giveaway": "gift start <текст> <1-99м|ч|д>` - Начните Giveaway со своим текстом и с таймером до остановки.\n`",
-  "messages_events_Start_Text_Time_Count_Giveaway": "gift start <текст> <1-99м|ч|д> <число>` - Начните Giveaway со своим описанием и таймером до остановки и количество победителей.\n`",
-  "messages_events_Start_Time_Count_Giveaway": "gift start <1-99м|ч|д> <число>` - Начните Giveaway с остановкой по таймеру и с определенным количеством победителей.\n`",
-  "messages_events_Stop_Giveaway": "gift stop` - Завершите Giveaway.\n`",
-  "messages_events_Stop_Number_Giveaway": "gift stop <число>` - Завершите Giveaway с большим количеством победителей.\n",
-
-  "_comment2": "Это нужно оставить",
-
   "messages_events_Links": "Ссылки:",
   "messages_events_Site": ":zap: [megoru.ru](https://megoru.ru)\n",
-  "messages_events_Add_Me_To_Other_Guilds": ":robot: [Добавь меня в другие гильдии | добавить Slash commands](https://discord.com/oauth2/authorize?client_id=808277484524011531&permissions=2147511296&scope=applications.commands%20bot)\n",
+  "messages_events_Add_Me_To_Other_Guilds": ":robot: [Добавь меня в другие гильдии](https://discord.com/oauth2/authorize?client_id=808277484524011531&permissions=2147511360&scope=bot+applications.commands)\n",
   "messages_events_Send_Private_Message": "Я отправил тебе личное сообщение",
   "messages_events_Failed_To_Send_Message": "Не удалось отправить сообщение. Возможно я у тебя черном списке!",
 

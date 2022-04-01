@@ -175,7 +175,7 @@ public class Gift {
         textChannel.sendMessageEmbeds(start.build())
                 .queue(message -> {
                             message.addReaction(Reactions.TADA).queue();
-                            updateCollections(guild, countWinners, time, message, null, false, null, newTitle, idUserWhoCreateGiveaway);
+                            updateCollections(countWinners, time, message, null, false, null, newTitle, idUserWhoCreateGiveaway);
                         }
                 );
 
@@ -204,23 +204,23 @@ public class Gift {
         textChannel.sendMessageEmbeds(start.build())
                 .queue(message -> {
                     message.addReaction(Reactions.TADA).queue();
-                    updateCollections(guild, countWinners, time, message, role, isOnlyForSpecificRole, urlImage, newTitle, idUserWhoCreateGiveaway);
+                    updateCollections(countWinners, time, message, role, isOnlyForSpecificRole, urlImage, newTitle, idUserWhoCreateGiveaway);
                 });
 
         //Вот мы запускаем бесконечный поток.
         autoInsert();
     }
 
-    private void updateCollections(Guild guild, String countWinners, String time, Message message, Long role,
+    private void updateCollections(String countWinners, String time, Message message, Long role,
                                    Boolean isOnlyForSpecificRole, String urlImage, String title, Long idUserWhoCreateGiveaway) {
-        GiveawayRegistry.getInstance().putMessageId(guild.getIdLong(), message.getId());
-        GiveawayRegistry.getInstance().putChannelId(guild.getIdLong(), message.getChannel().getId());
-        GiveawayRegistry.getInstance().putCountWinners(guild.getIdLong(), countWinners);
-        GiveawayRegistry.getInstance().putRoleId(guild.getIdLong(), role);
-        GiveawayRegistry.getInstance().putIsForSpecificRole(guild.getIdLong(), isOnlyForSpecificRole);
+        GiveawayRegistry.getInstance().putMessageId(guildId, message.getId());
+        GiveawayRegistry.getInstance().putChannelId(guildId, message.getChannel().getId());
+        GiveawayRegistry.getInstance().putCountWinners(guildId, countWinners);
+        GiveawayRegistry.getInstance().putRoleId(guildId, role);
+        GiveawayRegistry.getInstance().putIsForSpecificRole(guildId, isOnlyForSpecificRole);
         GiveawayRegistry.getInstance().putUrlImage(guildId, urlImage);
-        GiveawayRegistry.getInstance().putTitle(guild.getIdLong(), title == null ? "Giveaway" : title);
-        GiveawayRegistry.getInstance().putIdUserWhoCreateGiveaway(guild.getIdLong(), String.valueOf(idUserWhoCreateGiveaway));
+        GiveawayRegistry.getInstance().putTitle(guildId, title == null ? "Giveaway" : title);
+        GiveawayRegistry.getInstance().putIdUserWhoCreateGiveaway(guildId, String.valueOf(idUserWhoCreateGiveaway));
 
         ActiveGiveaways activeGiveaways = new ActiveGiveaways();
         activeGiveaways.setGuildLongId(guildId);
@@ -364,9 +364,10 @@ public class Gift {
         LOGGER.info("\nparticipantsJSON size: " + participantsJSON.size());
 
         for (int i = 0; i < participantsJSON.size(); i++) {
-            System.out.println(participantsJSON.get(i).getUserIdLong());
-            System.out.println(participantsJSON.get(i).getNickNameTag());
-            System.out.println(participantsJSON.get(i).getGiveawayId());
+            System.out.println("getIdUserWhoCreateGiveaway " + participantsJSON.get(i).getIdUserWhoCreateGiveaway()
+                    + " getUserIdLong " + participantsJSON.get(i).getUserIdLong()
+                    + " getNickNameTag " + participantsJSON.get(i).getNickNameTag()
+                    + " getGiveawayId " + participantsJSON.get(i).getGiveawayId());
         }
 
         try {
