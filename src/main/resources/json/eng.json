@@ -1,27 +1,7 @@
 {
-  "_comment1": "Это нужно удалить 1 мая 2022",
-
-  "messages_events_Prefix": "Prefix:",
-  "messages_events_Changes_Prefix": "`*prefix <symbol>` - Changes the prefix.\n",
-  "messages_events_Reset_Prefix": "`*prefix reset` - Reset the prefix.",
-  "messages_events_Language_Title": "Changing the language:",
-  "messages_events_Language": "lang rus` - Available languages: `(rus|eng)`\n",
-  "messages_events_Language_Reset": "lang reset` - Reset the language to: `ENG`",
-  "messages_events_PS": "-------------------------------\n`Attention:`\n1. Don't use quotation marks `< >`\n2. `<1-99m|h|d>` use only **ONE LETTER**.\nYou cannot use minutes, hours, or days together.\n-------------------------------\n",
-  "messages_events_PS2": "`Pay attention:`\nThe commands below will be deprecated from May 1, 2022. Use Slash commands.\nAt the very bottom there is a link to connect Slash commands to your guild.\n-------------------------------\n",
-  "messages_events_Start_Giveaway": "gift start` - Start Giveaway.\n`",
-  "messages_events_Start_Text_Giveaway": "gift start <title>` - Start Giveaway with special text.\n`",
-  "messages_events_Start_Text_Time_Giveaway": "gift start <title> <1-99m|h|d>` - Start Giveaway with special text and with a by timer stop.\n`",
-  "messages_events_Start_Text_Time_Count_Giveaway": "gift start <title> <1-99m|h|d> <number>` - Start Giveaway with special text, with a by timer stop and with certain number of winners.\n`",
-  "messages_events_Start_Time_Count_Giveaway": "gift start <1-99m|h|d> <number>` - Start Giveaway with a by timer stop and certain number of winners.\n`",
-  "messages_events_Stop_Giveaway": "gift stop` - Stop Giveaway.\n`",
-  "messages_events_Stop_Number_Giveaway": "gift stop <number>` - Stop Giveaway with more winners.\n",
-
-  "_comment2": "Это нужно оставить",
-
   "messages_events_Links": "Links:",
   "messages_events_Site": ":zap: [megoru.ru](https://megoru.ru)\n",
-  "messages_events_Add_Me_To_Other_Guilds": ":robot: [Add me to other guilds | add Slash commands](https://discord.com/oauth2/authorize?client_id=808277484524011531&permissions=2147511296&scope=applications.commands%20bot)\n",
+  "messages_events_Add_Me_To_Other_Guilds": ":robot: [Add me to other guilds](https://discord.com/oauth2/authorize?client_id=808277484524011531&permissions=2147511360&scope=bot+applications.commands)\n",
   "messages_events_Send_Private_Message": "I sent you a private message",
   "messages_events_Failed_To_Send_Message": "Failed to send message. Maybe I'm on your blacklist!",
 

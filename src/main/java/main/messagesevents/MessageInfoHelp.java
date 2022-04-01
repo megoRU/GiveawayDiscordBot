@@ -77,9 +77,6 @@ public class MessageInfoHelp extends ListenerAdapter {
         EmbedBuilder info = new EmbedBuilder();
         info.setColor(0xa224db);
         info.setAuthor(name, null, avatar);
-        info.addField(jsonParsers.getLocale("messages_events_Prefix", guildIdLong),
-                jsonParsers.getLocale("messages_events_Changes_Prefix", guildIdLong) +
-                        jsonParsers.getLocale("messages_events_Reset_Prefix", guildIdLong), false);
 
         info.addField(jsonParsers.getLocale("messages_events_Language_Title", guildIdLong), "`"
                         + p + jsonParsers.getLocale("messages_events_Language", guildIdLong) + "`"

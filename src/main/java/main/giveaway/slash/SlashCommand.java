@@ -12,14 +12,15 @@ import lombok.AllArgsConstructor;
 import main.config.BotStartConfig;
 import main.giveaway.Gift;
 import main.giveaway.GiveawayRegistry;
+import main.giveaway.buttons.ReactionsButton;
 import main.jsonparser.JSONParsers;
-import main.messagesevents.MessageInfoHelp;
 import main.model.entity.Language;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.LanguageRepository;
 import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -48,7 +49,7 @@ public class SlashCommand extends ListenerAdapter {
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         if (event.getUser().isBot()) return;
 
-        if (!event.isFromGuild()) {
+        if (event.getGuild() == null) {
             EmbedBuilder fromGuild = new EmbedBuilder();
             fromGuild.setColor(0x00FF00);
             fromGuild.setDescription("The bot supports `/slash commands` only in guilds!");
@@ -135,16 +136,16 @@ public class SlashCommand extends ListenerAdapter {
                     //Если время будет неверным. Сработает try catch
                 } catch (Exception e) {
                     e.printStackTrace();
-                    GiveawayRegistry.getInstance().removeGift(event.getGuild().getIdLong());
 
                     EmbedBuilder errors = new EmbedBuilder();
                     errors.setColor(0x00FF00);
                     errors.setDescription(jsonParsers.getLocale("slash_Errors", event.getGuild().getId()));
 
                     event.replyEmbeds(errors.build()).queue();
+                    GiveawayRegistry.getInstance().removeGift(event.getGuild().getIdLong());
+                    activeGiveawayRepository.deleteActiveGiveaways(event.getGuild().getIdLong());
                 }
             }
-
             return;
         }
 
@@ -226,16 +227,41 @@ public class SlashCommand extends ListenerAdapter {
 
         if (event.getName().equals("help")) {
 
-            String p = BotStartConfig.getMapPrefix().get(event.getGuild().getId()) == null ? "!" :
-                    BotStartConfig.getMapPrefix().get(event.getGuild().getId());
+            String guildIdLong = event.getGuild().getId();
 
-            new MessageInfoHelp().buildMessage(
-                    p,
-                    event.getTextChannel(),
-                    event.getUser().getAvatarUrl(),
-                    event.getGuild().getId(),
-                    event.getUser().getName(),
-                    event);
+            EmbedBuilder info = new EmbedBuilder();
+            info.setColor(0xa224db);
+            info.setTitle("Giveaway");
+            info.addField("Slash Commands", "`/language`, `/start`, `/stop`, `/list`" +
+                    "\n`/reroll`, `/participants`, `/patreon`", false);
+
+            info.addField(jsonParsers.getLocale("messages_events_Links", guildIdLong),
+                    jsonParsers.getLocale("messages_events_Site", guildIdLong) +
+                            jsonParsers.getLocale("messages_events_Add_Me_To_Other_Guilds", guildIdLong), false);
+
+            List<Button> buttons = new ArrayList<>();
+
+            buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
+
+            if (BotStartConfig.getMapLanguages().get(guildIdLong) != null) {
+
+                if (BotStartConfig.getMapLanguages().get(guildIdLong).equals("eng")) {
+
+                    buttons.add(Button.secondary(guildIdLong + ":" + ReactionsButton.CHANGE_LANGUAGE,
+                                    "Сменить язык ")
+                            .withEmoji(Emoji.fromUnicode("U+1F1F7U+1F1FA")));
+                } else {
+                    buttons.add(Button.secondary(guildIdLong + ":" + ReactionsButton.CHANGE_LANGUAGE,
+                                    "Change language ")
+                            .withEmoji(Emoji.fromUnicode("U+1F1ECU+1F1E7")));
+                }
+            } else {
+                buttons.add(Button.secondary(guildIdLong + ":" + ReactionsButton.CHANGE_LANGUAGE,
+                                "Сменить язык ")
+                        .withEmoji(Emoji.fromUnicode("U+1F1F7U+1F1FA")));
+            }
+
+            event.replyEmbeds(info.build()).setEphemeral(true).addActionRow(buttons).queue();
             return;
         }
 
