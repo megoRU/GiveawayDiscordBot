@@ -3,7 +3,6 @@ package main.giveaway.buttons;
 import lombok.AllArgsConstructor;
 import main.config.BotStartConfig;
 import main.jsonparser.JSONParsers;
-import main.messagesevents.MessageInfoHelp;
 import main.messagesevents.SenderMessage;
 import main.model.entity.Language;
 import main.model.repository.LanguageRepository;
@@ -46,21 +45,6 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
                     .setActionRow(Button.success(event.getGuild().getId() + ":" + ReactionsButton.BUTTON_HELP,
                             jsonParsers.getLocale("button_Help", event.getGuild().getId())))
                     .queue();
-            return;
-        }
-
-        if (Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + BUTTON_HELP)) {
-
-            event.deferEdit().queue();
-            MessageInfoHelp messageInfoHelp = new MessageInfoHelp();
-            messageInfoHelp.buildMessage(
-                    BotStartConfig.getMapPrefix().get(event.getGuild().getId()) == null ? "!" : BotStartConfig.getMapPrefix().get(event.getGuild().getId()),
-                    event.getTextChannel(),
-                    event.getUser().getAvatarUrl(),
-                    event.getGuild().getId(),
-                    event.getUser().getName(),
-                    null
-            );
             return;
         }
 

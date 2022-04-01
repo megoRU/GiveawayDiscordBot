@@ -8,7 +8,6 @@ import main.giveaway.buttons.ReactionsButton;
 import main.giveaway.reactions.Reactions;
 import main.giveaway.slash.SlashCommand;
 import main.jsonparser.ParserClass;
-import main.messagesevents.MessageInfoHelp;
 import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.LanguageRepository;
@@ -127,7 +126,6 @@ public class BotStartConfig {
             jdaBuilder.setBulkDeleteSplittingEnabled(false);
             jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild(activeGiveawayRepository, languageRepository));
             jdaBuilder.addEventListeners(new MessageGift());
-            jdaBuilder.addEventListeners(new MessageInfoHelp());
             jdaBuilder.addEventListeners(new ReactionsButton(languageRepository));
             jdaBuilder.addEventListeners(new Reactions());
             jdaBuilder.addEventListeners(new SlashCommand(languageRepository, activeGiveawayRepository, participantsRepository));
