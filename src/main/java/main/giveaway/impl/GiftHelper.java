@@ -2,7 +2,6 @@ package main.giveaway.impl;
 
 import main.config.BotStartConfig;
 import main.giveaway.GiveawayRegistry;
-import main.jsonparser.JSONParsers;
 import main.model.repository.ActiveGiveawayRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -11,7 +10,6 @@ import java.util.concurrent.CompletableFuture;
 
 public class GiftHelper {
 
-    public static final JSONParsers jsonParsers = new JSONParsers();
     private final ActiveGiveawayRepository activeGiveawayRepository;
 
     public GiftHelper(ActiveGiveawayRepository activeGiveawayRepository) {
