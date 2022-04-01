@@ -220,7 +220,7 @@ public class Gift {
         GiveawayRegistry.getInstance().putIsForSpecificRole(guild.getIdLong(), isOnlyForSpecificRole);
         GiveawayRegistry.getInstance().putUrlImage(guildId, urlImage);
         GiveawayRegistry.getInstance().putTitle(guild.getIdLong(), title == null ? "Giveaway" : title);
-        GiveawayRegistry.getInstance().putIdUserWhoCreateGiveaway(idUserWhoCreateGiveaway);
+        GiveawayRegistry.getInstance().putIdUserWhoCreateGiveaway(String.valueOf(idUserWhoCreateGiveaway));
 
         ActiveGiveaways activeGiveaways = new ActiveGiveaways();
         activeGiveaways.setGuildLongId(guildId);
