@@ -6,13 +6,14 @@
 #### Giveaway stores the following:
 ##### • User IDs
 ##### • User name
+##### • User tag
 ##### • Discord Guild IDs
 ##### • Giveaway title
 ##### • Giveaway message IDs
 ##### • Giveaway channel IDs
 ##### • Giveaway count winners
 ##### • Giveaway ends time
-##### • Prefix | Deprecated 1 may 2022
+##### • Giveaway Role IDs
 ##### • Language
 
 ### 2. Who can access the data?
@@ -20,7 +21,6 @@
 
 ### 3. How can I get rid of the data stored?
 #### The bot automatically deletes the data from the database when completing Giveaway.
-#### To delete the prefix data or language, you can reset it to the standard one: `*prefix reset` | `!lang reset`. | Deprecated 1 may 2022
 
 ### 4. Why does it store the data?
 #### In order not to lose active Giveaways in the event of a reboot.
@@ -29,4 +29,4 @@
 #### Feel free to join my [Discord server](https://discord.gg/UrWG3R683d)
 
 ### Please note, that we can change this policy without any warning at any given time.
-#### **Last changed:** `03.02.2022`
+#### **Last changed:** `03.04.2022`
