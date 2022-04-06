@@ -235,7 +235,7 @@ public class BotStartConfig {
 
                 TOP_GG_API.setStats(serverCount);
                 BotStartConfig.jda.getPresence().setActivity(Activity.playing(BotStartConfig.activity + serverCount + " guilds"));
-                IOUtils.toString(new URL("http://91.200.146.143:3001/api/push/SHAtSCMYvd?msg=OK&ping="), StandardCharsets.UTF_8);
+                IOUtils.toString(new URL("http://193.163.203.77:3001/api/push/SHAtSCMYvd?msg=OK&ping="), StandardCharsets.UTF_8);
 
                 //BOTICORD API
                 AtomicInteger usersCount = new AtomicInteger();
