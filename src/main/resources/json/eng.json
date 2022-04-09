@@ -34,6 +34,7 @@
   "gift_special_role": "This Giveaway only for a Special Role: ",
   "gift_notification_for_this_role": "Notification for this role: ",
   "slash_error_only_for_this_role": "You can't make a Giveaway just for a Role: `",
+  "slash_error_256": "The number of characters in the name should not exceed 256!",
   "slash_error_role_can_not_be_everyone": "`@everyone` can only be used to mention!",
   "button_giveaway_not_access": "You don't have access to [this]({0}) Giveaway!",
   "button_dont_worry": "Don't worry, you're a participant.\nWe checked you in the database.",

@@ -166,23 +166,6 @@ public class Gift {
 
     }
 
-    protected void startGift(Guild guild, TextChannel textChannel, String newTitle,
-                             String countWinners, String time, Long idUserWhoCreateGiveaway) {
-        EmbedBuilder start = new EmbedBuilder();
-
-        extracted(start, guild, textChannel, newTitle, countWinners, time, null, false, null);
-
-        textChannel.sendMessageEmbeds(start.build())
-                .queue(message -> {
-                            message.addReaction(Reactions.TADA).queue();
-                            updateCollections(countWinners, time, message, null, false, null, newTitle, idUserWhoCreateGiveaway);
-                        }
-                );
-
-        //Вот мы запускаем бесконечный поток.
-        autoInsert();
-    }
-
     public void startGift(@NotNull SlashCommandInteractionEvent event, Guild guild,
                           TextChannel textChannel, String newTitle, String countWinners,
                           String time, Long role, boolean isOnlyForSpecificRole,
