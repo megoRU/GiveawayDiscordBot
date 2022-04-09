@@ -22,6 +22,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -90,6 +91,12 @@ public class SlashCommand extends ListenerAdapter {
 
                     EmbedBuilder embedBuilder = new EmbedBuilder();
                     embedBuilder.setColor(0xFF0000);
+
+                    if (title != null && title.length() >= MessageEmbed.TITLE_MAX_LENGTH) {
+                        embedBuilder.setDescription(jsonParsers.getLocale("slash_error_256", event.getGuild().getId()) + role + "`");
+                        event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
+                        return;
+                    }
 
                     if (role == null && isOnlyForSpecificRole) {
                         embedBuilder.setDescription(jsonParsers.getLocale("slash_error_only_for_this_role", event.getGuild().getId()) + role + "`");

@@ -142,7 +142,7 @@ public class BotStartConfig {
             System.out.println("updateUserList()");
 
             //Обновить команды
-//        updateSlashCommands();
+            updateSlashCommands();
             System.out.println("15:25");
         } catch (Exception e) {
             e.printStackTrace();
@@ -170,7 +170,7 @@ public class BotStartConfig {
 
             //Start Giveaway
             List<OptionData> optionsStart = new ArrayList<>();
-            optionsStart.add(new OptionData(STRING, "title", "Title for Giveaway").setName("title"));
+            optionsStart.add(new OptionData(STRING, "title", "Title for Giveaway. Maximum 255 characters").setName("title"));
             optionsStart.add(new OptionData(INTEGER, "count", "Set count winners").setName("count").setMinValue(1).setMaxValue(30));
             optionsStart.add(new OptionData(STRING, "duration", "Examples: 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style. Preferably immediately in UTC ±0")
                     .setName("duration"));
@@ -225,19 +225,21 @@ public class BotStartConfig {
         }
     }
 
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRate = 50000)
     private void status() {
         try {
-            int timeout = 3;
-            RequestConfig config = RequestConfig.custom().
-                    setConnectTimeout(timeout * 1000).
-                    setConnectionRequestTimeout(timeout * 1000).
-                    setSocketTimeout(timeout * 1000).build();
-            CloseableHttpClient client = HttpClientBuilder.create()
-                    .setDefaultRequestConfig(config).build();
-            HttpGet request = new HttpGet("http://193.163.203.77:3001/api/push/SHAtSCMYvd?msg=OK&ping=");
-            CloseableHttpResponse execute = client.execute(request);
-            System.out.println(execute.getStatusLine().getStatusCode());
+            if (!Config.isIsDev()) {
+                int timeout = 3;
+                RequestConfig config = RequestConfig.custom().
+                        setConnectTimeout(timeout * 1000).
+                        setConnectionRequestTimeout(timeout * 1000).
+                        setSocketTimeout(timeout * 1000).build();
+                CloseableHttpClient client = HttpClientBuilder.create()
+                        .setDefaultRequestConfig(config).build();
+                HttpGet request = new HttpGet("http://193.163.203.77:3001/api/push/SHAtSCMYvd?msg=OK&ping=");
+                CloseableHttpResponse execute = client.execute(request);
+                System.out.println(execute.getStatusLine().getStatusCode());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
