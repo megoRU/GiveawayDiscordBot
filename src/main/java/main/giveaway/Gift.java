@@ -423,7 +423,6 @@ public class Gift {
 
                     zero.setTitle(GiveawayRegistry.getInstance().getTitle(guildId));
                     zero.setColor(Color.GREEN);
-                    zero.setTitle(GiveawayRegistry.getInstance().getTitle(guildId));
                     zero.setDescription(m.getEmbeds().get(0).getDescription());
 
                     giftHelper.editMessage(zero, guildIdLong, textChannelId);
