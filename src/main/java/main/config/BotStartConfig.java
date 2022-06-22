@@ -375,14 +375,13 @@ public class BotStartConfig {
 //                    System.out.println("Guild ID: " + guildIdLong);
 
                     if (jda.getGuildById(guildIdLong) != null) {
-
-                        CompletableFuture<Message> action = jda
-                                .getGuildById(guildIdLong)
-                                .getTextChannelById(channelId)
-                                .retrieveMessageById(messageId)
-                                .submit();
-
                         try {
+                            CompletableFuture<Message> action = jda
+                                    .getGuildById(guildIdLong)
+                                    .getTextChannelById(channelId)
+                                    .retrieveMessageById(messageId)
+                                    .submit();
+
                             List<MessageReaction> reactions = action.
                                     whenComplete((message, throwable) -> {
                                         if (throwable != null) {

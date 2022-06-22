@@ -1,13 +1,11 @@
 package main.threads;
 
-import lombok.Getter;
 import main.giveaway.GiveawayRegistry;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
-@Getter
-public class StopGiveawayByTimer implements Runnable {
+public final class StopGiveawayByTimer implements Runnable {
 
     private final Long ID_GUILD;
     private final Timestamp TIME;
@@ -33,13 +31,19 @@ public class StopGiveawayByTimer implements Runnable {
 
                 if (LocalDateTime.now().isAfter(TIME.toLocalDateTime())) {
 
-                    GiveawayRegistry.getInstance()
-                            .getGift(getID_GUILD())
-                            .stopGift(getID_GUILD(),
-                                    GiveawayRegistry.getInstance().getCountWinners(getID_GUILD())
-                                            == null ? 1
-                                            : Integer.parseInt(GiveawayRegistry.getInstance().getCountWinners(getID_GUILD())));
-                    return;
+                    int listUsersSize = GiveawayRegistry.getInstance().getGift(ID_GUILD).getListUsersSize();
+                    int countWinners = GiveawayRegistry.getInstance().getCountWinners(ID_GUILD) == null ? 1
+                            : Integer.parseInt(GiveawayRegistry.getInstance().getCountWinners(ID_GUILD));
+
+                    if (countWinners < listUsersSize) {
+                        GiveawayRegistry.getInstance()
+                                .getGift(ID_GUILD)
+                                .stopGift(ID_GUILD,
+                                        GiveawayRegistry.getInstance().getCountWinners(ID_GUILD)
+                                                == null ? 1
+                                                : Integer.parseInt(GiveawayRegistry.getInstance().getCountWinners(ID_GUILD)));
+                        return;
+                    }
                 }
                 Thread.sleep(5000L);
             }
