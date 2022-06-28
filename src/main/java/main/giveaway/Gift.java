@@ -7,7 +7,6 @@ import api.megoru.ru.impl.MegoruAPIImpl;
 import lombok.Getter;
 import lombok.Setter;
 import main.config.BotStartConfig;
-import main.giveaway.impl.ChecksClass;
 import main.giveaway.impl.GiftHelper;
 import main.giveaway.reactions.Reactions;
 import main.jsonparser.JSONParsers;

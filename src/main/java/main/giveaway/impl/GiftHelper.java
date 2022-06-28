@@ -1,6 +1,7 @@
 package main.giveaway.impl;
 
 import main.config.BotStartConfig;
+import main.giveaway.ChecksClass;
 import main.giveaway.GiveawayRegistry;
 import main.model.repository.ActiveGiveawayRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -81,7 +82,8 @@ public class GiftHelper {
         if (symbol.equals("d") || symbol.equals("д")) {
             return String.valueOf(Integer.parseInt(time) * 1440);
         }
-        return "5";
+
+        throw new IllegalArgumentException("Argument don`t have symbol: " + time);
     }
 
 }
