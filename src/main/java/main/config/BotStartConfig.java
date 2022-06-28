@@ -135,6 +135,7 @@ public class BotStartConfig {
             //Обновляем список участников при запуске бота
             updateUserList();
             System.out.println("updateUserList()");
+            System.out.println("IsDevMode: " + Config.isIsDev());
 
             //Обновить команды
 //            updateSlashCommands();
@@ -358,7 +359,6 @@ public class BotStartConfig {
         }
     }
 
-    //TODO: Сделать задержку в 1000 ms
     private void updateUserList() {
         try {
             List<GiveawayRegistry.GiveawayData> giveawayDataList = new ArrayList<>(GiveawayRegistry.getGiveawayDataMap().values());
@@ -372,8 +372,10 @@ public class BotStartConfig {
 
                     String messageId = giveawayDataList.get(l).getMessageId();
                     long channelId = GiveawayRegistry.getInstance().getGift(guildIdLong).getTextChannelId();
+                    Gift gift = GiveawayRegistry.getInstance().getGift(guildIdLong);
 //                    System.out.println("Guild ID: " + guildIdLong);
 
+                    Thread.sleep(1000L);
                     if (jda.getGuildById(guildIdLong) != null) {
                         try {
                             CompletableFuture<Message> action = jda
@@ -408,20 +410,18 @@ public class BotStartConfig {
                                             .complete()
                                             .stream()
                                             .filter(user -> !user.isBot())
+                                            .filter(user -> !gift.getListUsersHash(user.getId()))
                                             .collect(Collectors.toList());
-//                                    System.out.println("UserList count: " + userList.size());
+
+//                                    System.out.println("UserList count: " + userList);
 
                                     //Перебираем Users в реакциях
                                     for (int o = 0; o < userList.size(); o++) {
                                         User user = userList.get(o);
-                                        Gift gift = GiveawayRegistry.getInstance().getGift(guildIdLong);
-                                        //Если User`a нет в активном Giveaway добавляем. (Скорее всего нажал когда бот не работал)
-                                        if (!gift.getListUsersHash(user.getId())) {
-                                            gift.addUserToPoll(user);
-//                                            System.out.println("User id: " + user.getIdLong());
-                                        }
-                                    }
+                                        gift.addUserToPoll(user);
+//                                      System.out.println("User id: " + user.getIdLong());
 
+                                    }
                                 }
                             }
                         } catch (Exception e) {

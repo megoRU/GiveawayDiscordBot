@@ -348,7 +348,7 @@ public class SlashCommand extends ListenerAdapter {
         if (event.getName().equals("reroll")) {
             event.deferReply().queue();
 
-            if (!event.getOption("id").getAsString().matches("[0-9]+")) {
+            if (!event.getOption("id").getAsString().matches("\\d+")) {
                 event.getHook().sendMessage("ID is not Number!").setEphemeral(true).queue();
                 return;
             }
@@ -418,7 +418,6 @@ public class SlashCommand extends ListenerAdapter {
             }
             return;
         }
-
 
         if (event.getName().equals("participants")) {
             try {

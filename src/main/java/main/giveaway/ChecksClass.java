@@ -1,7 +1,6 @@
-package main.giveaway.impl;
+package main.giveaway;
 
 import main.config.BotStartConfig;
-import main.giveaway.GiveawayRegistry;
 import main.model.repository.ActiveGiveawayRepository;
 
 public class ChecksClass {
