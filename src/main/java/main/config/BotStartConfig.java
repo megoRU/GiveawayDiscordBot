@@ -246,16 +246,6 @@ public class BotStartConfig {
         }
     }
 
-    @Scheduled(fixedDelay = 240000, initialDelay = 200000)
-    public void updateUser() {
-        try {
-            updateUserList();
-        } catch (Exception e) {
-            Thread.currentThread().interrupt();
-            e.printStackTrace();
-        }
-    }
-
     private void setLanguages() {
         try {
             List<String> listLanguages = new ArrayList<>();
@@ -359,7 +349,8 @@ public class BotStartConfig {
         }
     }
 
-    private void updateUserList() {
+    @Scheduled(fixedDelay = 240000, initialDelay = 12000)
+    public void updateUserList() {
         try {
             List<GiveawayRegistry.GiveawayData> giveawayDataList = new ArrayList<>(GiveawayRegistry.getGiveawayDataMap().values());
 
@@ -375,7 +366,6 @@ public class BotStartConfig {
                     Gift gift = GiveawayRegistry.getInstance().getGift(guildIdLong);
 //                    System.out.println("Guild ID: " + guildIdLong);
 
-                    Thread.sleep(1000L);
                     if (jda.getGuildById(guildIdLong) != null) {
                         try {
                             CompletableFuture<Message> action = jda
@@ -397,13 +387,13 @@ public class BotStartConfig {
                                     })
                                     .orTimeout(10000L, TimeUnit.MILLISECONDS)
                                     .get()
-                                    .getReactions();
+                                    .getReactions()
+                                    .stream()
+                                    .filter(messageReaction -> messageReaction.getReactionEmote().isEmoji())
+                                    .filter(messageReaction -> messageReaction.getReactionEmote().getEmoji().equals(Reactions.TADA))
+                                    .collect(Collectors.toList());
 
-//                            System.out.println("Reaction count: " + reactions.size());
                             for (int i = 0; i < reactions.size(); i++) {
-
-                                if (reactions.get(i).getReactionEmote().isEmoji() &&
-                                        reactions.get(i).getReactionEmote().getEmoji().equals(Reactions.TADA)) {
 
                                     List<User> userList = reactions.get(i)
                                             .retrieveUsers()
@@ -421,7 +411,6 @@ public class BotStartConfig {
                                         gift.addUserToPoll(user);
 //                                      System.out.println("User id: " + user.getIdLong());
 
-                                    }
                                 }
                             }
                         } catch (Exception e) {
@@ -430,6 +419,7 @@ public class BotStartConfig {
                             }
                         }
                     }
+                    Thread.sleep(1000L);
                 }
             }
         } catch (Exception e) {
