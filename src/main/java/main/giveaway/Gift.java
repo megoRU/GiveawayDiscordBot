@@ -34,7 +34,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Queue;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -72,7 +71,7 @@ public class Gift {
     private int localCountUsers;
 
     //DTO
-    private volatile Queue<Participants> participantsList = new ArrayDeque<>();
+    private volatile Set<Participants> participantsList = new HashSet<>();
     private volatile List<api.megoru.ru.entity.Participants> participantsJSON = new LinkedList<>();
 
     //REPO
@@ -228,6 +227,14 @@ public class Gift {
 
     //Добавляет пользователя в StringBuilder
     public void addUserToPoll(final User user) {
+        System.out.println(user.getName() + " " + user.getId());
+        System.out.println(listUsersHash.containsKey(user.getId()));
+
+        if (listUsersHash.containsKey(user.getId())) {
+            System.out.println(listUsersHash.get(user.getId()));
+        }
+
+
         if (!listUsersHash.containsKey(user.getId())) {
             count.incrementAndGet();
             listUsersHash.put(user.getId(), user.getId());
@@ -283,11 +290,13 @@ public class Gift {
             if (count.get() > localCountUsers && GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
                 localCountUsers = count.get();
                 if (!participantsList.isEmpty()) {
-                    Set<Participants> temp = new HashSet<>();
-                    for (int i = 0; i < participantsList.size(); i++) {
-                        temp.add(participantsList.poll());
-                    }
+                    //Сохраняем всех участников в temp коллекцию
+                    Set<Participants> temp = new HashSet<>(participantsList);
+
                     participantsRepository.saveAllAndFlush(temp);
+
+                    //Удаляем все элементы которые уэе в БД
+                    participantsList.removeAll(temp);
                 }
             }
         } catch (Exception e) {
