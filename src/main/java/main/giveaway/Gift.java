@@ -289,7 +289,8 @@ public class Gift {
         try {
             if (count.get() > localCountUsers && GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
                 localCountUsers = count.get();
-                if (!participantsList.isEmpty()) {
+                if (participantsList != null && !participantsList.isEmpty()) {
+                    System.out.println(Arrays.toString(participantsList.toArray()));
                     //Сохраняем всех участников в temp коллекцию
                     Set<Participants> temp = new HashSet<>(participantsList);
 

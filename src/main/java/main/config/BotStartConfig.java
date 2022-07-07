@@ -349,7 +349,7 @@ public class BotStartConfig {
         }
     }
 
-    @Scheduled(fixedDelay = 240000, initialDelay = 12000)
+    @Scheduled(fixedDelay = 240000, initialDelay = 17000)
     public void updateUserList() {
         try {
             List<GiveawayRegistry.GiveawayData> giveawayDataList = new ArrayList<>(GiveawayRegistry.getGiveawayDataMap().values());
@@ -395,6 +395,7 @@ public class BotStartConfig {
 
                             for (int i = 0; i < reactions.size(); i++) {
 
+                                System.out.println("stream api start");
                                     List<User> userList = reactions.get(i)
                                             .retrieveUsers()
                                             .complete()
@@ -412,6 +413,8 @@ public class BotStartConfig {
 //                                      System.out.println("User id: " + user.getIdLong());
 
                                 }
+                                System.out.println("stream api end");
+
                             }
                         } catch (Exception e) {
                             if (!e.getMessage().contains("java.util.concurrent.TimeoutException")) {
