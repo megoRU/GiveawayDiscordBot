@@ -133,13 +133,14 @@ public class BotStartConfig {
 
             System.out.println(jda.retrieveCommands().complete());
             //Обновляем список участников при запуске бота
-            updateUserList();
+
             System.out.println("updateUserList()");
             System.out.println("IsDevMode: " + Config.isIsDev());
 
             //Обновить команды
 //            updateSlashCommands();
             System.out.println("23:15");
+            updateUserList();
         } catch (Exception e) {
             e.printStackTrace();
         }
