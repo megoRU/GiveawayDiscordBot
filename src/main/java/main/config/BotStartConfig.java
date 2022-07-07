@@ -139,7 +139,7 @@ public class BotStartConfig {
 
             //Обновить команды
 //            updateSlashCommands();
-            System.out.println("15:25");
+            System.out.println("23:15");
         } catch (Exception e) {
             e.printStackTrace();
         }
