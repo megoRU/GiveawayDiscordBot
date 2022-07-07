@@ -366,7 +366,7 @@ public class BotStartConfig {
                     Gift gift = GiveawayRegistry.getInstance().getGift(guildIdLong);
 //                    System.out.println("Guild ID: " + guildIdLong);
 
-                    if (jda.getGuildById(guildIdLong) != null) {
+                    if (jda.getGuildById(guildIdLong) != null || jda.getGuildById(guildIdLong).getTextChannelById(channelId) != null) {
                         try {
                             CompletableFuture<Message> action = jda
                                     .getGuildById(guildIdLong)
@@ -421,6 +421,10 @@ public class BotStartConfig {
                                 e.printStackTrace();
                             }
                         }
+                    } else {
+                        System.out.println("Guild or textChannel null");
+                        activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
+                        GiveawayRegistry.getInstance().removeGift(guildIdLong);
                     }
                     Thread.sleep(1000L);
                 }
