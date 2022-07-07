@@ -394,32 +394,40 @@ public class BotStartConfig {
                                     .filter(messageReaction -> messageReaction.getReactionEmote().getEmoji().equals(Reactions.TADA))
                                     .collect(Collectors.toList());
 
+
                             for (int i = 0; i < reactions.size(); i++) {
 
                                 System.out.println("stream api start");
-                                    List<User> userList = reactions.get(i)
-                                            .retrieveUsers()
-                                            .complete()
-                                            .stream()
-                                            .filter(user -> !user.isBot())
-                                            .filter(user -> !gift.getListUsersHash(user.getId()))
-                                            .collect(Collectors.toList());
+                                List<User> userList = reactions.get(i)
+                                        .retrieveUsers()
+                                        .complete()
+                                        .stream()
+                                        .filter(user -> !user.isBot())
+                                        .filter(user -> !gift.getListUsersHash(user.getId()))
+                                        .collect(Collectors.toList());
 
 //                                    System.out.println("UserList count: " + userList);
 
-                                    //Перебираем Users в реакциях
-                                    for (int o = 0; o < userList.size(); o++) {
-                                        User user = userList.get(o);
-                                        gift.addUserToPoll(user);
+                                //Перебираем Users в реакциях
+                                for (int o = 0; o < userList.size(); o++) {
+                                    User user = userList.get(o);
+                                    gift.addUserToPoll(user);
 //                                      System.out.println("User id: " + user.getIdLong());
 
                                 }
                                 System.out.println("stream api end");
 
                             }
+
                         } catch (Exception e) {
-                            if (!e.getMessage().contains("java.util.concurrent.TimeoutException")) {
+                            if (!e.getMessage().contains("java.util.concurrent.TimeoutException") &&
+                                    !e.getMessage().contains("net.dv8tion.jda.api.entities.TextChannel.retrieveMessageById(String)")) {
                                 e.printStackTrace();
+                            }
+                            if (e.getMessage().contains("net.dv8tion.jda.api.entities.TextChannel.retrieveMessageById(String)")) {
+                                System.out.println("Guild or textChannel null");
+                                activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
+                                GiveawayRegistry.getInstance().removeGift(guildIdLong);
                             }
                         }
                     } else {
