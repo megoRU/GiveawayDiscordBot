@@ -56,7 +56,7 @@ public class Reactions extends ListenerAdapter {
                         return;
                     }
 
-                    if (!gift.isUserInListUsersHash(user.getId())) {
+                    if (!gift.getIsUserInListUsersHash(user.getId())) {
                         LOGGER.info("\nНовый участник: " + user.getId() + "\nСервер: " + event.getGuild().getId());
                         GiveawayRegistry.getInstance().getGift(guildIdLong).addUserToPoll(user);
                     }
