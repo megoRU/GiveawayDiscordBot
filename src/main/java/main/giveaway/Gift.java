@@ -523,7 +523,7 @@ public class Gift {
         }
     }
 
-    public boolean isUserInListUsersHash(String id) {
+    public boolean getIsUserInListUsersHash(String id) {
         return listUsersHash.containsKey(id);
     }
 
