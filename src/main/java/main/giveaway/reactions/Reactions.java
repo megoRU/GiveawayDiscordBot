@@ -28,9 +28,8 @@ public class Reactions extends ListenerAdapter {
         try {
             User user = event.retrieveUser().complete();
             if (user == null || user.isBot()) return;
-            if (!event.getReactionEmote().isEmoji()) return;
 
-            String emoji = event.getReactionEmote().getEmoji();
+            String emoji = event.getEmoji().getName();
             long guildIdLong = event.getGuild().getIdLong();
 
             if (GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
@@ -57,7 +56,7 @@ public class Reactions extends ListenerAdapter {
                         return;
                     }
 
-                    if (!gift.getListUsersHash(user.getId())) {
+                    if (!gift.isUserInListUsersHash(user.getId())) {
                         LOGGER.info("\nНовый участник: " + user.getId() + "\nСервер: " + event.getGuild().getId());
                         GiveawayRegistry.getInstance().getGift(guildIdLong).addUserToPoll(user);
                     }

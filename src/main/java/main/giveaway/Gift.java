@@ -21,6 +21,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -184,7 +185,7 @@ public class Gift {
 
         textChannel.sendMessageEmbeds(start.build())
                 .queue(message -> {
-                    message.addReaction(Reactions.TADA).queue();
+                    message.addReaction(Emoji.fromUnicode(Reactions.TADA)).queue();
                     updateCollections(countWinners, time, message, role, isOnlyForSpecificRole, urlImage, newTitle, idUserWhoCreateGiveaway);
                 });
 
@@ -290,7 +291,6 @@ public class Gift {
             if (count.get() > localCountUsers && GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
                 localCountUsers = count.get();
                 if (participantsList != null && !participantsList.isEmpty()) {
-                    System.out.println(Arrays.toString(participantsList.toArray()));
                     //Сохраняем всех участников в temp коллекцию
                     Set<Participants> temp = new HashSet<>(participantsList);
 
@@ -523,7 +523,7 @@ public class Gift {
         }
     }
 
-    public boolean getListUsersHash(String id) {
+    public boolean isUserInListUsersHash(String id) {
         return listUsersHash.containsKey(id);
     }
 

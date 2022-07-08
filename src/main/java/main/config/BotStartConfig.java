@@ -17,10 +17,12 @@ import main.threads.StopGiveawayByTimer;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -106,7 +108,7 @@ public class BotStartConfig {
             List<GatewayIntent> intents = new ArrayList<>(
                     Arrays.asList(
                             GatewayIntent.GUILD_MESSAGES,
-                            GatewayIntent.GUILD_EMOJIS,
+                            GatewayIntent.GUILD_EMOJIS_AND_STICKERS,
                             GatewayIntent.GUILD_MESSAGE_REACTIONS,
                             GatewayIntent.DIRECT_MESSAGES,
                             GatewayIntent.DIRECT_MESSAGE_TYPING));
@@ -138,8 +140,8 @@ public class BotStartConfig {
             System.out.println("IsDevMode: " + Config.isIsDev());
 
             //Обновить команды
-//            updateSlashCommands();
-            System.out.println("23:15");
+            updateSlashCommands();
+            System.out.println("12:45");
             updateUserList();
         } catch (Exception e) {
             e.printStackTrace();
@@ -184,15 +186,36 @@ public class BotStartConfig {
 
 
             //Build
-            commands.addCommands(Commands.slash("language", "Setting language").addOptions(optionsLanguage));
-            commands.addCommands(Commands.slash("start", "Create giveaway").addOptions(optionsStart));
-            commands.addCommands(Commands.slash("stop", "Stop the Giveaway").addOptions(optionsStop));
-            commands.addCommands(Commands.slash("help", "Bot commands"));
-            commands.addCommands(Commands.slash("list", "List of participants"));
-            commands.addCommands(Commands.slash("patreon", "Support us on Patreon"));
-            commands.addCommands(Commands.slash("participants", "Get file with all participants by Giveaway ID").addOptions(participants));
-            commands.addCommands(Commands.slash("reroll", "Reroll one winner by Giveaway ID").addOptions(reroll));
+            commands.addCommands(Commands.slash("language", "Setting language")
+                    .addOptions(optionsLanguage)
+                    .setGuildOnly(true));
 
+            commands.addCommands(Commands.slash("start", "Create giveaway")
+                    .addOptions(optionsStart)
+                    .setGuildOnly(true));
+
+            commands.addCommands(Commands.slash("stop", "Stop the Giveaway")
+                    .addOptions(optionsStop)
+                    .setGuildOnly(true)
+                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_PERMISSIONS, Permission.ADMINISTRATOR))
+            );
+
+            commands.addCommands(Commands.slash("help", "Bot commands")
+                    .setGuildOnly(true));
+
+            commands.addCommands(Commands.slash("list", "List of participants")
+                    .setGuildOnly(true));
+
+            commands.addCommands(Commands.slash("patreon", "Support us on Patreon")
+                    .setGuildOnly(true));
+
+            commands.addCommands(Commands.slash("participants", "Get file with all participants by Giveaway ID")
+                    .addOptions(participants)
+                    .setGuildOnly(true));
+
+            commands.addCommands(Commands.slash("reroll", "Reroll one winner by Giveaway ID")
+                    .addOptions(reroll)
+                    .setGuildOnly(true));
 
             commands.queue();
 
@@ -390,8 +413,8 @@ public class BotStartConfig {
                                     .get()
                                     .getReactions()
                                     .stream()
-                                    .filter(messageReaction -> messageReaction.getReactionEmote().isEmoji())
-                                    .filter(messageReaction -> messageReaction.getReactionEmote().getEmoji().equals(Reactions.TADA))
+//                                    .filter(messageReaction -> messageReaction.getEmoji().)
+                                    .filter(messageReaction -> messageReaction.getEmoji().getName().equals(Reactions.TADA))
                                     .collect(Collectors.toList());
 
 
@@ -403,7 +426,7 @@ public class BotStartConfig {
                                         .complete()
                                         .stream()
                                         .filter(user -> !user.isBot())
-                                        .filter(user -> !gift.getListUsersHash(user.getId()))
+                                        .filter(user -> !gift.isUserInListUsersHash(user.getId()))
                                         .collect(Collectors.toList());
 
 //                                    System.out.println("UserList count: " + userList);
@@ -413,7 +436,6 @@ public class BotStartConfig {
                                     User user = userList.get(o);
                                     gift.addUserToPoll(user);
 //                                      System.out.println("User id: " + user.getIdLong());
-
                                 }
                                 System.out.println("stream api end");
 
