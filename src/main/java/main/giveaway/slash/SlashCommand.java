@@ -20,10 +20,10 @@ import main.model.repository.LanguageRepository;
 import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -49,15 +49,6 @@ public class SlashCommand extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         if (event.getUser().isBot()) return;
-
-        if (event.getGuild() == null) {
-            EmbedBuilder fromGuild = new EmbedBuilder();
-            fromGuild.setColor(0x00FF00);
-            fromGuild.setDescription("The bot supports `/slash commands` only in guilds!");
-            event.replyEmbeds(fromGuild.build()).queue();
-            return;
-        }
-
         if (event.getMember() == null) return;
 
         if (!event.getGuild().getSelfMember().hasPermission(event.getTextChannel(), Permission.MESSAGE_SEND) ||
@@ -194,7 +185,7 @@ public class SlashCommand extends ListenerAdapter {
                 return;
             }
 
-            if (!event.getOptions().get(0).getAsString().matches("[0-9]{1,2}")) {
+            if (!event.getOptions().get(0).getAsString().matches("\\d{1,2}")) {
                 EmbedBuilder errors = new EmbedBuilder();
                 errors.setColor(Color.RED);
                 errors.setDescription(jsonParsers.getLocale("slash_Errors", event.getGuild().getId()));
@@ -393,8 +384,8 @@ public class SlashCommand extends ListenerAdapter {
                 winner.setDescription(jsonParsers.getLocale("gift_congratulations_reroll",
                         event.getGuild().getId()).replaceAll("\\{0}",
                         Arrays.toString(uniqueWinners.toArray())
-                        .replaceAll("\\[", "")
-                        .replaceAll("]", "")));
+                                .replaceAll("\\[", "")
+                                .replaceAll("]", "")));
 
 
                 event.getHook().sendMessageEmbeds(winner.build()).queue();
