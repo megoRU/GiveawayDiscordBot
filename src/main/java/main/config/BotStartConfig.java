@@ -197,7 +197,7 @@ public class BotStartConfig {
             commands.addCommands(Commands.slash("stop", "Stop the Giveaway")
                     .addOptions(optionsStop)
                     .setGuildOnly(true)
-                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_PERMISSIONS, Permission.ADMINISTRATOR))
+                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MESSAGE_MANAGE, Permission.ADMINISTRATOR))
             );
 
             commands.addCommands(Commands.slash("help", "Bot commands")
