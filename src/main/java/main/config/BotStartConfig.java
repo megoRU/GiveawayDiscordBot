@@ -25,8 +25,7 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
-import org.boticordjava.api.BotiCordAPI;
-import org.boticordjava.api.impl.BotiCordAPIImpl;
+import org.boticordjava.api.impl.BotiCordAPI;
 import org.discordbots.api.client.DiscordBotListAPI;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -259,7 +258,12 @@ public class BotStartConfig {
                 AtomicInteger usersCount = new AtomicInteger();
                 BotStartConfig.jda.getGuilds().forEach(g -> usersCount.addAndGet(g.getMembers().size()));
 
-                BotiCordAPI api = new BotiCordAPIImpl(System.getenv("BOTICORD"), Config.getBotId());
+
+                BotiCordAPI api = new BotiCordAPI.Builder()
+                        .token(System.getenv("BOTICORD"))
+                        .botId(Config.getBotId())
+                        .build();
+
                 api.setStats(serverCount, 1, usersCount.get());
             } catch (Exception e) {
                 e.printStackTrace();
