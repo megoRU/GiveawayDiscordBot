@@ -79,6 +79,29 @@ public class Gift {
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final ParticipantsRepository participantsRepository;
 
+    @Getter
+    @Setter
+    public class GiveawayData {
+
+        private String channelId;
+        private String messageId;
+        private String countWinners;
+        private String title;
+        private Timestamp endGiveawayDate;
+        private Long roleId;
+        private Boolean isForSpecificRole;
+        private String urlImage;
+        private String idUserWhoCreateGiveaway;
+
+        public GiveawayData() {
+        }
+
+        public Gift getGift() {
+            return Gift.this;
+        }
+
+    }
+
     public Gift(long guildId, long textChannelId, long userIdLong, ActiveGiveawayRepository activeGiveawayRepository, ParticipantsRepository participantsRepository) {
         this.guildId = guildId;
         this.textChannelId = textChannelId;
@@ -195,6 +218,7 @@ public class Gift {
 
     private void updateCollections(String countWinners, String time, Message message, Long role,
                                    Boolean isOnlyForSpecificRole, String urlImage, String title, Long idUserWhoCreateGiveaway) {
+
         GiveawayRegistry.getInstance().putMessageId(guildId, message.getId());
         GiveawayRegistry.getInstance().putChannelId(guildId, message.getChannel().getId());
         GiveawayRegistry.getInstance().putCountWinners(guildId, countWinners);
@@ -539,4 +563,6 @@ public class Gift {
         this.count.set(count);
         this.localCountUsers = count;
     }
+
+
 }

@@ -1,7 +1,5 @@
 package main.giveaway;
 
-import lombok.Getter;
-import lombok.Setter;
 import main.jsonparser.JSONParsers;
 
 import java.sql.Timestamp;
@@ -11,35 +9,11 @@ import java.util.Map;
 public class GiveawayRegistry {
 
     //Возвращает GiveawayData по long id
-    private static final Map<Long, GiveawayData> giveawayDataMap = new HashMap<>();
+    private static final Map<Long, Gift.GiveawayData> giveawayDataMap = new HashMap<>();
     private static final JSONParsers jsonParsers = new JSONParsers();
     private static volatile GiveawayRegistry giveawayRegistry;
 
     private GiveawayRegistry() {
-    }
-
-    @Getter
-    @Setter
-    public static class GiveawayData {
-
-        private Gift gift;
-        private String channelId;
-        private String messageId;
-        private String countWinners;
-        private String title;
-        private Timestamp endGiveawayDate;
-        private Long roleId;
-        private Boolean isForSpecificRole;
-        private String urlImage;
-        private String idUserWhoCreateGiveaway;
-
-        public GiveawayData(Gift gift) {
-            this.gift = gift;
-        }
-
-        private GiveawayData() {
-        }
-
     }
 
     public static GiveawayRegistry getInstance() {
@@ -53,7 +27,7 @@ public class GiveawayRegistry {
         return giveawayRegistry;
     }
 
-    public static Map<Long, GiveawayData> getGiveawayDataMap() {
+    public static Map<Long, Gift.GiveawayData> getGiveawayDataMap() {
         return giveawayDataMap;
     }
 
@@ -130,7 +104,7 @@ public class GiveawayRegistry {
     }
 
     public void putGift(long guildId, Gift gift) {
-        giveawayDataMap.put(guildId, new GiveawayData(gift));
+        giveawayDataMap.put(guildId, gift.new GiveawayData());
     }
 
     public void putCountWinners(long guildId, String countWinners) {

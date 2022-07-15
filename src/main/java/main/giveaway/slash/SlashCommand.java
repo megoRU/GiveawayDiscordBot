@@ -117,7 +117,8 @@ public class SlashCommand extends ListenerAdapter {
                     }
 
                     GiveawayRegistry.getInstance()
-                            .getGift(event.getGuild().getIdLong()).startGift(event,
+                            .getGift(event.getGuild().getIdLong())
+                            .startGift(event,
                                     event.getGuild(),
                                     textChannel == null ? event.getTextChannel() : textChannel,
                                     title,
