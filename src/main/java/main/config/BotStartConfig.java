@@ -137,7 +137,7 @@ public class BotStartConfig {
 
             //Обновить команды
 //            updateSlashCommands();
-            System.out.println("17:24");
+            System.out.println("18:45");
             updateUserList();
         } catch (Exception e) {
             e.printStackTrace();
@@ -377,7 +377,7 @@ public class BotStartConfig {
     @Scheduled(fixedDelay = 240000, initialDelay = 17000)
     public void updateUserList() {
         try {
-            List<GiveawayRegistry.GiveawayData> giveawayDataList = new ArrayList<>(GiveawayRegistry.getGiveawayDataMap().values());
+            List<Gift.GiveawayData> giveawayDataList = new ArrayList<>(GiveawayRegistry.getGiveawayDataMap().values());
 
             for (int l = 0; l < giveawayDataList.size(); l++) {
 
@@ -391,7 +391,7 @@ public class BotStartConfig {
                     Gift gift = GiveawayRegistry.getInstance().getGift(guildIdLong);
                     //System.out.println("Guild ID: " + guildIdLong);
 
-                    if (jda.getGuildById(guildIdLong) != null || jda.getGuildById(guildIdLong).getTextChannelById(channelId) != null) {
+                    if (jda.getGuildById(guildIdLong) != null && jda.getGuildById(guildIdLong).getTextChannelById(channelId) != null) {
                         try {
                             CompletableFuture<Message> action = jda
                                     .getGuildById(guildIdLong)
@@ -427,11 +427,12 @@ public class BotStartConfig {
                                             .complete()
                                             .stream()
                                             .filter(user -> !user.isBot())
+                                            .filter(user -> !gift.getIsUserInListUsersHash(user.getId()))
                                             .filter(user -> jda.getGuildById(guildIdLong)
-                                                    .getMember(user)
+                                                    //TODO: This block thread may be use *parallelStream()*
+                                                    .retrieveMember(user).complete()
                                                     .getRoles()
                                                     .contains(roleGiveaway))
-                                            .filter(user -> !gift.getIsUserInListUsersHash(user.getId()))
                                             .collect(Collectors.toList());
                                 } else {
                                     userList = reactions.get(i)
