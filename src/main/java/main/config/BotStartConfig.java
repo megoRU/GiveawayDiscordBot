@@ -137,7 +137,7 @@ public class BotStartConfig {
 
             //Обновить команды
 //            updateSlashCommands();
-            System.out.println("17:24");
+            System.out.println("18:45");
             updateUserList();
         } catch (Exception e) {
             e.printStackTrace();
@@ -422,11 +422,6 @@ public class BotStartConfig {
 
                                 if (isForSpecificRole) {
                                     Role roleGiveaway = jda.getRoleById(giveawayDataList.get(l).getRoleId());
-
-                                    System.out.println(roleGiveaway);
-
-                                    reactions.get(i).retrieveUsers().forEach(user -> System.out.println(user.getName()));
-
                                     userList = reactions.get(i)
                                             .retrieveUsers()
                                             .complete()
