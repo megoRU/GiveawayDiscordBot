@@ -17,7 +17,7 @@ public class ChecksClass {
         } else {
             System.out.println("Бота нет в Guild -> Удаляем Giveaway!");
             activeGiveawayRepository.deleteActiveGiveaways(guildId);
-            GiveawayRegistry.getInstance().removeGift(guildId);
+            GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildId);
             return true;
         }
     }

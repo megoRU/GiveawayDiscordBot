@@ -5,11 +5,13 @@ import main.jsonparser.JSONParsers;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
 
 public class GiveawayRegistry {
 
     //Возвращает GiveawayData по long id
     private static final Map<Long, Gift.GiveawayData> giveawayDataMap = new HashMap<>();
+    private static final Map<Long, Timer> giveawayTimer = new HashMap<>();
     private static final JSONParsers jsonParsers = new JSONParsers();
     private static volatile GiveawayRegistry giveawayRegistry;
 
@@ -25,6 +27,10 @@ public class GiveawayRegistry {
             }
         }
         return giveawayRegistry;
+    }
+
+    public Timer getGiveawayTimer(long guildId) {
+        return giveawayTimer.get(guildId);
     }
 
     public static Map<Long, Gift.GiveawayData> getGiveawayDataMap() {
@@ -91,6 +97,10 @@ public class GiveawayRegistry {
         giveawayDataMap.get(guildId).setEndGiveawayDate(timestamp);
     }
 
+    public void putGiveawayTimer(long guildId, Timer timer) {
+        giveawayTimer.put(guildId, timer);
+    }
+
     public void putMessageId(long guildId, String messageId) {
         giveawayDataMap.get(guildId).setMessageId(messageId);
     }
@@ -111,12 +121,12 @@ public class GiveawayRegistry {
         giveawayDataMap.get(guildId).setCountWinners(countWinners);
     }
 
-    public void removeGift(long guildId) {
+    public void removeGuildFromGiveaway(long guildId) {
         giveawayDataMap.remove(guildId);
     }
 
-    public void removeGuildFromGiveaway(long guildId) {
-        giveawayDataMap.remove(guildId);
+    public void removeGiveawayTimer(long guildId) {
+        giveawayTimer.remove(guildId);
     }
 
     //TODO: Удалять из Базы данных нужно ещё

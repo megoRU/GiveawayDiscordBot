@@ -12,7 +12,6 @@ import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.LanguageRepository;
 import main.model.repository.ParticipantsRepository;
-import main.threads.Giveaway;
 import main.threads.StopGiveawayByTimer;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -41,6 +40,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.*;
+import java.util.Date;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,7 +56,6 @@ import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
 public class BotStartConfig {
 
     public static final String activity = "/help | ";
-    private static final Deque<Giveaway> queue = new ArrayDeque<>();
     //String - guildLongId
     private static final ConcurrentMap<String, String> mapLanguages = new ConcurrentHashMap<>();
     private static final Map<String, String> mapPrefix = new HashMap<>();
@@ -221,26 +220,6 @@ public class BotStartConfig {
         }
     }
 
-    @Scheduled(fixedDelay = 2000, initialDelay = 10000)
-    public void stopGiveaway() {
-        try {
-            int count = queue.size();
-//            System.out.println(count);
-            for (int i = 0; i < count; i++) {
-                if (!queue.isEmpty()) {
-                    final Giveaway giveaway = queue.poll();
-                    if (giveaway != null) {
-                        Thread t2 = new Thread(() -> new StopGiveawayByTimer(giveaway).run());
-                        t2.start();
-                    }
-                }
-            }
-        } catch (Exception e) {
-            Thread.currentThread().interrupt();
-            e.printStackTrace();
-        }
-    }
-
     @Scheduled(fixedDelay = 140000L)
     private void topGGAndStatcord() {
         if (!Config.isIsDev()) {
@@ -362,7 +341,12 @@ public class BotStartConfig {
                 GiveawayRegistry.getInstance().putIdUserWhoCreateGiveaway(guild_long_id, id_user_who_create_giveaway);
 
                 if (date_end_giveaway != null) {
-                    queue.add(new Giveaway(guild_long_id, date_end_giveaway));
+                    Timer timer = new Timer();
+                    StopGiveawayByTimer stopGiveawayByTimer = new StopGiveawayByTimer(guild_long_id, date_end_giveaway);
+                    Date date = new Date(date_end_giveaway.getTime());
+                    timer.schedule(stopGiveawayByTimer, date);
+
+                    GiveawayRegistry.getInstance().putGiveawayTimer(guild_long_id, timer);
                 }
             }
             rs.close();
@@ -406,7 +390,7 @@ public class BotStartConfig {
                                             if (throwable.getMessage().contains("10008: Unknown Message")) {
                                                 System.out.println("10008: Unknown Message: Удаляем Giveaway!");
                                                 activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
-                                                GiveawayRegistry.getInstance().removeGift(guildIdLong);
+                                                GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
                                             }
                                         }
                                     })
@@ -459,13 +443,13 @@ public class BotStartConfig {
                             }
                             if (e.getMessage().contains("net.dv8tion.jda.api.entities.TextChannel.retrieveMessageById(String)")) {
                                 System.out.println("Guild or textChannel null");
-                                GiveawayRegistry.getInstance().removeGift(guildIdLong);
+                                GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
                                 activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
                             }
                         }
                     } else {
                         System.out.println("Guild or textChannel null");
-                        GiveawayRegistry.getInstance().removeGift(guildIdLong);
+                        GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
                         activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
                     }
                     Thread.sleep(1000L);
@@ -546,10 +530,6 @@ public class BotStartConfig {
 
     public static Map<String, String> getMapLanguages() {
         return mapLanguages;
-    }
-
-    public static Deque<Giveaway> getQueue() {
-        return queue;
     }
 
 }

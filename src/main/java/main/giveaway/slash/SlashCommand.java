@@ -141,7 +141,7 @@ public class SlashCommand extends ListenerAdapter {
                     errors.setDescription(jsonParsers.getLocale("slash_Errors", event.getGuild().getId()));
 
                     event.replyEmbeds(errors.build()).queue();
-                    GiveawayRegistry.getInstance().removeGift(event.getGuild().getIdLong());
+                    GiveawayRegistry.getInstance().removeGuildFromGiveaway(event.getGuild().getIdLong());
                     activeGiveawayRepository.deleteActiveGiveaways(event.getGuild().getIdLong());
                 }
             }
