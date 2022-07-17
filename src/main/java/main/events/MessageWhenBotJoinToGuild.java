@@ -48,8 +48,8 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
                         "!\n", false);
                 welcome.addField("List of commands", "Use Slash Command: **/help** for a list of commands.", false);
                 welcome.addField("Support server", ":helmet_with_cross: [Discord server](https://discord.com/invite/UrWG3R683d)\n", false);
-                welcome.addField("One more Thing", "If you are not satisfied with something in the bot, please let us know, we will fix it!"
-                        , false);
+                welcome.addField("Information", "We are actively writing about new updates or problems in our discord. We recommend that you follow up.", false);
+                welcome.addField("One more Thing", "If you are not satisfied with something in the bot, please let us know, we will fix it!", false);
 
                 List<Button> buttons = new ArrayList<>();
                 buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
