@@ -507,7 +507,9 @@ public class Gift {
     private void clearingCollections() {
         try {
             GiveawayRegistry.getInstance().removeGuildFromGiveaway(this.guildId);
-            GiveawayRegistry.getInstance().getGiveawayTimer(this.guildId).cancel();
+            if (GiveawayRegistry.getInstance().getGiveawayTimer(this.guildId) != null) {
+                GiveawayRegistry.getInstance().getGiveawayTimer(this.guildId).cancel();
+            }
             GiveawayRegistry.getInstance().removeGiveawayTimer(this.guildId);
             setCount(0);
         } catch (Exception e) {
