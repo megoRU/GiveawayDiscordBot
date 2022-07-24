@@ -73,7 +73,7 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
                             .withEmoji(Emoji.fromUnicode("U+1F1F7U+1F1FA")));
                 }
 
-                event.getGuild().getDefaultChannel().sendMessageEmbeds(welcome.build()).setActionRow(buttons).queue();
+                event.getGuild().getDefaultChannel().asTextChannel().sendMessageEmbeds(welcome.build()).setActionRow(buttons).queue();
 
                 welcome.clear();
             }
