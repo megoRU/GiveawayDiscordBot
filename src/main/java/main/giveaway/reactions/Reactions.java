@@ -46,7 +46,7 @@ public class Reactions extends ListenerAdapter {
                     if (GiveawayRegistry.getInstance().getIsForSpecificRole(guildIdLong) && !event.getMember().getRoles().toString().contains(roleId)) {
                         LOGGER.info("\nНажал на эмодзи, но у него нет доступа к розыгрышу: " + user.getId());
                         //Получаем ссылку до сообщения
-                        String url = getDiscordUrlMessage(event.getGuild().getId(), event.getTextChannel().getId(), event.getReaction().getMessageId());
+                        String url = getDiscordUrlMessage(event.getGuild().getId(), event.getGuildChannel().getId(), event.getReaction().getMessageId());
 
                         EmbedBuilder embedBuilder = new EmbedBuilder();
                         embedBuilder.setColor(Color.RED);

@@ -442,15 +442,15 @@ public class BotStartConfig {
                                 e.printStackTrace();
                             }
                             if (e.getMessage().contains("net.dv8tion.jda.api.entities.TextChannel.retrieveMessageById(String)")) {
-                                System.out.println("Guild or textChannel null");
+                                System.out.println("Guild or textChannel null 1");
                                 GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
                                 activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
                             }
                         }
                     } else {
-                        System.out.println("Guild or textChannel null");
-                        GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
-                        activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
+//                        System.out.println("Guild or textChannel null 2");
+//                        GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
+//                        activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
                     }
                     Thread.sleep(1000L);
                 }

@@ -22,7 +22,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.unions.GuildChannelUnion;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -51,8 +51,8 @@ public class SlashCommand extends ListenerAdapter {
         if (event.getUser().isBot()) return;
         if (event.getMember() == null) return;
 
-        if (!event.getGuild().getSelfMember().hasPermission(event.getTextChannel(), Permission.MESSAGE_SEND) ||
-                !event.getGuild().getSelfMember().hasPermission(event.getTextChannel(), Permission.MESSAGE_EMBED_LINKS)) {
+        if (!event.getGuild().getSelfMember().hasPermission(event.getGuildChannel(), Permission.MESSAGE_SEND) ||
+                !event.getGuild().getSelfMember().hasPermission(event.getGuildChannel(), Permission.MESSAGE_EMBED_LINKS)) {
             return;
         }
 
@@ -69,7 +69,7 @@ public class SlashCommand extends ListenerAdapter {
                     String title = event.getOption("title", OptionMapping::getAsString);
                     String count = event.getOption("count", OptionMapping::getAsString);
                     String time = event.getOption("duration", OptionMapping::getAsString);
-                    TextChannel textChannel = event.getOption("channel", OptionMapping::getAsTextChannel);
+                    GuildChannelUnion textChannel = event.getOption("channel", OptionMapping::getAsChannel);
                     Long role = event.getOption("mention", OptionMapping::getAsLong);
                     Message.Attachment image = event.getOption("image", OptionMapping::getAsAttachment);
                     String urlImage = null;
@@ -104,15 +104,15 @@ public class SlashCommand extends ListenerAdapter {
                     GiveawayRegistry.getInstance().putGift(
                             event.getGuild().getIdLong(),
                             new Gift(event.getGuild().getIdLong(),
-                                    textChannel == null ? event.getTextChannel().getIdLong() : textChannel.getIdLong(),
+                                    textChannel == null ? event.getGuildChannel().getIdLong() : textChannel.getIdLong(),
                                     event.getUser().getIdLong(),
                                     activeGiveawayRepository,
                                     participantsRepository));
 
                     if (!event.getGuild().getSelfMember()
-                            .hasPermission(textChannel == null ? event.getTextChannel() : textChannel, Permission.MESSAGE_SEND)
+                            .hasPermission(textChannel == null ? event.getGuildChannel() : textChannel, Permission.MESSAGE_SEND)
                             || !event.getGuild().getSelfMember()
-                            .hasPermission(textChannel == null ? event.getTextChannel() : textChannel, Permission.MESSAGE_EMBED_LINKS)) {
+                            .hasPermission(textChannel == null ? event.getGuildChannel() : textChannel, Permission.MESSAGE_EMBED_LINKS)) {
                         return;
                     }
 
@@ -120,7 +120,7 @@ public class SlashCommand extends ListenerAdapter {
                             .getGift(event.getGuild().getIdLong())
                             .startGift(event,
                                     event.getGuild(),
-                                    textChannel == null ? event.getTextChannel() : textChannel,
+                                    textChannel == null ? event.getChannel().asGuildMessageChannel() : textChannel.asGuildMessageChannel(),
                                     title,
                                     count,
                                     time,
@@ -158,8 +158,8 @@ public class SlashCommand extends ListenerAdapter {
                 return;
             }
 
-            if (!event.getMember().hasPermission(event.getTextChannel(), Permission.ADMINISTRATOR)
-                    && !event.getMember().hasPermission(event.getTextChannel(), Permission.MESSAGE_MANAGE)) {
+            if (!event.getMember().hasPermission(event.getGuildChannel(), Permission.ADMINISTRATOR)
+                    && !event.getMember().hasPermission(event.getGuildChannel(), Permission.MESSAGE_MANAGE)) {
 
                 EmbedBuilder gift = new EmbedBuilder();
                 gift.setColor(0x00FF00);

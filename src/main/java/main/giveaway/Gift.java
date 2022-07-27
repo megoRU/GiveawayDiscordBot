@@ -17,8 +17,8 @@ import main.model.repository.ParticipantsRepository;
 import main.threads.StopGiveawayByTimer;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -109,7 +109,7 @@ public class Gift {
         this.participantsRepository = participantsRepository;
     }
 
-    private void extracted(EmbedBuilder start, Guild guild, TextChannel channel,
+    private void extracted(EmbedBuilder start, Guild guild, GuildMessageChannel channel,
                            String newTitle, String countWinners,
                            String time, Long role, boolean isOnlyForSpecificRole, String urlImage) {
         LOGGER.info("\nGuild id: " + guild.getId()
@@ -188,7 +188,7 @@ public class Gift {
     }
 
     public void startGift(@NotNull SlashCommandInteractionEvent event, Guild guild,
-                          TextChannel textChannel, String newTitle, String countWinners,
+                          GuildMessageChannel textChannel, String newTitle, String countWinners,
                           String time, Long role, boolean isOnlyForSpecificRole,
                           String urlImage, Long idUserWhoCreateGiveaway) {
 
