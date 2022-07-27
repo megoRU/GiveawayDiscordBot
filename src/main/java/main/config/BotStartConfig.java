@@ -3,7 +3,6 @@ package main.config;
 import main.events.MessageWhenBotJoinToGuild;
 import main.giveaway.Gift;
 import main.giveaway.GiveawayRegistry;
-import main.giveaway.MessageGift;
 import main.giveaway.buttons.ReactionsButton;
 import main.giveaway.reactions.Reactions;
 import main.giveaway.slash.SlashCommand;
@@ -119,7 +118,6 @@ public class BotStartConfig {
             jdaBuilder.setActivity(Activity.playing("Starting..."));
             jdaBuilder.setBulkDeleteSplittingEnabled(false);
             jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild(activeGiveawayRepository, languageRepository));
-            jdaBuilder.addEventListeners(new MessageGift());
             jdaBuilder.addEventListeners(new ReactionsButton(languageRepository));
             jdaBuilder.addEventListeners(new Reactions());
             jdaBuilder.addEventListeners(new SlashCommand(languageRepository, activeGiveawayRepository, participantsRepository));
