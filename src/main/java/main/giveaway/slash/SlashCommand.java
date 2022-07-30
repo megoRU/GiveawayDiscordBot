@@ -10,6 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.AllArgsConstructor;
 import main.config.BotStartConfig;
+import main.giveaway.ChecksClass;
 import main.giveaway.Gift;
 import main.giveaway.GiveawayRegistry;
 import main.giveaway.buttons.ReactionsButton;
@@ -51,10 +52,11 @@ public class SlashCommand extends ListenerAdapter {
         if (event.getUser().isBot()) return;
         if (event.getMember() == null) return;
 
-        if (!event.getGuild().getSelfMember().hasPermission(event.getGuildChannel(), Permission.MESSAGE_SEND) ||
-                !event.getGuild().getSelfMember().hasPermission(event.getGuildChannel(), Permission.MESSAGE_EMBED_LINKS)) {
-            return;
-        }
+        if (!ChecksClass.canSendGiveaway(event.getGuildChannel())) return;
+        GuildChannelUnion channel = event.getOption("channel", OptionMapping::getAsChannel);
+        if (!ChecksClass.canSendGiveaway(
+                channel == null ? event.getGuildChannel() : channel.asGuildMessageChannel(),
+                event)) return;
 
         if (event.getName().equals("start")) {
             if (GiveawayRegistry.getInstance().hasGift(event.getGuild().getIdLong())) {
