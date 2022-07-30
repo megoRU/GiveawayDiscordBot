@@ -373,7 +373,10 @@ public class BotStartConfig {
                     Gift gift = GiveawayRegistry.getInstance().getGift(guildIdLong);
                     //System.out.println("Guild ID: " + guildIdLong);
 
-                    if (jda.getGuildById(guildIdLong) != null && jda.getGuildById(guildIdLong).getTextChannelById(channelId) != null) {
+                    if (jda.getGuildById(guildIdLong) != null
+                            && jda.getGuildById(guildIdLong).getTextChannelById(channelId) != null
+                            && jda.getGuildById(guildIdLong).getSelfMember().hasPermission(Permission.VIEW_CHANNEL)) {
+
                         try {
                             CompletableFuture<Message> action = jda
                                     .getGuildById(guildIdLong)
