@@ -88,7 +88,7 @@ public class Gift {
         private String title;
         private Timestamp endGiveawayDate;
         private Long roleId;
-        private Boolean isForSpecificRole;
+        private boolean isForSpecificRole;
         private String urlImage;
         private String idUserWhoCreateGiveaway;
 
@@ -99,6 +99,13 @@ public class Gift {
             return Gift.this;
         }
 
+        public boolean getIsForSpecificRole() {
+            return isForSpecificRole;
+        }
+
+        public void setIsForSpecificRole(boolean is_for_specific_role) {
+            isForSpecificRole = is_for_specific_role;
+        }
     }
 
     public Gift(long guildId, long textChannelId, long userIdLong, ActiveGiveawayRepository activeGiveawayRepository, ParticipantsRepository participantsRepository) {

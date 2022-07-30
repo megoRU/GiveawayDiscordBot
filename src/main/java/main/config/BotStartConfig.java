@@ -364,20 +364,19 @@ public class BotStartConfig {
             for (int l = 0; l < giveawayDataList.size(); l++) {
 
                 long guildIdLong = giveawayDataList.get(l).getGift().getGuildId();
-                Boolean isForSpecificRole = giveawayDataList.get(l).getIsForSpecificRole();
-                // && !isForSpecificRole
+                boolean isForSpecificRole = giveawayDataList.get(l).getIsForSpecificRole();
+
                 if (GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
 
                     String messageId = giveawayDataList.get(l).getMessageId();
                     long channelId = GiveawayRegistry.getInstance().getGift(guildIdLong).getTextChannelId();
                     Gift gift = GiveawayRegistry.getInstance().getGift(guildIdLong);
                     //System.out.println("Guild ID: " + guildIdLong);
+                    try {
+                        if (jda.getGuildById(guildIdLong) != null
+                                && jda.getGuildById(guildIdLong).getTextChannelById(channelId) != null
+                                && jda.getGuildById(guildIdLong).getSelfMember().hasPermission(Permission.VIEW_CHANNEL)) {
 
-                    if (jda.getGuildById(guildIdLong) != null
-                            && jda.getGuildById(guildIdLong).getTextChannelById(channelId) != null
-                            && jda.getGuildById(guildIdLong).getSelfMember().hasPermission(Permission.VIEW_CHANNEL)) {
-
-                        try {
                             CompletableFuture<Message> action = jda
                                     .getGuildById(guildIdLong)
                                     .getTextChannelById(channelId)
@@ -437,23 +436,19 @@ public class BotStartConfig {
                                     //System.out.println("User id: " + user.getIdLong());
                                 }
                             }
-                        } catch (Exception e) {
-                            if (!e.getMessage().contains("java.util.concurrent.TimeoutException") &&
-                                    !e.getMessage().contains("net.dv8tion.jda.api.entities.TextChannel.retrieveMessageById(String)")) {
-                                e.printStackTrace();
-                            }
-                            if (e.getMessage().contains("net.dv8tion.jda.api.entities.TextChannel.retrieveMessageById(String)")) {
-                                System.out.println("Guild or textChannel null 1");
-                                GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
-                                activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
-                            }
                         }
-                    } else {
-//                        System.out.println("Guild or textChannel null 2");
-//                        GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
-//                        activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
+                    } catch (Exception e) {
+                        if (!e.getMessage().contains("java.util.concurrent.TimeoutException") &&
+                                !e.getMessage().contains("net.dv8tion.jda.api.entities.TextChannel.retrieveMessageById(String)")) {
+                            e.printStackTrace();
+                        }
+                        if (e.getMessage().contains("net.dv8tion.jda.api.entities.TextChannel.retrieveMessageById(String)")) {
+                            System.out.println("Guild or textChannel null");
+                            GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
+                            activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
+                        }
                     }
-                    Thread.sleep(1000L);
+                    Thread.sleep(2000L);
                 }
             }
         } catch (Exception e) {

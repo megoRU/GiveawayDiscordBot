@@ -53,11 +53,11 @@ public class GiveawayRegistry {
         giveawayDataMap.get(guildId).setUrlImage(urlImage);
     }
 
-    public Boolean getIsForSpecificRole(long guildId) {
+    public boolean getIsForSpecificRole(long guildId) {
         return giveawayDataMap.get(guildId).getIsForSpecificRole();
     }
 
-    public void putIsForSpecificRole(long guildId, Boolean is_for_specific_role) {
+    public void putIsForSpecificRole(long guildId, boolean is_for_specific_role) {
         giveawayDataMap.get(guildId).setIsForSpecificRole(is_for_specific_role);
     }
 
