@@ -133,7 +133,6 @@ public class BotStartConfig {
             //Обновить команды
 //            updateSlashCommands();
             System.out.println("18:45");
-            updateUserList();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -343,7 +342,8 @@ public class BotStartConfig {
             long guildIdLong = giveawayDataList.get(l).getGift().getGuildId();
             boolean isForSpecificRole = giveawayDataList.get(l).getIsForSpecificRole();
 
-            if (GiveawayRegistry.getInstance().hasGift(guildIdLong) && GiveawayRegistry.getInstance().getMessageId(guildIdLong) != null) {
+            if (GiveawayRegistry.getInstance().hasGift(guildIdLong)
+                    && GiveawayRegistry.getInstance().getMessageId(guildIdLong) != null) {
 
                 String messageId = giveawayDataList.get(l).getMessageId();
                 long channelId = GiveawayRegistry.getInstance().getGift(guildIdLong).getTextChannelId();
@@ -401,9 +401,7 @@ public class BotStartConfig {
                 } catch (Exception e) {
                     if (e.getMessage().contains("10008: Unknown Message")
                             || e.getMessage().contains("Missing permission: VIEW_CHANNEL")
-                            || e.getMessage().contains("net.dv8tion.jda.api.entities.TextChannel.retrieveMessageById(String)")
                     )
-
                     {
                         System.out.println(e.getMessage() + " удаляем!");
                         activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
