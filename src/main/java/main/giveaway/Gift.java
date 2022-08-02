@@ -265,7 +265,6 @@ public class Gift {
             System.out.println(listUsersHash.get(user.getId()));
         }
 
-
         if (!listUsersHash.containsKey(user.getId())) {
             count.incrementAndGet();
             listUsersHash.put(user.getId(), user.getId());
