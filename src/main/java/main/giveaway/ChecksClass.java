@@ -30,6 +30,11 @@ public class ChecksClass {
             bool = false;
         }
 
+        if (!selfMember.hasPermission(dstChannel, Permission.VIEW_CHANNEL)) {
+            stringBuilder.append(stringBuilder.length() == 0 ? "`Permission.VIEW_CHANNEL`" : ", `Permission.VIEW_CHANNEL`");
+            bool = false;
+        }
+
         if (!selfMember.hasPermission(dstChannel, Permission.MESSAGE_EMBED_LINKS)) {
             stringBuilder.append(stringBuilder.length() == 0 ? "`Permission.MESSAGE_EMBED_LINKS`" : ", `Permission.MESSAGE_EMBED_LINKS`");
             bool = false;

@@ -5,9 +5,6 @@ import main.giveaway.ChecksClass;
 import main.giveaway.GiveawayRegistry;
 import main.model.repository.ActiveGiveawayRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Message;
-
-import java.util.concurrent.CompletableFuture;
 
 public class GiftHelper {
 
@@ -23,35 +20,28 @@ public class GiftHelper {
 
             if (checksClass.isGuildDeleted(guildId)) return;
 
-            CompletableFuture<Message> action = BotStartConfig.jda
+            BotStartConfig.jda
                     .getGuildById(guildId)
                     .getTextChannelById(textChannel)
                     .retrieveMessageById(GiveawayRegistry.getInstance().getMessageId(guildId))
+                    .complete()
+                    .editMessageEmbeds(embedBuilder.build())
                     .submit();
 
-            action.thenCompose(message -> message.editMessageEmbeds(embedBuilder.build())
-                    .submit()
-                    .whenComplete((message1, throwable) -> {
-                        if (throwable != null) {
-                            System.out.println(throwable.getMessage());
-                            if (throwable.getMessage().contains("10008: Unknown Message")) {
-                                System.out.println("10008: Unknown Message: Удаляем Giveaway!");
-                                activeGiveawayRepository.deleteActiveGiveaways(guildId);
-                            }
-                        }
-                    }));
-            //TODO .orTimeout(10000L, TimeUnit.MILLISECONDS)
         } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+            if (e.getMessage().contains("10008: Unknown Message")
+                    || e.getMessage().contains("Missing permission: VIEW_CHANNEL")
+                    || e.getMessage().contains("net.dv8tion.jda.api.entities.TextChannel.retrieveMessageById(String)")
+                    || e.getMessage().contains("net.dv8tion.jda.api.entities.Guild.getTextChannelById(long)")
 
-    public CompletableFuture<Message> getMessageDescription(final long guildId, final long textChannelId) {
-      return BotStartConfig.jda
-                .getGuildById(guildId)
-                .getTextChannelById(textChannelId)
-                .retrieveMessageById(GiveawayRegistry.getInstance().getMessageId(guildId))
-                .submit();
+            ) {
+                System.out.println(e.getMessage() + " удаляем!");
+                activeGiveawayRepository.deleteActiveGiveaways(guildId);
+                GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildId);
+            } else {
+                e.printStackTrace();
+            }
+        }
     }
 
     public static String setEndingWord(int num, final long guildId) {
