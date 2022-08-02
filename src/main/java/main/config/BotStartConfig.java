@@ -402,9 +402,9 @@ public class BotStartConfig {
                     if (e.getMessage().contains("10008: Unknown Message")
                             || e.getMessage().contains("Missing permission: VIEW_CHANNEL")
                             || e.getMessage().contains("net.dv8tion.jda.api.entities.TextChannel.retrieveMessageById(String)")
-                            || e.getMessage().contains("net.dv8tion.jda.api.entities.Guild.getTextChannelById(long)")
+                    )
 
-                    ) {
+                    {
                         System.out.println(e.getMessage() + " удаляем!");
                         activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
                         GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
