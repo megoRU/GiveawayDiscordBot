@@ -364,7 +364,7 @@ public class BotStartConfig {
 
                     //-1 because one Bot
                     if (reactions.get(0).getCount() - 1 != GiveawayRegistry.getInstance().getGift(guildIdLong).getListUsersSize()) {
-                        System.out.println("зашел");
+
                         for (int i = 0; i < reactions.size(); i++) {
                             List<User> userList;
 
