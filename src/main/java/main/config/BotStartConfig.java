@@ -362,47 +362,49 @@ public class BotStartConfig {
                             .filter(messageReaction -> messageReaction.getEmoji().getName().equals(Reactions.TADA))
                             .collect(Collectors.toList());
 
-                    for (int i = 0; i < reactions.size(); i++) {
-                        List<User> userList;
+                    //-1 because one Bot
+                    if (reactions.get(0).getCount() - 1 != GiveawayRegistry.getInstance().getGift(guildIdLong).getListUsersSize()) {
+                        System.out.println("зашел");
+                        for (int i = 0; i < reactions.size(); i++) {
+                            List<User> userList;
 
-                        if (isForSpecificRole) {
-                            Role roleGiveaway = jda.getRoleById(giveawayDataList.get(l).getRoleId());
-                            userList = reactions.get(i)
-                                    .retrieveUsers()
-                                    .complete()
-                                    .stream()
-                                    .filter(user -> !user.isBot())
-                                    .filter(user -> !gift.getIsUserInListUsersHash(user.getId()))
-                                    .filter(user -> jda.getGuildById(guildIdLong)
-                                            //TODO: This block thread may be use *parallelStream()*
-                                            .retrieveMember(user).complete()
-                                            .getRoles()
-                                            .contains(roleGiveaway))
-                                    .collect(Collectors.toList());
-                        } else {
-                            userList = reactions.get(i)
-                                    .retrieveUsers()
-                                    .complete()
-                                    .stream()
-                                    .filter(user -> !user.isBot())
-                                    .filter(user -> !gift.getIsUserInListUsersHash(user.getId()))
-                                    .collect(Collectors.toList());
-                        }
+                            if (isForSpecificRole) {
+                                Role roleGiveaway = jda.getRoleById(giveawayDataList.get(l).getRoleId());
+                                userList = reactions.get(i)
+                                        .retrieveUsers()
+                                        .complete()
+                                        .stream()
+                                        .filter(user -> !user.isBot())
+                                        .filter(user -> !gift.getIsUserInListUsersHash(user.getId()))
+                                        .filter(user -> jda.getGuildById(guildIdLong)
+                                                //TODO: This block thread may be use *parallelStream()*
+                                                .retrieveMember(user).complete()
+                                                .getRoles()
+                                                .contains(roleGiveaway))
+                                        .collect(Collectors.toList());
+                            } else {
+                                userList = reactions.get(i)
+                                        .retrieveUsers()
+                                        .complete()
+                                        .stream()
+                                        .filter(user -> !user.isBot())
+                                        .filter(user -> !gift.getIsUserInListUsersHash(user.getId()))
+                                        .collect(Collectors.toList());
+                            }
 
-                        //System.out.println("UserList count: " + userList);
-                        //Перебираем Users в реакциях
-                        for (int o = 0; o < userList.size(); o++) {
-                            User user = userList.get(o);
-                            gift.addUserToPoll(user);
-                            //System.out.println("User id: " + user.getIdLong());
+                            //System.out.println("UserList count: " + userList);
+                            //Перебираем Users в реакциях
+                            for (int o = 0; o < userList.size(); o++) {
+                                User user = userList.get(o);
+                                gift.addUserToPoll(user);
+                                //System.out.println("User id: " + user.getIdLong());
+                            }
                         }
                     }
-
                 } catch (Exception e) {
                     if (e.getMessage().contains("10008: Unknown Message")
                             || e.getMessage().contains("Missing permission: VIEW_CHANNEL")
-                    )
-                    {
+                    ) {
                         System.out.println(e.getMessage() + " удаляем!");
                         activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
                         GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
