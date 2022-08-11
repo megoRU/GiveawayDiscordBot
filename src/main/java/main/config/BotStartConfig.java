@@ -235,7 +235,6 @@ public class BotStartConfig {
 
                 BotiCordAPI api = new BotiCordAPI.Builder()
                         .token(System.getenv("BOTICORD"))
-                        .botId(Config.getBotId())
                         .build();
 
                 api.setStats(serverCount, 1, usersCount.get());
