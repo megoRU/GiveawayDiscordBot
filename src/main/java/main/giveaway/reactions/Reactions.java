@@ -5,6 +5,7 @@ import main.giveaway.GiveawayRegistry;
 import main.jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
@@ -27,7 +28,9 @@ public class Reactions extends ListenerAdapter {
     public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
         try {
             User user = event.retrieveUser().complete();
-            if (user == null || user.isBot()) return;
+            Member member = event.getMember();
+
+            if (member == null || user.isBot()) return;
 
             String emoji = event.getEmoji().getName();
             long guildIdLong = event.getGuild().getIdLong();
@@ -43,7 +46,8 @@ public class Reactions extends ListenerAdapter {
                     Gift gift = GiveawayRegistry.getInstance().getGift(guildIdLong);
                     String roleId = String.valueOf(GiveawayRegistry.getInstance().getRoleId(guildIdLong));
 
-                    if (GiveawayRegistry.getInstance().getIsForSpecificRole(guildIdLong) && !event.getMember().getRoles().toString().contains(roleId)) {
+                    if (GiveawayRegistry.getInstance().getIsForSpecificRole(guildIdLong)
+                            && !event.getMember().getRoles().toString().contains(roleId)) {
                         LOGGER.info("\nНажал на эмодзи, но у него нет доступа к розыгрышу: " + user.getId());
                         //Получаем ссылку до сообщения
                         String url = getDiscordUrlMessage(event.getGuild().getId(), event.getGuildChannel().getId(), event.getReaction().getMessageId());
@@ -56,7 +60,7 @@ public class Reactions extends ListenerAdapter {
                         return;
                     }
 
-                    if (!gift.getIsUserInListUsersHash(user.getId())) {
+                    if (!gift.isUserInList(user.getId())) {
                         LOGGER.info("\nНовый участник: " + user.getId() + "\nСервер: " + event.getGuild().getId());
                         GiveawayRegistry.getInstance().getGift(guildIdLong).addUserToPoll(user);
                     }

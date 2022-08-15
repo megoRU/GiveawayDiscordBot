@@ -33,9 +33,11 @@ public class Participants {
     @Column(name = "nick_name_tag", nullable = false)
     private String nickNameTag;
 
-    public Participants(ActiveGiveaways activeGiveaways, Long userIdLong, String nickName) {
-        this.activeGiveaways = activeGiveaways;
-        this.userIdLong = userIdLong;
-        this.nickName = nickName;
+    public Long getGiveawayGuildId() {
+        return activeGiveaways.getGuildLongId();
+    }
+
+    public String getIdUserWhoCreateGiveaway() {
+        return activeGiveaways.getIdUserWhoCreateGiveaway().toString();
     }
 }

@@ -16,10 +16,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.entities.MessageReaction;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -316,7 +313,7 @@ public class BotStartConfig {
 
                 if (date_end_giveaway != null) {
                     Timer timer = new Timer();
-                    StopGiveawayByTimer stopGiveawayByTimer = new StopGiveawayByTimer(guild_long_id, date_end_giveaway);
+                    StopGiveawayByTimer stopGiveawayByTimer = new StopGiveawayByTimer(guild_long_id);
                     Date date = new Date(date_end_giveaway.getTime());
                     timer.schedule(stopGiveawayByTimer, date);
 
@@ -340,63 +337,70 @@ public class BotStartConfig {
 
             long guildIdLong = giveawayDataList.get(l).getGift().getGuildId();
             boolean isForSpecificRole = giveawayDataList.get(l).getIsForSpecificRole();
+            String messageId = GiveawayRegistry.getInstance().getMessageId(guildIdLong);
+            boolean hasGift = GiveawayRegistry.getInstance().hasGift(guildIdLong);
 
-            if (GiveawayRegistry.getInstance().hasGift(guildIdLong)
-                    && GiveawayRegistry.getInstance().getMessageId(guildIdLong) != null) {
+            if (hasGift && messageId != null) {
 
-                String messageId = giveawayDataList.get(l).getMessageId();
                 long channelId = GiveawayRegistry.getInstance().getGift(guildIdLong).getTextChannelId();
                 Gift gift = GiveawayRegistry.getInstance().getGift(guildIdLong);
                 //System.out.println("Guild ID: " + guildIdLong);
 
-                List<MessageReaction> reactions;
+                List<MessageReaction> reactions = null;
+                TextChannel textChannelById;
                 try {
-                    reactions = jda
-                            .getGuildById(guildIdLong)
-                            .getTextChannelById(channelId)
-                            .retrieveMessageById(messageId)
-                            .complete()
-                            .getReactions()
-                            .stream()
-                            .filter(messageReaction -> messageReaction.getEmoji().getName().equals(Reactions.TADA))
-                            .collect(Collectors.toList());
+                    Guild guildById = jda.getGuildById(guildIdLong);
+                    if (guildById != null) {
+                        textChannelById = guildById.getTextChannelById(channelId);
+                        if (textChannelById != null) {
+                            reactions = textChannelById
+                                    .retrieveMessageById(messageId)
+                                    .complete()
+                                    .getReactions()
+                                    .stream()
+                                    .filter(messageReaction -> messageReaction.getEmoji().getName().equals(Reactions.TADA))
+                                    .collect(Collectors.toList());
+                        }
 
-                    //-1 because one Bot
-                    if (reactions.size() == 1 && reactions.get(0).getCount() - 1 != GiveawayRegistry.getInstance().getGift(guildIdLong).getListUsersSize()) {
+                        //-1 because one Bot
+                        if (reactions != null
+                                && reactions.size() == 1
+                                && reactions.get(0).getCount() - 1 != GiveawayRegistry.getInstance().getGift(guildIdLong).getListUsersSize()) {
 
-                        for (int i = 0; i < reactions.size(); i++) {
-                            List<User> userList;
+                            for (int i = 0; i < reactions.size(); i++) {
+                                List<User> userList;
 
-                            if (isForSpecificRole) {
-                                Role roleGiveaway = jda.getRoleById(giveawayDataList.get(l).getRoleId());
-                                userList = reactions.get(i)
-                                        .retrieveUsers()
-                                        .complete()
-                                        .stream()
-                                        .filter(user -> !user.isBot())
-                                        .filter(user -> !gift.getIsUserInListUsersHash(user.getId()))
-                                        .filter(user -> jda.getGuildById(guildIdLong)
-                                                //TODO: This block thread may be use *parallelStream()*
-                                                .retrieveMember(user).complete()
-                                                .getRoles()
-                                                .contains(roleGiveaway))
-                                        .collect(Collectors.toList());
-                            } else {
-                                userList = reactions.get(i)
-                                        .retrieveUsers()
-                                        .complete()
-                                        .stream()
-                                        .filter(user -> !user.isBot())
-                                        .filter(user -> !gift.getIsUserInListUsersHash(user.getId()))
-                                        .collect(Collectors.toList());
-                            }
+                                if (isForSpecificRole) {
+                                    Role roleGiveaway = jda.getRoleById(giveawayDataList.get(l).getRoleId());
+                                    userList = reactions.get(i)
+                                            .retrieveUsers()
+                                            .complete()
+                                            .stream()
+                                            .filter(user -> !user.isBot())
+                                            .filter(user -> !gift.isUserInList(user.getId()))
+                                            .filter(user -> guildById
+                                                    //TODO: This block thread may be use *parallelStream()*
+                                                    .retrieveMember(user).complete()
+                                                    .getRoles()
+                                                    .contains(roleGiveaway))
+                                            .collect(Collectors.toList());
+                                } else {
+                                    userList = reactions.get(i)
+                                            .retrieveUsers()
+                                            .complete()
+                                            .stream()
+                                            .filter(user -> !user.isBot())
+                                            .filter(user -> !gift.isUserInList(user.getId()))
+                                            .collect(Collectors.toList());
+                                }
 
-                            //System.out.println("UserList count: " + userList);
-                            //Перебираем Users в реакциях
-                            for (int o = 0; o < userList.size(); o++) {
-                                User user = userList.get(o);
-                                gift.addUserToPoll(user);
-                                //System.out.println("User id: " + user.getIdLong());
+                                //System.out.println("UserList count: " + userList);
+                                //Перебираем Users в реакциях
+                                for (int o = 0; o < userList.size(); o++) {
+                                    User user = userList.get(o);
+                                    gift.addUserToPoll(user);
+                                    //System.out.println("User id: " + user.getIdLong());
+                                }
                             }
                         }
                     }
@@ -440,16 +444,6 @@ public class BotStartConfig {
                     GiveawayRegistry.getInstance()
                             .getGift(Long.parseLong(guildIdHashList.get(i)))
                             .setCount(participantsList.size());
-
-                    GiveawayRegistry.getInstance()
-                            .getGift(Long.parseLong(guildIdHashList.get(i))).getParticipantsJSON()
-                            .add(new api.megoru.ru.entity.Participants(
-                                    String.valueOf(participantsList.get(j).getActiveGiveaways().getIdUserWhoCreateGiveaway()),
-                                    String.valueOf(participantsList.get(j).getActiveGiveaways().getGuildLongId() + participantsList.get(j).getActiveGiveaways().getMessageIdLong()),
-                                    participantsList.get(j).getActiveGiveaways().getGuildLongId(),
-                                    participantsList.get(j).getUserIdLong(),
-                                    participantsList.get(j).getNickName(),
-                                    participantsList.get(j).getNickNameTag()));
                 }
             }
             System.out.println("getUsersWhoTakePartFromDB()");

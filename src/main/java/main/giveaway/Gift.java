@@ -7,10 +7,12 @@ import api.megoru.ru.impl.MegoruAPIImpl;
 import lombok.Getter;
 import lombok.Setter;
 import main.giveaway.impl.GiftHelper;
+import main.giveaway.impl.URLS;
 import main.giveaway.reactions.Reactions;
 import main.jsonparser.JSONParsers;
 import main.messagesevents.SenderMessage;
 import main.model.entity.ActiveGiveaways;
+import main.model.entity.Convector;
 import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.ParticipantsRepository;
@@ -39,7 +41,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
-import static main.giveaway.impl.URLS.getDiscordUrlMessage;
 
 @Getter
 @Setter
@@ -72,7 +73,6 @@ public class Gift {
 
     //DTO
     private volatile Set<Participants> participantsList = new HashSet<>();
-    private volatile List<api.megoru.ru.entity.Participants> participantsJSON = new LinkedList<>();
 
     //REPO
     private final ActiveGiveawayRepository activeGiveawayRepository;
@@ -261,10 +261,6 @@ public class Gift {
         System.out.println(user.getName() + " " + user.getId());
         System.out.println(listUsersHash.containsKey(user.getId()));
 
-        if (listUsersHash.containsKey(user.getId())) {
-            System.out.println(listUsersHash.get(user.getId()));
-        }
-
         if (!listUsersHash.containsKey(user.getId())) {
             count.incrementAndGet();
             listUsersHash.put(user.getId(), user.getId());
@@ -272,49 +268,6 @@ public class Gift {
         }
     }
 
-    private EmbedBuilder embedBuilder(Color color, String winners, final int countWinner) {
-        EmbedBuilder embedBuilder = null;
-        try {
-            embedBuilder = new EmbedBuilder();
-            LOGGER.info("\nwinners: " + winners);
-            embedBuilder.setColor(color);
-            embedBuilder.setTitle(GiveawayRegistry.getInstance().getTitle(guildId));
-
-
-            if (countWinner == 1) {
-                embedBuilder.appendDescription(jsonParsers.getLocale("gift_winner", String.valueOf(guildId)) + winners);
-            } else {
-                embedBuilder.appendDescription(jsonParsers.getLocale("gift_winners", String.valueOf(guildId)) + winners);
-            }
-
-            String footer = GiftHelper.setEndingWord(countWinner, guildId);
-            embedBuilder.setTimestamp(Instant.now());
-            embedBuilder.setFooter(countWinner + " " + footer + " | " + jsonParsers.getLocale("gift_Ends", String.valueOf(guildId)));
-
-
-            if (GiveawayRegistry.getInstance().getIsForSpecificRole(guildId)) {
-                embedBuilder.appendDescription(jsonParsers.getLocale("gift_OnlyFor", String.valueOf(guildId))
-                        + " <@&" + GiveawayRegistry.getInstance().getRoleId(guildId) + ">");
-            }
-
-            embedBuilder.appendDescription("\nHosted by: " + "<@" + userIdLong + ">");
-            embedBuilder.appendDescription("\nGiveaway ID: `" + (guildId + Long.parseLong(GiveawayRegistry.getInstance().getMessageId(guildId))) + "`");
-
-            if (GiveawayRegistry.getInstance().getUrlImage(guildId) != null) {
-                embedBuilder.setImage(GiveawayRegistry.getInstance().getUrlImage(guildId));
-            }
-
-
-        } catch (
-                Exception e) {
-            e.printStackTrace();
-        }
-
-        return embedBuilder;
-    }
-
-    //TODO: Может удалять список с кем то. Какой блять список? Уже его нет! А блять понял. Этот participantsList
-    //Fixed
     private void executeMultiInsert(long guildIdLong) {
         try {
             if (count.get() > localCountUsers && GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
@@ -325,8 +278,14 @@ public class Gift {
 
                     participantsRepository.saveAllAndFlush(temp);
 
-                    //Удаляем все элементы которые уэе в БД
+                    //Удаляем все элементы которые уже в БД
                     participantsList.removeAll(temp);
+                }
+
+                if (participantsList.isEmpty()) {
+                    synchronized (this) {
+                        notifyAll();
+                    }
                 }
             }
         } catch (Exception e) {
@@ -346,15 +305,6 @@ public class Gift {
         participants.setNickNameTag(nickNameTag);
         participants.setActiveGiveaways(activeGiveaways);
         participantsList.add(participants);
-
-        participantsJSON.add(new api.megoru.ru.entity.Participants(
-                GiveawayRegistry.getInstance().getIdUserWhoCreateGiveaway(guildId),
-                String.valueOf(guildIdLong + Long.parseLong(GiveawayRegistry.getInstance().getMessageId(guildId))),
-                guildIdLong,
-                userIdLong,
-                nickName,
-                nickNameTag)
-        );
     }
 
     //Автоматически отправляет в БД данные которые в буфере StringBuilder
@@ -379,16 +329,26 @@ public class Gift {
      * @throws Exception Throws an exception
      */
     private void getWinners(int countWinner) throws Exception {
-        if (participantsJSON.isEmpty()) throw new Exception("participantsJSON is Empty");
+        if (!participantsList.isEmpty()) {
+            synchronized (this) {
+                wait(10000L);
+            }
+        }
+
+        List<api.megoru.ru.entity.Participants> participants =
+                new Convector(participantsRepository.getParticipantsByGuildIdLong(guildId))
+                        .getList();
+
+        if (participants.isEmpty()) throw new Exception("participantsJSON is Empty");
 
         LOGGER.info("\nlistUsersHash size: " + listUsersHash.size());
-        LOGGER.info("\nparticipantsJSON size: " + participantsJSON.size());
+        LOGGER.info("\nparticipantsJSON size: " + participants.size());
 
-        for (int i = 0; i < participantsJSON.size(); i++) {
-            System.out.println("getIdUserWhoCreateGiveaway " + participantsJSON.get(i).getIdUserWhoCreateGiveaway()
-                    + " getUserIdLong " + participantsJSON.get(i).getUserIdLong()
-                    + " getNickNameTag " + participantsJSON.get(i).getNickNameTag()
-                    + " getGiveawayId " + participantsJSON.get(i).getGiveawayId());
+        for (int i = 0; i < participants.size(); i++) {
+            System.out.println("getIdUserWhoCreateGiveaway " + participants.get(i).getIdUserWhoCreateGiveaway()
+                    + " getUserIdLong " + participants.get(i).getUserIdLong()
+                    + " getNickNameTag " + participants.get(i).getNickNameTag()
+                    + " getGiveawayId " + participants.get(i).getGiveawayId());
         }
 
         try {
@@ -397,7 +357,7 @@ public class Gift {
             WinnersAndParticipants winnersAndParticipants = new WinnersAndParticipants();
             winnersAndParticipants.setUpdate(true);
             winnersAndParticipants.setWinners(winners);
-            winnersAndParticipants.setUserList(participantsJSON);
+            winnersAndParticipants.setUserList(participants);
 
             LOGGER.info(winners.toString());
 
@@ -419,9 +379,9 @@ public class Gift {
 
     public void stopGift(final long guildIdLong, final int countWinner) {
         LOGGER.info("\nstopGift method" + "\nCount winner: " + countWinner);
-        ChecksClass checksClass = new ChecksClass(activeGiveawayRepository);
         GiftHelper giftHelper = new GiftHelper(activeGiveawayRepository);
-        if (checksClass.isGuildDeleted(guildId)) return;
+//        ChecksClass checksClass = new ChecksClass(activeGiveawayRepository);
+//        if (checksClass.isGuildDeleted(guildId)) return;
         try {
             if (listUsersHash.size() < 2) {
                 EmbedBuilder notEnoughUsers = new EmbedBuilder();
@@ -462,32 +422,27 @@ public class Gift {
         winners.setColor(Color.GREEN);
 
         String messageId = GiveawayRegistry.getInstance().getMessageId(this.guildId);
-        String url = getDiscordUrlMessage(String.valueOf(this.guildId), String.valueOf(this.textChannelId), messageId);
+        String url = URLS.getDiscordUrlMessage(String.valueOf(this.guildId), String.valueOf(this.textChannelId), messageId);
+
+        String winnerArray = Arrays.toString(uniqueWinners.toArray())
+                .replaceAll("\\[", "")
+                .replaceAll("]", "");
 
         if (uniqueWinners.size() == 1) {
             winners.setDescription(jsonParsers.getLocale("gift_congratulations",
                     String.valueOf(guildIdLong)).replaceAll("\\{0}", url)
-                    + Arrays.toString(uniqueWinners.toArray())
-                    .replaceAll("\\[", "")
-                    .replaceAll("]", ""));
+                    + winnerArray);
 
             giftHelper.editMessage(
-                    embedBuilder(Color.GREEN, Arrays.toString(uniqueWinners.toArray())
-                            .replaceAll("\\[", "")
-                            .replaceAll("]", ""), countWinner),
+                    GiveawayEmbedUtils.embedBuilder(winnerArray, countWinner, guildIdLong),
                     this.guildId,
                     textChannelId);
         } else {
             winners.setDescription(jsonParsers.getLocale("gift_congratulations_many",
-                    String.valueOf(guildIdLong)).replaceAll("\\{0}", url)
-                    + Arrays.toString(uniqueWinners.toArray())
-                    .replaceAll("\\[", "")
-                    .replaceAll("]", ""));
+                    String.valueOf(guildIdLong)).replaceAll("\\{0}", url) + winnerArray);
 
             giftHelper.editMessage(
-                    embedBuilder(Color.GREEN, Arrays.toString(uniqueWinners.toArray())
-                            .replaceAll("\\[", "")
-                            .replaceAll("]", ""), countWinner),
+                    GiveawayEmbedUtils.embedBuilder(winnerArray, countWinner, guildIdLong),
                     this.guildId,
                     textChannelId);
         }
@@ -502,7 +457,7 @@ public class Gift {
 
     private void putTimestamp(Timestamp timestamp) {
         Timer timer = new Timer();
-        StopGiveawayByTimer stopGiveawayByTimer = new StopGiveawayByTimer(this.guildId, timestamp);
+        StopGiveawayByTimer stopGiveawayByTimer = new StopGiveawayByTimer(this.guildId);
         Date date = new Date(timestamp.getTime());
         timer.schedule(stopGiveawayByTimer, date);
 
@@ -523,7 +478,7 @@ public class Gift {
         }
     }
 
-    public boolean getIsUserInListUsersHash(String id) {
+    public boolean isUserInList(String id) {
         return listUsersHash.containsKey(id);
     }
 

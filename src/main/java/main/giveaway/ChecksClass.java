@@ -52,6 +52,7 @@ public class ChecksClass {
         return bool;
     }
 
+    //TODO: Я бы лучше переделал это.
     public boolean isGuildDeleted(final long guildId) {
         if (BotStartConfig.jda.getGuildById(guildId) != null) {
             return false;
