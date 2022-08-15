@@ -2,17 +2,14 @@ package main.threads;
 
 import main.giveaway.GiveawayRegistry;
 
-import java.sql.Timestamp;
 import java.util.TimerTask;
 
 public final class StopGiveawayByTimer extends TimerTask {
 
     private final Long idGuild;
-    private final Timestamp time;
 
-    public StopGiveawayByTimer(Long idGuild, Timestamp time) {
+    public StopGiveawayByTimer(Long idGuild) {
         this.idGuild = idGuild;
-        this.time = time;
     }
 
     @Override

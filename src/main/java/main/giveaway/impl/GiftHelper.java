@@ -1,10 +1,11 @@
 package main.giveaway.impl;
 
 import main.config.BotStartConfig;
-import main.giveaway.ChecksClass;
 import main.giveaway.GiveawayRegistry;
 import main.model.repository.ActiveGiveawayRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.TextChannel;
 
 public class GiftHelper {
 
@@ -14,20 +15,26 @@ public class GiftHelper {
         this.activeGiveawayRepository = activeGiveawayRepository;
     }
 
+
     public void editMessage(EmbedBuilder embedBuilder, final long guildId, final long textChannel) {
         try {
-            ChecksClass checksClass = new ChecksClass(activeGiveawayRepository);
+            //TODO: Удалить
+//            ChecksClass checksClass = new ChecksClass(activeGiveawayRepository);
+//
+//            if (checksClass.isGuildDeleted(guildId)) return;
 
-            if (checksClass.isGuildDeleted(guildId)) return;
+            Guild guildById = BotStartConfig.jda.getGuildById(guildId);
+            if (guildById != null) {
+                TextChannel textChannelById = guildById.getTextChannelById(textChannel);
 
-            BotStartConfig.jda
-                    .getGuildById(guildId)
-                    .getTextChannelById(textChannel)
-                    .retrieveMessageById(GiveawayRegistry.getInstance().getMessageId(guildId))
-                    .complete()
-                    .editMessageEmbeds(embedBuilder.build())
-                    .submit();
-
+                if (textChannelById != null) {
+                    textChannelById
+                            .retrieveMessageById(GiveawayRegistry.getInstance().getMessageId(guildId))
+                            .complete()
+                            .editMessageEmbeds(embedBuilder.build())
+                            .submit();
+                }
+            }
         } catch (Exception e) {
             if (e.getMessage().contains("10008: Unknown Message")
                     || e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
