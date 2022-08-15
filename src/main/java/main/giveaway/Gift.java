@@ -281,6 +281,12 @@ public class Gift {
                     //Удаляем все элементы которые уже в БД
                     participantsList.removeAll(temp);
                 }
+
+                if (participantsList.isEmpty()) {
+                    synchronized (this) {
+                        notifyAll();
+                    }
+                }
             }
         } catch (Exception e) {
             insertQuery = new StringBuilder();
@@ -323,6 +329,12 @@ public class Gift {
      * @throws Exception Throws an exception
      */
     private void getWinners(int countWinner) throws Exception {
+        if (!participantsList.isEmpty()) {
+            synchronized (this) {
+                wait(10000L);
+            }
+        }
+
         List<api.megoru.ru.entity.Participants> participants =
                 new Convector(participantsRepository.getParticipantsByGuildIdLong(guildId))
                         .getList();
