@@ -1,6 +1,7 @@
 package main.giveaway;
 
 import main.config.BotStartConfig;
+import main.jsonparser.JSONParsers;
 import main.model.repository.ActiveGiveawayRepository;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.GuildChannel;
@@ -10,6 +11,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 public class ChecksClass {
 
     private final ActiveGiveawayRepository activeGiveawayRepository;
+    public static final JSONParsers jsonParsers = new JSONParsers();
 
     public ChecksClass(ActiveGiveawayRepository activeGiveawayRepository) {
         this.activeGiveawayRepository = activeGiveawayRepository;
@@ -35,6 +37,11 @@ public class ChecksClass {
             bool = false;
         }
 
+        if (!selfMember.hasPermission(dstChannel, Permission.MESSAGE_HISTORY)) {
+            stringBuilder.append(stringBuilder.length() == 0 ? "`Permission.MESSAGE_HISTORY`" : ", `Permission.MESSAGE_HISTORY`");
+            bool = false;
+        }
+
         if (!selfMember.hasPermission(dstChannel, Permission.MESSAGE_EMBED_LINKS)) {
             stringBuilder.append(stringBuilder.length() == 0 ? "`Permission.MESSAGE_EMBED_LINKS`" : ", `Permission.MESSAGE_EMBED_LINKS`");
             bool = false;
@@ -45,8 +52,9 @@ public class ChecksClass {
             bool = false;
         }
 
-        if (!bool && event != null) {
-            event.reply("Bot don't have in <#" + dstChannel.getId() + ">: \n" + stringBuilder).queue();
+        if (!bool && event != null && event.getGuild() != null) {
+            event.reply(jsonParsers.getLocale("check_permissions", event.getGuild().getId())
+                    + "<#" + dstChannel.getId() + ">:" + "\n" + stringBuilder).queue();
         }
 
         return bool;
