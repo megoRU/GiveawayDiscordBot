@@ -66,7 +66,7 @@ public class SlashCommand extends ListenerAdapter {
             return;
         }
 
-        if (!ChecksClass.canSendGiveaway(event.getGuildChannel())) return;
+//        if (!ChecksClass.canSendGiveaway(event.getGuildChannel())) return;
         GuildChannelUnion channel = event.getOption("channel", OptionMapping::getAsChannel);
         if (!ChecksClass.canSendGiveaway(
                 channel == null ? event.getGuildChannel() : channel.asGuildMessageChannel(),
