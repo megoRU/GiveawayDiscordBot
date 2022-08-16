@@ -21,6 +21,7 @@ import main.model.repository.LanguageRepository;
 import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.unions.GuildChannelUnion;
@@ -51,8 +52,21 @@ public class SlashCommand extends ListenerAdapter {
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         if (event.getUser().isBot()) return;
         if (event.getMember() == null) return;
+        if (event.getGuild() == null) return;
 
-        if (!ChecksClass.canSendGiveaway(event.getGuildChannel())) return;
+        if (event.getName().equals("check-bot-permission")) {
+            GuildChannelUnion textChannel = event.getOption("textchannel", OptionMapping::getAsChannel);
+            GuildChannel guildChannel = textChannel != null ? textChannel : event.getGuildChannel();
+
+            boolean canSendGiveaway = ChecksClass.canSendGiveaway(guildChannel, event);
+
+            if (canSendGiveaway) {
+                event.reply(jsonParsers.getLocale("gift_permissions", event.getGuild().getId()) + "<#" + guildChannel.getId() + ">").queue();
+            }
+            return;
+        }
+
+//        if (!ChecksClass.canSendGiveaway(event.getGuildChannel())) return;
         GuildChannelUnion channel = event.getOption("channel", OptionMapping::getAsChannel);
         if (!ChecksClass.canSendGiveaway(
                 channel == null ? event.getGuildChannel() : channel.asGuildMessageChannel(),
@@ -110,13 +124,6 @@ public class SlashCommand extends ListenerAdapter {
                                     event.getUser().getIdLong(),
                                     activeGiveawayRepository,
                                     participantsRepository));
-
-                    if (!event.getGuild().getSelfMember()
-                            .hasPermission(textChannel == null ? event.getGuildChannel() : textChannel, Permission.MESSAGE_SEND)
-                            || !event.getGuild().getSelfMember()
-                            .hasPermission(textChannel == null ? event.getGuildChannel() : textChannel, Permission.MESSAGE_EMBED_LINKS)) {
-                        return;
-                    }
 
                     GiveawayRegistry.getInstance()
                             .getGift(event.getGuild().getIdLong())
