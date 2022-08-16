@@ -128,7 +128,7 @@ public class BotStartConfig {
             System.out.println("IsDevMode: " + Config.isIsDev());
 
             //Обновить команды
-            updateSlashCommands();
+//            updateSlashCommands();
             System.out.println("18:45");
         } catch (Exception e) {
             e.printStackTrace();
