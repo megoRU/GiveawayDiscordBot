@@ -40,5 +40,8 @@
   "gift_congratulations_many": "Congratulations to the winners!\n[Link to Giveaway]({0})\n",
   "gift_reaction": "React with :tada: to enter!",
   "gift_permissions": "The bot has all the necessary permissions in: ",
-  "check_permissions": "Bot don't have in "
+  "check_permissions": "Bot don't have in ",
+  "start_in_thread": "It is forbidden to create <@808277484524011531> in Thread!",
+  "start_in_not_text_channels": "You can create <@808277484524011531> only in TextChannels!"
+
 }

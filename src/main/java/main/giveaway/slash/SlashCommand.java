@@ -21,6 +21,7 @@ import main.model.repository.LanguageRepository;
 import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -53,10 +54,14 @@ public class SlashCommand extends ListenerAdapter {
         if (event.getUser().isBot()) return;
         if (event.getMember() == null) return;
         if (event.getGuild() == null) return;
+        if (event.getChannelType().isThread()) {
+            event.reply(jsonParsers.getLocale("start_in_thread", event.getGuild().getId())).queue();
+            return;
+        }
 
         if (event.getName().equals("check-bot-permission")) {
             GuildChannelUnion textChannel = event.getOption("textchannel", OptionMapping::getAsChannel);
-            GuildChannel guildChannel = textChannel != null ? textChannel : event.getGuildChannel();
+            GuildChannel guildChannel = textChannel != null ? textChannel : event.getGuildChannel().asTextChannel();
 
             boolean canSendGiveaway = ChecksClass.canSendGiveaway(guildChannel, event);
 
@@ -66,13 +71,19 @@ public class SlashCommand extends ListenerAdapter {
             return;
         }
 
-//        if (!ChecksClass.canSendGiveaway(event.getGuildChannel())) return;
         GuildChannelUnion channel = event.getOption("channel", OptionMapping::getAsChannel);
-        if (!ChecksClass.canSendGiveaway(
-                channel == null ? event.getGuildChannel() : channel.asGuildMessageChannel(),
-                event)) return;
+
+        if (channel != null && !channel.getType().equals(ChannelType.TEXT)) {
+            event.reply(jsonParsers.getLocale("start_in_not_text_channels", event.getGuild().getId())).queue();
+            return;
+        } else {
+            boolean canSendGiveaway = ChecksClass.canSendGiveaway(channel.asTextChannel(), event);
+            if (!canSendGiveaway) return;
+        }
+
 
         if (event.getName().equals("start")) {
+
             if (GiveawayRegistry.getInstance().hasGift(event.getGuild().getIdLong())) {
 
                 EmbedBuilder errors = new EmbedBuilder();
@@ -120,7 +131,7 @@ public class SlashCommand extends ListenerAdapter {
                     GiveawayRegistry.getInstance().putGift(
                             event.getGuild().getIdLong(),
                             new Gift(event.getGuild().getIdLong(),
-                                    textChannel == null ? event.getGuildChannel().getIdLong() : textChannel.getIdLong(),
+                                    textChannel == null ? event.getChannel().getIdLong() : textChannel.getIdLong(),
                                     event.getUser().getIdLong(),
                                     activeGiveawayRepository,
                                     participantsRepository));
@@ -129,7 +140,7 @@ public class SlashCommand extends ListenerAdapter {
                             .getGift(event.getGuild().getIdLong())
                             .startGift(event,
                                     event.getGuild(),
-                                    textChannel == null ? event.getChannel().asGuildMessageChannel() : textChannel.asGuildMessageChannel(),
+                                    textChannel == null ? event.getChannel().asTextChannel() : textChannel.asTextChannel(),
                                     title,
                                     count,
                                     time,
