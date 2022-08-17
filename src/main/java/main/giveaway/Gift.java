@@ -134,7 +134,7 @@ public class Gift {
 
         start.setColor(Color.GREEN);
         start.setTitle(title);
-        start.appendDescription(jsonParsers.getLocale("git_react", guild.getId()));
+        start.appendDescription(jsonParsers.getLocale("gift_reaction", guild.getId()));
 
         if (role != null) {
             if (isOnlyForSpecificRole) {
