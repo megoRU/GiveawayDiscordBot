@@ -23,7 +23,7 @@ public class GiftHelper {
 //
 //            if (checksClass.isGuildDeleted(guildId)) return;
 
-            Guild guildById = BotStartConfig.jda.getGuildById(guildId);
+            Guild guildById = BotStartConfig.getJda().getGuildById(guildId);
             if (guildById != null) {
                 TextChannel textChannelById = guildById.getTextChannelById(textChannel);
 

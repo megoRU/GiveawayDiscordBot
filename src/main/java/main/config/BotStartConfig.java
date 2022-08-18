@@ -55,8 +55,7 @@ public class BotStartConfig {
     public static final String activity = "/help | ";
     //String - guildLongId
     private static final ConcurrentMap<String, String> mapLanguages = new ConcurrentHashMap<>();
-    private static final Map<Integer, String> guildIdHashList = new HashMap<>();
-    public static JDA jda;
+    private static JDA jda;
     private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
 
     //REPOSITORY
@@ -81,7 +80,7 @@ public class BotStartConfig {
     }
 
     @Bean
-    public void startBot() {
+    public synchronized void startBot() {
         try {
             //Загружаем GiveawayRegistry
             GiveawayRegistry.getInstance();
@@ -89,10 +88,6 @@ public class BotStartConfig {
             getLocalizationFromDB();
             //Устанавливаем языки
             setLanguages();
-            //Получаем id guild и id message
-            getMessageIdFromDB();
-            //Получаем всех участников по гильдиям
-            getUsersWhoTakePartFromDB();
 
             List<GatewayIntent> intents = new ArrayList<>(
                     Arrays.asList(
@@ -120,6 +115,8 @@ public class BotStartConfig {
             jda = jdaBuilder.build();
             jda.awaitReady();
 
+            //Получаем Giveaway и пользователей. Устанавливаем данные
+            setGiveawayAndUsersInGift();
 
             System.out.println(jda.retrieveCommands().complete());
             //Обновляем список участников при запуске бота
@@ -128,7 +125,7 @@ public class BotStartConfig {
             System.out.println("IsDevMode: " + Config.isIsDev());
 
             //Обновить команды
-            updateSlashCommands();
+//            updateSlashCommands();
             System.out.println("13:20");
         } catch (Exception e) {
             e.printStackTrace();
@@ -281,7 +278,7 @@ public class BotStartConfig {
         }
     }
 
-    private void getMessageIdFromDB() {
+    private void setGiveawayAndUsersInGift() {
         try {
             Connection connection = DriverManager.getConnection(URL_CONNECTION, USER_CONNECTION, PASSWORD_CONNECTION);
 
@@ -297,11 +294,13 @@ public class BotStartConfig {
                 String giveaway_title = rs.getString("giveaway_title");
                 Timestamp date_end_giveaway = rs.getTimestamp("date_end_giveaway");
                 Long role_id_long = rs.getLong("role_id_long");
-                Boolean is_for_specific_role = rs.getBoolean("is_for_specific_role");
+                boolean is_for_specific_role = rs.getBoolean("is_for_specific_role");
                 String url_image = rs.getString("url_image");
                 String id_user_who_create_giveaway = rs.getString("id_user_who_create_giveaway");
 
-                guildIdHashList.put(guildIdHashList.size() + 1, String.valueOf(guild_long_id));
+                List<Participants> participantsList = participantsRepository.getParticipantsByGuildIdLong(guild_long_id);
+
+
                 GiveawayRegistry.getInstance().putGift(
                         guild_long_id,
                         new Gift(guild_long_id,
@@ -309,6 +308,8 @@ public class BotStartConfig {
                                 Long.parseLong(id_user_who_create_giveaway),
                                 activeGiveawayRepository,
                                 participantsRepository));
+
+
                 GiveawayRegistry.getInstance().getGift(guild_long_id).autoInsert();
                 GiveawayRegistry.getInstance().putMessageId(guild_long_id, String.valueOf(message_id_long));
                 GiveawayRegistry.getInstance().putTitle(guild_long_id, giveaway_title);
@@ -319,6 +320,23 @@ public class BotStartConfig {
                 GiveawayRegistry.getInstance().putIsForSpecificRole(guild_long_id, is_for_specific_role);
                 GiveawayRegistry.getInstance().putUrlImage(guild_long_id, url_image);
                 GiveawayRegistry.getInstance().putIdUserWhoCreateGiveaway(guild_long_id, id_user_who_create_giveaway);
+
+                for (int i = 0; i < participantsList.size(); i++) {
+
+                    long userIdLong = participantsList.get(i).getUserIdLong();
+                    //System.out.println("Guild id: " + guildIdHashList.get(i) + " user id long: " + userIdLong);
+
+                    //Добавляем пользователей в hashmap
+                    GiveawayRegistry.getInstance()
+                            .getGift(guild_long_id)
+                            .getListUsersHash()
+                            .put(String.valueOf(userIdLong), String.valueOf(userIdLong));
+
+                    //Устанавливаем счетчик на верное число
+                    GiveawayRegistry.getInstance()
+                            .getGift(guild_long_id)
+                            .setCount(participantsList.size());
+                }
 
                 if (date_end_giveaway != null) {
                     Timer timer = new Timer();
@@ -429,38 +447,6 @@ public class BotStartConfig {
         Thread.sleep(2000L);
     }
 
-    private void getUsersWhoTakePartFromDB() {
-        try {
-            System.out.println("Получаем данные с БД и добавляем их в коллекции и экземпляры классов");
-
-            for (int i = 1; i <= guildIdHashList.size(); i++) {
-
-                List<Participants> participantsList = participantsRepository.getParticipantsByGuildIdLong(Long.valueOf(guildIdHashList.get(i)));
-
-                for (int j = 0; j < participantsList.size(); j++) {
-
-                    long userIdLong = participantsList.get(j).getUserIdLong();
-
-//                    System.out.println("Guild id: " + guildIdHashList.get(i) + " user id long: " + userIdLong);
-
-                    //Добавляем пользователей в hashmap
-                    GiveawayRegistry.getInstance()
-                            .getGift(Long.parseLong(guildIdHashList.get(i)))
-                            .getListUsersHash()
-                            .put(String.valueOf(userIdLong), String.valueOf(userIdLong));
-
-                    //Устанавливаем счетчик на верное число
-                    GiveawayRegistry.getInstance()
-                            .getGift(Long.parseLong(guildIdHashList.get(i)))
-                            .setCount(participantsList.size());
-                }
-            }
-            System.out.println("getUsersWhoTakePartFromDB()");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     private void getLocalizationFromDB() {
         try {
             Connection connection = DriverManager.getConnection(URL_CONNECTION, USER_CONNECTION, PASSWORD_CONNECTION);
@@ -483,6 +469,10 @@ public class BotStartConfig {
 
     public static Map<String, String> getMapLanguages() {
         return mapLanguages;
+    }
+
+    public static JDA getJda() {
+        return jda;
     }
 
 }

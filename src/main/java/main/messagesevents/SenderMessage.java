@@ -12,7 +12,7 @@ public interface SenderMessage {
 
     static void sendMessage(MessageEmbed embedBuilder, Long guildId, Long textChannel) {
         try {
-            Guild guildById = BotStartConfig.jda.getGuildById(guildId);
+            Guild guildById = BotStartConfig.getJda().getGuildById(guildId);
             if (guildById != null) {
                 TextChannel textChannelById = guildById.getTextChannelById(textChannel);
                 if (textChannelById != null) {
@@ -28,7 +28,7 @@ public interface SenderMessage {
 
     static void sendMessage(MessageEmbed embedBuilder, Long guildId, Long textChannel, List<Button> buttons) {
         try {
-            Guild guildById = BotStartConfig.jda.getGuildById(guildId);
+            Guild guildById = BotStartConfig.getJda().getGuildById(guildId);
             if (guildById != null) {
                 TextChannel textChannelById = guildById.getTextChannelById(textChannel);
                 if (textChannelById != null) {
