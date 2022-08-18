@@ -42,6 +42,7 @@
   "gift_permissions": "The bot has all the necessary permissions in: ",
   "check_permissions": "Bot don't have in ",
   "start_in_thread": "It is forbidden to create <@808277484524011531> in Thread!",
-  "start_in_not_text_channels": "You can create <@808277484524011531> only in TextChannels!"
-
+  "start_in_not_text_channels": "You can create <@808277484524011531> only in TextChannels!",
+  "start_wrong_time": "You set the time incorrectly: `",
+  "start_examples": "There must be one of:"
 }

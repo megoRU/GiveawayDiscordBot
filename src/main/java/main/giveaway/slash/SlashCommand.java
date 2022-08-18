@@ -48,6 +48,7 @@ public class SlashCommand extends ListenerAdapter {
     private final LanguageRepository languageRepository;
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final ParticipantsRepository participantsRepository;
+    private static final String TIME_REGEX = "^(\\d{1,2}h|\\d{1,2}m|\\d{1,2}d|\\d{4}.\\d{2}.\\d{2}\\s\\d{2}:\\d{2})$";
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
@@ -71,19 +72,7 @@ public class SlashCommand extends ListenerAdapter {
             return;
         }
 
-        GuildChannelUnion channel = event.getOption("channel", OptionMapping::getAsChannel);
-
-        if (channel != null && !channel.getType().equals(ChannelType.TEXT)) {
-            event.reply(jsonParsers.getLocale("start_in_not_text_channels", event.getGuild().getId())).queue();
-            return;
-        } else {
-            boolean canSendGiveaway = ChecksClass.canSendGiveaway(channel.asTextChannel(), event);
-            if (!canSendGiveaway) return;
-        }
-
-
         if (event.getName().equals("start")) {
-
             if (GiveawayRegistry.getInstance().hasGift(event.getGuild().getIdLong())) {
 
                 EmbedBuilder errors = new EmbedBuilder();
@@ -92,11 +81,20 @@ public class SlashCommand extends ListenerAdapter {
 
                 event.replyEmbeds(errors.build()).queue();
             } else {
+                GuildChannelUnion textChannel = event.getOption("textchannel", OptionMapping::getAsChannel);
+
+                if (textChannel != null && !textChannel.getType().equals(ChannelType.TEXT)) {
+                    event.reply(jsonParsers.getLocale("start_in_not_text_channels", event.getGuild().getId())).queue();
+                    return;
+                } else if (textChannel != null && textChannel.getType().equals(ChannelType.TEXT)) {
+                    boolean canSendGiveaway = ChecksClass.canSendGiveaway(textChannel.asTextChannel(), event);
+                    if (!canSendGiveaway) return;
+                }
+
                 try {
                     String title = event.getOption("title", OptionMapping::getAsString);
                     String count = event.getOption("count", OptionMapping::getAsString);
                     String time = event.getOption("duration", OptionMapping::getAsString);
-                    GuildChannelUnion textChannel = event.getOption("channel", OptionMapping::getAsChannel);
                     Long role = event.getOption("mention", OptionMapping::getAsLong);
                     Message.Attachment image = event.getOption("image", OptionMapping::getAsAttachment);
                     String urlImage = null;
@@ -109,6 +107,26 @@ public class SlashCommand extends ListenerAdapter {
 
                     EmbedBuilder embedBuilder = new EmbedBuilder();
                     embedBuilder.setColor(0xFF0000);
+
+                    if (time != null && !time.matches(TIME_REGEX)) {
+                        String startWrongTime = jsonParsers.getLocale("start_wrong_time", event.getGuild().getId());
+                        String startExamples = jsonParsers.getLocale("start_examples", event.getGuild().getId());
+                        embedBuilder.setDescription(
+                                startWrongTime + time + "`"
+                                        + "\n" +
+                                        startExamples
+                                        + "\n"
+                                        + "`1h`"
+                                        + "\n"
+                                        + "`1d`"
+                                        + "\n" +
+                                        "`20m`"
+                                        + "\n"
+                                        + "`2022.08.18 13:48`"
+                        );
+                        event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
+                        return;
+                    }
 
                     if (title != null && title.length() >= MessageEmbed.TITLE_MAX_LENGTH) {
                         embedBuilder.setDescription(jsonParsers.getLocale("slash_error_256", event.getGuild().getId()) + role + "`");

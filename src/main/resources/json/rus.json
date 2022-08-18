@@ -42,5 +42,8 @@
   "gift_permissions": "Бот имеет все необходимые разрешения в: ",
   "check_permissions": "У бота нет в ",
   "start_in_thread": "Запрещено создавать <@808277484524011531> в Thread!",
-  "start_in_not_text_channels": "Можно создавать <@808277484524011531> только в TextChannels!"
+  "start_in_not_text_channels": "Можно создавать <@808277484524011531> только в TextChannels!",
+  "start_wrong_time": "Вы неправильно задали время: `",
+  "start_examples": "Должно быть что-то одно из:"
+
 }
