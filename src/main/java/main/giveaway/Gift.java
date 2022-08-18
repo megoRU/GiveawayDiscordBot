@@ -173,7 +173,7 @@ public class Gift {
                 start.appendDescription("\nEnds: <t:" + offsetTime.toEpochSecond() + ":R> (<t:" + offsetTime.toEpochSecond() + ":f>)");
 
                 putTimestamp(new Timestamp(offsetTime.toEpochSecond() * 1000));
-
+//                putTimestamp(Timestamp.valueOf(offsetTime.toLocalDateTime()));
             } else {
                 times = GiftHelper.getMinutes(time);
 
