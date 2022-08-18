@@ -128,8 +128,8 @@ public class BotStartConfig {
             System.out.println("IsDevMode: " + Config.isIsDev());
 
             //Обновить команды
-//            updateSlashCommands();
-            System.out.println("18:45");
+            updateSlashCommands();
+            System.out.println("13:20");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -160,7 +160,7 @@ public class BotStartConfig {
             optionsStart.add(new OptionData(INTEGER, "count", "Set count winners").setName("count").setMinValue(1).setMaxValue(30));
             optionsStart.add(new OptionData(STRING, "duration", "Examples: 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style. Preferably immediately in UTC ±0")
                     .setName("duration"));
-            optionsStart.add(new OptionData(CHANNEL, "channel", "#text channel name").setName("channel"));
+            optionsStart.add(new OptionData(CHANNEL, "channel", "#TextChannel name").setName("textchannel"));
             optionsStart.add(new OptionData(ROLE, "mention", "Mentioning a specific Role").setName("mention"));
             optionsStart.add(new OptionData(STRING, "role", "Giveaway is only for a specific role? Don't forget to specify the Role in the previous choice.")
                     .addChoice("yes", "yes")

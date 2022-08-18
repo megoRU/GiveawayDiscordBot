@@ -21,6 +21,7 @@ import main.model.repository.LanguageRepository;
 import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -47,16 +48,21 @@ public class SlashCommand extends ListenerAdapter {
     private final LanguageRepository languageRepository;
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final ParticipantsRepository participantsRepository;
+    private static final String TIME_REGEX = "^(\\d{1,2}h|\\d{1,2}m|\\d{1,2}d|\\d{4}.\\d{2}.\\d{2}\\s\\d{2}:\\d{2})$";
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         if (event.getUser().isBot()) return;
         if (event.getMember() == null) return;
         if (event.getGuild() == null) return;
+        if (event.getChannelType().isThread()) {
+            event.reply(jsonParsers.getLocale("start_in_thread", event.getGuild().getId())).queue();
+            return;
+        }
 
         if (event.getName().equals("check-bot-permission")) {
             GuildChannelUnion textChannel = event.getOption("textchannel", OptionMapping::getAsChannel);
-            GuildChannel guildChannel = textChannel != null ? textChannel : event.getGuildChannel();
+            GuildChannel guildChannel = textChannel != null ? textChannel : event.getGuildChannel().asTextChannel();
 
             boolean canSendGiveaway = ChecksClass.canSendGiveaway(guildChannel, event);
 
@@ -65,12 +71,6 @@ public class SlashCommand extends ListenerAdapter {
             }
             return;
         }
-
-//        if (!ChecksClass.canSendGiveaway(event.getGuildChannel())) return;
-        GuildChannelUnion channel = event.getOption("channel", OptionMapping::getAsChannel);
-        if (!ChecksClass.canSendGiveaway(
-                channel == null ? event.getGuildChannel() : channel.asGuildMessageChannel(),
-                event)) return;
 
         if (event.getName().equals("start")) {
             if (GiveawayRegistry.getInstance().hasGift(event.getGuild().getIdLong())) {
@@ -81,11 +81,20 @@ public class SlashCommand extends ListenerAdapter {
 
                 event.replyEmbeds(errors.build()).queue();
             } else {
+                GuildChannelUnion textChannel = event.getOption("textchannel", OptionMapping::getAsChannel);
+
+                if (textChannel != null && !textChannel.getType().equals(ChannelType.TEXT)) {
+                    event.reply(jsonParsers.getLocale("start_in_not_text_channels", event.getGuild().getId())).queue();
+                    return;
+                } else if (textChannel != null && textChannel.getType().equals(ChannelType.TEXT)) {
+                    boolean canSendGiveaway = ChecksClass.canSendGiveaway(textChannel.asTextChannel(), event);
+                    if (!canSendGiveaway) return;
+                }
+
                 try {
                     String title = event.getOption("title", OptionMapping::getAsString);
                     String count = event.getOption("count", OptionMapping::getAsString);
                     String time = event.getOption("duration", OptionMapping::getAsString);
-                    GuildChannelUnion textChannel = event.getOption("channel", OptionMapping::getAsChannel);
                     Long role = event.getOption("mention", OptionMapping::getAsLong);
                     Message.Attachment image = event.getOption("image", OptionMapping::getAsAttachment);
                     String urlImage = null;
@@ -98,6 +107,26 @@ public class SlashCommand extends ListenerAdapter {
 
                     EmbedBuilder embedBuilder = new EmbedBuilder();
                     embedBuilder.setColor(0xFF0000);
+
+                    if (time != null && !time.matches(TIME_REGEX)) {
+                        String startWrongTime = jsonParsers.getLocale("start_wrong_time", event.getGuild().getId());
+                        String startExamples = jsonParsers.getLocale("start_examples", event.getGuild().getId());
+                        embedBuilder.setDescription(
+                                startWrongTime + time + "`"
+                                        + "\n" +
+                                        startExamples
+                                        + "\n"
+                                        + "`1h`"
+                                        + "\n"
+                                        + "`1d`"
+                                        + "\n" +
+                                        "`20m`"
+                                        + "\n"
+                                        + "`2022.08.18 13:48`"
+                        );
+                        event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
+                        return;
+                    }
 
                     if (title != null && title.length() >= MessageEmbed.TITLE_MAX_LENGTH) {
                         embedBuilder.setDescription(jsonParsers.getLocale("slash_error_256", event.getGuild().getId()) + role + "`");
@@ -120,7 +149,7 @@ public class SlashCommand extends ListenerAdapter {
                     GiveawayRegistry.getInstance().putGift(
                             event.getGuild().getIdLong(),
                             new Gift(event.getGuild().getIdLong(),
-                                    textChannel == null ? event.getGuildChannel().getIdLong() : textChannel.getIdLong(),
+                                    textChannel == null ? event.getChannel().getIdLong() : textChannel.getIdLong(),
                                     event.getUser().getIdLong(),
                                     activeGiveawayRepository,
                                     participantsRepository));
@@ -129,7 +158,7 @@ public class SlashCommand extends ListenerAdapter {
                             .getGift(event.getGuild().getIdLong())
                             .startGift(event,
                                     event.getGuild(),
-                                    textChannel == null ? event.getChannel().asGuildMessageChannel() : textChannel.asGuildMessageChannel(),
+                                    textChannel == null ? event.getChannel().asTextChannel() : textChannel.asTextChannel(),
                                     title,
                                     count,
                                     time,
