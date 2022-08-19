@@ -32,7 +32,6 @@ import java.awt.*;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -41,13 +40,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
-
 @Getter
 @Setter
 public class Gift {
 
     private static final Logger LOGGER = Logger.getLogger(Gift.class.getName());
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss.SSS");
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     //API
@@ -56,11 +54,6 @@ public class Gift {
     //User LIST
     private final Map<String, String> listUsersHash = new LinkedHashMap<>();
     private final Set<String> uniqueWinners = new LinkedHashSet<>();
-
-    //Time
-    private Instant specificTime;
-    private String times;
-    private OffsetDateTime offsetTime;
 
     //USER DATA
     private final long guildId;
@@ -72,7 +65,7 @@ public class Gift {
     private int localCountUsers;
 
     //DTO
-    private volatile Set<Participants> participantsList = new HashSet<>();
+    private volatile Set<Participants> participantsList = new LinkedHashSet<>();
 
     //REPO
     private final ActiveGiveawayRepository activeGiveawayRepository;
@@ -127,8 +120,6 @@ public class Gift {
                 + "\nRole: " + role
                 + "\nisOnlyForSpecificRole: " + isOnlyForSpecificRole
                 + "\nurlImage: " + urlImage);
-        //Instant для timestamp
-        specificTime = Instant.ofEpochMilli(Instant.now().toEpochMilli());
 
         String title = newTitle == null ? "Giveaway" : newTitle;
 
@@ -160,33 +151,28 @@ public class Gift {
 
         if (time != null) {
             start.setFooter(footer + " | " + jsonParsers.getLocale("gift_Ends_At", guild.getId()));
-
+            ZoneOffset offset = ZoneOffset.UTC;
+            LocalDateTime localDateTime;
             if (time.length() > 4) {
-
-                String localTime = time + ":00.001";
-                LocalDateTime dateTime = LocalDateTime.parse(localTime, formatter);
-                ZoneOffset offset = ZoneOffset.UTC;
-                offsetTime = OffsetDateTime.of(dateTime, offset);
-
-                start.setTimestamp(dateTime);
-
-                start.appendDescription("\nEnds: <t:" + offsetTime.toEpochSecond() + ":R> (<t:" + offsetTime.toEpochSecond() + ":f>)");
-
-                putTimestamp(new Timestamp(offsetTime.toEpochSecond() * 1000));
-//                putTimestamp(Timestamp.valueOf(offsetTime.toLocalDateTime()));
+                localDateTime = LocalDateTime.parse(time, formatter);
+                start.setTimestamp(localDateTime);
             } else {
-                times = GiftHelper.getMinutes(time);
-
-                long toEpochSecond = OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times)).toEpochSecond();
-                start.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times)));
-
-                start.appendDescription("\nEnds: <t:" + toEpochSecond + ":R> (<t:" + toEpochSecond + ":f>)");
-
-                putTimestamp(new Timestamp(specificTime.plusSeconds(Long.parseLong(times) * 60).getEpochSecond() * 1000));
+                String minutes = GiftHelper.getMinutes(time);
+                localDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).plusMinutes(Long.parseLong(minutes));
+                start.setTimestamp(localDateTime.plusMinutes(Long.parseLong(minutes)));
             }
+
+            if (localDateTime.isBefore(Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime())) {
+                throw new IllegalArgumentException(
+                        "Time in the past " + localDateTime
+                        + " Now: " + Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime());
+            }
+
+            start.appendDescription("\nEnds: <t:" + localDateTime.toEpochSecond(offset) + ":R> (<t:" + localDateTime.toEpochSecond(offset) + ":f>)");
+            putTimestamp(localDateTime.toEpochSecond(offset));
         }
 
-        start.appendDescription("\nHosted by: " + "<@" + userIdLong + ">");
+        start.appendDescription("\nHosted by: " + "<@" + this.userIdLong + ">");
 
         if (urlImage != null) {
             start.setImage(urlImage);
@@ -245,21 +231,20 @@ public class Gift {
         activeGiveaways.setUrlImage(urlImage);
         activeGiveaways.setIdUserWhoCreateGiveaway(idUserWhoCreateGiveaway);
 
+        Timestamp endGiveawayDate = GiveawayRegistry.getInstance().getEndGiveawayDate(guildId);
+
         if (time != null && time.length() > 4) {
-            activeGiveaways.setDateEndGiveaway(new Timestamp(offsetTime.toLocalDateTime().atOffset(ZoneOffset.UTC).toEpochSecond() * 1000));
+            activeGiveaways.setDateEndGiveaway(endGiveawayDate);
         } else {
-            activeGiveaways.setDateEndGiveaway(time == null ? null :
-                    new Timestamp(specificTime.plusSeconds(Long.parseLong(times) * 60)
-                            .atOffset(ZoneOffset.UTC)
-                            .toEpochSecond() * 1000));
+            activeGiveaways.setDateEndGiveaway(time == null ? null : endGiveawayDate);
         }
         activeGiveawayRepository.saveAndFlush(activeGiveaways);
     }
 
     //Добавляет пользователя в StringBuilder
     public void addUserToPoll(final User user) {
-        System.out.println(user.getName() + " " + user.getId());
-        System.out.println(listUsersHash.containsKey(user.getId()));
+        LOGGER.info("\n" + user.getName() + " " + user.getId());
+        LOGGER.info("\n" + listUsersHash.containsKey(user.getId()));
 
         if (!listUsersHash.containsKey(user.getId())) {
             count.incrementAndGet();
@@ -274,7 +259,7 @@ public class Gift {
                 localCountUsers = count.get();
                 if (participantsList != null && !participantsList.isEmpty()) {
                     //Сохраняем всех участников в temp коллекцию
-                    Set<Participants> temp = new HashSet<>(participantsList);
+                    Set<Participants> temp = new LinkedHashSet<>(participantsList);
 
                     participantsRepository.saveAllAndFlush(temp);
 
@@ -380,8 +365,6 @@ public class Gift {
     public void stopGift(final long guildIdLong, final int countWinner) {
         LOGGER.info("\nstopGift method" + "\nCount winner: " + countWinner);
         GiftHelper giftHelper = new GiftHelper(activeGiveawayRepository);
-//        ChecksClass checksClass = new ChecksClass(activeGiveawayRepository);
-//        if (checksClass.isGuildDeleted(guildId)) return;
         try {
             if (listUsersHash.size() < 2) {
                 EmbedBuilder notEnoughUsers = new EmbedBuilder();
@@ -455,10 +438,12 @@ public class Gift {
         clearingCollections();
     }
 
-    private void putTimestamp(Timestamp timestamp) {
+    private void putTimestamp(long localDateTime) {
         Timer timer = new Timer();
         StopGiveawayByTimer stopGiveawayByTimer = new StopGiveawayByTimer(this.guildId);
+        Timestamp timestamp = new Timestamp(localDateTime * 1000);
         Date date = new Date(timestamp.getTime());
+
         timer.schedule(stopGiveawayByTimer, date);
 
         GiveawayRegistry.getInstance().putEndGiveawayDate(this.guildId, timestamp);
@@ -484,10 +469,6 @@ public class Gift {
 
     public int getListUsersSize() {
         return listUsersHash.size();
-    }
-
-    public int getCount() {
-        return count.intValue();
     }
 
     public void setCount(int count) {
