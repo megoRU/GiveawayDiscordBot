@@ -58,6 +58,10 @@ public class BotStartConfig {
     private static JDA jda;
     private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
 
+    //API
+    private final BotiCordAPI api = new BotiCordAPI.Builder().token(System.getenv("BOTICORD")).build();
+    private final DiscordBotListAPI TOP_GG_API = new DiscordBotListAPI.Builder().token(Config.getTopGgApiToken()).botId(Config.getBotId()).build();
+
     //REPOSITORY
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final LanguageRepository languageRepository;
@@ -222,10 +226,6 @@ public class BotStartConfig {
     private void topGGAndStatcord() {
         if (!Config.isIsDev()) {
             try {
-                DiscordBotListAPI TOP_GG_API = new DiscordBotListAPI.Builder()
-                        .token(Config.getTopGgApiToken())
-                        .botId(Config.getBotId())
-                        .build();
                 int serverCount = BotStartConfig.jda.getGuilds().size();
 
                 TOP_GG_API.setStats(serverCount);
@@ -234,11 +234,6 @@ public class BotStartConfig {
                 //BOTICORD API
                 AtomicInteger usersCount = new AtomicInteger();
                 BotStartConfig.jda.getGuilds().forEach(g -> usersCount.addAndGet(g.getMembers().size()));
-
-
-                BotiCordAPI api = new BotiCordAPI.Builder()
-                        .token(System.getenv("BOTICORD"))
-                        .build();
 
                 api.setStats(serverCount, 1, usersCount.get());
             } catch (Exception e) {
