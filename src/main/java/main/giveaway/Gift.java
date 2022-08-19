@@ -47,7 +47,7 @@ import java.util.logging.Logger;
 public class Gift {
 
     private static final Logger LOGGER = Logger.getLogger(Gift.class.getName());
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss.SSS");
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     //API
@@ -160,30 +160,19 @@ public class Gift {
 
         if (time != null) {
             start.setFooter(footer + " | " + jsonParsers.getLocale("gift_Ends_At", guild.getId()));
-
+            ZoneOffset offset = ZoneOffset.UTC;
+            LocalDateTime dateTime;
             if (time.length() > 4) {
-
-                String localTime = time + ":00.001";
-                LocalDateTime dateTime = LocalDateTime.parse(localTime, formatter);
-                ZoneOffset offset = ZoneOffset.UTC;
-                offsetTime = OffsetDateTime.of(dateTime, offset);
-
+                dateTime = LocalDateTime.parse(time, formatter);
                 start.setTimestamp(dateTime);
-
-                start.appendDescription("\nEnds: <t:" + offsetTime.toEpochSecond() + ":R> (<t:" + offsetTime.toEpochSecond() + ":f>)");
-
-                putTimestamp(new Timestamp(offsetTime.toEpochSecond() * 1000));
-//                putTimestamp(Timestamp.valueOf(offsetTime.toLocalDateTime()));
             } else {
                 times = GiftHelper.getMinutes(time);
-
-                long toEpochSecond = OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times)).toEpochSecond();
-                start.setTimestamp(OffsetDateTime.parse(String.valueOf(specificTime)).plusMinutes(Long.parseLong(times)));
-
-                start.appendDescription("\nEnds: <t:" + toEpochSecond + ":R> (<t:" + toEpochSecond + ":f>)");
-
-                putTimestamp(new Timestamp(specificTime.plusSeconds(Long.parseLong(times) * 60).getEpochSecond() * 1000));
+                dateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).plusMinutes(Long.parseLong(times));
+                start.setTimestamp(dateTime.plusMinutes(Long.parseLong(times)));
             }
+
+            start.appendDescription("\nEnds: <t:" + dateTime.toEpochSecond(offset) + ":R> (<t:" + dateTime.toEpochSecond(offset) + ":f>)");
+            putTimestamp(dateTime.toEpochSecond(offset));
         }
 
         start.appendDescription("\nHosted by: " + "<@" + userIdLong + ">");
@@ -245,13 +234,12 @@ public class Gift {
         activeGiveaways.setUrlImage(urlImage);
         activeGiveaways.setIdUserWhoCreateGiveaway(idUserWhoCreateGiveaway);
 
+        Timestamp endGiveawayDate = GiveawayRegistry.getInstance().getEndGiveawayDate(guildId);
+
         if (time != null && time.length() > 4) {
-            activeGiveaways.setDateEndGiveaway(new Timestamp(offsetTime.toLocalDateTime().atOffset(ZoneOffset.UTC).toEpochSecond() * 1000));
+            activeGiveaways.setDateEndGiveaway(endGiveawayDate);
         } else {
-            activeGiveaways.setDateEndGiveaway(time == null ? null :
-                    new Timestamp(specificTime.plusSeconds(Long.parseLong(times) * 60)
-                            .atOffset(ZoneOffset.UTC)
-                            .toEpochSecond() * 1000));
+            activeGiveaways.setDateEndGiveaway(time == null ? null : endGiveawayDate);
         }
         activeGiveawayRepository.saveAndFlush(activeGiveaways);
     }
@@ -380,8 +368,6 @@ public class Gift {
     public void stopGift(final long guildIdLong, final int countWinner) {
         LOGGER.info("\nstopGift method" + "\nCount winner: " + countWinner);
         GiftHelper giftHelper = new GiftHelper(activeGiveawayRepository);
-//        ChecksClass checksClass = new ChecksClass(activeGiveawayRepository);
-//        if (checksClass.isGuildDeleted(guildId)) return;
         try {
             if (listUsersHash.size() < 2) {
                 EmbedBuilder notEnoughUsers = new EmbedBuilder();
@@ -455,10 +441,12 @@ public class Gift {
         clearingCollections();
     }
 
-    private void putTimestamp(Timestamp timestamp) {
+    private void putTimestamp(long localDateTime) {
         Timer timer = new Timer();
         StopGiveawayByTimer stopGiveawayByTimer = new StopGiveawayByTimer(this.guildId);
+        Timestamp timestamp = new Timestamp(localDateTime * 1000);
         Date date = new Date(timestamp.getTime());
+
         timer.schedule(stopGiveawayByTimer, date);
 
         GiveawayRegistry.getInstance().putEndGiveawayDate(this.guildId, timestamp);
