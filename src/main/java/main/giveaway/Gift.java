@@ -237,8 +237,8 @@ public class Gift {
 
     //Добавляет пользователя в StringBuilder
     public void addUserToPoll(final User user) {
-        System.out.println(user.getName() + " " + user.getId());
-        System.out.println(listUsersHash.containsKey(user.getId()));
+        LOGGER.info("\n" + user.getName() + " " + user.getId());
+        LOGGER.info("\n" + listUsersHash.containsKey(user.getId()));
 
         if (!listUsersHash.containsKey(user.getId())) {
             count.incrementAndGet();
