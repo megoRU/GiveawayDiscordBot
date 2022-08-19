@@ -152,18 +152,24 @@ public class Gift {
         if (time != null) {
             start.setFooter(footer + " | " + jsonParsers.getLocale("gift_Ends_At", guild.getId()));
             ZoneOffset offset = ZoneOffset.UTC;
-            LocalDateTime dateTime;
+            LocalDateTime localDateTime;
             if (time.length() > 4) {
-                dateTime = LocalDateTime.parse(time, formatter);
-                start.setTimestamp(dateTime);
+                localDateTime = LocalDateTime.parse(time, formatter);
+                start.setTimestamp(localDateTime);
             } else {
                 String minutes = GiftHelper.getMinutes(time);
-                dateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).plusMinutes(Long.parseLong(minutes));
-                start.setTimestamp(dateTime.plusMinutes(Long.parseLong(minutes)));
+                localDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).plusMinutes(Long.parseLong(minutes));
+                start.setTimestamp(localDateTime.plusMinutes(Long.parseLong(minutes)));
             }
 
-            start.appendDescription("\nEnds: <t:" + dateTime.toEpochSecond(offset) + ":R> (<t:" + dateTime.toEpochSecond(offset) + ":f>)");
-            putTimestamp(dateTime.toEpochSecond(offset));
+            if (localDateTime.isBefore(Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime())) {
+                throw new IllegalArgumentException(
+                        "Time in the past " + localDateTime
+                        + " Now: " + Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime());
+            }
+
+            start.appendDescription("\nEnds: <t:" + localDateTime.toEpochSecond(offset) + ":R> (<t:" + localDateTime.toEpochSecond(offset) + ":f>)");
+            putTimestamp(localDateTime.toEpochSecond(offset));
         }
 
         start.appendDescription("\nHosted by: " + "<@" + this.userIdLong + ">");
