@@ -249,7 +249,7 @@ public class Gift {
 
     private void executeMultiInsert(long guildIdLong) {
         try {
-            if (localCountUsers > count.get() && GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
+            if (count.get() > localCountUsers && GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
                 localCountUsers = count.get();
                 if (participantsList != null && !participantsList.isEmpty()) {
                     //Сохраняем всех участников в temp коллекцию
