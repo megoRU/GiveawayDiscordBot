@@ -40,7 +40,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
-
 @Getter
 @Setter
 public class Gift {
@@ -63,10 +62,9 @@ public class Gift {
 
     private StringBuilder insertQuery = new StringBuilder();
     private AtomicInteger count = new AtomicInteger(0);
-    private int localCountUsers;
 
     //DTO
-    private volatile Set<Participants> participantsList = new HashSet<>();
+    private volatile Set<Participants> participantsList = new LinkedHashSet<>();
 
     //REPO
     private final ActiveGiveawayRepository activeGiveawayRepository;
@@ -167,7 +165,7 @@ public class Gift {
             putTimestamp(dateTime.toEpochSecond(offset));
         }
 
-        start.appendDescription("\nHosted by: " + "<@" + userIdLong + ">");
+        start.appendDescription("\nHosted by: " + "<@" + this.userIdLong + ">");
 
         if (urlImage != null) {
             start.setImage(urlImage);
@@ -250,11 +248,11 @@ public class Gift {
 
     private void executeMultiInsert(long guildIdLong) {
         try {
-            if (count.get() > localCountUsers && GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
-                localCountUsers = count.get();
+            if (listUsersHash.size() > count.get() && GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
+                count.set(listUsersHash.size());
                 if (participantsList != null && !participantsList.isEmpty()) {
                     //Сохраняем всех участников в temp коллекцию
-                    Set<Participants> temp = new HashSet<>(participantsList);
+                    Set<Participants> temp = new LinkedHashSet<>(participantsList);
 
                     participantsRepository.saveAllAndFlush(temp);
 
@@ -466,12 +464,7 @@ public class Gift {
         return listUsersHash.size();
     }
 
-    public int getCount() {
-        return count.intValue();
-    }
-
     public void setCount(int count) {
         this.count.set(count);
-        this.localCountUsers = count;
     }
 }
