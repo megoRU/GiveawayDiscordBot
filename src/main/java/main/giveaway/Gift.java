@@ -32,7 +32,6 @@ import java.awt.*;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -56,11 +55,6 @@ public class Gift {
     //User LIST
     private final Map<String, String> listUsersHash = new LinkedHashMap<>();
     private final Set<String> uniqueWinners = new LinkedHashSet<>();
-
-    //Time
-    private Instant specificTime;
-    private String times;
-    private OffsetDateTime offsetTime;
 
     //USER DATA
     private final long guildId;
@@ -127,8 +121,6 @@ public class Gift {
                 + "\nRole: " + role
                 + "\nisOnlyForSpecificRole: " + isOnlyForSpecificRole
                 + "\nurlImage: " + urlImage);
-        //Instant для timestamp
-        specificTime = Instant.ofEpochMilli(Instant.now().toEpochMilli());
 
         String title = newTitle == null ? "Giveaway" : newTitle;
 
@@ -166,9 +158,9 @@ public class Gift {
                 dateTime = LocalDateTime.parse(time, formatter);
                 start.setTimestamp(dateTime);
             } else {
-                times = GiftHelper.getMinutes(time);
-                dateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).plusMinutes(Long.parseLong(times));
-                start.setTimestamp(dateTime.plusMinutes(Long.parseLong(times)));
+                String minutes = GiftHelper.getMinutes(time);
+                dateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).plusMinutes(Long.parseLong(minutes));
+                start.setTimestamp(dateTime.plusMinutes(Long.parseLong(minutes)));
             }
 
             start.appendDescription("\nEnds: <t:" + dateTime.toEpochSecond(offset) + ":R> (<t:" + dateTime.toEpochSecond(offset) + ":f>)");
