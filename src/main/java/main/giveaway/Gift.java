@@ -62,6 +62,7 @@ public class Gift {
 
     private StringBuilder insertQuery = new StringBuilder();
     private AtomicInteger count = new AtomicInteger(0);
+    private int localCountUsers;
 
     //DTO
     private volatile Set<Participants> participantsList = new LinkedHashSet<>();
@@ -248,8 +249,8 @@ public class Gift {
 
     private void executeMultiInsert(long guildIdLong) {
         try {
-            if (listUsersHash.size() > count.get() && GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
-                count.set(listUsersHash.size());
+            if (localCountUsers > count.get() && GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
+                localCountUsers = count.get();
                 if (participantsList != null && !participantsList.isEmpty()) {
                     //Сохраняем всех участников в temp коллекцию
                     Set<Participants> temp = new LinkedHashSet<>(participantsList);
@@ -466,5 +467,6 @@ public class Gift {
 
     public void setCount(int count) {
         this.count.set(count);
+        this.localCountUsers = count;
     }
 }
