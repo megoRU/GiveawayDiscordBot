@@ -159,7 +159,7 @@ public class Gift {
             } else {
                 String minutes = GiftHelper.getMinutes(time);
                 localDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).plusMinutes(Long.parseLong(minutes));
-                start.setTimestamp(localDateTime.plusMinutes(Long.parseLong(minutes)));
+                start.setTimestamp(localDateTime);
             }
 
             if (localDateTime.isBefore(Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime())) {
