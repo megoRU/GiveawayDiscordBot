@@ -6,6 +6,8 @@ import api.megoru.ru.entity.WinnersAndParticipants;
 import api.megoru.ru.impl.MegoruAPIImpl;
 import lombok.Getter;
 import lombok.Setter;
+import main.config.BotStartConfig;
+import main.giveaway.buttons.ReactionsButton;
 import main.giveaway.impl.GiftHelper;
 import main.giveaway.impl.URLS;
 import main.giveaway.reactions.Reactions;
@@ -13,6 +15,7 @@ import main.jsonparser.JSONParsers;
 import main.messagesevents.SenderMessage;
 import main.model.entity.ActiveGiveaways;
 import main.model.entity.Convector;
+import main.model.entity.Notification;
 import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.ParticipantsRepository;
@@ -25,6 +28,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,6 +43,8 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
+
+import static main.giveaway.impl.URLS.getDiscordUrlMessage;
 
 @Getter
 @Setter
@@ -165,7 +171,7 @@ public class Gift {
             if (localDateTime.isBefore(Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime())) {
                 throw new IllegalArgumentException(
                         "Time in the past " + localDateTime
-                        + " Now: " + Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime());
+                                + " Now: " + Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime());
             }
 
             start.appendDescription("\nEnds: <t:" + localDateTime.toEpochSecond(offset) + ":R> (<t:" + localDateTime.toEpochSecond(offset) + ":f>)");
@@ -262,6 +268,47 @@ public class Gift {
                     Set<Participants> temp = new LinkedHashSet<>(participantsList);
 
                     participantsRepository.saveAllAndFlush(temp);
+                    List<ActionRow> buttons = new ArrayList<>();
+                    buttons.add(ActionRow.of(Button.danger(ReactionsButton.DISABLE_NOTIFICATIONS, "Disable notifications")));
+
+                    for (int i = 0; i < temp.size(); i++) {
+                        temp.forEach(t -> {
+                                    Notification.NotificationStatus notificationStatus = BotStartConfig
+                                            .getMapNotifications()
+                                            .get(String.valueOf(t.getUserIdLong()));
+
+                                    if (notificationStatus == null) {
+                                        notificationStatus = Notification.NotificationStatus.ACCEPT;
+                                    }
+
+                                    if (notificationStatus.equals(Notification.NotificationStatus.ACCEPT)) {
+                                        final String url = getDiscordUrlMessage(
+                                                t.getGiveawayGuildId().toString(),
+                                                String.valueOf(t.getActiveGiveaways().getChannelIdLong()),
+                                                String.valueOf(t.getActiveGiveaways().getMessageIdLong()));
+
+                                        final String giftRegistered = jsonParsers.getLocale("gift_registered", t.getGiveawayGuildId().toString());
+                                        final String giftVote = jsonParsers.getLocale("gift_vote", t.getGiveawayGuildId().toString());
+                                        final String userIdLong = String.valueOf(t.getUserIdLong());
+                                        final String giftRegisteredTitle = jsonParsers.getLocale("gift_registeredTitle", t.getGiveawayGuildId().toString());
+
+                                        EmbedBuilder embedBuilder = new EmbedBuilder();
+                                        embedBuilder.setColor(Color.GREEN);
+                                        embedBuilder.setAuthor(
+                                                giftRegisteredTitle,
+                                                null,
+                                                BotStartConfig.getJda().getSelfUser().getAvatarUrl());
+                                        embedBuilder.setDescription(giftRegistered.replaceAll("\\{0}", url));
+                                        embedBuilder.appendDescription(giftVote);
+
+                                        SenderMessage.sendPrivateMessageWithButtons(
+                                                BotStartConfig.getJda(),
+                                                userIdLong,
+                                                embedBuilder.build(), buttons);
+                                    }
+                                }
+                        );
+                    }
 
                     //Удаляем все элементы которые уже в БД
                     participantsList.removeAll(temp);

@@ -7,9 +7,11 @@ import main.giveaway.buttons.ReactionsButton;
 import main.giveaway.reactions.Reactions;
 import main.giveaway.slash.SlashCommand;
 import main.jsonparser.ParserClass;
+import main.model.entity.Notification;
 import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.LanguageRepository;
+import main.model.repository.NotificationRepository;
 import main.model.repository.ParticipantsRepository;
 import main.threads.StopGiveawayByTimer;
 import net.dv8tion.jda.api.JDA;
@@ -46,6 +48,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static main.giveaway.impl.URLS.getDiscordUrlMessage;
 import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
 
 @Configuration
@@ -55,6 +58,8 @@ public class BotStartConfig {
     public static final String activity = "/help | ";
     //String - guildLongId
     private static final ConcurrentMap<String, String> mapLanguages = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, Notification.NotificationStatus> mapNotifications = new ConcurrentHashMap<>();
+
     private static JDA jda;
     private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
 
@@ -66,6 +71,7 @@ public class BotStartConfig {
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final LanguageRepository languageRepository;
     private final ParticipantsRepository participantsRepository;
+    private final NotificationRepository notificationRepository;
 
     //DataBase
     @Value("${spring.datasource.url}")
@@ -77,10 +83,11 @@ public class BotStartConfig {
 
     @Autowired
     public BotStartConfig(ActiveGiveawayRepository activeGiveawayRepository, LanguageRepository
-            languageRepository, ParticipantsRepository participantsRepository) {
+            languageRepository, ParticipantsRepository participantsRepository, NotificationRepository notificationRepository) {
         this.activeGiveawayRepository = activeGiveawayRepository;
         this.languageRepository = languageRepository;
         this.participantsRepository = participantsRepository;
+        this.notificationRepository = notificationRepository;
     }
 
     @Bean
@@ -92,6 +99,9 @@ public class BotStartConfig {
             getLocalizationFromDB();
             //Устанавливаем языки
             setLanguages();
+
+            //Получаем уведомления
+            getNotification();
 
             List<GatewayIntent> intents = new ArrayList<>(
                     Arrays.asList(
@@ -112,9 +122,9 @@ public class BotStartConfig {
             jdaBuilder.setActivity(Activity.playing("Starting..."));
             jdaBuilder.setBulkDeleteSplittingEnabled(false);
             jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild(activeGiveawayRepository, languageRepository));
-            jdaBuilder.addEventListeners(new ReactionsButton(languageRepository));
+            jdaBuilder.addEventListeners(new ReactionsButton(languageRepository, notificationRepository));
             jdaBuilder.addEventListeners(new Reactions());
-            jdaBuilder.addEventListeners(new SlashCommand(languageRepository, activeGiveawayRepository, participantsRepository));
+            jdaBuilder.addEventListeners(new SlashCommand(languageRepository, activeGiveawayRepository, participantsRepository, notificationRepository));
 
             jda = jdaBuilder.build();
             jda.awaitReady();
@@ -129,8 +139,8 @@ public class BotStartConfig {
             System.out.println("IsDevMode: " + Config.isIsDev());
 
             //Обновить команды
-//            updateSlashCommands();
-            System.out.println("13:20");
+            updateSlashCommands();
+            System.out.println("20:14");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -153,6 +163,12 @@ public class BotStartConfig {
             optionsLanguage.add(new OptionData(STRING, "bot", "Setting the bot language")
                     .addChoice("\uD83C\uDDEC\uD83C\uDDE7 English Language", "eng")
                     .addChoice("\uD83C\uDDF7\uD83C\uDDFA Russian Language", "rus")
+                    .setRequired(true));
+
+            List<OptionData> optionsNotifications = new ArrayList<>();
+            optionsNotifications.add(new OptionData(STRING, "set", "Disable or Enable notifications")
+                    .addChoice("Enable", "enable")
+                    .addChoice("Disable", "disable")
                     .setRequired(true));
 
             //Start Giveaway
@@ -213,6 +229,9 @@ public class BotStartConfig {
             commands.addCommands(Commands.slash("reroll", "Reroll one winner by Giveaway ID")
                     .addOptions(reroll)
                     .setGuildOnly(true));
+
+            commands.addCommands(Commands.slash("notifications", "Configuring Bot Notifications")
+                    .addOptions(optionsNotifications));
 
             commands.queue();
 
@@ -366,6 +385,8 @@ public class BotStartConfig {
 
                 long channelId = GiveawayRegistry.getInstance().getGift(guildIdLong).getTextChannelId();
                 Gift gift = GiveawayRegistry.getInstance().getGift(guildIdLong);
+                String url = getDiscordUrlMessage(String.valueOf(guildIdLong), String.valueOf(channelId), messageId);
+
                 //System.out.println("Guild ID: " + guildIdLong);
 
                 List<MessageReaction> reactions = null;
@@ -462,8 +483,34 @@ public class BotStartConfig {
         }
     }
 
+    private void getNotification() {
+        try {
+            Connection connection = DriverManager.getConnection(URL_CONNECTION, USER_CONNECTION, PASSWORD_CONNECTION);
+            Statement statement = connection.createStatement();
+            String sql = "SELECT * FROM notification";
+            ResultSet rs = statement.executeQuery(sql);
+
+            while (rs.next()) {
+                mapNotifications.put(
+                        rs.getString("user_id_long"),
+                        Enum.valueOf(Notification.NotificationStatus.class, rs.getString("notification_status")));
+            }
+
+            rs.close();
+            statement.close();
+            connection.close();
+            System.out.println("getNotification()");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static Map<String, String> getMapLanguages() {
         return mapLanguages;
+    }
+
+    public static Map<String, Notification.NotificationStatus> getMapNotifications() {
+        return mapNotifications;
     }
 
     public static JDA getJda() {

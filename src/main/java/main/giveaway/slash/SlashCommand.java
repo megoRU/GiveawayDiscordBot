@@ -16,8 +16,10 @@ import main.giveaway.GiveawayRegistry;
 import main.giveaway.buttons.ReactionsButton;
 import main.jsonparser.JSONParsers;
 import main.model.entity.Language;
+import main.model.entity.Notification;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.LanguageRepository;
+import main.model.repository.NotificationRepository;
 import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -48,6 +50,8 @@ public class SlashCommand extends ListenerAdapter {
     private final LanguageRepository languageRepository;
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final ParticipantsRepository participantsRepository;
+    private final NotificationRepository notificationRepository;
+
     private static final String TIME_REGEX = "^(\\d{1,2}h|\\d{1,2}m|\\d{1,2}d|\\d{4}.\\d{2}.\\d{2}\\s\\d{2}:\\d{2})$";
 
     @Override
@@ -374,6 +378,38 @@ public class SlashCommand extends ListenerAdapter {
             }
             return;
         }
+
+        if (event.getName().equals("notifications")) {
+            event.deferReply().queue();
+
+            Notification.NotificationStatus notificationStatus;
+            String userId = event.getUser().getId();
+
+            EmbedBuilder giveaway = new EmbedBuilder();
+            giveaway.setColor(Color.GREEN);
+
+            if (event.getOptions().get(0).getAsString().equals("enable")) {
+                notificationStatus = Notification.NotificationStatus.ACCEPT;
+                giveaway.setDescription(jsonParsers.getLocale("button_notification_accept", event.getGuild().getId()));
+            } else {
+                notificationStatus = Notification.NotificationStatus.DENY;
+                giveaway.setDescription(jsonParsers.getLocale("button_notification_deny", event.getGuild().getId()));
+            }
+
+            BotStartConfig.getMapNotifications().put(userId, notificationStatus);
+
+            Notification notification = new Notification();
+            notification.setUserIdLong(userId);
+            notification.setNotificationStatus(notificationStatus);
+
+            event.getHook().sendMessageEmbeds(giveaway.build())
+                    .setEphemeral(true)
+                    .queue();
+
+            notificationRepository.save(notification);
+            return;
+        }
+
 
         if (event.getName().equals("reroll")) {
             event.deferReply().queue();
