@@ -93,6 +93,9 @@ public class SlashCommand extends ListenerAdapter {
                 } else if (textChannel != null && textChannel.getType().equals(ChannelType.TEXT)) {
                     boolean canSendGiveaway = ChecksClass.canSendGiveaway(textChannel.asTextChannel(), event);
                     if (!canSendGiveaway) return;
+                } else if (textChannel == null) {
+                    boolean canSendGiveaway = ChecksClass.canSendGiveaway(event.getGuildChannel().asTextChannel(), event);
+                    if (!canSendGiveaway) return;
                 }
 
                 try {
