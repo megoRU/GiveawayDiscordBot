@@ -44,5 +44,10 @@
   "start_in_thread": "It is forbidden to create <@808277484524011531> in Thread!",
   "start_in_not_text_channels": "You can create <@808277484524011531> only in TextChannels!",
   "start_wrong_time": "You set the time incorrectly: `",
-  "start_examples": "There must be one of:"
+  "start_examples": "There must be one of:",
+  "gift_registeredTitle": "Giveaway",
+  "gift_registered": "We have successfully registered you in [Giveaway]({0})",
+  "gift_vote": "\n\n[Vote for our bot, it will help us a lot](https://top.gg/bot/808277484524011531/vote)",
+  "button_notification_deny": "Now the bot will not notify you!",
+  "button_notification_accept": "Now the bot will notify you!"
 }
