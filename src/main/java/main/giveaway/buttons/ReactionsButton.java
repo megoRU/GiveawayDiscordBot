@@ -28,9 +28,6 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
-        System.out.println(event.getButton().getId());
-        System.out.println(Objects.equals(event.getButton().getId(), DISABLE_NOTIFICATIONS));
-
         if (event.getUser().isBot()) return;
 
         if (event.getGuild() != null && Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + CHANGE_LANGUAGE)) {
@@ -45,9 +42,10 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
 
                 BotStartConfig.getMapLanguages().put(event.getGuild().getId(), buttonName);
 
+                String buttonLanguage = String.format(jsonParsers.getLocale("button_language", event.getGuild().getId()), buttonName);
+
                 event.getHook()
-                        .sendMessage(jsonParsers.getLocale("button_Language", event.getGuild().getId())
-                                .replaceAll("\\{0}", buttonName))
+                        .sendMessage(buttonLanguage)
                         .setEphemeral(true).queue();
             }
             return;
@@ -61,6 +59,7 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
             notification.setNotificationStatus(Notification.NotificationStatus.DENY);
             BotStartConfig.getMapNotifications().put(event.getUser().getId(), Notification.NotificationStatus.DENY);
 
+            //Не перевести на русский ибо у нас другая реализация (Only Guild)
             event.getHook()
                     .sendMessage("Now the bot will not notify you!")
                     .queue();

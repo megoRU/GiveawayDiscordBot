@@ -139,7 +139,7 @@ public class BotStartConfig {
             System.out.println("IsDevMode: " + Config.isIsDev());
 
             //Обновить команды
-            updateSlashCommands();
+//            updateSlashCommands();
             System.out.println("20:14");
         } catch (Exception e) {
             e.printStackTrace();
@@ -193,7 +193,6 @@ public class BotStartConfig {
             botPermissions.add(new OptionData(CHANNEL, "textchannel", "Checking the permissions of a specific channel")
                     .setName("textchannel"));
 
-
             commands.addCommands(Commands.slash("check-bot-permission", "Checking the permission bot")
                     .addOptions(botPermissions)
                     .setGuildOnly(true));
@@ -230,7 +229,7 @@ public class BotStartConfig {
                     .addOptions(reroll)
                     .setGuildOnly(true));
 
-            commands.addCommands(Commands.slash("notifications", "Configuring Bot Notifications")
+            commands.addCommands(Commands.slash("notifications", "Configuring bot notifications")
                     .addOptions(optionsNotifications));
 
             commands.queue();

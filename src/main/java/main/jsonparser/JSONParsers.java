@@ -8,7 +8,7 @@ public class JSONParsers {
         try {
             return ParserClass.getInstance().getTranslation(key,
                     BotStartConfig.getMapLanguages().get(guildIdLong) != null
-                    ? BotStartConfig.getMapLanguages().get(guildIdLong) : "eng");
+                            ? BotStartConfig.getMapLanguages().get(guildIdLong) : "eng");
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -49,10 +49,10 @@ public class Reactions extends ListenerAdapter implements SenderMessage {
                         LOGGER.info("\nНажал на эмодзи, но у него нет доступа к розыгрышу: " + user.getId());
                         //Получаем ссылку до сообщения
 
+                        String buttonGiveawayNotAccess = String.format(jsonParsers.getLocale("button_giveaway_not_access", event.getGuild().getId()), url);
                         EmbedBuilder embedBuilder = new EmbedBuilder();
                         embedBuilder.setColor(Color.RED);
-                        embedBuilder.setDescription(jsonParsers.getLocale("button_giveaway_not_access", event.getGuild().getId())
-                                .replaceAll("\\{0}", url));
+                        embedBuilder.setDescription(buttonGiveawayNotAccess);
 
                         SenderMessage.sendPrivateMessage(event.getJDA(), user.getId(), embedBuilder.build());
                         return;
