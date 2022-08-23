@@ -53,8 +53,12 @@ public class ChecksClass {
         }
 
         if (!bool && event != null && event.getGuild() != null) {
-            event.reply(jsonParsers.getLocale("check_permissions", event.getGuild().getId())
-                    + "<#" + dstChannel.getId() + ">:" + "\n" + stringBuilder).queue();
+            String checkPermissions = String.format(
+                    jsonParsers.getLocale("check_permissions", event.getGuild().getId()),
+                    dstChannel.getId(),
+                    stringBuilder);
+
+            event.reply(checkPermissions).queue();
         }
 
         return bool;

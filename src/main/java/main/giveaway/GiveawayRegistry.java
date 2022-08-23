@@ -132,6 +132,6 @@ public class GiveawayRegistry {
     //TODO: Удалять из Базы данных нужно ещё
     public String removeGiftExceptions(long guildId) {
         giveawayDataMap.remove(guildId);
-        return jsonParsers.getLocale("giveaway_registry_Error", String.valueOf(guildId));
+        return jsonParsers.getLocale("giveaway_registry_error", String.valueOf(guildId));
     }
 }

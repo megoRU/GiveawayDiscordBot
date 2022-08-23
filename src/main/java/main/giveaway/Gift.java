@@ -128,20 +128,24 @@ public class Gift {
                 + "\nurlImage: " + urlImage);
 
         String title = newTitle == null ? "Giveaway" : newTitle;
+        String giftReaction = jsonParsers.getLocale("gift_reaction", guild.getId());
 
         start.setColor(Color.GREEN);
         start.setTitle(title);
-        start.appendDescription(jsonParsers.getLocale("gift_reaction", guild.getId()));
+        start.appendDescription(giftReaction);
 
         if (role != null) {
+            String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guild.getId()), role);
             if (isOnlyForSpecificRole) {
-                channel.sendMessage(jsonParsers.getLocale("gift_notification_for_this_role", guild.getId()) + "<@&" + role + ">").queue();
-                start.appendDescription(jsonParsers.getLocale("gift_OnlyFor", guild.getId()) + "<@&" + role + ">");
+                channel.sendMessage(giftNotificationForThisRole).queue();
+                String giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", guild.getId()), role);
+                start.appendDescription(giftOnlyFor);
             } else {
                 if (role == guildId) {
-                    channel.sendMessage(jsonParsers.getLocale("gift_notification_for_this_role", guild.getId()) + "@everyone").queue();
+                    String notificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_everyone", guild.getId()), "@everyone");
+                    channel.sendMessage(notificationForThisRole).queue();
                 } else {
-                    channel.sendMessage(jsonParsers.getLocale("gift_notification_for_this_role", guild.getId()) + "<@&" + role + ">").queue();
+                    channel.sendMessage(giftNotificationForThisRole).queue();
                 }
             }
         }
@@ -156,7 +160,8 @@ public class Gift {
         start.setFooter(footer);
 
         if (time != null) {
-            start.setFooter(footer + " | " + jsonParsers.getLocale("gift_Ends_At", guild.getId()));
+            String giftEndsAt = String.format(jsonParsers.getLocale("gift_ends_at", guild.getId()), footer);
+            start.setFooter(giftEndsAt);
             ZoneOffset offset = ZoneOffset.UTC;
             LocalDateTime localDateTime;
             if (time.length() > 4) {
@@ -196,7 +201,8 @@ public class Gift {
         extracted(start, guild, textChannel, newTitle, countWinners, time, role, isOnlyForSpecificRole, urlImage);
 
         try {
-            event.reply(jsonParsers.getLocale("send_slash_message", guild.getId()).replaceAll("\\{0}", textChannel.getId()))
+            String sendSlashMessage = String.format(jsonParsers.getLocale("send_slash_message", guild.getId()), textChannel.getId());
+            event.reply(sendSlashMessage)
                     .delay(7, TimeUnit.SECONDS)
                     .flatMap(InteractionHook::deleteOriginal)
                     .queue();
@@ -268,8 +274,11 @@ public class Gift {
                     Set<Participants> temp = new LinkedHashSet<>(participantsList);
 
                     participantsRepository.saveAllAndFlush(temp);
+
+                    String buttonNotification = jsonParsers.getLocale("button_notification", String.valueOf(this.guildId));
                     List<ActionRow> buttons = new ArrayList<>();
-                    buttons.add(ActionRow.of(Button.danger(ReactionsButton.DISABLE_NOTIFICATIONS, "Disable notifications")));
+                    buttons.add(ActionRow.of(Button.danger(ReactionsButton.DISABLE_NOTIFICATIONS, buttonNotification)));
+
 
                     for (int i = 0; i < temp.size(); i++) {
                         temp.forEach(t -> {
@@ -287,10 +296,13 @@ public class Gift {
                                                 String.valueOf(t.getActiveGiveaways().getChannelIdLong()),
                                                 String.valueOf(t.getActiveGiveaways().getMessageIdLong()));
 
-                                        final String giftRegistered = jsonParsers.getLocale("gift_registered", t.getGiveawayGuildId().toString());
+                                        final String giftRegistered = String.format(
+                                                jsonParsers.getLocale("gift_registered", t.getGiveawayGuildId().toString()), url);
+
+
                                         final String giftVote = jsonParsers.getLocale("gift_vote", t.getGiveawayGuildId().toString());
                                         final String userIdLong = String.valueOf(t.getUserIdLong());
-                                        final String giftRegisteredTitle = jsonParsers.getLocale("gift_registeredTitle", t.getGiveawayGuildId().toString());
+                                        final String giftRegisteredTitle = jsonParsers.getLocale("gift_registered_title", t.getGiveawayGuildId().toString());
 
                                         EmbedBuilder embedBuilder = new EmbedBuilder();
                                         embedBuilder.setColor(Color.GREEN);
@@ -298,7 +310,7 @@ public class Gift {
                                                 giftRegisteredTitle,
                                                 null,
                                                 BotStartConfig.getJda().getSelfUser().getAvatarUrl());
-                                        embedBuilder.setDescription(giftRegistered.replaceAll("\\{0}", url));
+                                        embedBuilder.setDescription(giftRegistered);
                                         embedBuilder.appendDescription(giftVote);
 
                                         SenderMessage.sendPrivateMessageWithButtons(
@@ -414,10 +426,14 @@ public class Gift {
         GiftHelper giftHelper = new GiftHelper(activeGiveawayRepository);
         try {
             if (listUsersHash.size() < 2) {
+
+                String giftNotEnoughUsers = jsonParsers.getLocale("gift_not_enough_users", String.valueOf(guildIdLong));
+                String giftGiveawayDeleted = jsonParsers.getLocale("gift_giveaway_deleted", String.valueOf(guildIdLong));
+
                 EmbedBuilder notEnoughUsers = new EmbedBuilder();
                 notEnoughUsers.setColor(Color.GREEN);
-                notEnoughUsers.setTitle(jsonParsers.getLocale("gift_Not_Enough_Users", String.valueOf(guildIdLong)));
-                notEnoughUsers.setDescription(jsonParsers.getLocale("gift_Giveaway_Deleted", String.valueOf(guildIdLong)));
+                notEnoughUsers.setTitle(giftNotEnoughUsers);
+                notEnoughUsers.setDescription(giftGiveawayDeleted);
                 //Отправляет сообщение
                 giftHelper.editMessage(notEnoughUsers, guildIdLong, textChannelId);
 
@@ -459,17 +475,16 @@ public class Gift {
                 .replaceAll("]", "");
 
         if (uniqueWinners.size() == 1) {
-            winners.setDescription(jsonParsers.getLocale("gift_congratulations",
-                    String.valueOf(guildIdLong)).replaceAll("\\{0}", url)
-                    + winnerArray);
+            String giftCongratulations = String.format(jsonParsers.getLocale("gift_congratulations", String.valueOf(guildIdLong)), url, winnerArray);
+            winners.setDescription(giftCongratulations);
 
             giftHelper.editMessage(
                     GiveawayEmbedUtils.embedBuilder(winnerArray, countWinner, guildIdLong),
                     this.guildId,
                     textChannelId);
         } else {
-            winners.setDescription(jsonParsers.getLocale("gift_congratulations_many",
-                    String.valueOf(guildIdLong)).replaceAll("\\{0}", url) + winnerArray);
+            String giftCongratulationsMany = String.format(jsonParsers.getLocale("gift_congratulations_many", String.valueOf(guildIdLong)), url, winnerArray);
+            winners.setDescription(giftCongratulationsMany);
 
             giftHelper.editMessage(
                     GiveawayEmbedUtils.embedBuilder(winnerArray, countWinner, guildIdLong),
