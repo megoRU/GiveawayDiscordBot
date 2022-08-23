@@ -8,7 +8,7 @@
   "gift_ends_at": "%s | Ends at:",
   "gift_ends": "Ended in",
   "gift_participants": "Participants",
-  "gift_only_for": "\nOnly for: ",
+  "gift_only_for": "\nOnly for: <@&%s>",
   "gift_not_enough_users": "Not enough users",
   "gift_giveaway_deleted": ":x: The giveaway deleted!",
   "gift_invalid_number": ":warning: Invalid number",
