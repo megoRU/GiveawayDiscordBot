@@ -18,11 +18,11 @@ public class Convector {
         List<Participants> temp = new LinkedList<>();
         for (main.model.entity.Participants value : participantsListAPI) {
             Long giveawayGuildId = value.getGiveawayGuildId();
-            String messageId = GiveawayRegistry.getInstance().getMessageId(giveawayGuildId);
+            long messageId = GiveawayRegistry.getInstance().getMessageId(giveawayGuildId);
 
             Participants participants = new Participants(
                     value.getIdUserWhoCreateGiveaway(),
-                    String.valueOf(giveawayGuildId + Long.parseLong(messageId)),
+                    String.valueOf(giveawayGuildId + messageId),
                     value.getGiveawayGuildId(),
                     value.getUserIdLong(),
                     value.getNickName(),
