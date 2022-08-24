@@ -6,7 +6,6 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.RestAction;
 
@@ -61,12 +60,12 @@ public interface SenderMessage {
                 });
     }
 
-    static void sendPrivateMessageWithButtons(JDA jda, String userId, MessageEmbed messageEmbed, List<ActionRow> actionRows) {
+    static void sendPrivateMessageWithButtons(JDA jda, String userId, MessageEmbed messageEmbed, List<Button> actionRows) {
         RestAction<User> action = jda.retrieveUserById(userId);
         action.submit()
                 .thenCompose((user) -> user.openPrivateChannel().submit())
                 .thenCompose((channel) -> channel.sendMessageEmbeds(messageEmbed)
-                        .setActionRows(actionRows)
+                        .setActionRow(actionRows)
                         .submit())
                 .whenComplete((v, throwable) -> {
                     if (throwable != null) {
