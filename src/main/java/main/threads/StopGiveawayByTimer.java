@@ -3,11 +3,12 @@ package main.threads;
 import main.giveaway.GiveawayRegistry;
 
 import java.util.TimerTask;
+import java.util.logging.Logger;
 
 public final class StopGiveawayByTimer extends TimerTask {
 
     private final Long idGuild;
-
+    private static final Logger LOGGER = Logger.getLogger(StopGiveawayByTimer.class.getName());
     public StopGiveawayByTimer(Long idGuild) {
         this.idGuild = idGuild;
     }
@@ -27,28 +28,15 @@ public final class StopGiveawayByTimer extends TimerTask {
 //                }
 
                 int listUsersSize = GiveawayRegistry.getInstance().getGift(idGuild).getListUsersSize();
-                int countWinners = GiveawayRegistry.getInstance().getCountWinners(idGuild) == null ? 1
-                        : Integer.parseInt(GiveawayRegistry.getInstance().getCountWinners(idGuild));
+                int countWinners = GiveawayRegistry.getInstance().getCountWinners(idGuild);
 
-                System.out.println(listUsersSize);
-                System.out.println(countWinners);
+
+                LOGGER.info("\nlistUsersSize: " + listUsersSize);
+                LOGGER.info("\ncountWinners: " + countWinners);
 
                 //TODO завершать если прошёл месяц?
-                if (countWinners < listUsersSize) {
-                    GiveawayRegistry.getInstance()
-                            .getGift(idGuild)
-                            .stopGift(idGuild,
-                                    GiveawayRegistry.getInstance().getCountWinners(idGuild)
-                                            == null ? 1
-                                            : Integer.parseInt(GiveawayRegistry.getInstance().getCountWinners(idGuild)));
-                    return;
-                } else if (listUsersSize < 2) {
-                    GiveawayRegistry.getInstance()
-                            .getGift(idGuild)
-                            .stopGift(idGuild,
-                                    GiveawayRegistry.getInstance().getCountWinners(idGuild)
-                                            == null ? 1
-                                            : Integer.parseInt(GiveawayRegistry.getInstance().getCountWinners(idGuild)));
+                if (listUsersSize < 2 || countWinners < listUsersSize) {
+                    GiveawayRegistry.getInstance().getGift(idGuild).stopGift(idGuild, countWinners);
                     return;
                 }
 

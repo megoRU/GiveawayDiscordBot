@@ -14,10 +14,14 @@ public class GiveawayEmbedUtils {
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     public static EmbedBuilder embedBuilder(final String winners, final int countWinner, final long guildIdLong) {
-        String idUserWhoCreateGiveaway = GiveawayRegistry.getInstance().getIdUserWhoCreateGiveaway(guildIdLong);
+        long idUserWhoCreateGiveaway = GiveawayRegistry.getInstance().getIdUserWhoCreateGiveaway(guildIdLong);
         EmbedBuilder embedBuilder = new EmbedBuilder();
 
-        LOGGER.info("\nEmbedBuilder: " + winners + " " +  countWinner + " " + guildIdLong);
+        LOGGER.info("\nEmbedBuilder: " +
+                "\nwinners: " + winners +
+                "\ncountWinner: " + countWinner
+                +"\nguildIdLong: " + guildIdLong);
+
         embedBuilder.setColor(Color.GREEN);
         embedBuilder.setTitle(GiveawayRegistry.getInstance().getTitle(guildIdLong));
 
@@ -40,7 +44,7 @@ public class GiveawayEmbedUtils {
 
             embedBuilder.appendDescription(giftOnlyFor);
         }
-        long giveawayIdLong = guildIdLong + Long.parseLong(GiveawayRegistry.getInstance().getMessageId(guildIdLong));
+        long giveawayIdLong = guildIdLong + GiveawayRegistry.getInstance().getMessageId(guildIdLong);
 
         String hostedBy = String.format("\nHosted by: <@%s>", idUserWhoCreateGiveaway);
         String giveawayIdDescription = String.format("\nGiveaway ID: `%s`", giveawayIdLong);

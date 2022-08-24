@@ -105,7 +105,12 @@ public class SlashCommand extends ListenerAdapter {
 
                 try {
                     String title = event.getOption("title", OptionMapping::getAsString);
-                    String count = event.getOption("count", OptionMapping::getAsString);
+
+                    int count = 1;
+                    String countString = event.getOption("count", OptionMapping::getAsString);
+                    if (countString != null) {
+                        count = Integer.parseInt(countString);
+                    }
                     String time = event.getOption("duration", OptionMapping::getAsString);
                     Long role = event.getOption("mention", OptionMapping::getAsLong);
                     Message.Attachment image = event.getOption("image", OptionMapping::getAsAttachment);
@@ -175,7 +180,7 @@ public class SlashCommand extends ListenerAdapter {
                                     event.getUser().getIdLong());
 
                     //Мы не будет очищать это, всё равно рано или поздно будет перезаписываться или даже не будет в случае Exception
-                    GiveawayRegistry.getInstance().putIdUserWhoCreateGiveaway(event.getGuild().getIdLong(), event.getUser().getId());
+                    GiveawayRegistry.getInstance().putIdUserWhoCreateGiveaway(event.getGuild().getIdLong(), event.getUser().getIdLong());
 
                     //Если время будет неверным. Сработает try catch
                 } catch (Exception e) {
@@ -226,8 +231,7 @@ public class SlashCommand extends ListenerAdapter {
 
                 event.replyEmbeds(stop.build()).queue();
 
-                int count = GiveawayRegistry.getInstance().getCountWinners(event.getGuild().getIdLong()) == null ? 1
-                        : Integer.parseInt(GiveawayRegistry.getInstance().getCountWinners(event.getGuild().getIdLong()));
+                int count = GiveawayRegistry.getInstance().getCountWinners(event.getGuild().getIdLong());
 
                 GiveawayRegistry.getInstance()
                         .getGift(event.getGuild().getIdLong())

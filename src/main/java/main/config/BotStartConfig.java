@@ -48,7 +48,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static main.giveaway.impl.URLS.getDiscordUrlMessage;
 import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
 
 @Configuration
@@ -301,15 +300,15 @@ public class BotStartConfig {
             while (rs.next()) {
 
                 long guild_long_id = rs.getLong("guild_long_id");
-                String channel_long_id = rs.getString("channel_id_long");
-                String count_winners = rs.getString("count_winners");
+                long channel_long_id = rs.getLong("channel_id_long");
+                int count_winners = rs.getInt("count_winners");
                 long message_id_long = rs.getLong("message_id_long");
                 String giveaway_title = rs.getString("giveaway_title");
                 Timestamp date_end_giveaway = rs.getTimestamp("date_end_giveaway");
                 Long role_id_long = rs.getLong("role_id_long");
                 boolean is_for_specific_role = rs.getBoolean("is_for_specific_role");
                 String url_image = rs.getString("url_image");
-                String id_user_who_create_giveaway = rs.getString("id_user_who_create_giveaway");
+                long id_user_who_create_giveaway = rs.getLong("id_user_who_create_giveaway");
 
                 List<Participants> participantsList = participantsRepository.getParticipantsByGuildIdLong(guild_long_id);
 
@@ -317,14 +316,14 @@ public class BotStartConfig {
                 GiveawayRegistry.getInstance().putGift(
                         guild_long_id,
                         new Gift(guild_long_id,
-                                Long.parseLong(channel_long_id),
-                                Long.parseLong(id_user_who_create_giveaway),
+                                channel_long_id,
+                                id_user_who_create_giveaway,
                                 activeGiveawayRepository,
                                 participantsRepository));
 
 
                 GiveawayRegistry.getInstance().getGift(guild_long_id).autoInsert();
-                GiveawayRegistry.getInstance().putMessageId(guild_long_id, String.valueOf(message_id_long));
+                GiveawayRegistry.getInstance().putMessageId(guild_long_id, message_id_long);
                 GiveawayRegistry.getInstance().putTitle(guild_long_id, giveaway_title);
                 GiveawayRegistry.getInstance().putEndGiveawayDate(guild_long_id, date_end_giveaway);
                 GiveawayRegistry.getInstance().putChannelId(guild_long_id, channel_long_id);
@@ -377,14 +376,12 @@ public class BotStartConfig {
 
             long guildIdLong = giveawayDataList.get(l).getGift().getGuildId();
             boolean isForSpecificRole = giveawayDataList.get(l).getIsForSpecificRole();
-            String messageId = GiveawayRegistry.getInstance().getMessageId(guildIdLong);
-            boolean hasGift = GiveawayRegistry.getInstance().hasGift(guildIdLong);
+            long messageId = GiveawayRegistry.getInstance().getMessageId(guildIdLong);
 
-            if (hasGift && messageId != null) {
+            if (hasGift(guildIdLong)) {
 
                 long channelId = GiveawayRegistry.getInstance().getGift(guildIdLong).getTextChannelId();
                 Gift gift = GiveawayRegistry.getInstance().getGift(guildIdLong);
-                String url = getDiscordUrlMessage(String.valueOf(guildIdLong), String.valueOf(channelId), messageId);
 
                 //System.out.println("Guild ID: " + guildIdLong);
 
@@ -405,9 +402,9 @@ public class BotStartConfig {
                         }
 
                         //-1 because one Bot
-                        if (reactions != null
+                        if (hasGift(guildIdLong) && reactions != null
                                 && reactions.size() == 1
-                                && reactions.get(0).getCount() - 1 != GiveawayRegistry.getInstance().getGift(guildIdLong).getListUsersSize()) {
+                                && reactions.get(0).getCount() - 1 != gift.getListUsersSize()) {
 
                             for (int i = 0; i < reactions.size(); i++) {
                                 List<User> userList;
@@ -419,7 +416,7 @@ public class BotStartConfig {
                                             .complete()
                                             .stream()
                                             .filter(user -> !user.isBot())
-                                            .filter(user -> !gift.isUserInList(user.getId()))
+                                            .filter(user -> !gift.hasUserInList(user.getId()))
                                             .filter(user -> guildById
                                                     //TODO: This block thread may be use *parallelStream()*
                                                     .retrieveMember(user).complete()
@@ -432,14 +429,17 @@ public class BotStartConfig {
                                             .complete()
                                             .stream()
                                             .filter(user -> !user.isBot())
-                                            .filter(user -> !gift.isUserInList(user.getId()))
+                                            .filter(user -> !gift.hasUserInList(user.getId()))
                                             .collect(Collectors.toList());
                                 }
+
 
                                 //System.out.println("UserList count: " + userList);
                                 //Перебираем Users в реакциях
                                 for (int o = 0; o < userList.size(); o++) {
                                     User user = userList.get(o);
+
+                                    if (!hasGift(guildIdLong)) return;
                                     gift.addUserToPoll(user);
                                     //System.out.println("User id: " + user.getIdLong());
                                 }
@@ -502,6 +502,10 @@ public class BotStartConfig {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean hasGift(long guildIdLong) {
+        return GiveawayRegistry.getInstance().hasGift(guildIdLong);
     }
 
     public static Map<String, String> getMapLanguages() {

@@ -37,11 +37,11 @@ public class GiveawayRegistry {
         return giveawayDataMap;
     }
 
-    public String getIdUserWhoCreateGiveaway(long guildId) {
+    public long getIdUserWhoCreateGiveaway(long guildId) {
         return giveawayDataMap.get(guildId).getIdUserWhoCreateGiveaway();
     }
 
-    public void putIdUserWhoCreateGiveaway(long guildId, String userId) {
+    public void putIdUserWhoCreateGiveaway(long guildId, long userId) {
         giveawayDataMap.get(guildId).setIdUserWhoCreateGiveaway(userId);
     }
 
@@ -81,11 +81,11 @@ public class GiveawayRegistry {
         return giveawayDataMap.get(guildId).getEndGiveawayDate();
     }
 
-    public String getCountWinners(long guildId) {
+    public int getCountWinners(long guildId) {
         return giveawayDataMap.get(guildId).getCountWinners();
     }
 
-    public String getMessageId(long guildId) {
+    public long getMessageId(long guildId) {
         return giveawayDataMap.get(guildId).getMessageId();
     }
 
@@ -101,11 +101,11 @@ public class GiveawayRegistry {
         giveawayTimer.put(guildId, timer);
     }
 
-    public void putMessageId(long guildId, String messageId) {
+    public void putMessageId(long guildId, long messageId) {
         giveawayDataMap.get(guildId).setMessageId(messageId);
     }
 
-    public void putChannelId(long guildId, String channelId) {
+    public void putChannelId(long guildId, long channelId) {
         giveawayDataMap.get(guildId).setChannelId(channelId);
     }
 
@@ -117,7 +117,7 @@ public class GiveawayRegistry {
         giveawayDataMap.put(guildId, gift.new GiveawayData());
     }
 
-    public void putCountWinners(long guildId, String countWinners) {
+    public void putCountWinners(long guildId, int countWinners) {
         giveawayDataMap.get(guildId).setCountWinners(countWinners);
     }
 

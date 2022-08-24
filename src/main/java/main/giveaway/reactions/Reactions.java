@@ -36,11 +36,11 @@ public class Reactions extends ListenerAdapter implements SenderMessage {
             if (GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
                 if (emoji.equals(TADA)) {
                     //Проверяем event id message с Giveaway message id
-                    String messageIdWithReactionCurrent = event.getMessageId();
-                    String messageIdWithReaction = GiveawayRegistry.getInstance().getMessageId(guildIdLong);
+                    long messageIdWithReactionCurrent = event.getMessageIdLong();
+                    long messageIdWithReaction = GiveawayRegistry.getInstance().getMessageId(guildIdLong);
 
-                    if (!messageIdWithReactionCurrent.equals(messageIdWithReaction)) return;
-                    String url = getDiscordUrlMessage(event.getGuild().getId(), event.getGuildChannel().getId(), event.getReaction().getMessageId());
+                    if (messageIdWithReactionCurrent != messageIdWithReaction) return;
+                    String url = getDiscordUrlMessage(guildIdLong, event.getGuildChannel().getIdLong(), messageIdWithReactionCurrent);
                     Gift gift = GiveawayRegistry.getInstance().getGift(guildIdLong);
                     String roleId = String.valueOf(GiveawayRegistry.getInstance().getRoleId(guildIdLong));
 
@@ -58,7 +58,7 @@ public class Reactions extends ListenerAdapter implements SenderMessage {
                         return;
                     }
 
-                    if (!gift.isUserInList(user.getId())) {
+                    if (!gift.hasUserInList(user.getId())) {
                         LOGGER.info("\nНовый участник: " + user.getId() + "\nСервер: " + event.getGuild().getId());
                         GiveawayRegistry.getInstance().getGift(guildIdLong).addUserToPoll(user);
                     }

@@ -6,9 +6,8 @@ public class JSONParsers {
 
     public String getLocale(String key, String guildIdLong) {
         try {
-            return ParserClass.getInstance().getTranslation(key,
-                    BotStartConfig.getMapLanguages().get(guildIdLong) != null
-                            ? BotStartConfig.getMapLanguages().get(guildIdLong) : "eng");
+            String language = BotStartConfig.getMapLanguages().get(guildIdLong);
+            return ParserClass.getInstance().getTranslation(key, language != null ? language : "eng");
         } catch (Exception e) {
             e.printStackTrace();
         }

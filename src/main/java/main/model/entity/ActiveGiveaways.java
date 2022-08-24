@@ -30,7 +30,7 @@ public class ActiveGiveaways {
     private Long channelIdLong;
 
     @Column(name = "count_winners")
-    private String countWinners;
+    private int countWinners;
 
     @Column(name = "date_end_giveaway")
     private Timestamp dateEndGiveaway;

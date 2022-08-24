@@ -81,15 +81,15 @@ public class Gift {
     @Setter
     public class GiveawayData {
 
-        private String channelId;
-        private String messageId;
-        private String countWinners;
+        private long channelId;
+        private long messageId;
+        private int countWinners;
         private String title;
         private Timestamp endGiveawayDate;
         private Long roleId;
         private boolean isForSpecificRole;
         private String urlImage;
-        private String idUserWhoCreateGiveaway;
+        private long idUserWhoCreateGiveaway;
 
         public GiveawayData() {
         }
@@ -116,7 +116,7 @@ public class Gift {
     }
 
     private void extracted(EmbedBuilder start, Guild guild, GuildMessageChannel channel,
-                           String newTitle, String countWinners,
+                           String newTitle, int countWinners,
                            String time, Long role, boolean isOnlyForSpecificRole, String urlImage) {
         LOGGER.info("\nGuild id: " + guild.getId()
                 + "\nTextChannel: " + channel.getName() + " " + channel.getId()
@@ -151,10 +151,10 @@ public class Gift {
         }
 
         String footer;
-        if (countWinners == null) {
+        if (countWinners == 1) {
             footer = "1 " + GiftHelper.setEndingWord(1, guildId);
         } else {
-            footer = countWinners + " " + GiftHelper.setEndingWord(Integer.parseInt(countWinners), guildId);
+            footer = countWinners + " " + GiftHelper.setEndingWord(countWinners, guildId);
         }
 
         start.setFooter(footer);
@@ -192,7 +192,7 @@ public class Gift {
     }
 
     public void startGift(@NotNull SlashCommandInteractionEvent event, Guild guild,
-                          GuildMessageChannel textChannel, String newTitle, String countWinners,
+                          GuildMessageChannel textChannel, String newTitle, int countWinners,
                           String time, Long role, boolean isOnlyForSpecificRole,
                           String urlImage, Long idUserWhoCreateGiveaway) {
 
@@ -220,17 +220,17 @@ public class Gift {
         autoInsert();
     }
 
-    private void updateCollections(String countWinners, String time, Message message, Long role,
+    private void updateCollections(int countWinners, String time, Message message, Long role,
                                    Boolean isOnlyForSpecificRole, String urlImage, String title, Long idUserWhoCreateGiveaway) {
 
-        GiveawayRegistry.getInstance().putMessageId(guildId, message.getId());
-        GiveawayRegistry.getInstance().putChannelId(guildId, message.getChannel().getId());
+        GiveawayRegistry.getInstance().putMessageId(guildId, message.getIdLong());
+        GiveawayRegistry.getInstance().putChannelId(guildId, message.getChannel().getIdLong());
         GiveawayRegistry.getInstance().putCountWinners(guildId, countWinners);
         GiveawayRegistry.getInstance().putRoleId(guildId, role);
         GiveawayRegistry.getInstance().putIsForSpecificRole(guildId, isOnlyForSpecificRole);
         GiveawayRegistry.getInstance().putUrlImage(guildId, urlImage);
         GiveawayRegistry.getInstance().putTitle(guildId, title == null ? "Giveaway" : title);
-        GiveawayRegistry.getInstance().putIdUserWhoCreateGiveaway(guildId, String.valueOf(idUserWhoCreateGiveaway));
+        GiveawayRegistry.getInstance().putIdUserWhoCreateGiveaway(guildId, idUserWhoCreateGiveaway);
 
         ActiveGiveaways activeGiveaways = new ActiveGiveaways();
         activeGiveaways.setGuildLongId(guildId);
@@ -292,9 +292,9 @@ public class Gift {
 
                                     if (notificationStatus.equals(Notification.NotificationStatus.ACCEPT)) {
                                         final String url = getDiscordUrlMessage(
-                                                t.getGiveawayGuildId().toString(),
-                                                String.valueOf(t.getActiveGiveaways().getChannelIdLong()),
-                                                String.valueOf(t.getActiveGiveaways().getMessageIdLong()));
+                                                t.getGiveawayGuildId(),
+                                                t.getActiveGiveaways().getChannelIdLong(),
+                                                t.getActiveGiveaways().getMessageIdLong());
 
                                         final String giftRegistered = String.format(
                                                 jsonParsers.getLocale("gift_registered", t.getGiveawayGuildId().toString()), url);
@@ -467,8 +467,8 @@ public class Gift {
         EmbedBuilder winners = new EmbedBuilder();
         winners.setColor(Color.GREEN);
 
-        String messageId = GiveawayRegistry.getInstance().getMessageId(this.guildId);
-        String url = URLS.getDiscordUrlMessage(String.valueOf(this.guildId), String.valueOf(this.textChannelId), messageId);
+        long messageId = GiveawayRegistry.getInstance().getMessageId(this.guildId);
+        String url = URLS.getDiscordUrlMessage(this.guildId, this.textChannelId, messageId);
 
         String winnerArray = Arrays.toString(uniqueWinners.toArray())
                 .replaceAll("\\[", "")
@@ -525,7 +525,7 @@ public class Gift {
         }
     }
 
-    public boolean isUserInList(String id) {
+    public boolean hasUserInList(String id) {
         return listUsersHash.containsKey(id);
     }
 
