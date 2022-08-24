@@ -33,6 +33,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.utils.FileUpload;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
@@ -556,7 +557,9 @@ public class SlashCommand extends ListenerAdapter {
                 writer.flush();
                 writer.close();
 
-                event.getHook().sendFile(file).setEphemeral(true).queue();
+                FileUpload fileUpload = FileUpload.fromData(file);
+
+                event.getHook().sendFiles(fileUpload).setEphemeral(true).queue();
                 return;
             } catch (Exception e) {
                 e.printStackTrace();

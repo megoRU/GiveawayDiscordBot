@@ -28,7 +28,6 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 
@@ -276,9 +275,8 @@ public class Gift {
                     participantsRepository.saveAllAndFlush(temp);
 
                     String buttonNotification = jsonParsers.getLocale("button_notification", String.valueOf(this.guildId));
-                    List<ActionRow> buttons = new ArrayList<>();
-                    buttons.add(ActionRow.of(Button.danger(ReactionsButton.DISABLE_NOTIFICATIONS, buttonNotification)));
-
+                    List<Button> buttons = new ArrayList<>();
+                    buttons.add(Button.danger(ReactionsButton.DISABLE_NOTIFICATIONS, buttonNotification));
 
                     for (int i = 0; i < temp.size(); i++) {
                         temp.forEach(t -> {

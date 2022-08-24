@@ -74,7 +74,8 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
             event.getGuild()
                     .getDefaultChannel()
                     .asTextChannel()
-                    .sendMessageEmbeds(welcome.build()).setActionRow(buttons)
+                    .sendMessageEmbeds(welcome.build())
+                    .setActionRow(buttons)
                     .queue();
         } catch (Exception e) {
             System.out.println("Скорее всего нет `DefaultChannel`!");
