@@ -34,6 +34,7 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
             event.deferEdit().queue();
             if (event.getButton().getEmoji() != null) {
                 String buttonName = event.getButton().getEmoji().getName().contains(FLAG_RUS) ? "rus" : "eng";
+                event.editButton(event.getButton().asDisabled()).queue();
 
                 Language language = new Language();
                 language.setServerId(event.getGuild().getId());
@@ -43,7 +44,6 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
                 BotStartConfig.getMapLanguages().put(event.getGuild().getId(), buttonName);
 
                 String buttonLanguage = String.format(jsonParsers.getLocale("button_language", event.getGuild().getId()), buttonName);
-
                 event.getHook()
                         .sendMessage(buttonLanguage)
                         .setEphemeral(true).queue();
@@ -53,6 +53,7 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
 
         if (Objects.equals(event.getButton().getId(), DISABLE_NOTIFICATIONS)) {
             event.deferEdit().queue();
+            event.editButton(event.getButton().asDisabled()).queue();
 
             Notification notification = new Notification();
             notification.setUserIdLong(event.getUser().getId());
