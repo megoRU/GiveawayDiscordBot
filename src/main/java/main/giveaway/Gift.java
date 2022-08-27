@@ -201,8 +201,13 @@ public class Gift {
 
         try {
             String sendSlashMessage = String.format(jsonParsers.getLocale("send_slash_message", guild.getId()), textChannel.getId());
-            event.reply(sendSlashMessage)
-                    .delay(7, TimeUnit.SECONDS)
+
+            String message = sendSlashMessage + "\nIf you have lost an active Giveaway, please do not delete it and write to our support service" +
+                    "\nWe will restore everything." +
+                    "\nhttps://discord.gg/UrWG3R683d";
+
+            event.reply(message)
+                    .delay(120, TimeUnit.SECONDS)
                     .flatMap(InteractionHook::deleteOriginal)
                     .queue();
         } catch (Exception e) {
