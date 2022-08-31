@@ -199,19 +199,17 @@ public class Gift {
 
         extracted(start, guild, textChannel, newTitle, countWinners, time, role, isOnlyForSpecificRole, urlImage);
 
+        String sendSlashMessage = String.format(jsonParsers.getLocale("send_slash_message", guild.getId()), textChannel.getId());
+
         try {
-            String sendSlashMessage = String.format(jsonParsers.getLocale("send_slash_message", guild.getId()), textChannel.getId());
-
-            String message = sendSlashMessage + "\nIf you have lost an active Giveaway, please do not delete it and write to our support service" +
-                    "\nWe will restore everything." +
-                    "\nhttps://discord.gg/UrWG3R683d";
-
-            event.reply(message)
-                    .delay(120, TimeUnit.SECONDS)
+            event.reply(sendSlashMessage)
+                    .delay(7, TimeUnit.SECONDS)
                     .flatMap(InteractionHook::deleteOriginal)
                     .queue();
         } catch (Exception e) {
-            e.printStackTrace();
+            if (!e.getMessage().contains("10008: Unknown Message")) {
+                e.printStackTrace();
+            }
         }
 
         textChannel.sendMessageEmbeds(start.build())
