@@ -14,7 +14,6 @@ import main.giveaway.reactions.Reactions;
 import main.jsonparser.JSONParsers;
 import main.messagesevents.SenderMessage;
 import main.model.entity.ActiveGiveaways;
-import main.model.entity.Convector;
 import main.model.entity.Notification;
 import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
@@ -293,17 +292,17 @@ public class Gift {
 
                                     if (notificationStatus.equals(Notification.NotificationStatus.ACCEPT)) {
                                         final String url = getDiscordUrlMessage(
-                                                t.getGiveawayGuildId(),
+                                                Long.parseLong(t.getGiveawayIdLong()),
                                                 t.getActiveGiveaways().getChannelIdLong(),
                                                 t.getActiveGiveaways().getMessageIdLong());
 
                                         final String giftRegistered = String.format(
-                                                jsonParsers.getLocale("gift_registered", t.getGiveawayGuildId().toString()), url);
+                                                jsonParsers.getLocale("gift_registered", t.getGiveawayIdLong()), url);
 
 
-                                        final String giftVote = jsonParsers.getLocale("gift_vote", t.getGiveawayGuildId().toString());
+                                        final String giftVote = jsonParsers.getLocale("gift_vote", t.getGiveawayIdLong());
                                         final String userIdLong = String.valueOf(t.getUserIdLong());
-                                        final String giftRegisteredTitle = jsonParsers.getLocale("gift_registered_title", t.getGiveawayGuildId().toString());
+                                        final String giftRegisteredTitle = jsonParsers.getLocale("gift_registered_title", t.getGiveawayIdLong());
 
                                         EmbedBuilder embedBuilder = new EmbedBuilder();
                                         embedBuilder.setColor(Color.GREEN);
@@ -349,6 +348,10 @@ public class Gift {
         participants.setNickName(nickName);
         participants.setNickNameTag(nickNameTag);
         participants.setActiveGiveaways(activeGiveaways);
+        participants.setIdUserWhoCreateGiveaway(activeGiveaways.getIdUserWhoCreateGiveaway().toString());
+        participants.setGuildIdLong(guildIdLong);
+        System.out.println("activeGiveaways.getGuildLongId() + activeGiveaways.getMessageIdLong() " + (activeGiveaways.getGuildLongId() + activeGiveaways.getMessageIdLong()));
+        participants.setGiveawayIdLong(String.valueOf(activeGiveaways.getGuildLongId() + activeGiveaways.getMessageIdLong()));
         participantsList.add(participants);
     }
 
@@ -380,9 +383,7 @@ public class Gift {
             }
         }
 
-        List<api.megoru.ru.entity.Participants> participants =
-                new Convector(participantsRepository.getParticipantsByGuildIdLong(guildId))
-                        .getList();
+        List<Participants> participants = participantsRepository.getParticipantsByGuildIdLong(guildId);
 
         if (participants.isEmpty()) throw new Exception("participantsJSON is Empty");
 
@@ -393,7 +394,9 @@ public class Gift {
             System.out.println("getIdUserWhoCreateGiveaway " + participants.get(i).getIdUserWhoCreateGiveaway()
                     + " getUserIdLong " + participants.get(i).getUserIdLong()
                     + " getNickNameTag " + participants.get(i).getNickNameTag()
-                    + " getGiveawayId " + participants.get(i).getGiveawayId());
+                    + " getGiveawayId " + participants.get(i).getGiveawayIdLong()
+                    + " getGuildId " + participants.get(i).getGuildIdLong()
+            );
         }
 
         try {
