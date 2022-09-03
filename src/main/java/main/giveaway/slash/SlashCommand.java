@@ -442,78 +442,80 @@ public class SlashCommand extends ListenerAdapter {
 
         if (event.getName().equals("reroll")) {
             event.deferReply().queue();
+            OptionMapping option = event.getOption("id");
 
-            if (!event.getOption("id").getAsString().matches("\\d+")) {
-                event.getHook().sendMessage("ID is not Number!").setEphemeral(true).queue();
-                return;
-            }
+            if (option != null) {
 
-            Long id = event.getOption("id", OptionMapping::getAsLong);
-
-            if (GiveawayRegistry.getInstance().hasGift(event.getGuild().getIdLong())) {
-                String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_stop_giveaway", event.getGuild().getId());
-
-                EmbedBuilder giveaway = new EmbedBuilder();
-                giveaway.setColor(Color.orange);
-                giveaway.setDescription(messageGiftNeedStopGiveaway);
-                event.getHook().sendMessageEmbeds(giveaway.build()).setEphemeral(true).queue();
-                return;
-            }
-
-
-            MegoruAPI api = new MegoruAPIImpl(System.getenv("BASE64_PASSWORD"));
-            Participants[] listUsers;
-
-            try {
-                listUsers = api.getListUsers(event.getUser().getId(), String.valueOf(id));
-
-                Winners winners = new Winners(1, 0, listUsers.length - 1);
-
-                WinnersAndParticipants winnersAndParticipants = new WinnersAndParticipants();
-                winnersAndParticipants.setUpdate(false);
-                winnersAndParticipants.setWinners(winners);
-                winnersAndParticipants.setUserList(List.of(listUsers));
-
-                String[] strings = api.setWinners(winnersAndParticipants);
-
-                final Set<String> uniqueWinners = new LinkedHashSet<>();
-
-
-                if (strings == null) throw new Exception("API not work, or connection refused");
-
-                for (int i = 0; i < strings.length; i++) {
-                    uniqueWinners.add("<@" + listUsers[Integer.parseInt(strings[i])].getUserIdLong() + ">");
+                if (!option.getAsString().matches("\\d+")) {
+                    event.getHook().sendMessage("ID is not Number!").setEphemeral(true).queue();
+                    return;
                 }
 
-                String winnerList = Arrays.toString(uniqueWinners.toArray())
-                        .replaceAll("\\[", "")
-                        .replaceAll("]", "");
-                String giftCongratulationsReroll = String.format(jsonParsers.getLocale("gift_congratulations_reroll",
-                        event.getGuild().getId()), winnerList);
+                Long id = event.getOption("id", OptionMapping::getAsLong);
 
-                EmbedBuilder winner = new EmbedBuilder();
-                winner.setColor(Color.GREEN);
-                winner.setDescription(giftCongratulationsReroll);
+                if (GiveawayRegistry.getInstance().hasGift(event.getGuild().getIdLong())) {
+                    String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_stop_giveaway", event.getGuild().getId());
 
-
-                event.getHook().sendMessageEmbeds(winner.build()).queue();
-            } catch (UnsuccessfulHttpException exception) {
-                if (exception.getCode() == 404) {
-                    event.getHook().sendMessage(exception.getMessage()).setEphemeral(true).queue();
-                } else {
-                    EmbedBuilder errors = new EmbedBuilder();
-                    errors.setColor(Color.RED);
-                    errors.setTitle("Errors with API");
-                    errors.setDescription("Repeat later. Or write to us about it.");
-
-                    List<net.dv8tion.jda.api.interactions.components.buttons.Button> buttons = new ArrayList<>();
-                    buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
-
-                    event.getHook().sendMessageEmbeds(errors.build()).addActionRow(buttons).queue();
+                    EmbedBuilder giveaway = new EmbedBuilder();
+                    giveaway.setColor(Color.orange);
+                    giveaway.setDescription(messageGiftNeedStopGiveaway);
+                    event.getHook().sendMessageEmbeds(giveaway.build()).setEphemeral(true).queue();
+                    return;
                 }
-                return;
-            } catch (Exception e) {
-                e.printStackTrace();
+
+
+                MegoruAPI api = new MegoruAPIImpl(System.getenv("BASE64_PASSWORD"));
+
+                try {
+                    Participants[] listUsers = api.getListUsers(event.getUser().getId(), String.valueOf(id));
+
+                    Winners winners = new Winners(1, 0, listUsers.length - 1);
+
+                    WinnersAndParticipants winnersAndParticipants = new WinnersAndParticipants();
+                    winnersAndParticipants.setUpdate(false);
+                    winnersAndParticipants.setWinners(winners);
+                    winnersAndParticipants.setUserList(List.of(listUsers));
+
+                    String[] strings = api.setWinners(winnersAndParticipants);
+
+                    final Set<String> uniqueWinners = new LinkedHashSet<>();
+
+                    for (int i = 0; i < strings.length; i++) {
+                        uniqueWinners.add("<@" + listUsers[Integer.parseInt(strings[i])].getUserIdLong() + ">");
+                    }
+
+                    String winnerList = Arrays.toString(uniqueWinners.toArray())
+                            .replaceAll("\\[", "")
+                            .replaceAll("]", "");
+                    String giftCongratulationsReroll = String.format(jsonParsers.getLocale("gift_congratulations_reroll",
+                            event.getGuild().getId()), winnerList);
+
+                    EmbedBuilder winner = new EmbedBuilder();
+                    winner.setColor(Color.GREEN);
+                    winner.setDescription(giftCongratulationsReroll);
+
+
+                    event.getHook().sendMessageEmbeds(winner.build()).queue();
+                } catch (UnsuccessfulHttpException exception) {
+                    if (exception.getCode() == 404) {
+                        event.getHook().sendMessage(exception.getMessage()).setEphemeral(true).queue();
+                    } else {
+                        EmbedBuilder errors = new EmbedBuilder();
+                        errors.setColor(Color.RED);
+                        errors.setTitle("Errors with API");
+                        errors.setDescription("Repeat later. Or write to us about it.");
+
+                        List<net.dv8tion.jda.api.interactions.components.buttons.Button> buttons = new ArrayList<>();
+                        buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
+
+                        event.getHook().sendMessageEmbeds(errors.build()).addActionRow(buttons).queue();
+                    }
+                    return;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                event.getHook().sendMessage("Options is null").setEphemeral(true).queue();
             }
             return;
         }
