@@ -350,11 +350,11 @@ public class Gift {
         participants.setActiveGiveaways(activeGiveaways);
         participants.setIdUserWhoCreateGiveaway(activeGiveaways.getIdUserWhoCreateGiveaway().toString());
         participants.setGuildIdLong(guildIdLong);
-        System.out.println("activeGiveaways.getGuildLongId() + activeGiveaways.getMessageIdLong() " + (activeGiveaways.getGuildLongId() + activeGiveaways.getMessageIdLong()));
         participants.setGiveawayIdLong(String.valueOf(activeGiveaways.getGuildLongId() + activeGiveaways.getMessageIdLong()));
         participantsList.add(participants);
     }
 
+    //TODO: Не завершается после заверешения
     //Автоматически отправляет в БД данные которые в буфере StringBuilder
     public void autoInsert() {
         new Timer().scheduleAtFixedRate(new TimerTask() {
@@ -399,29 +399,21 @@ public class Gift {
             );
         }
 
-        try {
-            Winners winners = new Winners(countWinner, 0, listUsersHash.size() - 1);
+        Winners winners = new Winners(countWinner, 0, listUsersHash.size() - 1);
 
-            WinnersAndParticipants winnersAndParticipants = new WinnersAndParticipants();
-            winnersAndParticipants.setUpdate(true);
-            winnersAndParticipants.setWinners(winners);
-            winnersAndParticipants.setUserList(participants);
+        WinnersAndParticipants winnersAndParticipants = new WinnersAndParticipants();
+        winnersAndParticipants.setUpdate(true);
+        winnersAndParticipants.setWinners(winners);
+        winnersAndParticipants.setUserList(participants);
 
-            LOGGER.info(winners.toString());
+        LOGGER.info(winners.toString());
 
-            String[] strings = api.setWinners(winnersAndParticipants);
+        List<String> temp = new LinkedList<>(listUsersHash.values());
 
-            List<String> temp = new LinkedList<>(listUsersHash.values());
+        String[] strings = api.setWinners(winnersAndParticipants);
 
-            if (strings == null) throw new Exception("API not work, or connection refused");
-
-            for (int i = 0; i < strings.length; i++) {
-                uniqueWinners.add("<@" + temp.get(Integer.parseInt(strings[i])) + ">");
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new Exception("API not work, or connection refused");
+        for (int i = 0; i < strings.length; i++) {
+            uniqueWinners.add("<@" + temp.get(Integer.parseInt(strings[i])) + ">");
         }
     }
 
@@ -465,6 +457,7 @@ public class Gift {
             buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
 
             SenderMessage.sendMessage(errors.build(), guildId, textChannelId, buttons);
+            e.printStackTrace();
             return;
         }
 
