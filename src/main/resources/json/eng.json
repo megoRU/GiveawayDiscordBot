@@ -48,7 +48,7 @@
   "start_examples": "There must be one of: \n`1h`\n`1d`\n`20m`\n`2022.08.18 13:48`",
   "gift_registered_title": "Giveaway",
   "gift_registered": "We have successfully registered you in [Giveaway](%s)",
-  "gift_vote": "\n\n[Vote for our bot, it will help us a lot](https://top.gg/bot/808277484524011531/vote)",
+  "gift_vote": "\n\nSupport us on [Patreon.com](https://www.patreon.com/ghbots)",
   "button_notification_deny": "Now the bot will not notify you!",
   "button_notification_accept": "Now the bot will notify you!",
   "button_notification": "Disable notifications"

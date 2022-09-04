@@ -292,17 +292,15 @@ public class Gift {
 
                                     if (notificationStatus.equals(Notification.NotificationStatus.ACCEPT)) {
                                         final String url = getDiscordUrlMessage(
-                                                Long.parseLong(t.getGiveawayIdLong()),
-                                                t.getActiveGiveaways().getChannelIdLong(),
+                                                guildIdLong,
+                                                textChannelId,
                                                 t.getActiveGiveaways().getMessageIdLong());
 
-                                        final String giftRegistered = String.format(
-                                                jsonParsers.getLocale("gift_registered", t.getGiveawayIdLong()), url);
+                                        final String giftRegistered = String.format(jsonParsers.getLocale("gift_registered", String.valueOf(t.getGuildIdLong())), url);
 
-
-                                        final String giftVote = jsonParsers.getLocale("gift_vote", t.getGiveawayIdLong());
+                                        final String giftVote = jsonParsers.getLocale("gift_vote", String.valueOf(t.getGuildIdLong()));
                                         final String userIdLong = String.valueOf(t.getUserIdLong());
-                                        final String giftRegisteredTitle = jsonParsers.getLocale("gift_registered_title", t.getGiveawayIdLong());
+                                        final String giftRegisteredTitle = jsonParsers.getLocale("gift_registered_title", String.valueOf(t.getGuildIdLong()));
 
                                         EmbedBuilder embedBuilder = new EmbedBuilder();
                                         embedBuilder.setColor(Color.GREEN);

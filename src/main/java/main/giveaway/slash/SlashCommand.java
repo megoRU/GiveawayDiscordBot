@@ -23,10 +23,7 @@ import main.model.repository.NotificationRepository;
 import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.entities.GuildChannel;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.unions.GuildChannelUnion;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -58,9 +55,8 @@ public class SlashCommand extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         if (event.getUser().isBot()) return;
-        if (event.getMember() == null) return;
-        if (event.getGuild() == null) return;
-        if (event.getChannelType().isThread()) {
+
+        if (event.getGuild() != null && event.getChannelType().isThread()) {
             String startInThread = jsonParsers.getLocale("start_in_thread", event.getGuild().getId());
             event.reply(startInThread).queue();
             return;
@@ -415,12 +411,13 @@ public class SlashCommand extends ListenerAdapter {
             EmbedBuilder giveaway = new EmbedBuilder();
             giveaway.setColor(Color.GREEN);
 
+            Guild guild = event.getGuild();
             if (event.getOptions().get(0).getAsString().equals("enable")) {
-                String buttonNotificationAccept = jsonParsers.getLocale("button_notification_accept", event.getGuild().getId());
+                String buttonNotificationAccept = jsonParsers.getLocale("button_notification_accept", guild == null ? "0" : guild.getId());
                 notificationStatus = Notification.NotificationStatus.ACCEPT;
                 giveaway.setDescription(buttonNotificationAccept);
             } else {
-                String buttonNotificationDeny = jsonParsers.getLocale("button_notification_deny", event.getGuild().getId());
+                String buttonNotificationDeny = jsonParsers.getLocale("button_notification_deny", guild == null ? "0" : guild.getId());
                 notificationStatus = Notification.NotificationStatus.DENY;
                 giveaway.setDescription(buttonNotificationDeny);
             }
