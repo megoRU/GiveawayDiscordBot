@@ -48,7 +48,7 @@
   "start_examples": "Должно быть что-то одно из: \n`1h`\n`1d`\n`20m`\n`2022.08.18 13:48`",
   "gift_registered_title": "Giveaway",
   "gift_registered": "Мы успешно зарегистрировали Вас в [Giveaway](%s)",
-  "gift_vote": "\n\n[Проголосуйте за нашего бота, это нам очень поможет](https://top.gg/bot/808277484524011531/vote)",
+  "gift_vote": "\n\nПоддержите нас на [Boosty.to](https://boosty.to/ghbots)",
   "button_notification_deny": "Теперь бот не будет уведомлять вас!",
   "button_notification_accept": "Теперь бот будет уведомлять вас!",
   "button_notification": "Отключить уведомления"
