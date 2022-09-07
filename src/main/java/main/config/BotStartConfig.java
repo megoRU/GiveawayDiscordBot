@@ -67,10 +67,7 @@ public class BotStartConfig {
     private final DiscordBotListAPI TOP_GG_API = new DiscordBotListAPI.Builder().token(Config.getTopGgApiToken()).botId(Config.getBotId()).build();
 
     //REPOSITORY
-    private final ActiveGiveawayRepository activeGiveawayRepository;
-    private final LanguageRepository languageRepository;
-    private final ParticipantsRepository participantsRepository;
-    private final NotificationRepository notificationRepository;
+    private static RepositoryHandler repositoryHandler;
 
     //DataBase
     @Value("${spring.datasource.url}")
@@ -81,17 +78,21 @@ public class BotStartConfig {
     private String PASSWORD_CONNECTION;
 
     @Autowired
-    public BotStartConfig(ActiveGiveawayRepository activeGiveawayRepository, LanguageRepository
-            languageRepository, ParticipantsRepository participantsRepository, NotificationRepository notificationRepository) {
-        this.activeGiveawayRepository = activeGiveawayRepository;
-        this.languageRepository = languageRepository;
-        this.participantsRepository = participantsRepository;
-        this.notificationRepository = notificationRepository;
+    public BotStartConfig(
+            ActiveGiveawayRepository activeGiveawayRepository,
+            LanguageRepository languageRepository,
+            ParticipantsRepository participantsRepository,
+            NotificationRepository notificationRepository) {
+        repositoryHandler = new RepositoryHandler(activeGiveawayRepository, languageRepository, participantsRepository, notificationRepository);
     }
 
     @Bean
     public synchronized void startBot() {
         try {
+            List<Participants> participantsRepository1 = repositoryHandler.getParticipants(772388035944906793L);
+
+            System.out.println(participantsRepository1.get(0).getNickName());
+
             //Загружаем GiveawayRegistry
             GiveawayRegistry.getInstance();
 
@@ -120,10 +121,10 @@ public class BotStartConfig {
             jdaBuilder.setStatus(OnlineStatus.ONLINE);
             jdaBuilder.setActivity(Activity.playing("Starting..."));
             jdaBuilder.setBulkDeleteSplittingEnabled(false);
-            jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild(activeGiveawayRepository, languageRepository));
-            jdaBuilder.addEventListeners(new ReactionsButton(languageRepository, notificationRepository));
+            jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild());
+            jdaBuilder.addEventListeners(new ReactionsButton());
             jdaBuilder.addEventListeners(new Reactions());
-            jdaBuilder.addEventListeners(new SlashCommand(languageRepository, activeGiveawayRepository, participantsRepository, notificationRepository));
+            jdaBuilder.addEventListeners(new SlashCommand());
 
             jda = jdaBuilder.build();
             jda.awaitReady();
@@ -310,16 +311,12 @@ public class BotStartConfig {
                 String url_image = rs.getString("url_image");
                 long id_user_who_create_giveaway = rs.getLong("id_user_who_create_giveaway");
 
-                List<Participants> participantsList = participantsRepository.getParticipantsByGuildIdLong(guild_long_id);
+                List<Participants> participantsList = repositoryHandler.getParticipants(guild_long_id);
 
 
                 GiveawayRegistry.getInstance().putGift(
                         guild_long_id,
-                        new Gift(guild_long_id,
-                                channel_long_id,
-                                id_user_who_create_giveaway,
-                                activeGiveawayRepository,
-                                participantsRepository));
+                        new Gift(guild_long_id, channel_long_id, id_user_who_create_giveaway));
 
 
                 GiveawayRegistry.getInstance().getGift(guild_long_id).autoInsert();
@@ -451,7 +448,7 @@ public class BotStartConfig {
                             || e.getMessage().contains("Missing permission: VIEW_CHANNEL")
                     ) {
                         System.out.println(e.getMessage() + " удаляем!");
-                        activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
+                        repositoryHandler.deleteActiveGiveaway(guildIdLong);
                         GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
                     } else {
                         e.printStackTrace();
@@ -502,6 +499,10 @@ public class BotStartConfig {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public static RepositoryHandler getRepositoryHandler() {
+        return repositoryHandler;
     }
 
     private boolean hasGift(long guildIdLong) {

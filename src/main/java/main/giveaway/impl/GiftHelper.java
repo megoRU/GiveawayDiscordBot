@@ -2,27 +2,16 @@ package main.giveaway.impl;
 
 import main.config.BotStartConfig;
 import main.giveaway.GiveawayRegistry;
-import main.model.repository.ActiveGiveawayRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
+import org.springframework.stereotype.Service;
 
-public class GiftHelper {
+@Service
+public interface GiftHelper {
 
-    private final ActiveGiveawayRepository activeGiveawayRepository;
-
-    public GiftHelper(ActiveGiveawayRepository activeGiveawayRepository) {
-        this.activeGiveawayRepository = activeGiveawayRepository;
-    }
-
-
-    public void editMessage(EmbedBuilder embedBuilder, final long guildId, final long textChannel) {
+    static void editMessage(EmbedBuilder embedBuilder, final long guildId, final long textChannel) {
         try {
-            //TODO: Удалить
-//            ChecksClass checksClass = new ChecksClass(activeGiveawayRepository);
-//
-//            if (checksClass.isGuildDeleted(guildId)) return;
-
             Guild guildById = BotStartConfig.getJda().getGuildById(guildId);
             if (guildById != null) {
                 TextChannel textChannelById = guildById.getTextChannelById(textChannel);
@@ -36,10 +25,9 @@ public class GiftHelper {
                 }
             }
         } catch (Exception e) {
-            if (e.getMessage().contains("10008: Unknown Message")
-                    || e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
+            if (e.getMessage().contains("10008: Unknown Message") || e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
                 System.out.println(e.getMessage() + " удаляем!");
-                activeGiveawayRepository.deleteActiveGiveaways(guildId);
+                BotStartConfig.getRepositoryHandler().deleteActiveGiveaway(guildId);
                 GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildId);
             } else {
                 e.printStackTrace();
@@ -47,7 +35,7 @@ public class GiftHelper {
         }
     }
 
-    public static String setEndingWord(int num, final long guildId) {
+    static String setEndingWord(int num, final long guildId) {
         String language = "eng";
         if (BotStartConfig.getMapLanguages().get(String.valueOf(guildId)) != null) {
             language = BotStartConfig.getMapLanguages().get(String.valueOf(guildId));
@@ -60,7 +48,7 @@ public class GiftHelper {
         };
     }
 
-    public static String getMinutes(String time) {
+    static String getMinutes(String time) {
         String symbol = time.substring(time.length() - 1);
         time = time.substring(0, time.length() - 1);
 

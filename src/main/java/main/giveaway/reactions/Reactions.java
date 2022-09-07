@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import java.awt.*;
 import java.util.logging.Logger;
 
-import static main.giveaway.impl.URLS.getDiscordUrlMessage;
+import static main.giveaway.impl.URLS.setGiveawayMessageUrl;
 
 public class Reactions extends ListenerAdapter implements SenderMessage {
 
@@ -40,7 +40,7 @@ public class Reactions extends ListenerAdapter implements SenderMessage {
                     long messageIdWithReaction = GiveawayRegistry.getInstance().getMessageId(guildIdLong);
 
                     if (messageIdWithReactionCurrent != messageIdWithReaction) return;
-                    String url = getDiscordUrlMessage(guildIdLong, event.getGuildChannel().getIdLong(), messageIdWithReactionCurrent);
+                    String url = setGiveawayMessageUrl(guildIdLong, event.getGuildChannel().getIdLong(), messageIdWithReactionCurrent);
                     Gift gift = GiveawayRegistry.getInstance().getGift(guildIdLong);
                     String roleId = String.valueOf(GiveawayRegistry.getInstance().getRoleId(guildIdLong));
 
