@@ -89,10 +89,6 @@ public class BotStartConfig {
     @Bean
     public synchronized void startBot() {
         try {
-            List<Participants> participantsRepository1 = repositoryHandler.getParticipants(772388035944906793L);
-
-            System.out.println(participantsRepository1.get(0).getNickName());
-
             //Загружаем GiveawayRegistry
             GiveawayRegistry.getInstance();
 
