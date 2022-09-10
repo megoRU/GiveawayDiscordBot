@@ -1,6 +1,7 @@
 package main.giveaway.impl;
 
 import main.config.BotStartConfig;
+import main.config.RepositoryHandler;
 import main.giveaway.GiveawayRegistry;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -9,6 +10,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface GiftHelper {
+
+    RepositoryHandler repositoryHandler = BotStartConfig.getRepositoryHandler();
+
 
     static void editMessage(EmbedBuilder embedBuilder, final long guildId, final long textChannel) {
         try {
@@ -27,7 +31,7 @@ public interface GiftHelper {
         } catch (Exception e) {
             if (e.getMessage().contains("10008: Unknown Message") || e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
                 System.out.println(e.getMessage() + " удаляем!");
-                BotStartConfig.getRepositoryHandler().deleteActiveGiveaway(guildId);
+                repositoryHandler.deleteActiveGiveaway(guildId);
                 GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildId);
             } else {
                 e.printStackTrace();

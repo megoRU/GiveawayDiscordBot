@@ -7,6 +7,7 @@ import api.megoru.ru.impl.MegoruAPIImpl;
 import lombok.Getter;
 import lombok.Setter;
 import main.config.BotStartConfig;
+import main.config.RepositoryHandler;
 import main.giveaway.buttons.ReactionsButton;
 import main.giveaway.impl.GiftHelper;
 import main.giveaway.impl.URLS;
@@ -18,6 +19,7 @@ import main.model.entity.Notification;
 import main.model.entity.Participants;
 import main.threads.StopGiveawayByTimer;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.Message;
@@ -49,6 +51,8 @@ public class Gift {
     private static final Logger LOGGER = Logger.getLogger(Gift.class.getName());
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
     private static final JSONParsers jsonParsers = new JSONParsers();
+    private static final RepositoryHandler repositoryHandler = BotStartConfig.getRepositoryHandler();
+    private static final JDA jda = BotStartConfig.getJda();
 
     //API
     private final MegoruAPI api = new MegoruAPIImpl(System.getenv("BASE64_PASSWORD"));
@@ -244,7 +248,7 @@ public class Gift {
             activeGiveaways.setDateEndGiveaway(time == null ? null : endGiveawayDate);
         }
 
-        BotStartConfig.getRepositoryHandler().saveActiveGiveaway(activeGiveaways);
+        repositoryHandler.saveActiveGiveaway(activeGiveaways);
     }
 
     //Добавляет пользователя в StringBuilder
@@ -267,7 +271,7 @@ public class Gift {
                     //Сохраняем всех участников в temp коллекцию
                     Set<Participants> temp = new LinkedHashSet<>(participantsList);
 
-                    BotStartConfig.getRepositoryHandler().saveParticipant(temp);
+                    repositoryHandler.saveParticipant(temp);
 
                     String buttonNotification = jsonParsers.getLocale("button_notification", String.valueOf(this.guildId));
                     List<Button> buttons = new ArrayList<>();
@@ -297,17 +301,11 @@ public class Gift {
 
                                         EmbedBuilder embedBuilder = new EmbedBuilder();
                                         embedBuilder.setColor(Color.GREEN);
-                                        embedBuilder.setAuthor(
-                                                giftRegisteredTitle,
-                                                null,
-                                                BotStartConfig.getJda().getSelfUser().getAvatarUrl());
+                                        embedBuilder.setAuthor(giftRegisteredTitle, null, jda.getSelfUser().getAvatarUrl());
                                         embedBuilder.setDescription(giftRegistered);
                                         embedBuilder.appendDescription(giftVote);
 
-                                        SenderMessage.sendPrivateMessageWithButtons(
-                                                BotStartConfig.getJda(),
-                                                userIdLong,
-                                                embedBuilder.build(), buttons);
+                                        SenderMessage.sendPrivateMessageWithButtons(jda, userIdLong, embedBuilder.build(), buttons);
                                     }
                                 }
                         );
@@ -333,7 +331,7 @@ public class Gift {
     }
 
     private void addUserToInsertQuery(final String nickName, final String nickNameTag, final long userIdLong, final long guildIdLong) {
-        ActiveGiveaways activeGiveaways = BotStartConfig.getRepositoryHandler().getGiveawayByGuildId(guildIdLong);
+        ActiveGiveaways activeGiveaways = repositoryHandler.getGiveawayByGuildId(guildIdLong);
         Participants participants = new Participants();
         participants.setUserIdLong(userIdLong);
         participants.setNickName(nickName);
@@ -374,7 +372,7 @@ public class Gift {
             }
         }
 
-        List<Participants> participants = BotStartConfig.getRepositoryHandler().getParticipants(guildId);
+        List<Participants> participants = repositoryHandler.getParticipants(guildId);
 
         if (participants.isEmpty()) throw new Exception("participantsJSON is Empty");
 
@@ -424,7 +422,7 @@ public class Gift {
                 //Отправляет сообщение
                 GiftHelper.editMessage(notEnoughUsers, guildIdLong, textChannelId);
 
-                BotStartConfig.getRepositoryHandler().deleteActiveGiveaway(guildIdLong);
+                repositoryHandler.deleteActiveGiveaway(guildIdLong);
 
                 //Удаляет данные из коллекций
                 clearingCollections();
@@ -482,7 +480,7 @@ public class Gift {
 
         SenderMessage.sendMessage(winners.build(), this.guildId, textChannelId);
 
-        BotStartConfig.getRepositoryHandler().deleteActiveGiveaway(guildIdLong);
+        repositoryHandler.deleteActiveGiveaway(guildIdLong);
 
         //Удаляет данные из коллекций
         clearingCollections();

@@ -9,6 +9,7 @@ import api.megoru.ru.io.UnsuccessfulHttpException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import main.config.BotStartConfig;
+import main.config.RepositoryHandler;
 import main.giveaway.ChecksClass;
 import main.giveaway.Gift;
 import main.giveaway.GiveawayRegistry;
@@ -38,8 +39,8 @@ import java.util.*;
 @Service
 public class SlashCommand extends ListenerAdapter {
 
-    private final JSONParsers jsonParsers = new JSONParsers();
-
+    private static final JSONParsers jsonParsers = new JSONParsers();
+    private static final RepositoryHandler repositoryHandler = BotStartConfig.getRepositoryHandler();
     private static final String TIME_REGEX = "^(\\d{1,2}h|\\d{1,2}m|\\d{1,2}d|\\d{4}.\\d{2}.\\d{2}\\s\\d{2}:\\d{2})$";
 
     @Override
@@ -178,7 +179,7 @@ public class SlashCommand extends ListenerAdapter {
                     event.replyEmbeds(errors.build()).queue();
                     GiveawayRegistry.getInstance().removeGuildFromGiveaway(event.getGuild().getIdLong());
 
-                    BotStartConfig.getRepositoryHandler().deleteActiveGiveaway(event.getGuild().getIdLong());
+                    repositoryHandler.deleteActiveGiveaway(event.getGuild().getIdLong());
                 }
             }
             return;
@@ -341,7 +342,7 @@ public class SlashCommand extends ListenerAdapter {
             language.setServerId(event.getGuild().getId());
             language.setLanguage(event.getOptions().get(0).getAsString());
 
-            BotStartConfig.getRepositoryHandler().saveLanguage(language);
+            repositoryHandler.saveLanguage(language);
             return;
         }
 
@@ -422,7 +423,7 @@ public class SlashCommand extends ListenerAdapter {
                     .setEphemeral(true)
                     .queue();
 
-            BotStartConfig.getRepositoryHandler().saveNotification(notification);
+            repositoryHandler.saveNotification(notification);
             return;
         }
 

@@ -1,6 +1,7 @@
 package main.giveaway.buttons;
 
 import main.config.BotStartConfig;
+import main.config.RepositoryHandler;
 import main.jsonparser.JSONParsers;
 import main.messagesevents.SenderMessage;
 import main.model.entity.Language;
@@ -19,6 +20,7 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
     public static final String DISABLE_NOTIFICATIONS = "DISABLE_NOTIFICATIONS";
     private static final JSONParsers jsonParsers = new JSONParsers();
     private static final String FLAG_RUS = "\uD83C\uDDF7\uD83C\uDDFA"; //🇷🇺
+    private static final RepositoryHandler repositoryHandler = BotStartConfig.getRepositoryHandler();
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
@@ -33,7 +35,7 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
                 Language language = new Language();
                 language.setServerId(event.getGuild().getId());
                 language.setLanguage(buttonName);
-                BotStartConfig.getRepositoryHandler().saveLanguage(language);
+                repositoryHandler.saveLanguage(language);
 
                 BotStartConfig.getMapLanguages().put(event.getGuild().getId(), buttonName);
 
@@ -59,7 +61,7 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
                     .sendMessage("Now the bot will not notify you!")
                     .queue();
 
-            BotStartConfig.getRepositoryHandler().saveNotification(notification);
+            repositoryHandler.saveNotification(notification);
         }
     }
 }

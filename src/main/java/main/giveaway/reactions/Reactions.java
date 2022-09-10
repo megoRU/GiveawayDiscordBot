@@ -20,7 +20,7 @@ public class Reactions extends ListenerAdapter implements SenderMessage {
 
     public static final String TADA = "\uD83C\uDF89";
     private static final JSONParsers jsonParsers = new JSONParsers();
-    private final static Logger LOGGER = Logger.getLogger(Reactions.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(Reactions.class.getName());
 
     @Override
     public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
