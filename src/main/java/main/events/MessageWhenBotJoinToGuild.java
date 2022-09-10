@@ -1,10 +1,8 @@
 package main.events;
 
-import lombok.AllArgsConstructor;
 import main.config.BotStartConfig;
+import main.config.RepositoryHandler;
 import main.giveaway.buttons.ReactionsButton;
-import main.model.repository.ActiveGiveawayRepository;
-import main.model.repository.LanguageRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -19,12 +17,10 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@AllArgsConstructor
 @Service
 public class MessageWhenBotJoinToGuild extends ListenerAdapter {
 
-    private final ActiveGiveawayRepository activeGiveawayRepository;
-    private final LanguageRepository languageRepository;
+    private static final RepositoryHandler repositoryHandler = BotStartConfig.getRepositoryHandler();
 
     //bot join msg
     @Override
@@ -88,8 +84,9 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
     public void onGuildLeave(@NotNull GuildLeaveEvent event) {
         try {
             System.out.println("Удаляем данные после удаления бота из Guild");
-            languageRepository.deleteLanguage(event.getGuild().getId());
-            activeGiveawayRepository.deleteActiveGiveaways(event.getGuild().getIdLong());
+
+            repositoryHandler.deleteLanguage(event.getGuild().getId());
+            repositoryHandler.deleteActiveGiveaway(event.getGuild().getIdLong());
         } catch (Exception e) {
             e.printStackTrace();
         }

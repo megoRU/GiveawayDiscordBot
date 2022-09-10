@@ -1,13 +1,11 @@
 package main.giveaway.buttons;
 
-import lombok.AllArgsConstructor;
 import main.config.BotStartConfig;
+import main.config.RepositoryHandler;
 import main.jsonparser.JSONParsers;
 import main.messagesevents.SenderMessage;
 import main.model.entity.Language;
 import main.model.entity.Notification;
-import main.model.repository.LanguageRepository;
-import main.model.repository.NotificationRepository;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -15,16 +13,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
-@AllArgsConstructor
 @Service
 public class ReactionsButton extends ListenerAdapter implements SenderMessage {
 
     public static final String CHANGE_LANGUAGE = "CHANGE_LANGUAGE";
     public static final String DISABLE_NOTIFICATIONS = "DISABLE_NOTIFICATIONS";
     private static final JSONParsers jsonParsers = new JSONParsers();
-    private final LanguageRepository languageRepository;
-    private final NotificationRepository notificationRepository;
     private static final String FLAG_RUS = "\uD83C\uDDF7\uD83C\uDDFA"; //🇷🇺
+    private static final RepositoryHandler repositoryHandler = BotStartConfig.getRepositoryHandler();
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
@@ -39,7 +35,7 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
                 Language language = new Language();
                 language.setServerId(event.getGuild().getId());
                 language.setLanguage(buttonName);
-                languageRepository.save(language);
+                repositoryHandler.saveLanguage(language);
 
                 BotStartConfig.getMapLanguages().put(event.getGuild().getId(), buttonName);
 
@@ -64,7 +60,8 @@ public class ReactionsButton extends ListenerAdapter implements SenderMessage {
             event.getHook()
                     .sendMessage("Now the bot will not notify you!")
                     .queue();
-            notificationRepository.save(notification);
+
+            repositoryHandler.saveNotification(notification);
         }
     }
 }
