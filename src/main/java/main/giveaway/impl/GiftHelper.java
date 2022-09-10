@@ -13,7 +13,6 @@ public interface GiftHelper {
 
     RepositoryHandler repositoryHandler = BotStartConfig.getRepositoryHandler();
 
-
     static void editMessage(EmbedBuilder embedBuilder, final long guildId, final long textChannel) {
         try {
             Guild guildById = BotStartConfig.getJda().getGuildById(guildId);
