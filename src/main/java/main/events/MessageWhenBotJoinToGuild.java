@@ -1,6 +1,7 @@
 package main.events;
 
 import main.config.BotStartConfig;
+import main.config.RepositoryHandler;
 import main.giveaway.buttons.ReactionsButton;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -18,6 +19,8 @@ import java.util.List;
 
 @Service
 public class MessageWhenBotJoinToGuild extends ListenerAdapter {
+
+    private static final RepositoryHandler repositoryHandler = BotStartConfig.getRepositoryHandler();
 
     //bot join msg
     @Override
@@ -82,8 +85,8 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
         try {
             System.out.println("Удаляем данные после удаления бота из Guild");
 
-            BotStartConfig.getRepositoryHandler().deleteLanguage(event.getGuild().getId());
-            BotStartConfig.getRepositoryHandler().deleteActiveGiveaway(event.getGuild().getIdLong());
+            repositoryHandler.deleteLanguage(event.getGuild().getId());
+            repositoryHandler.deleteActiveGiveaway(event.getGuild().getIdLong());
         } catch (Exception e) {
             e.printStackTrace();
         }
