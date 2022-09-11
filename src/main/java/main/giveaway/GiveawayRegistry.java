@@ -3,15 +3,15 @@ package main.giveaway;
 import main.jsonparser.JSONParsers;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class GiveawayRegistry {
 
     //Возвращает GiveawayData по long id
-    private static final Map<Long, Gift.GiveawayData> giveawayDataMap = new ConcurrentHashMap<>();
-    private static final Map<Long, Timer> giveawayTimer = new ConcurrentHashMap<>();
+    private static final Map<Long, Gift.GiveawayData> giveawayDataMap = new HashMap<>();
+    private static final Map<Long, Timer> giveawayTimer = new HashMap<>();
     private static final JSONParsers jsonParsers = new JSONParsers();
     private static volatile GiveawayRegistry giveawayRegistry;
 
@@ -114,8 +114,7 @@ public class GiveawayRegistry {
     }
 
     public void putGift(long guildId, Gift gift) {
-        Gift.GiveawayData giveawayData = gift.new GiveawayData();
-        giveawayDataMap.put(guildId, giveawayData);
+        giveawayDataMap.put(guildId, gift.new GiveawayData());
     }
 
     public void putCountWinners(long guildId, int countWinners) {

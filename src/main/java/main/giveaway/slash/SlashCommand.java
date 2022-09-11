@@ -8,8 +8,8 @@ import api.megoru.ru.impl.MegoruAPIImpl;
 import api.megoru.ru.io.UnsuccessfulHttpException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import lombok.AllArgsConstructor;
 import main.config.BotStartConfig;
-import main.config.RepositoryHandler;
 import main.giveaway.ChecksClass;
 import main.giveaway.Gift;
 import main.giveaway.GiveawayRegistry;
@@ -17,6 +17,10 @@ import main.giveaway.buttons.ReactionsButton;
 import main.jsonparser.JSONParsers;
 import main.model.entity.Language;
 import main.model.entity.Notification;
+import main.model.repository.ActiveGiveawayRepository;
+import main.model.repository.LanguageRepository;
+import main.model.repository.NotificationRepository;
+import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
@@ -36,11 +40,16 @@ import java.io.FileWriter;
 import java.util.List;
 import java.util.*;
 
+@AllArgsConstructor
 @Service
 public class SlashCommand extends ListenerAdapter {
 
-    private static final JSONParsers jsonParsers = new JSONParsers();
-    private static final RepositoryHandler repositoryHandler = BotStartConfig.getRepositoryHandler();
+    private final JSONParsers jsonParsers = new JSONParsers();
+    private final LanguageRepository languageRepository;
+    private final ActiveGiveawayRepository activeGiveawayRepository;
+    private final ParticipantsRepository participantsRepository;
+    private final NotificationRepository notificationRepository;
+
     private static final String TIME_REGEX = "^(\\d{1,2}h|\\d{1,2}m|\\d{1,2}d|\\d{4}.\\d{2}.\\d{2}\\s\\d{2}:\\d{2})$";
 
     @Override
@@ -150,7 +159,9 @@ public class SlashCommand extends ListenerAdapter {
                             event.getGuild().getIdLong(),
                             new Gift(event.getGuild().getIdLong(),
                                     textChannel == null ? event.getChannel().getIdLong() : textChannel.getIdLong(),
-                                    event.getUser().getIdLong()));
+                                    event.getUser().getIdLong(),
+                                    activeGiveawayRepository,
+                                    participantsRepository));
 
                     GiveawayRegistry.getInstance()
                             .getGift(event.getGuild().getIdLong())
@@ -178,8 +189,7 @@ public class SlashCommand extends ListenerAdapter {
 
                     event.replyEmbeds(errors.build()).queue();
                     GiveawayRegistry.getInstance().removeGuildFromGiveaway(event.getGuild().getIdLong());
-
-                    repositoryHandler.deleteActiveGiveaway(event.getGuild().getIdLong());
+                    activeGiveawayRepository.deleteActiveGiveaways(event.getGuild().getIdLong());
                 }
             }
             return;
@@ -341,8 +351,7 @@ public class SlashCommand extends ListenerAdapter {
             Language language = new Language();
             language.setServerId(event.getGuild().getId());
             language.setLanguage(event.getOptions().get(0).getAsString());
-
-            repositoryHandler.saveLanguage(language);
+            languageRepository.save(language);
             return;
         }
 
@@ -423,7 +432,7 @@ public class SlashCommand extends ListenerAdapter {
                     .setEphemeral(true)
                     .queue();
 
-            repositoryHandler.saveNotification(notification);
+            notificationRepository.save(notification);
             return;
         }
 

@@ -2,20 +2,26 @@ package main.giveaway;
 
 import main.config.BotStartConfig;
 import main.jsonparser.JSONParsers;
+import main.model.repository.ActiveGiveawayRepository;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
-public interface ChecksClass {
+public class ChecksClass {
 
-    JSONParsers jsonParsers = new JSONParsers();
+    private final ActiveGiveawayRepository activeGiveawayRepository;
+    public static final JSONParsers jsonParsers = new JSONParsers();
 
-    static boolean canSendGiveaway(GuildChannel srcChannel) {
+    public ChecksClass(ActiveGiveawayRepository activeGiveawayRepository) {
+        this.activeGiveawayRepository = activeGiveawayRepository;
+    }
+
+    public static boolean canSendGiveaway(GuildChannel srcChannel) {
         return srcChannel.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_SEND);
     }
 
-    static boolean canSendGiveaway(GuildChannel dstChannel, SlashCommandInteractionEvent event) {
+    public static boolean canSendGiveaway(GuildChannel dstChannel, SlashCommandInteractionEvent event) {
         Member selfMember = dstChannel.getGuild().getSelfMember();
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -59,12 +65,12 @@ public interface ChecksClass {
     }
 
     //TODO: Я бы лучше переделал это.
-    static boolean isGuildDeleted(final long guildId) {
+    public boolean isGuildDeleted(final long guildId) {
         if (BotStartConfig.getJda().getGuildById(guildId) != null) {
             return false;
         } else {
             System.out.println("Бота нет в Guild -> Удаляем Giveaway!");
-            BotStartConfig.getRepositoryHandler().deleteActiveGiveaway(guildId);
+            activeGiveawayRepository.deleteActiveGiveaways(guildId);
             GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildId);
             return true;
         }
