@@ -14,13 +14,13 @@ import org.jetbrains.annotations.NotNull;
 import java.awt.*;
 import java.util.logging.Logger;
 
-import static main.giveaway.impl.URLS.setGiveawayMessageUrl;
+import static main.giveaway.impl.URLS.getDiscordUrlMessage;
 
 public class Reactions extends ListenerAdapter implements SenderMessage {
 
     public static final String TADA = "\uD83C\uDF89";
     private static final JSONParsers jsonParsers = new JSONParsers();
-    private static final Logger LOGGER = Logger.getLogger(Reactions.class.getName());
+    private final static Logger LOGGER = Logger.getLogger(Reactions.class.getName());
 
     @Override
     public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
@@ -40,7 +40,7 @@ public class Reactions extends ListenerAdapter implements SenderMessage {
                     long messageIdWithReaction = GiveawayRegistry.getInstance().getMessageId(guildIdLong);
 
                     if (messageIdWithReactionCurrent != messageIdWithReaction) return;
-                    String url = setGiveawayMessageUrl(guildIdLong, event.getGuildChannel().getIdLong(), messageIdWithReactionCurrent);
+                    String url = getDiscordUrlMessage(guildIdLong, event.getGuildChannel().getIdLong(), messageIdWithReactionCurrent);
                     Gift gift = GiveawayRegistry.getInstance().getGift(guildIdLong);
                     String roleId = String.valueOf(GiveawayRegistry.getInstance().getRoleId(guildIdLong));
 

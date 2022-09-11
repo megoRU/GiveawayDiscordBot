@@ -9,7 +9,6 @@ public final class StopGiveawayByTimer extends TimerTask {
 
     private final Long idGuild;
     private static final Logger LOGGER = Logger.getLogger(StopGiveawayByTimer.class.getName());
-
     public StopGiveawayByTimer(Long idGuild) {
         this.idGuild = idGuild;
     }

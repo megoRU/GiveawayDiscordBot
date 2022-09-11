@@ -18,6 +18,7 @@ public interface ActiveGiveawayRepository extends JpaRepository<ActiveGiveaways,
     @Query(value = "DELETE FROM ActiveGiveaways ac WHERE ac.guildLongId = :guildIdLong")
     void deleteActiveGiveaways(@Param("guildIdLong") Long guildIdLong);
 
+
     @Query(value = "SELECT ac FROM ActiveGiveaways ac WHERE ac.guildLongId = :guildIdLong")
     ActiveGiveaways getActiveGiveawaysByGuildIdLong(@Param("guildIdLong") Long guildIdLong);
 
