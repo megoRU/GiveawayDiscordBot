@@ -19,6 +19,7 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -447,10 +448,8 @@ public class BotStartConfig {
                         }
                     }
                 } catch (Exception e) {
-                    if (e.getMessage().contains("10008: Unknown Message")
-                            || e.getMessage().contains("Missing permission: VIEW_CHANNEL")
-                    ) {
-                        System.out.println(e.getMessage() + " удаляем!");
+                    if (e.getMessage().contains("10008: Unknown Message") || e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
+                        System.out.println("updateUserList() " + e.getMessage() + " удаляем!");
                         activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
                         GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
                     } else {
