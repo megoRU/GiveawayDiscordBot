@@ -25,10 +25,7 @@ import net.dv8tion.jda.api.entities.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.sql.Timestamp;
@@ -38,7 +35,6 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
@@ -113,9 +109,11 @@ public class Gift {
         this.participantsRepository = participantsRepository;
     }
 
-    private void extracted(EmbedBuilder start, Guild guild, GuildMessageChannel channel,
+    private EmbedBuilder extracted(Guild guild, GuildMessageChannel channel,
                            String newTitle, int countWinners,
                            String time, Long role, boolean isOnlyForSpecificRole, String urlImage) {
+        EmbedBuilder start = new EmbedBuilder();
+
         LOGGER.info("\nGuild id: " + guild.getId()
                 + "\nTextChannel: " + channel.getName() + " " + channel.getId()
                 + "\nTitle: " + newTitle
@@ -186,30 +184,29 @@ public class Gift {
         if (urlImage != null) {
             start.setImage(urlImage);
         }
-
+        return start;
     }
 
-    public void startGift(@NotNull SlashCommandInteractionEvent event, Guild guild,
+    public void startGift(Guild guild,
                           GuildMessageChannel textChannel, String newTitle, int countWinners,
                           String time, Long role, boolean isOnlyForSpecificRole,
                           String urlImage, Long idUserWhoCreateGiveaway) {
 
-        EmbedBuilder start = new EmbedBuilder();
-
-        extracted(start, guild, textChannel, newTitle, countWinners, time, role, isOnlyForSpecificRole, urlImage);
+        EmbedBuilder start = extracted(guild, textChannel, newTitle, countWinners, time, role, isOnlyForSpecificRole, urlImage);
 
         String sendSlashMessage = String.format(jsonParsers.getLocale("send_slash_message", guild.getId()), textChannel.getId());
 
-        try {
-            event.reply(sendSlashMessage)
-                    .delay(7, TimeUnit.SECONDS)
-                    .flatMap(InteractionHook::deleteOriginal)
-                    .queue();
-        } catch (Exception e) {
-            if (!e.getMessage().contains("10008: Unknown Message")) {
-                e.printStackTrace();
-            }
-        }
+//        try {
+//            event.reply(sendSlashMessage)
+//                    .setEphemeral(true)
+//                    .delay(7, TimeUnit.SECONDS)
+//                    .flatMap(InteractionHook::deleteOriginal)
+//                    .queue();
+//        } catch (Exception e) {
+//            if (!e.getMessage().contains("10008: Unknown Message")) {
+//                e.printStackTrace();
+//            }
+//        }
 
         textChannel.sendMessageEmbeds(start.build())
                 .queue(message -> {
