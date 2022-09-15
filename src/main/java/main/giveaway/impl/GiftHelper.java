@@ -5,7 +5,7 @@ import main.giveaway.GiveawayRegistry;
 import main.model.repository.ActiveGiveawayRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 
 public class GiftHelper {
 
