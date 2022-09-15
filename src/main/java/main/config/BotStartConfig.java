@@ -448,10 +448,8 @@ public class BotStartConfig {
                         }
                     }
                 } catch (Exception e) {
-                    if (e.getMessage().contains("10008: Unknown Message")
-                            || e.getMessage().contains("Missing permission: VIEW_CHANNEL")
-                    ) {
-                        System.out.println(e.getMessage() + " удаляем!");
+                    if (e.getMessage().contains("10008: Unknown Message") || e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
+                        System.out.println("updateUserList() " + e.getMessage() + " удаляем!");
                         activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
                         GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
                     } else {
