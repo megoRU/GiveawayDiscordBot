@@ -403,9 +403,7 @@ public class BotStartConfig {
                         }
 
                         //-1 because one Bot
-                        if (hasGift(guildIdLong) && reactions != null
-                                && reactions.size() == 1
-                                && reactions.get(0).getCount() - 1 != gift.getListUsersSize()) {
+                        if (hasGift(guildIdLong) && reactions != null && reactions.get(0).getCount() - 1 != gift.getListUsersSize()) {
 
                             for (int i = 0; i < reactions.size(); i++) {
                                 List<User> userList;
@@ -420,6 +418,7 @@ public class BotStartConfig {
                                             .filter(user -> !gift.hasUserInList(user.getId()))
                                             .filter(user -> guildById
                                                     //TODO: This block thread may be use *parallelStream()*
+                                                    //TODO: RateLimit может быть в будущем
                                                     .retrieveMember(user).complete()
                                                     .getRoles()
                                                     .contains(roleGiveaway))
@@ -433,7 +432,6 @@ public class BotStartConfig {
                                             .filter(user -> !gift.hasUserInList(user.getId()))
                                             .collect(Collectors.toList());
                                 }
-
 
                                 //System.out.println("UserList count: " + userList);
                                 //Перебираем Users в реакциях
