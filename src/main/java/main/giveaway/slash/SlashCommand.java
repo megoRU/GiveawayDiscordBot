@@ -83,6 +83,40 @@ public class SlashCommand extends ListenerAdapter {
             return;
         }
 
+        if (event.getName().equals("notifications")) {
+            event.deferReply().queue();
+
+            Notification.NotificationStatus notificationStatus;
+            String userId = event.getUser().getId();
+
+            EmbedBuilder giveaway = new EmbedBuilder();
+            giveaway.setColor(Color.GREEN);
+
+            Guild guild = event.getGuild();
+            if (event.getOptions().get(0).getAsString().equals("enable")) {
+                String buttonNotificationAccept = jsonParsers.getLocale("button_notification_accept", guild == null ? "0" : guild.getId());
+                notificationStatus = Notification.NotificationStatus.ACCEPT;
+                giveaway.setDescription(buttonNotificationAccept);
+            } else {
+                String buttonNotificationDeny = jsonParsers.getLocale("button_notification_deny", guild == null ? "0" : guild.getId());
+                notificationStatus = Notification.NotificationStatus.DENY;
+                giveaway.setDescription(buttonNotificationDeny);
+            }
+
+            BotStartConfig.getMapNotifications().put(userId, notificationStatus);
+
+            Notification notification = new Notification();
+            notification.setUserIdLong(userId);
+            notification.setNotificationStatus(notificationStatus);
+
+            event.getHook().sendMessageEmbeds(giveaway.build())
+                    .setEphemeral(true)
+                    .queue();
+
+            notificationRepository.save(notification);
+            return;
+        }
+
         long guildIdLong = event.getGuild().getIdLong();
         if (event.getName().equals("start")) {
             if (GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
@@ -417,40 +451,6 @@ public class SlashCommand extends ListenerAdapter {
                 noGiveaway.setDescription(slashStopNoHas);
                 event.replyEmbeds(noGiveaway.build()).setEphemeral(true).queue();
             }
-            return;
-        }
-
-        if (event.getName().equals("notifications")) {
-            event.deferReply().queue();
-
-            Notification.NotificationStatus notificationStatus;
-            String userId = event.getUser().getId();
-
-            EmbedBuilder giveaway = new EmbedBuilder();
-            giveaway.setColor(Color.GREEN);
-
-            Guild guild = event.getGuild();
-            if (event.getOptions().get(0).getAsString().equals("enable")) {
-                String buttonNotificationAccept = jsonParsers.getLocale("button_notification_accept", guild == null ? "0" : guild.getId());
-                notificationStatus = Notification.NotificationStatus.ACCEPT;
-                giveaway.setDescription(buttonNotificationAccept);
-            } else {
-                String buttonNotificationDeny = jsonParsers.getLocale("button_notification_deny", guild == null ? "0" : guild.getId());
-                notificationStatus = Notification.NotificationStatus.DENY;
-                giveaway.setDescription(buttonNotificationDeny);
-            }
-
-            BotStartConfig.getMapNotifications().put(userId, notificationStatus);
-
-            Notification notification = new Notification();
-            notification.setUserIdLong(userId);
-            notification.setNotificationStatus(notificationStatus);
-
-            event.getHook().sendMessageEmbeds(giveaway.build())
-                    .setEphemeral(true)
-                    .queue();
-
-            notificationRepository.save(notification);
             return;
         }
 
