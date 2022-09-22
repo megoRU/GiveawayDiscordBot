@@ -259,7 +259,8 @@ public class SlashCommand extends ListenerAdapter {
                 return;
             }
 
-            if (!event.getMember().hasPermission(event.getGuildChannel(), Permission.ADMINISTRATOR)
+            if (event.getMember() != null
+                    && !event.getMember().hasPermission(event.getGuildChannel(), Permission.ADMINISTRATOR)
                     && !event.getMember().hasPermission(event.getGuildChannel(), Permission.MESSAGE_MANAGE)) {
                 String messageGiftNotAdmin = jsonParsers.getLocale("message_gift_not_admin", event.getGuild().getId());
 
@@ -377,7 +378,7 @@ public class SlashCommand extends ListenerAdapter {
         //0 - bot
         if (event.getName().equals("language")) {
 
-            if (!event.getMember().hasPermission(Permission.MANAGE_SERVER)) {
+            if (event.getMember() != null && !event.getMember().hasPermission(Permission.MANAGE_SERVER)) {
 
                 String languageChangeNotAdmin = jsonParsers.getLocale("language_change_not_admin", event.getGuild().getId());
 
@@ -412,9 +413,8 @@ public class SlashCommand extends ListenerAdapter {
             if (GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
 
                 StringBuilder stringBuilder = new StringBuilder();
-                List<String> participantsList = new ArrayList<>(GiveawayRegistry.getInstance()
-                        .getGift(guildIdLong)
-                        .getListUsersHash().values());
+
+                List<? extends Participants> participantsList = participantsRepository.getParticipantsByGuildIdLong(guildIdLong);
 
                 if (participantsList.isEmpty()) {
                     String slashListUsersEmpty = jsonParsers.getLocale("slash_list_users_empty", event.getGuild().getId());
@@ -426,9 +426,9 @@ public class SlashCommand extends ListenerAdapter {
                     return;
                 }
 
-                for (int i = 0; i < participantsList.size(); i++) {
+                for (Participants participants : participantsList) {
                     if (stringBuilder.length() < 4000) {
-                        stringBuilder.append(stringBuilder.length() == 0 ? "<@" : ", <@").append(participantsList.get(i)).append(">");
+                        stringBuilder.append(stringBuilder.length() == 0 ? "<@" : ", <@").append(participants.getUserIdLong()).append(">");
                     } else {
                         stringBuilder.append(" and others...");
                         break;
