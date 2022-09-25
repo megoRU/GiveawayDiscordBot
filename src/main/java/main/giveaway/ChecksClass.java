@@ -1,8 +1,6 @@
 package main.giveaway;
 
-import main.config.BotStartConfig;
 import main.jsonparser.JSONParsers;
-import main.model.repository.ActiveGiveawayRepository;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
@@ -10,12 +8,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 
 public class ChecksClass {
 
-    private final ActiveGiveawayRepository activeGiveawayRepository;
     public static final JSONParsers jsonParsers = new JSONParsers();
-
-    public ChecksClass(ActiveGiveawayRepository activeGiveawayRepository) {
-        this.activeGiveawayRepository = activeGiveawayRepository;
-    }
 
     public static boolean canSendGiveaway(GuildChannel srcChannel) {
         return srcChannel.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_SEND);
@@ -62,17 +55,5 @@ public class ChecksClass {
         }
 
         return bool;
-    }
-
-    //TODO: Я бы лучше переделал это.
-    public boolean isGuildDeleted(final long guildId) {
-        if (BotStartConfig.getJda().getGuildById(guildId) != null) {
-            return false;
-        } else {
-            System.out.println("Бота нет в Guild -> Удаляем Giveaway!");
-            activeGiveawayRepository.deleteActiveGiveaways(guildId);
-            GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildId);
-            return true;
-        }
     }
 }

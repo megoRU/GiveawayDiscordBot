@@ -60,23 +60,23 @@ public class GiftHelper {
         };
     }
 
-    public static String getMinutes(String time) {
-        String symbol = time.substring(time.length() - 1);
-        time = time.substring(0, time.length() - 1);
+    public static long getSeconds(String time) {
+        String[] splitTime = time.split("\\s+");
+        long seconds = 0;
 
-        if (symbol.equals("m") || symbol.equals("м")) {
-            return time;
+        for (String s : splitTime) {
+            long localTime = Long.parseLong(s.substring(0, s.length() - 1));
+            String symbol = s.substring(s.length() - 1);
+
+            switch (symbol) {
+                case "m", "м" -> seconds += localTime * 60;
+                case "h", "ч" -> seconds += localTime * 3600;
+                case "d", "д" -> seconds += localTime * 86400;
+                case "s", "с" -> seconds += localTime;
+            }
         }
 
-        if (symbol.equals("h") || symbol.equals("ч")) {
-            return String.valueOf(Integer.parseInt(time) * 60);
-        }
-
-        if (symbol.equals("d") || symbol.equals("д")) {
-            return String.valueOf(Integer.parseInt(time) * 1440);
-        }
-
-        throw new IllegalArgumentException("Argument don`t have symbol: " + time);
+        return seconds;
+//        throw new IllegalArgumentException("Argument don`t have symbol: " + time);
     }
-
 }

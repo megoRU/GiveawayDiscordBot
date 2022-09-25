@@ -50,4 +50,8 @@ public class Participants extends api.megoru.ru.entity.Participants {
     public String getIdUserWhoCreateGiveaway() {
         return activeGiveaways.getIdUserWhoCreateGiveaway().toString();
     }
+
+    public String getUserIdAsString() {
+        return String.valueOf(userIdLong);
+    }
 }

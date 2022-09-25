@@ -175,7 +175,7 @@ public class BotStartConfig {
             List<OptionData> optionsStart = new ArrayList<>();
             optionsStart.add(new OptionData(STRING, "title", "Title for Giveaway. Maximum 255 characters").setName("title"));
             optionsStart.add(new OptionData(INTEGER, "count", "Set count winners").setName("count").setMinValue(1).setMaxValue(30));
-            optionsStart.add(new OptionData(STRING, "duration", "Examples: 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style. Preferably immediately in UTC ±0")
+            optionsStart.add(new OptionData(STRING, "duration", "Examples: 5s, 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style and UTC ±0")
                     .setName("duration"));
             optionsStart.add(new OptionData(CHANNEL, "channel", "#TextChannel name").setName("textchannel"));
             optionsStart.add(new OptionData(ROLE, "mention", "Mentioning a specific Role").setName("mention"));
@@ -311,19 +311,24 @@ public class BotStartConfig {
                 String url_image = rs.getString("url_image");
                 long id_user_who_create_giveaway = rs.getLong("id_user_who_create_giveaway");
 
-                List<Participants> participantsList = participantsRepository.getParticipantsByGuildIdLong(guild_long_id);
-
+                Map<String, String> participantsList = participantsRepository
+                        .getParticipantsByGuildIdLong(guild_long_id)
+                        .stream()
+                        .collect(Collectors.toMap(Participants::getUserIdAsString, Participants::getUserIdAsString));
 
                 GiveawayRegistry.getInstance().putGift(
                         guild_long_id,
                         new Gift(guild_long_id,
                                 channel_long_id,
                                 id_user_who_create_giveaway,
+                                //Добавляем пользователей в hashmap
+                                participantsList,
                                 activeGiveawayRepository,
                                 participantsRepository));
 
+                //Устанавливаем счетчик на верное число
+                GiveawayRegistry.getInstance().getGift(guild_long_id).setCount(participantsList.size());
 
-                GiveawayRegistry.getInstance().getGift(guild_long_id).autoInsert();
                 GiveawayRegistry.getInstance().putMessageId(guild_long_id, message_id_long);
                 GiveawayRegistry.getInstance().putTitle(guild_long_id, giveaway_title);
                 GiveawayRegistry.getInstance().putEndGiveawayDate(guild_long_id, date_end_giveaway);
@@ -333,23 +338,6 @@ public class BotStartConfig {
                 GiveawayRegistry.getInstance().putIsForSpecificRole(guild_long_id, is_for_specific_role);
                 GiveawayRegistry.getInstance().putUrlImage(guild_long_id, url_image);
                 GiveawayRegistry.getInstance().putIdUserWhoCreateGiveaway(guild_long_id, id_user_who_create_giveaway);
-
-                for (int i = 0; i < participantsList.size(); i++) {
-
-                    long userIdLong = participantsList.get(i).getUserIdLong();
-                    //System.out.println("Guild id: " + guildIdHashList.get(i) + " user id long: " + userIdLong);
-
-                    //Добавляем пользователей в hashmap
-                    GiveawayRegistry.getInstance()
-                            .getGift(guild_long_id)
-                            .getListUsersHash()
-                            .put(String.valueOf(userIdLong), String.valueOf(userIdLong));
-
-                    //Устанавливаем счетчик на верное число
-                    GiveawayRegistry.getInstance()
-                            .getGift(guild_long_id)
-                            .setCount(participantsList.size());
-                }
 
                 if (date_end_giveaway != null) {
                     Timer timer = new Timer();
@@ -371,12 +359,12 @@ public class BotStartConfig {
 
     @Scheduled(fixedDelay = 240000, initialDelay = 17000)
     public void updateUserList() throws InterruptedException {
-        List<Gift.GiveawayData> giveawayDataList = new ArrayList<>(GiveawayRegistry.getGiveawayDataMap().values());
+        List<Gift.GiveawayData> giveawayDataList = new LinkedList<>(GiveawayRegistry.getGiveawayDataMap().values());
 
-        for (int l = 0; l < giveawayDataList.size(); l++) {
+        for (Gift.GiveawayData giveawayData : giveawayDataList) {
 
-            long guildIdLong = giveawayDataList.get(l).getGift().getGuildId();
-            boolean isForSpecificRole = giveawayDataList.get(l).getIsForSpecificRole();
+            long guildIdLong = giveawayData.getGift().getGuildId();
+            boolean isForSpecificRole = giveawayData.getIsForSpecificRole();
             long messageId = GiveawayRegistry.getInstance().getMessageId(guildIdLong);
 
             if (hasGift(guildIdLong)) {
@@ -405,12 +393,12 @@ public class BotStartConfig {
                         //-1 because one Bot
                         if (hasGift(guildIdLong) && reactions != null && reactions.get(0).getCount() - 1 != gift.getListUsersSize()) {
 
-                            for (int i = 0; i < reactions.size(); i++) {
+                            for (MessageReaction reaction : reactions) {
                                 List<User> userList;
 
                                 if (isForSpecificRole) {
-                                    Role roleGiveaway = jda.getRoleById(giveawayDataList.get(l).getRoleId());
-                                    userList = reactions.get(i)
+                                    Role roleGiveaway = jda.getRoleById(giveawayData.getRoleId());
+                                    userList = reaction
                                             .retrieveUsers()
                                             .complete()
                                             .stream()
@@ -424,7 +412,7 @@ public class BotStartConfig {
                                                     .contains(roleGiveaway))
                                             .collect(Collectors.toList());
                                 } else {
-                                    userList = reactions.get(i)
+                                    userList = reaction
                                             .retrieveUsers()
                                             .complete()
                                             .stream()
@@ -435,9 +423,7 @@ public class BotStartConfig {
 
                                 //System.out.println("UserList count: " + userList);
                                 //Перебираем Users в реакциях
-                                for (int o = 0; o < userList.size(); o++) {
-                                    User user = userList.get(o);
-
+                                for (User user : userList) {
                                     if (!hasGift(guildIdLong)) return;
                                     gift.addUserToPoll(user);
                                     //System.out.println("User id: " + user.getIdLong());

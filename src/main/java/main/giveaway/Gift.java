@@ -11,6 +11,7 @@ import main.giveaway.buttons.ReactionsButton;
 import main.giveaway.impl.GiftHelper;
 import main.giveaway.impl.URLS;
 import main.giveaway.reactions.Reactions;
+import main.giveaway.slash.SlashCommand;
 import main.jsonparser.JSONParsers;
 import main.messagesevents.SenderMessage;
 import main.model.entity.ActiveGiveaways;
@@ -38,9 +39,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
-import static main.giveaway.impl.URLS.getDiscordUrlMessage;
-
-@Getter
 @Setter
 public class Gift {
 
@@ -52,7 +50,7 @@ public class Gift {
     private final MegoruAPI api = new MegoruAPIImpl(System.getenv("BASE64_PASSWORD"));
 
     //User LIST
-    private final Map<String, String> listUsersHash = new LinkedHashMap<>();
+    private final Map<String, String> listUsersHash;
     private final Set<String> uniqueWinners = new LinkedHashSet<>();
 
     //USER DATA
@@ -60,8 +58,7 @@ public class Gift {
     private final long textChannelId;
     private final long userIdLong;
 
-    private StringBuilder insertQuery = new StringBuilder();
-    private AtomicInteger count = new AtomicInteger(0);
+    private final AtomicInteger count = new AtomicInteger(0);
     private int localCountUsers;
 
     //DTO
@@ -107,11 +104,28 @@ public class Gift {
         this.userIdLong = userIdLong;
         this.activeGiveawayRepository = activeGiveawayRepository;
         this.participantsRepository = participantsRepository;
+        this.listUsersHash = new LinkedHashMap<>();
+        autoInsert();
     }
 
-    private EmbedBuilder extracted(Guild guild, GuildMessageChannel channel,
-                           String newTitle, int countWinners,
-                           String time, Long role, boolean isOnlyForSpecificRole, String urlImage) {
+    public Gift(long guildId, long textChannelId, long userIdLong, Map<String, String> listUsersHash, ActiveGiveawayRepository activeGiveawayRepository, ParticipantsRepository participantsRepository) {
+        this.guildId = guildId;
+        this.textChannelId = textChannelId;
+        this.userIdLong = userIdLong;
+        this.activeGiveawayRepository = activeGiveawayRepository;
+        this.participantsRepository = participantsRepository;
+        this.listUsersHash = new LinkedHashMap<>(listUsersHash);
+        autoInsert();
+    }
+
+    private EmbedBuilder extracted(final Guild guild,
+                                   final GuildMessageChannel channel,
+                                   final String newTitle,
+                                   final int countWinners,
+                                   final String time,
+                                   final Long role,
+                                   final boolean isOnlyForSpecificRole,
+                                   final String urlImage) {
         EmbedBuilder start = new EmbedBuilder();
 
         LOGGER.info("\nGuild id: " + guild.getId()
@@ -148,9 +162,9 @@ public class Gift {
 
         String footer;
         if (countWinners == 1) {
-            footer = "1 " + GiftHelper.setEndingWord(1, guildId);
+            footer = String.format("1 %s", GiftHelper.setEndingWord(1, guildId));
         } else {
-            footer = countWinners + " " + GiftHelper.setEndingWord(countWinners, guildId);
+            footer = String.format("%s %s", countWinners, GiftHelper.setEndingWord(countWinners, guildId));
         }
 
         start.setFooter(footer);
@@ -160,26 +174,30 @@ public class Gift {
             start.setFooter(giftEndsAt);
             ZoneOffset offset = ZoneOffset.UTC;
             LocalDateTime localDateTime;
-            if (time.length() > 4) {
+            if (time.matches(SlashCommand.ISO_TIME_REGEX)) {
                 localDateTime = LocalDateTime.parse(time, formatter);
                 start.setTimestamp(localDateTime);
             } else {
-                String minutes = GiftHelper.getMinutes(time);
-                localDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).plusMinutes(Long.parseLong(minutes));
+                long seconds = GiftHelper.getSeconds(time);
+                localDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).plusSeconds(seconds);
                 start.setTimestamp(localDateTime);
             }
 
             if (localDateTime.isBefore(Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime())) {
                 throw new IllegalArgumentException(
-                        "Time in the past " + localDateTime
-                                + " Now: " + Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime());
+                        String.format("Time in the past %s Now %s",
+                                localDateTime,
+                                Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime()));
+
             }
 
-            start.appendDescription("\nEnds: <t:" + localDateTime.toEpochSecond(offset) + ":R> (<t:" + localDateTime.toEpochSecond(offset) + ":f>)");
+            String endTimeFormat = String.format("\nEnds: <t:%s:R> (<t:%s:f>)", localDateTime.toEpochSecond(offset), localDateTime.toEpochSecond(offset));
+            start.appendDescription(endTimeFormat);
             putTimestamp(localDateTime.toEpochSecond(offset));
         }
 
-        start.appendDescription("\nHosted by: " + "<@" + this.userIdLong + ">");
+        String hosted = String.format("\nHosted by: <@%s>", this.userIdLong);
+        start.appendDescription(hosted);
 
         if (urlImage != null) {
             start.setImage(urlImage);
@@ -193,20 +211,6 @@ public class Gift {
                           String urlImage, Long idUserWhoCreateGiveaway) {
 
         EmbedBuilder start = extracted(guild, textChannel, newTitle, countWinners, time, role, isOnlyForSpecificRole, urlImage);
-
-        String sendSlashMessage = String.format(jsonParsers.getLocale("send_slash_message", guild.getId()), textChannel.getId());
-
-//        try {
-//            event.reply(sendSlashMessage)
-//                    .setEphemeral(true)
-//                    .delay(7, TimeUnit.SECONDS)
-//                    .flatMap(InteractionHook::deleteOriginal)
-//                    .queue();
-//        } catch (Exception e) {
-//            if (!e.getMessage().contains("10008: Unknown Message")) {
-//                e.printStackTrace();
-//            }
-//        }
 
         textChannel.sendMessageEmbeds(start.build())
                 .queue(message -> {
@@ -251,10 +255,9 @@ public class Gift {
         activeGiveawayRepository.saveAndFlush(activeGiveaways);
     }
 
-    //Добавляет пользователя в StringBuilder
     public void addUserToPoll(final User user) {
-        LOGGER.info("\n" + user.getName() + " " + user.getId());
-        LOGGER.info("\n" + listUsersHash.containsKey(user.getId()));
+        String log = String.format("\n%s %s\n%s", user.getName(), user.getId(), listUsersHash.containsKey(user.getId()));
+        LOGGER.info(log);
 
         if (!listUsersHash.containsKey(user.getId())) {
             count.incrementAndGet();
@@ -288,7 +291,7 @@ public class Gift {
                                     }
 
                                     if (notificationStatus.equals(Notification.NotificationStatus.ACCEPT)) {
-                                        final String url = getDiscordUrlMessage(
+                                        final String url = URLS.getDiscordUrlMessage(
                                                 guildIdLong,
                                                 textChannelId,
                                                 t.getActiveGiveaways().getMessageIdLong());
@@ -328,7 +331,6 @@ public class Gift {
                 }
             }
         } catch (Exception e) {
-            insertQuery = new StringBuilder();
             e.printStackTrace();
             System.out.println("Таблица: " + guildIdLong
                     + " больше не существует, скорее всего Giveaway завершился!\n"
@@ -351,7 +353,7 @@ public class Gift {
 
     //TODO: Не завершается после заверешения
     //Автоматически отправляет в БД данные которые в буфере StringBuilder
-    public void autoInsert() {
+    private void autoInsert() {
         new Timer().scheduleAtFixedRate(new TimerTask() {
             public void run() throws NullPointerException {
                 try {
@@ -528,5 +530,13 @@ public class Gift {
     public void setCount(int count) {
         this.count.set(count);
         this.localCountUsers = count;
+    }
+
+    public long getGuildId() {
+        return guildId;
+    }
+
+    public long getTextChannelId() {
+        return textChannelId;
     }
 }

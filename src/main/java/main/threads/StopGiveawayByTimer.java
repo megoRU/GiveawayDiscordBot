@@ -9,6 +9,7 @@ public final class StopGiveawayByTimer extends TimerTask {
 
     private final Long idGuild;
     private static final Logger LOGGER = Logger.getLogger(StopGiveawayByTimer.class.getName());
+
     public StopGiveawayByTimer(Long idGuild) {
         this.idGuild = idGuild;
     }
@@ -30,9 +31,13 @@ public final class StopGiveawayByTimer extends TimerTask {
                 int listUsersSize = GiveawayRegistry.getInstance().getGift(idGuild).getListUsersSize();
                 int countWinners = GiveawayRegistry.getInstance().getCountWinners(idGuild);
 
+                String logMessage = String.format("""
+                        Guild ID: %s
+                        ListUsersSize: %s
+                        CountWinners: %s
+                        """, this.idGuild, listUsersSize, countWinners);
 
-                LOGGER.info("\nlistUsersSize: " + listUsersSize);
-                LOGGER.info("\ncountWinners: " + countWinners);
+                LOGGER.info(logMessage);
 
                 //TODO завершать если прошёл месяц?
                 if (listUsersSize < 2 || countWinners < listUsersSize) {
@@ -40,7 +45,7 @@ public final class StopGiveawayByTimer extends TimerTask {
                     return;
                 }
 
-                Thread.sleep(30000L);
+                Thread.sleep(3600000L * 24L);
             }
         } catch (Exception e) {
             Thread.currentThread().interrupt();

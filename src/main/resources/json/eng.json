@@ -45,7 +45,7 @@
   "start_in_thread": "It is forbidden to create <@808277484524011531> in Thread!",
   "start_in_not_text_channels": "You can create <@808277484524011531> only in TextChannels!",
   "start_wrong_time": "You set the time incorrectly: `%s`\n %s",
-  "start_examples": "There must be one of: \n`1h`\n`1d`\n`20m`\n`2022.08.18 13:48`",
+  "start_examples": "There must be one of: \n`1h`\n`1d`\n`20m`\n`30s`\n`1h 30m 15s`\n`2022.08.18 13:48`",
   "gift_registered_title": "Giveaway",
   "gift_registered": "We have successfully registered you in [Giveaway](%s)",
   "gift_vote": "\n\nSupport us on [Patreon.com](https://www.patreon.com/ghbots)",
