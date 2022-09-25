@@ -123,7 +123,7 @@ public class SlashCommand extends ListenerAdapter {
                 String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_stop_giveaway", event.getGuild().getId());
 
                 EmbedBuilder errors = new EmbedBuilder();
-                errors.setColor(0x00FF00);
+                errors.setColor(Color.GREEN);
                 errors.setDescription(messageGiftNeedStopGiveaway);
 
                 event.replyEmbeds(errors.build()).queue();
@@ -162,7 +162,7 @@ public class SlashCommand extends ListenerAdapter {
                     boolean isOnlyForSpecificRole = Objects.equals(event.getOption("role", OptionMapping::getAsString), "yes");
 
                     EmbedBuilder embedBuilder = new EmbedBuilder();
-                    embedBuilder.setColor(0xFF0000);
+                    embedBuilder.setColor(Color.BLACK);
 
                     if (time != null && !time.matches(TIME_REGEX)) {
                         String startExamples = jsonParsers.getLocale("start_examples", event.getGuild().getId());
@@ -235,7 +235,7 @@ public class SlashCommand extends ListenerAdapter {
                     e.printStackTrace();
                     String slashErrors = jsonParsers.getLocale("slash_errors", event.getGuild().getId());
                     EmbedBuilder errors = new EmbedBuilder();
-                    errors.setColor(0x00FF00);
+                    errors.setColor(Color.GREEN);
                     errors.setDescription(slashErrors);
 
                     event.replyEmbeds(errors.build()).queue();
@@ -251,7 +251,7 @@ public class SlashCommand extends ListenerAdapter {
                 String slashStopNoHas = jsonParsers.getLocale("slash_stop_no_has", event.getGuild().getId());
 
                 EmbedBuilder notHas = new EmbedBuilder();
-                notHas.setColor(0x00FF00);
+                notHas.setColor(Color.GREEN);
                 notHas.setDescription(slashStopNoHas);
 
                 event.replyEmbeds(notHas.build()).queue();
@@ -264,7 +264,7 @@ public class SlashCommand extends ListenerAdapter {
                 String messageGiftNotAdmin = jsonParsers.getLocale("message_gift_not_admin", event.getGuild().getId());
 
                 EmbedBuilder gift = new EmbedBuilder();
-                gift.setColor(0x00FF00);
+                gift.setColor(Color.GREEN);
                 gift.setDescription(messageGiftNotAdmin);
 
                 event.replyEmbeds(gift.build()).setEphemeral(true).queue();
@@ -275,7 +275,7 @@ public class SlashCommand extends ListenerAdapter {
                 String slashStop = jsonParsers.getLocale("slash_stop", event.getGuild().getId());
 
                 EmbedBuilder stop = new EmbedBuilder();
-                stop.setColor(0x00FF00);
+                stop.setColor(Color.GREEN);
                 stop.setDescription(slashStop);
 
                 event.replyEmbeds(stop.build()).queue();
@@ -337,7 +337,7 @@ public class SlashCommand extends ListenerAdapter {
             String guildIdLongString = event.getGuild().getId();
 
             EmbedBuilder info = new EmbedBuilder();
-            info.setColor(0xa224db);
+            info.setColor(Color.decode("#9900FF")); //Фиолетовый
             info.setTitle("Giveaway");
             info.addField("Slash Commands", "`/language`, `/start`, `/stop`, `/list`" +
                     "\n`/reroll`, `/participants`, `/patreon`", false);
