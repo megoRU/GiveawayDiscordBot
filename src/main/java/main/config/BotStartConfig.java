@@ -175,7 +175,7 @@ public class BotStartConfig {
             List<OptionData> optionsStart = new ArrayList<>();
             optionsStart.add(new OptionData(STRING, "title", "Title for Giveaway. Maximum 255 characters").setName("title"));
             optionsStart.add(new OptionData(INTEGER, "count", "Set count winners").setName("count").setMinValue(1).setMaxValue(30));
-            optionsStart.add(new OptionData(STRING, "duration", "Examples: 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style. Preferably immediately in UTC ±0")
+            optionsStart.add(new OptionData(STRING, "duration", "Examples: 5s, 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style and UTC ±0")
                     .setName("duration"));
             optionsStart.add(new OptionData(CHANNEL, "channel", "#TextChannel name").setName("textchannel"));
             optionsStart.add(new OptionData(ROLE, "mention", "Mentioning a specific Role").setName("mention"));

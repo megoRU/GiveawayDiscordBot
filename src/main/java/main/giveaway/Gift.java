@@ -11,6 +11,7 @@ import main.giveaway.buttons.ReactionsButton;
 import main.giveaway.impl.GiftHelper;
 import main.giveaway.impl.URLS;
 import main.giveaway.reactions.Reactions;
+import main.giveaway.slash.SlashCommand;
 import main.jsonparser.JSONParsers;
 import main.messagesevents.SenderMessage;
 import main.model.entity.ActiveGiveaways;
@@ -173,12 +174,12 @@ public class Gift {
             start.setFooter(giftEndsAt);
             ZoneOffset offset = ZoneOffset.UTC;
             LocalDateTime localDateTime;
-            if (time.length() > 4) {
+            if (time.matches(SlashCommand.ISO_TIME_REGEX)) {
                 localDateTime = LocalDateTime.parse(time, formatter);
                 start.setTimestamp(localDateTime);
             } else {
-                String minutes = GiftHelper.getMinutes(time);
-                localDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).plusMinutes(Long.parseLong(minutes));
+                long seconds = GiftHelper.getSeconds(time);
+                localDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).plusSeconds(seconds);
                 start.setTimestamp(localDateTime);
             }
 

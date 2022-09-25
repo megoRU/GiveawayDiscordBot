@@ -45,7 +45,7 @@
   "start_in_thread": "Запрещено создавать <@808277484524011531> в Thread!",
   "start_in_not_text_channels": "Можно создавать <@808277484524011531> только в TextChannels!",
   "start_wrong_time": "Вы неправильно задали время: `%s`\n %s",
-  "start_examples": "Должно быть что-то одно из: \n`1h`\n`1d`\n`20m`\n`2022.08.18 13:48`",
+  "start_examples": "Должно быть что-то одно из: \n`1h`\n`1d`\n`20m`\n`30s`\n`1h 30m 15s`\n`2022.08.18 13:48`",
   "gift_registered_title": "Giveaway",
   "gift_registered": "Мы успешно зарегистрировали Вас в [Giveaway](%s)",
   "gift_vote": "\n\nПоддержите нас на [Boosty.to](https://boosty.to/ghbots)",

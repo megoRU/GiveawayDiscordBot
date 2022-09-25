@@ -57,7 +57,20 @@ public class SlashCommand extends ListenerAdapter {
     private final ParticipantsRepository participantsRepository;
     private final NotificationRepository notificationRepository;
 
-    private static final String TIME_REGEX = "^(\\d{1,2}h|\\d{1,2}m|\\d{1,2}d|\\d{4}.\\d{2}.\\d{2}\\s\\d{2}:\\d{2})$";
+    /*
+    Все доступные варианты:
+    3h
+    3ч
+    2d
+    2д
+    30s
+    30с
+    30s 30m 1h
+    30с 30м 1ч
+    2021.11.16 16:00
+    */
+    private static final String TIME_REGEX = "(\\d{4}.\\d{2}.\\d{2}\\s\\d{2}:\\d{2})|(\\d{1,2}[smhdсмдч]| )+";
+    public static final String ISO_TIME_REGEX = "^\\d{4}.\\d{2}.\\d{2}\\s\\d{2}:\\d{2}$"; //2021.11.16 16:00
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
