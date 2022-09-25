@@ -214,8 +214,7 @@ public class SlashCommand extends ListenerAdapter {
                                 .delay(5, TimeUnit.SECONDS)
                                 .flatMap(InteractionHook::deleteOriginal)
                                 .queue();
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    } catch (Exception ignored) {
                     }
 
                     gift.startGift(event.getGuild(),
