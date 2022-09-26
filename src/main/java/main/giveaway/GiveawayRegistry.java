@@ -3,6 +3,7 @@ package main.giveaway;
 import main.jsonparser.JSONParsers;
 import main.threads.StopGiveawayByTimer;
 
+import javax.annotation.Nullable;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +31,7 @@ public class GiveawayRegistry {
         return giveawayRegistry;
     }
 
+    @Nullable
     public Gift.GiveawayTimerStorage getGiveawayTimer(long guildId) {
         return giveawayTimer.get(guildId);
     }
@@ -46,6 +48,7 @@ public class GiveawayRegistry {
         giveawayDataMap.get(guildId).setIdUserWhoCreateGiveaway(userId);
     }
 
+    @Nullable
     public String getUrlImage(long guildId) {
         return giveawayDataMap.get(guildId).getUrlImage();
     }
@@ -62,6 +65,7 @@ public class GiveawayRegistry {
         giveawayDataMap.get(guildId).setIsForSpecificRole(is_for_specific_role);
     }
 
+    @Nullable
     public Long getRoleId(long guildId) {
         return giveawayDataMap.get(guildId).getRoleId();
     }
@@ -78,6 +82,7 @@ public class GiveawayRegistry {
         return giveawayDataMap.containsKey(guildId);
     }
 
+    @Nullable
     public Timestamp getEndGiveawayDate(long guildId) {
         return giveawayDataMap.get(guildId).getEndGiveawayDate();
     }
