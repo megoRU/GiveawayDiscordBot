@@ -444,9 +444,11 @@ public class BotStartConfig {
             }
             try {
                 Gift.GiveawayTimerStorage giveawayTimer = GiveawayRegistry.getInstance().getGiveawayTimer(guildIdLong);
-                StopGiveawayByTimer stopGiveawayByTimer = giveawayTimer.getStopGiveawayByTimer();
-                if (stopGiveawayByTimer.getCountDown() == 1) {
-                    stopGiveawayByTimer.countDown();
+                if (giveawayTimer != null) {
+                    StopGiveawayByTimer stopGiveawayByTimer = giveawayTimer.getStopGiveawayByTimer();
+                    if (stopGiveawayByTimer.getCountDown() == 1) {
+                        stopGiveawayByTimer.countDown();
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
