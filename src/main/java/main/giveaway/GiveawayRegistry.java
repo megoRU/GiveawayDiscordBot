@@ -1,6 +1,7 @@
 package main.giveaway;
 
 import main.jsonparser.JSONParsers;
+import main.threads.StopGiveawayByTimer;
 
 import java.sql.Timestamp;
 import java.util.HashMap;
@@ -11,7 +12,7 @@ public class GiveawayRegistry {
 
     //Возвращает GiveawayData по long id
     private static final Map<Long, Gift.GiveawayData> giveawayDataMap = new HashMap<>();
-    private static final Map<Long, Timer> giveawayTimer = new HashMap<>();
+    private static final Map<Long, Gift.GiveawayTimerStorage> giveawayTimer = new HashMap<>();
     private static final JSONParsers jsonParsers = new JSONParsers();
     private static volatile GiveawayRegistry giveawayRegistry;
 
@@ -29,7 +30,7 @@ public class GiveawayRegistry {
         return giveawayRegistry;
     }
 
-    public Timer getGiveawayTimer(long guildId) {
+    public Gift.GiveawayTimerStorage getGiveawayTimer(long guildId) {
         return giveawayTimer.get(guildId);
     }
 
@@ -97,8 +98,9 @@ public class GiveawayRegistry {
         giveawayDataMap.get(guildId).setEndGiveawayDate(timestamp);
     }
 
-    public void putGiveawayTimer(long guildId, Timer timer) {
-        giveawayTimer.put(guildId, timer);
+    public void putGiveawayTimer(long guildId, StopGiveawayByTimer stopGiveawayByTimer, Timer timer) {
+        Gift.GiveawayTimerStorage giveawayTimerStorage = new Gift.GiveawayTimerStorage(stopGiveawayByTimer, timer);
+        giveawayTimer.put(guildId, giveawayTimerStorage);
     }
 
     public void putMessageId(long guildId, long messageId) {

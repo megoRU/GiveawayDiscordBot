@@ -316,15 +316,15 @@ public class BotStartConfig {
                         .stream()
                         .collect(Collectors.toMap(Participants::getUserIdAsString, Participants::getUserIdAsString));
 
-                GiveawayRegistry.getInstance().putGift(
-                        guild_long_id,
-                        new Gift(guild_long_id,
-                                channel_long_id,
-                                id_user_who_create_giveaway,
-                                //Добавляем пользователей в hashmap
-                                participantsList,
-                                activeGiveawayRepository,
-                                participantsRepository));
+                Gift gift = new Gift(guild_long_id,
+                        channel_long_id,
+                        id_user_who_create_giveaway,
+                        //Добавляем пользователей в hashmap
+                        participantsList,
+                        activeGiveawayRepository,
+                        participantsRepository);
+
+                GiveawayRegistry.getInstance().putGift(guild_long_id, gift);
 
                 //Устанавливаем счетчик на верное число
                 GiveawayRegistry.getInstance().getGift(guild_long_id).setCount(participantsList.size());
@@ -345,7 +345,7 @@ public class BotStartConfig {
                     Date date = new Date(date_end_giveaway.getTime());
                     timer.schedule(stopGiveawayByTimer, date);
 
-                    GiveawayRegistry.getInstance().putGiveawayTimer(guild_long_id, timer);
+                    GiveawayRegistry.getInstance().putGiveawayTimer(guild_long_id, stopGiveawayByTimer, timer);
                 }
             }
             rs.close();
@@ -441,6 +441,15 @@ public class BotStartConfig {
                         e.printStackTrace();
                     }
                 }
+            }
+            try {
+                Gift.GiveawayTimerStorage giveawayTimer = GiveawayRegistry.getInstance().getGiveawayTimer(guildIdLong);
+                StopGiveawayByTimer stopGiveawayByTimer = giveawayTimer.getStopGiveawayByTimer();
+                if (stopGiveawayByTimer.getCountDown() == 1) {
+                    stopGiveawayByTimer.countDown();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         Thread.sleep(2000L);
