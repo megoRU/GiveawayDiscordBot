@@ -408,13 +408,22 @@ public class BotStartConfig {
                                         for (Map.Entry<String, User> entry : userMapTemp.entrySet()) {
                                             Guild guild = jda.getGuildById(guildIdLong);
                                             if (guild != null) {
-                                                guild.retrieveMember(entry.getValue())
-                                                        .onSuccess(member -> {
-                                                            boolean contains = member.getRoles().contains(roleGiveaway);
-                                                            if (!contains) {
-                                                                userList.remove(entry.getKey());
-                                                            }
-                                                        }).complete();
+                                                try {
+                                                    Member member = guild.retrieveMember(entry.getValue()).complete();
+                                                    if (member != null) {
+                                                        boolean contains = member.getRoles().contains(roleGiveaway);
+                                                        if (!contains) {
+                                                            userList.remove(entry.getKey());
+                                                        }
+                                                    }
+                                                } catch (Exception e) {
+                                                    if (e.getMessage().contains("10007: Unknown Member")) {
+                                                        System.out.println("10007: Unknown Member");
+                                                        userList.remove(entry.getKey());
+                                                    } else {
+                                                        e.printStackTrace();
+                                                    }
+                                                }
                                             }
                                         }
                                     } catch (Exception e) {
