@@ -31,7 +31,9 @@ public final class StopGiveawayByTimer extends TimerTask {
                 int listUsersSize = GiveawayRegistry.getInstance().getGift(idGuild).getListUsersSize();
                 int countWinners = GiveawayRegistry.getInstance().getCountWinners(idGuild);
 
-                String logMessage = String.format("""
+                String logMessage = String.format(
+                        """
+                        \n
                         Guild ID: %s
                         ListUsersSize: %s
                         CountWinners: %s
