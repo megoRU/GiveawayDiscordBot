@@ -494,23 +494,39 @@ public class Gift {
         clearingCollections();
     }
 
+    @Getter
+    public static class GiveawayTimerStorage {
+
+        private final StopGiveawayByTimer stopGiveawayByTimer;
+        private final Timer timer;
+
+        public GiveawayTimerStorage(StopGiveawayByTimer stopGiveawayByTimer, Timer timer) {
+            this.stopGiveawayByTimer = stopGiveawayByTimer;
+            this.timer = timer;
+        }
+    }
+
     private void putTimestamp(long localDateTime) {
         Timer timer = new Timer();
         StopGiveawayByTimer stopGiveawayByTimer = new StopGiveawayByTimer(this.guildId);
         Timestamp timestamp = new Timestamp(localDateTime * 1000);
         Date date = new Date(timestamp.getTime());
 
+        stopGiveawayByTimer.countDown();
         timer.schedule(stopGiveawayByTimer, date);
 
         GiveawayRegistry.getInstance().putEndGiveawayDate(this.guildId, timestamp);
-        GiveawayRegistry.getInstance().putGiveawayTimer(this.guildId, timer);
+        GiveawayRegistry.getInstance().putGiveawayTimer(this.guildId, stopGiveawayByTimer, timer);
     }
 
     private void clearingCollections() {
         try {
             GiveawayRegistry.getInstance().removeGuildFromGiveaway(this.guildId);
-            if (GiveawayRegistry.getInstance().getGiveawayTimer(this.guildId) != null) {
-                GiveawayRegistry.getInstance().getGiveawayTimer(this.guildId).cancel();
+            GiveawayTimerStorage giveawayTimer = GiveawayRegistry.getInstance().getGiveawayTimer(this.guildId);
+
+            if (giveawayTimer != null) {
+                giveawayTimer.stopGiveawayByTimer.cancel();
+                giveawayTimer.stopGiveawayByTimer.countDown();
             }
             GiveawayRegistry.getInstance().removeGiveawayTimer(this.guildId);
             setCount(0);

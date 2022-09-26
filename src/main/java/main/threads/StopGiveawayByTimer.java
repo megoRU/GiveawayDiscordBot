@@ -3,12 +3,14 @@ package main.threads;
 import main.giveaway.GiveawayRegistry;
 
 import java.util.TimerTask;
+import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;
 
 public final class StopGiveawayByTimer extends TimerTask {
 
     private final Long idGuild;
     private static final Logger LOGGER = Logger.getLogger(StopGiveawayByTimer.class.getName());
+    private final CountDownLatch latch = new CountDownLatch(1);
 
     public StopGiveawayByTimer(Long idGuild) {
         this.idGuild = idGuild;
@@ -28,14 +30,18 @@ public final class StopGiveawayByTimer extends TimerTask {
 //                    System.out.println(LocalDateTime.now().isAfter(time.toLocalDateTime()));
 //                }
 
+                latch.await();
                 int listUsersSize = GiveawayRegistry.getInstance().getGift(idGuild).getListUsersSize();
                 int countWinners = GiveawayRegistry.getInstance().getCountWinners(idGuild);
 
-                String logMessage = String.format("""
-                        Guild ID: %s
-                        ListUsersSize: %s
-                        CountWinners: %s
-                        """, this.idGuild, listUsersSize, countWinners);
+
+                String logMessage = String.format(
+                        """
+                                \n
+                                Guild ID: %s
+                                ListUsersSize: %s
+                                CountWinners: %s
+                                """, this.idGuild, listUsersSize, countWinners);
 
                 LOGGER.info(logMessage);
 
@@ -53,4 +59,11 @@ public final class StopGiveawayByTimer extends TimerTask {
         }
     }
 
+    public void countDown() {
+        latch.countDown();
+    }
+
+    public int getCountDown() {
+        return (int) latch.getCount();
+    }
 }
