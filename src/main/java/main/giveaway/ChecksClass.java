@@ -10,10 +10,6 @@ public class ChecksClass {
 
     public static final JSONParsers jsonParsers = new JSONParsers();
 
-    public static boolean canSendGiveaway(GuildChannel srcChannel) {
-        return srcChannel.getGuild().getSelfMember().hasPermission(Permission.MESSAGE_SEND);
-    }
-
     public static boolean canSendGiveaway(GuildChannel dstChannel, SlashCommandInteractionEvent event) {
         Member selfMember = dstChannel.getGuild().getSelfMember();
         StringBuilder stringBuilder = new StringBuilder();

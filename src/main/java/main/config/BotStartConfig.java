@@ -306,7 +306,7 @@ public class BotStartConfig {
                 long message_id_long = rs.getLong("message_id_long");
                 String giveaway_title = rs.getString("giveaway_title");
                 Timestamp date_end_giveaway = rs.getTimestamp("date_end_giveaway");
-                Long role_id_long = rs.getLong("role_id_long");
+                Long role_id_long = rs.getLong("role_id_long"); // null -> 0
                 boolean is_for_specific_role = rs.getBoolean("is_for_specific_role");
                 String url_image = rs.getString("url_image");
                 long id_user_who_create_giveaway = rs.getLong("id_user_who_create_giveaway");

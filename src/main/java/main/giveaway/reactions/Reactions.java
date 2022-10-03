@@ -6,6 +6,7 @@ import main.jsonparser.JSONParsers;
 import main.messagesevents.SenderMessage;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -42,25 +43,29 @@ public class Reactions extends ListenerAdapter implements SenderMessage {
                     if (messageIdWithReactionCurrent != messageIdWithReaction) return;
                     String url = getDiscordUrlMessage(guildIdLong, event.getGuildChannel().getIdLong(), messageIdWithReactionCurrent);
                     Gift gift = GiveawayRegistry.getInstance().getGift(guildIdLong);
-                    String roleId = String.valueOf(GiveawayRegistry.getInstance().getRoleId(guildIdLong));
+                    Long roleId = GiveawayRegistry.getInstance().getRoleId(guildIdLong); // null -> 0
 
-                    if (GiveawayRegistry.getInstance().getIsForSpecificRole(guildIdLong)
-                            && !event.getMember().getRoles().toString().contains(roleId)) {
-                        LOGGER.info("\nНажал на эмодзи, но у него нет доступа к розыгрышу: " + user.getId());
-                        //Получаем ссылку до сообщения
+                    if (roleId != null && roleId != 0L) {
+                        Role roleById = event.getGuild().getRoleById(roleId);
+                        boolean isForSpecificRole = GiveawayRegistry.getInstance().getIsForSpecificRole(guildIdLong);
 
-                        String buttonGiveawayNotAccess = String.format(jsonParsers.getLocale("button_giveaway_not_access", event.getGuild().getId()), url);
-                        EmbedBuilder embedBuilder = new EmbedBuilder();
-                        embedBuilder.setColor(Color.RED);
-                        embedBuilder.setDescription(buttonGiveawayNotAccess);
+                        if (isForSpecificRole && !event.getMember().getRoles().contains(roleById)) {
+                            LOGGER.info(String.format("\nНажал на эмодзи, но у него нет доступа к розыгрышу: %s", user.getId()));
+                            //Получаем ссылку на Giveaway
 
-                        SenderMessage.sendPrivateMessage(event.getJDA(), user.getId(), embedBuilder.build());
-                        return;
+                            String buttonGiveawayNotAccess = String.format(jsonParsers.getLocale("button_giveaway_not_access", event.getGuild().getId()), url);
+                            EmbedBuilder embedBuilder = new EmbedBuilder();
+                            embedBuilder.setColor(Color.RED);
+                            embedBuilder.setDescription(buttonGiveawayNotAccess);
+
+                            SenderMessage.sendPrivateMessage(event.getJDA(), user.getId(), embedBuilder.build());
+                            return;
+                        }
                     }
 
                     if (!gift.hasUserInList(user.getId())) {
-                        LOGGER.info("\nНовый участник: " + user.getId() + "\nСервер: " + event.getGuild().getId());
-                        GiveawayRegistry.getInstance().getGift(guildIdLong).addUserToPoll(user);
+                        LOGGER.info(String.format("\nНовый участник: %s\nСервер: %s", user.getId(), event.getGuild().getId()));
+                        gift.addUserToPoll(user);
                     }
                 }
             }
