@@ -255,10 +255,16 @@ public class Gift {
         activeGiveawayRepository.saveAndFlush(activeGiveaways);
     }
 
-    public void addUserToPoll(final User user) {
-        String log = String.format("\n%s %s\n%s", user.getName(), user.getId(), listUsersHash.containsKey(user.getId()));
-        LOGGER.info(log);
-
+    public synchronized void addUserToPoll(final User user) {
+        LOGGER.info(String.format(
+                """
+                \nНовый участник
+                Nick: %s
+                UserID: %s
+                Guild: %s""",
+                user.getName(),
+                user.getId(),
+                guildId));
         if (!listUsersHash.containsKey(user.getId())) {
             count.incrementAndGet();
             listUsersHash.put(user.getId(), user.getId());

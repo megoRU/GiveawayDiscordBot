@@ -501,12 +501,12 @@ public class SlashCommand extends ListenerAdapter {
                     winnersAndParticipants.setWinners(winners);
                     winnersAndParticipants.setUserList(List.of(listUsers));
 
-                    String[] strings = api.setWinners(winnersAndParticipants);
+                    String[] setWinners = api.setWinners(winnersAndParticipants);
 
                     final Set<String> uniqueWinners = new LinkedHashSet<>();
 
-                    for (int i = 0; i < strings.length; i++) {
-                        uniqueWinners.add("<@" + listUsers[Integer.parseInt(strings[i])].getUserIdLong() + ">");
+                    for (String setWinner : setWinners) {
+                        uniqueWinners.add("<@" + listUsers[Integer.parseInt(setWinner)].getUserIdLong() + ">");
                     }
 
                     String winnerList = Arrays.toString(uniqueWinners.toArray())
