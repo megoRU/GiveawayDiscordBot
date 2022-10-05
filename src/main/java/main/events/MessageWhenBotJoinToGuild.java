@@ -7,6 +7,8 @@ import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.LanguageRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.unions.DefaultGuildChannelUnion;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
@@ -31,9 +33,11 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
     public void onGuildJoin(@NotNull GuildJoinEvent event) {
 
         try {
-            if (event.getGuild().getDefaultChannel() == null
-                    || !event.getGuild().getSelfMember().hasPermission(event.getGuild().getDefaultChannel(), Permission.MESSAGE_SEND)
-                    || !event.getGuild().getSelfMember().hasPermission(event.getGuild().getDefaultChannel(), Permission.MESSAGE_EMBED_LINKS)) {
+            if (event.getGuild().getDefaultChannel() == null ||
+                    !event.getGuild().getSelfMember().hasPermission(event.getGuild().getDefaultChannel(),
+                                    Permission.MESSAGE_SEND,
+                                    Permission.MESSAGE_EMBED_LINKS,
+                                    Permission.VIEW_CHANNEL)) {
                 return;
             }
 
@@ -72,12 +76,14 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
                         .withEmoji(Emoji.fromUnicode("U+1F1F7U+1F1FA")));
             }
 
-            event.getGuild()
-                    .getDefaultChannel()
-                    .asTextChannel()
-                    .sendMessageEmbeds(welcome.build())
-                    .setActionRow(buttons)
-                    .queue();
+            DefaultGuildChannelUnion defaultChannel = event.getGuild().getDefaultChannel();
+            if (defaultChannel instanceof TextChannel) {
+                defaultChannel
+                        .asTextChannel()
+                        .sendMessageEmbeds(welcome.build())
+                        .setActionRow(buttons)
+                        .queue();
+            }
         } catch (Exception e) {
             System.out.println("Скорее всего нет `DefaultChannel`!");
             e.printStackTrace();
