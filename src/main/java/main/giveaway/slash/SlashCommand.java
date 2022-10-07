@@ -14,7 +14,9 @@ import main.giveaway.ChecksClass;
 import main.giveaway.Gift;
 import main.giveaway.GiveawayRegistry;
 import main.giveaway.buttons.ReactionsButton;
+import main.giveaway.impl.GiftHelper;
 import main.jsonparser.JSONParsers;
+import main.messagesevents.EditMessage;
 import main.model.entity.Language;
 import main.model.entity.Notification;
 import main.model.repository.ActiveGiveawayRepository;
@@ -43,9 +45,15 @@ import org.springframework.stereotype.Service;
 import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+
+import static main.giveaway.Gift.formatter;
 
 @AllArgsConstructor
 @Service
@@ -543,6 +551,93 @@ public class SlashCommand extends ListenerAdapter {
             }
             return;
         }
+
+        if (event.getName().equals("change")) {
+            long guildId = event.getGuild().getIdLong();
+            String guildIdString = event.getGuild().getId();
+
+            if (!GiveawayRegistry.getInstance().hasGift(guildId)) {
+                String slashStopNoHas = jsonParsers.getLocale("slash_stop_no_has", guildIdString);
+                event.reply(slashStopNoHas).setEphemeral(true).queue();
+                return;
+            }
+
+
+            String time = event.getOption("duration", OptionMapping::getAsString);
+            EmbedBuilder start = new EmbedBuilder();
+
+            Gift gift = GiveawayRegistry.getInstance().getGift(guildId);
+            String title = GiveawayRegistry.getInstance().getTitle(guildId);
+            Long role = GiveawayRegistry.getInstance().getRoleId(guildId);
+            boolean isOnlyForSpecificRole = GiveawayRegistry.getInstance().getIsForSpecificRole(guildId);
+            int countWinners = GiveawayRegistry.getInstance().getCountWinners(guildId);
+            String urlImage = GiveawayRegistry.getInstance().getUrlImage(guildId);
+            long userWhoCreateGiveaway = GiveawayRegistry.getInstance().getIdUserWhoCreateGiveaway(guildId);
+            long channelId = gift.getTextChannelId();
+            long messageId = GiveawayRegistry.getInstance().getMessageId(guildId);
+
+            String giftReaction = jsonParsers.getLocale("gift_reaction", guildIdString);
+
+            start.setColor(Color.GREEN);
+            start.setTitle(title);
+            start.appendDescription(giftReaction);
+
+            if (role != null && role != 0L && isOnlyForSpecificRole) {
+                String giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", guildIdString), role);
+                start.appendDescription(giftOnlyFor);
+            }
+
+            String footer;
+            if (countWinners == 1) {
+                footer = String.format("1 %s", GiftHelper.setEndingWord(1, guildId));
+            } else {
+                footer = String.format("%s %s", countWinners, GiftHelper.setEndingWord(countWinners, guildId));
+            }
+
+            start.setFooter(footer);
+
+            if (time != null) {
+                String giftEndsAt = String.format(jsonParsers.getLocale("gift_ends_at", guildIdString), footer);
+                start.setFooter(giftEndsAt);
+                ZoneOffset offset = ZoneOffset.UTC;
+                LocalDateTime localDateTime;
+                if (time.matches(SlashCommand.ISO_TIME_REGEX)) {
+                    localDateTime = LocalDateTime.parse(time, formatter);
+                    start.setTimestamp(localDateTime);
+                } else {
+                    long seconds = GiftHelper.getSeconds(time);
+                    localDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).plusSeconds(seconds);
+                    start.setTimestamp(localDateTime);
+                }
+
+                if (localDateTime.isBefore(Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime())) {
+                    throw new IllegalArgumentException(
+                            String.format("Time in the past %s Now %s",
+                                    localDateTime,
+                                    Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime()));
+                }
+
+                String endTimeFormat = String.format("\nEnds: <t:%s:R> (<t:%s:f>)", localDateTime.toEpochSecond(offset), localDateTime.toEpochSecond(offset));
+                start.appendDescription(endTimeFormat);
+                gift.putTimestamp(localDateTime.toEpochSecond(offset));
+            }
+
+            String hosted = String.format("\nHosted by: <@%s>", userWhoCreateGiveaway);
+            start.appendDescription(hosted);
+
+            if (urlImage != null) {
+                start.setImage(urlImage);
+            }
+            Timestamp endGiveawayDate = GiveawayRegistry.getInstance().getEndGiveawayDate(guildId);
+
+            activeGiveawayRepository.updateGiveawayTime(guildIdLong, endGiveawayDate);
+            EditMessage.edit(start.build(), guildId, channelId, messageId);
+
+            String changeDuration = jsonParsers.getLocale("change_duration", guildIdString);
+            event.reply(changeDuration).setEphemeral(true).queue();
+            return;
+        }
+
 
         if (event.getName().equals("participants")) {
             try {

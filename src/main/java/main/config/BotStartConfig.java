@@ -184,6 +184,11 @@ public class BotStartConfig {
                     .setName("role"));
             optionsStart.add(new OptionData(ATTACHMENT, "image", "Your Giveaway Image").setName("image"));
 
+            //change
+            List<OptionData> change = new ArrayList<>();
+            change.add(new OptionData(STRING, "duration", "Examples: 5s, 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style and UTC ±0")
+                    .setName("duration")
+                    .setRequired(true));
 
             List<OptionData> reroll = new ArrayList<>();
             reroll.add(new OptionData(STRING, "id", "Giveaway ID").setName("id").setRequired(true));
@@ -231,6 +236,10 @@ public class BotStartConfig {
 
             commands.addCommands(Commands.slash("notifications", "Configuring bot notifications")
                     .addOptions(optionsNotifications));
+
+            commands.addCommands(Commands.slash("change", "Change the time")
+                    .addOptions(change)
+                    .setGuildOnly(true));
 
             commands.queue();
 
@@ -452,6 +461,7 @@ public class BotStartConfig {
                 }
             }
             try {
+                //Что это такое и для чего?
                 Gift.GiveawayTimerStorage giveawayTimer = GiveawayRegistry.getInstance().getGiveawayTimer(guildIdLong);
                 if (giveawayTimer != null) {
                     StopGiveawayByTimer stopGiveawayByTimer = giveawayTimer.getStopGiveawayByTimer();
