@@ -103,6 +103,14 @@ public class GiveawayRegistry {
         giveawayDataMap.get(guildId).setEndGiveawayDate(timestamp);
     }
 
+    public void cancelGiveawayTimer(long guildId) {
+        Gift.GiveawayTimerStorage giveawayTimerStorage = getGiveawayTimer(guildId);
+        if (giveawayTimerStorage != null) {
+            giveawayTimerStorage.getStopGiveawayByTimer().cancel();
+            giveawayTimerStorage.getTimer().cancel();
+        }
+    }
+
     public void putGiveawayTimer(long guildId, StopGiveawayByTimer stopGiveawayByTimer, Timer timer) {
         Gift.GiveawayTimerStorage giveawayTimerStorage = new Gift.GiveawayTimerStorage(stopGiveawayByTimer, timer);
         giveawayTimer.put(guildId, giveawayTimerStorage);

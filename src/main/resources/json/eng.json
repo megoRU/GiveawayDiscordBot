@@ -51,5 +51,6 @@
   "gift_vote": "\n\nSupport us on [Patreon.com](https://www.patreon.com/ghbots)",
   "button_notification_deny": "Now the bot will not notify you!",
   "button_notification_accept": "Now the bot will notify you!",
-  "button_notification": "Disable notifications"
+  "button_notification": "Disable notifications",
+  "change_duration": "Successfully changed the time"
 }

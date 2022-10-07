@@ -43,7 +43,7 @@ import java.util.logging.Logger;
 public class Gift {
 
     private static final Logger LOGGER = Logger.getLogger(Gift.class.getName());
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
+    public static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     //API
@@ -393,12 +393,12 @@ public class Gift {
         LOGGER.info("\nlistUsersHash size: " + listUsersHash.size());
         LOGGER.info("\nparticipantsJSON size: " + participants.size());
 
-        for (int i = 0; i < participants.size(); i++) {
-            System.out.println("getIdUserWhoCreateGiveaway " + participants.get(i).getIdUserWhoCreateGiveaway()
-                    + " getUserIdLong " + participants.get(i).getUserIdLong()
-                    + " getNickNameTag " + participants.get(i).getNickNameTag()
-                    + " getGiveawayId " + participants.get(i).getGiveawayIdLong()
-                    + " getGuildId " + participants.get(i).getGuildIdLong()
+        for (Participants participant : participants) {
+            System.out.println("getIdUserWhoCreateGiveaway " + participant.getIdUserWhoCreateGiveaway()
+                    + " getUserIdLong " + participant.getUserIdLong()
+                    + " getNickNameTag " + participant.getNickNameTag()
+                    + " getGiveawayId " + participant.getGiveawayIdLong()
+                    + " getGuildId " + participant.getGuildIdLong()
             );
         }
 
@@ -415,8 +415,8 @@ public class Gift {
 
         String[] strings = api.setWinners(winnersAndParticipants);
 
-        for (int i = 0; i < strings.length; i++) {
-            uniqueWinners.add("<@" + temp.get(Integer.parseInt(strings[i])) + ">");
+        for (String string : strings) {
+            uniqueWinners.add("<@" + temp.get(Integer.parseInt(string)) + ">");
         }
     }
 
@@ -512,7 +512,9 @@ public class Gift {
         }
     }
 
-    private void putTimestamp(long localDateTime) {
+    public void putTimestamp(long localDateTime) {
+        GiveawayRegistry.getInstance().cancelGiveawayTimer(guildId);
+
         Timer timer = new Timer();
         StopGiveawayByTimer stopGiveawayByTimer = new StopGiveawayByTimer(this.guildId);
         Timestamp timestamp = new Timestamp(localDateTime * 1000);
