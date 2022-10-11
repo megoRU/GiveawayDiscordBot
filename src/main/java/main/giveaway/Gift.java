@@ -47,7 +47,7 @@ public class Gift {
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     //API
-    private final MegoruAPI api = new MegoruAPIImpl(System.getenv("BASE64_PASSWORD"));
+    private final MegoruAPI api = new MegoruAPIImpl();
 
     //User LIST
     private final Map<String, String> listUsersHash;
@@ -405,7 +405,11 @@ public class Gift {
         Winners winners = new Winners(countWinner, 0, listUsersHash.size() - 1);
 
         WinnersAndParticipants winnersAndParticipants = new WinnersAndParticipants();
-        winnersAndParticipants.setUpdate(true);
+
+        long messageId = GiveawayRegistry.getInstance().getMessageId(guildId);
+        long giveawayIdLong = guildId + messageId;
+
+        winnersAndParticipants.setGiveawayID(String.valueOf(giveawayIdLong));
         winnersAndParticipants.setWinners(winners);
         winnersAndParticipants.setUserList(participants);
 
