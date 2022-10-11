@@ -2,8 +2,8 @@ package main.giveaway.slash;
 
 import api.megoru.ru.MegoruAPI;
 import api.megoru.ru.entity.Participants;
+import api.megoru.ru.entity.Reroll;
 import api.megoru.ru.entity.Winners;
-import api.megoru.ru.entity.WinnersAndParticipants;
 import api.megoru.ru.impl.MegoruAPIImpl;
 import api.megoru.ru.io.UnsuccessfulHttpException;
 import com.google.gson.Gson;
@@ -485,7 +485,7 @@ public class SlashCommand extends ListenerAdapter {
                     return;
                 }
 
-                Long id = event.getOption("id", OptionMapping::getAsLong);
+                String id = event.getOption("id", OptionMapping::getAsString);
 
                 if (GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
                     String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_stop_giveaway", event.getGuild().getId());
@@ -497,19 +497,20 @@ public class SlashCommand extends ListenerAdapter {
                     return;
                 }
 
-                MegoruAPI api = new MegoruAPIImpl(System.getenv("BASE64_PASSWORD"));
+                MegoruAPI api = new MegoruAPIImpl();
 
                 try {
                     Participants[] listUsers = api.getListUsers(event.getUser().getId(), String.valueOf(id));
 
                     Winners winners = new Winners(1, 0, listUsers.length - 1);
 
-                    WinnersAndParticipants winnersAndParticipants = new WinnersAndParticipants();
-                    winnersAndParticipants.setUpdate(false);
-                    winnersAndParticipants.setWinners(winners);
-                    winnersAndParticipants.setUserList(List.of(listUsers));
+                    Reroll reroll = new Reroll();
+                    reroll.setGiveawayID(id);
+                    reroll.setIdUserWhoCreateGiveaway(event.getUser().getId());
+                    reroll.setWinners(winners);
 
-                    String[] setWinners = api.setWinners(winnersAndParticipants);
+
+                    String[] setWinners = api.reroll(reroll);
 
                     final Set<String> uniqueWinners = new LinkedHashSet<>();
 
@@ -647,7 +648,7 @@ public class SlashCommand extends ListenerAdapter {
                 File file = new File("participants.json");
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-                MegoruAPI api = new MegoruAPIImpl(System.getenv("BASE64_PASSWORD"));
+                MegoruAPI api = new MegoruAPIImpl();
                 Participants[] listUsers;
                 try {
                     listUsers = api.getListUsers(event.getUser().getId(), id);

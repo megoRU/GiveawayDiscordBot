@@ -2,8 +2,8 @@ package main.giveaway;
 
 import main.jsonparser.JSONParsers;
 import main.threads.StopGiveawayByTimer;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
