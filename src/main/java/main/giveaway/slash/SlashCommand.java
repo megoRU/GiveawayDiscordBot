@@ -1,10 +1,9 @@
 package main.giveaway.slash;
 
-import api.megoru.ru.MegoruAPI;
 import api.megoru.ru.entity.Participants;
 import api.megoru.ru.entity.Reroll;
 import api.megoru.ru.entity.Winners;
-import api.megoru.ru.impl.MegoruAPIImpl;
+import api.megoru.ru.impl.MegoruAPI;
 import api.megoru.ru.io.UnsuccessfulHttpException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -59,11 +58,12 @@ import static main.giveaway.Gift.formatter;
 @Service
 public class SlashCommand extends ListenerAdapter {
 
-    private final JSONParsers jsonParsers = new JSONParsers();
+    private final static JSONParsers jsonParsers = new JSONParsers();
     private final LanguageRepository languageRepository;
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final ParticipantsRepository participantsRepository;
     private final NotificationRepository notificationRepository;
+    private final static MegoruAPI api = new MegoruAPI.Builder().build();
 
     /*
     Все доступные варианты:
@@ -497,8 +497,6 @@ public class SlashCommand extends ListenerAdapter {
                     return;
                 }
 
-                MegoruAPI api = new MegoruAPIImpl();
-
                 try {
                     Participants[] listUsers = api.getListUsers(event.getUser().getId(), String.valueOf(id));
 
@@ -648,7 +646,6 @@ public class SlashCommand extends ListenerAdapter {
                 File file = new File("participants.json");
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-                MegoruAPI api = new MegoruAPIImpl();
                 Participants[] listUsers;
                 try {
                     listUsers = api.getListUsers(event.getUser().getId(), id);

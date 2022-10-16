@@ -64,8 +64,13 @@ public class BotStartConfig {
     private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
 
     //API
-    private final BotiCordAPI api = new BotiCordAPI.Builder().token(System.getenv("BOTICORD")).build();
-    private final DiscordBotListAPI TOP_GG_API = new DiscordBotListAPI.Builder().token(Config.getTopGgApiToken()).botId(Config.getBotId()).build();
+    private final BotiCordAPI api = new BotiCordAPI.Builder()
+            .token(System.getenv("BOTICORD"))
+            .build();
+
+    private final DiscordBotListAPI TOP_GG_API = new DiscordBotListAPI.Builder()
+            .token(Config.getTopGgApiToken())
+            .botId(Config.getBotId()).build();
 
     //REPOSITORY
     private final ActiveGiveawayRepository activeGiveawayRepository;

@@ -1,9 +1,8 @@
 package main.giveaway;
 
-import api.megoru.ru.MegoruAPI;
 import api.megoru.ru.entity.Winners;
 import api.megoru.ru.entity.WinnersAndParticipants;
-import api.megoru.ru.impl.MegoruAPIImpl;
+import api.megoru.ru.impl.MegoruAPI;
 import lombok.Getter;
 import lombok.Setter;
 import main.config.BotStartConfig;
@@ -47,7 +46,7 @@ public class Gift {
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     //API
-    private final MegoruAPI api = new MegoruAPIImpl();
+    private final MegoruAPI api = new MegoruAPI.Builder().build();
 
     //User LIST
     private final Map<String, String> listUsersHash;
