@@ -116,11 +116,13 @@ public class BotStartConfig {
                             GatewayIntent.DIRECT_MESSAGES,
                             GatewayIntent.DIRECT_MESSAGE_TYPING));
 
-            jdaBuilder.disableCache(
-                    CacheFlag.ROLE_TAGS,
-                    CacheFlag.ACTIVITY,
-                    CacheFlag.MEMBER_OVERRIDES);
+            List<CacheFlag> cacheFlags = new ArrayList<>(
+                    Arrays.asList(
+                            CacheFlag.ROLE_TAGS,
+                            CacheFlag.ACTIVITY,
+                            CacheFlag.MEMBER_OVERRIDES));
 
+            jdaBuilder.disableCache(cacheFlags);
             jdaBuilder.enableIntents(intents);
             jdaBuilder.setAutoReconnect(true);
             jdaBuilder.setStatus(OnlineStatus.ONLINE);
