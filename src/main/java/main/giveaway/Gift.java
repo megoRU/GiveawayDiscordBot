@@ -117,6 +117,33 @@ public class Gift {
         autoInsert();
     }
 
+    public void setTime(final EmbedBuilder start, final String time, final String footer) {
+        String giftEndsAt = String.format(jsonParsers.getLocale("gift_ends_at", String.valueOf(guildId)), footer);
+        start.setFooter(giftEndsAt);
+        ZoneOffset offset = ZoneOffset.UTC;
+        LocalDateTime localDateTime;
+
+        if (time.matches(SlashCommand.ISO_TIME_REGEX)) {
+            localDateTime = LocalDateTime.parse(time, formatter);
+            start.setTimestamp(localDateTime);
+        } else {
+            long seconds = GiftHelper.getSeconds(time);
+            localDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).plusSeconds(seconds);
+            start.setTimestamp(localDateTime);
+        }
+
+        if (localDateTime.isBefore(Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime())) {
+            LocalDateTime localDateTimeThrow = Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime();
+            String format = String.format("Time in the past %s Now %s", localDateTime, localDateTimeThrow);
+            throw new IllegalArgumentException(format);
+        }
+
+        String endTimeFormat = String.format("\nEnds: <t:%s:R> (<t:%s:f>)", localDateTime.toEpochSecond(offset), localDateTime.toEpochSecond(offset));
+        start.appendDescription(endTimeFormat);
+
+        putTimestamp(localDateTime.toEpochSecond(offset));
+    }
+
     private EmbedBuilder extracted(final Guild guild,
                                    final GuildMessageChannel channel,
                                    final String newTitle,
@@ -169,30 +196,7 @@ public class Gift {
         start.setFooter(footer);
 
         if (time != null) {
-            String giftEndsAt = String.format(jsonParsers.getLocale("gift_ends_at", guild.getId()), footer);
-            start.setFooter(giftEndsAt);
-            ZoneOffset offset = ZoneOffset.UTC;
-            LocalDateTime localDateTime;
-            if (time.matches(SlashCommand.ISO_TIME_REGEX)) {
-                localDateTime = LocalDateTime.parse(time, formatter);
-                start.setTimestamp(localDateTime);
-            } else {
-                long seconds = GiftHelper.getSeconds(time);
-                localDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).plusSeconds(seconds);
-                start.setTimestamp(localDateTime);
-            }
-
-            if (localDateTime.isBefore(Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime())) {
-                throw new IllegalArgumentException(
-                        String.format("Time in the past %s Now %s",
-                                localDateTime,
-                                Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime()));
-
-            }
-
-            String endTimeFormat = String.format("\nEnds: <t:%s:R> (<t:%s:f>)", localDateTime.toEpochSecond(offset), localDateTime.toEpochSecond(offset));
-            start.appendDescription(endTimeFormat);
-            putTimestamp(localDateTime.toEpochSecond(offset));
+            setTime(start, time, footer);
         }
 
         String hosted = String.format("\nHosted by: <@%s>", this.userIdLong);
@@ -257,10 +261,10 @@ public class Gift {
     public synchronized void addUserToPoll(final User user) {
         LOGGER.info(String.format(
                 """
-                \nНовый участник
-                Nick: %s
-                UserID: %s
-                Guild: %s""",
+                        \nНовый участник
+                        Nick: %s
+                        UserID: %s
+                        Guild: %s""",
                 user.getName(),
                 user.getId(),
                 guildId));
@@ -400,14 +404,12 @@ public class Gift {
                     + " getGuildId " + participant.getGuildIdLong()
             );
         }
+        long messageId = GiveawayRegistry.getInstance().getMessageId(guildId);
+        long giveawayIdLong = guildId + messageId;
 
         Winners winners = new Winners(countWinner, 0, listUsersHash.size() - 1);
 
         WinnersAndParticipants winnersAndParticipants = new WinnersAndParticipants();
-
-        long messageId = GiveawayRegistry.getInstance().getMessageId(guildId);
-        long giveawayIdLong = guildId + messageId;
-
         winnersAndParticipants.setGiveawayID(String.valueOf(giveawayIdLong));
         winnersAndParticipants.setWinners(winners);
         winnersAndParticipants.setUserList(participants);

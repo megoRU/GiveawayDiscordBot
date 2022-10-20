@@ -4,12 +4,12 @@ import api.megoru.ru.entity.Participants;
 import api.megoru.ru.entity.Reroll;
 import api.megoru.ru.entity.Winners;
 import api.megoru.ru.impl.MegoruAPI;
-import api.megoru.ru.io.UnsuccessfulHttpException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.AllArgsConstructor;
 import main.config.BotStartConfig;
 import main.giveaway.ChecksClass;
+import main.giveaway.Exceptions;
 import main.giveaway.Gift;
 import main.giveaway.GiveawayRegistry;
 import main.giveaway.buttons.ReactionsButton;
@@ -45,14 +45,9 @@ import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-
-import static main.giveaway.Gift.formatter;
 
 @AllArgsConstructor
 @Service
@@ -527,23 +522,9 @@ public class SlashCommand extends ListenerAdapter {
                     winner.setDescription(giftCongratulationsReroll);
 
                     event.getHook().sendMessageEmbeds(winner.build()).queue();
-                } catch (UnsuccessfulHttpException exception) {
-                    if (exception.getCode() == 404) {
-                        event.getHook().sendMessage(exception.getMessage()).setEphemeral(true).queue();
-                    } else {
-                        EmbedBuilder errors = new EmbedBuilder();
-                        errors.setColor(Color.RED);
-                        errors.setTitle("Errors with API");
-                        errors.setDescription("Repeat later. Or write to us about it.");
-
-                        List<Button> buttons = new ArrayList<>();
-                        buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
-
-                        event.getHook().sendMessageEmbeds(errors.build()).addActionRow(buttons).queue();
-                    }
+                } catch (Exception ex) {
+                    Exceptions.handle(ex, event.getHook());
                     return;
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
             } else {
                 event.getHook().sendMessage("Options is null").setEphemeral(true).queue();
@@ -555,25 +536,25 @@ public class SlashCommand extends ListenerAdapter {
             long guildId = event.getGuild().getIdLong();
             String guildIdString = event.getGuild().getId();
 
-            if (!GiveawayRegistry.getInstance().hasGift(guildId)) {
+            GiveawayRegistry instance = GiveawayRegistry.getInstance();
+            if (!instance.hasGift(guildId)) {
                 String slashStopNoHas = jsonParsers.getLocale("slash_stop_no_has", guildIdString);
                 event.reply(slashStopNoHas).setEphemeral(true).queue();
                 return;
             }
 
-
             String time = event.getOption("duration", OptionMapping::getAsString);
             EmbedBuilder start = new EmbedBuilder();
 
-            Gift gift = GiveawayRegistry.getInstance().getGift(guildId);
-            String title = GiveawayRegistry.getInstance().getTitle(guildId);
-            Long role = GiveawayRegistry.getInstance().getRoleId(guildId);
-            boolean isOnlyForSpecificRole = GiveawayRegistry.getInstance().getIsForSpecificRole(guildId);
-            int countWinners = GiveawayRegistry.getInstance().getCountWinners(guildId);
-            String urlImage = GiveawayRegistry.getInstance().getUrlImage(guildId);
-            long userWhoCreateGiveaway = GiveawayRegistry.getInstance().getIdUserWhoCreateGiveaway(guildId);
+            Gift gift = instance.getGift(guildId);
+            String title = instance.getTitle(guildId);
+            Long role = instance.getRoleId(guildId);
+            boolean isOnlyForSpecificRole = instance.getIsForSpecificRole(guildId);
+            int countWinners = instance.getCountWinners(guildId);
+            String urlImage = instance.getUrlImage(guildId);
+            long userWhoCreateGiveaway = instance.getIdUserWhoCreateGiveaway(guildId);
             long channelId = gift.getTextChannelId();
-            long messageId = GiveawayRegistry.getInstance().getMessageId(guildId);
+            long messageId = instance.getMessageId(guildId);
 
             String giftReaction = jsonParsers.getLocale("gift_reaction", guildIdString);
 
@@ -596,29 +577,7 @@ public class SlashCommand extends ListenerAdapter {
             start.setFooter(footer);
 
             if (time != null) {
-                String giftEndsAt = String.format(jsonParsers.getLocale("gift_ends_at", guildIdString), footer);
-                start.setFooter(giftEndsAt);
-                ZoneOffset offset = ZoneOffset.UTC;
-                LocalDateTime localDateTime;
-                if (time.matches(SlashCommand.ISO_TIME_REGEX)) {
-                    localDateTime = LocalDateTime.parse(time, formatter);
-                    start.setTimestamp(localDateTime);
-                } else {
-                    long seconds = GiftHelper.getSeconds(time);
-                    localDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).plusSeconds(seconds);
-                    start.setTimestamp(localDateTime);
-                }
-
-                if (localDateTime.isBefore(Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime())) {
-                    throw new IllegalArgumentException(
-                            String.format("Time in the past %s Now %s",
-                                    localDateTime,
-                                    Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime()));
-                }
-
-                String endTimeFormat = String.format("\nEnds: <t:%s:R> (<t:%s:f>)", localDateTime.toEpochSecond(offset), localDateTime.toEpochSecond(offset));
-                start.appendDescription(endTimeFormat);
-                gift.putTimestamp(localDateTime.toEpochSecond(offset));
+                gift.setTime(start, time, footer);
             }
 
             String hosted = String.format("\nHosted by: <@%s>", userWhoCreateGiveaway);
@@ -627,7 +586,7 @@ public class SlashCommand extends ListenerAdapter {
             if (urlImage != null) {
                 start.setImage(urlImage);
             }
-            Timestamp endGiveawayDate = GiveawayRegistry.getInstance().getEndGiveawayDate(guildId);
+            Timestamp endGiveawayDate = instance.getEndGiveawayDate(guildId);
 
             activeGiveawayRepository.updateGiveawayTime(guildIdLong, endGiveawayDate);
             EditMessage.edit(start.build(), guildId, channelId, messageId);
@@ -637,34 +596,14 @@ public class SlashCommand extends ListenerAdapter {
             return;
         }
 
-
         if (event.getName().equals("participants")) {
+            event.deferReply().setEphemeral(true).queue();
+            String id = event.getOption("id", OptionMapping::getAsString);
+
+            File file = new File("participants.json");
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
             try {
-                event.deferReply().setEphemeral(true).queue();
-                String id = event.getOption("id", OptionMapping::getAsString);
-
-                File file = new File("participants.json");
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-                Participants[] listUsers;
-                try {
-                    listUsers = api.getListUsers(event.getUser().getId(), id);
-                } catch (UnsuccessfulHttpException exception) {
-                    if (exception.getCode() == 404) {
-                        event.getHook().sendMessage(exception.getMessage()).setEphemeral(true).queue();
-                    } else {
-                        EmbedBuilder errors = new EmbedBuilder();
-                        errors.setColor(Color.RED);
-                        errors.setTitle("Errors with API");
-                        errors.setDescription("Repeat later. Or write to us about it.");
-
-                        List<Button> buttons = new ArrayList<>();
-                        buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
-
-                        event.getHook().sendMessageEmbeds(errors.build()).addActionRow(buttons).queue();
-                    }
-                    return;
-                }
+                Participants[] listUsers = api.getListUsers(event.getUser().getId(), id);
 
                 String json = gson.toJson(listUsers);
 
@@ -679,10 +618,11 @@ public class SlashCommand extends ListenerAdapter {
                 FileUpload fileUpload = FileUpload.fromData(file);
 
                 event.getHook().sendFiles(fileUpload).setEphemeral(true).queue();
+            } catch (Exception exception) {
+                Exceptions.handle(exception, event.getHook());
                 return;
-            } catch (Exception e) {
-                e.printStackTrace();
             }
+            return;
         }
 
         if (event.getName().equals("patreon")) {
