@@ -356,7 +356,7 @@ public class Gift {
         participants.setActiveGiveaways(activeGiveaways);
         participants.setIdUserWhoCreateGiveaway(activeGiveaways.getIdUserWhoCreateGiveaway().toString());
         participants.setGuildIdLong(guildIdLong);
-        participants.setGiveawayIdLong(String.valueOf(activeGiveaways.getGuildLongId() + activeGiveaways.getMessageIdLong()));
+        participants.setGiveawayIdLong(activeGiveaways.getMessageIdLong().toString());
         participantsList.add(participants);
     }
 
@@ -405,12 +405,11 @@ public class Gift {
             );
         }
         long messageId = GiveawayRegistry.getInstance().getMessageId(guildId);
-        long giveawayIdLong = guildId + messageId;
 
         Winners winners = new Winners(countWinner, 0, listUsersHash.size() - 1);
 
         WinnersAndParticipants winnersAndParticipants = new WinnersAndParticipants();
-        winnersAndParticipants.setGiveawayID(String.valueOf(giveawayIdLong));
+        winnersAndParticipants.setGiveawayID(String.valueOf(messageId));
         winnersAndParticipants.setWinners(winners);
         winnersAndParticipants.setUserList(participants);
 

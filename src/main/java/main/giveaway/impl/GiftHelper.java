@@ -18,11 +18,6 @@ public class GiftHelper {
 
     public void editMessage(EmbedBuilder embedBuilder, final long guildId, final long textChannel) {
         try {
-            //TODO: Удалить
-//            ChecksClass checksClass = new ChecksClass(activeGiveawayRepository);
-//
-//            if (checksClass.isGuildDeleted(guildId)) return;
-
             Guild guildById = BotStartConfig.getJda().getGuildById(guildId);
             if (guildById != null) {
                 TextChannel textChannelById = guildById.getTextChannelById(textChannel);
@@ -77,6 +72,5 @@ public class GiftHelper {
         }
 
         return seconds;
-//        throw new IllegalArgumentException("Argument don`t have symbol: " + time);
     }
 }
