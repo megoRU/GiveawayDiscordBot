@@ -43,7 +43,7 @@ public class Participants extends api.megoru.ru.entity.Participants {
 
     //Не удалять
     public String getGiveawayIdLong() {
-        return String.valueOf(activeGiveaways.getGuildLongId() + activeGiveaways.getMessageIdLong());
+        return String.valueOf(activeGiveaways.getMessageIdLong());
     }
 
     //Не удалять
