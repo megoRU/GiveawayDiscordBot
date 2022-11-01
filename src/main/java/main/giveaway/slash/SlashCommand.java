@@ -27,9 +27,10 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.channel.unions.GuildChannelUnion;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -135,6 +136,7 @@ public class SlashCommand extends ListenerAdapter {
 
         long guildIdLong = event.getGuild().getIdLong();
         if (event.getName().equals("start")) {
+            GuildMessageChannel textChannelEvent = null;
             if (GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
                 String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_stop_giveaway", event.getGuild().getId());
 
@@ -146,16 +148,32 @@ public class SlashCommand extends ListenerAdapter {
             } else {
                 GuildChannelUnion textChannel = event.getOption("textchannel", OptionMapping::getAsChannel);
 
-                if (textChannel != null && !textChannel.getType().equals(ChannelType.TEXT)) {
-                    String startInNotTextChannels = jsonParsers.getLocale("start_in_not_text_channels", event.getGuild().getId());
-                    event.reply(startInNotTextChannels).queue();
-                    return;
-                } else if (textChannel != null && textChannel.getType().equals(ChannelType.TEXT)) {
-                    boolean canSendGiveaway = ChecksClass.canSendGiveaway(textChannel.asTextChannel(), event);
-                    if (!canSendGiveaway) return;
-                } else if (textChannel == null) {
-                    boolean canSendGiveaway = ChecksClass.canSendGiveaway(event.getGuildChannel().asTextChannel(), event);
-                    if (!canSendGiveaway) return;
+                //Если не указали конкретный канал
+                if (textChannel == null) {
+                    if (event.getChannel() instanceof TextChannel) {
+                        textChannelEvent = event.getChannel().asTextChannel();
+                        boolean canSendGiveaway = ChecksClass.canSendGiveaway(textChannelEvent, event);
+                        if (!canSendGiveaway) return;
+                    } else if (event.getChannel() instanceof NewsChannel) {
+                        textChannelEvent = event.getChannel().asNewsChannel();
+                        boolean canSendGiveaway = ChecksClass.canSendGiveaway(textChannelEvent, event);
+                        if (!canSendGiveaway) return;
+                    }
+                    //Если указывали
+                } else {
+                    if (textChannel instanceof TextChannel) {
+                        textChannelEvent = textChannel.asTextChannel();
+                        boolean canSendGiveaway = ChecksClass.canSendGiveaway(textChannelEvent, event);
+                        if (!canSendGiveaway) return;
+                    } else if (textChannel instanceof NewsChannel) {
+                        textChannelEvent = textChannel.asNewsChannel();
+                        boolean canSendGiveaway = ChecksClass.canSendGiveaway(textChannelEvent, event);
+                        if (!canSendGiveaway) return;
+                    } else {
+                        String startInNotTextChannels = jsonParsers.getLocale("start_in_not_text_channels", event.getGuild().getId());
+                        event.reply(startInNotTextChannels).queue();
+                        return;
+                    }
                 }
 
                 try {
@@ -222,7 +240,6 @@ public class SlashCommand extends ListenerAdapter {
 
                     GiveawayRegistry.getInstance().putGift(guildIdLong, gift);
 
-                    TextChannel textChannelEvent = textChannel == null ? event.getChannel().asTextChannel() : textChannel.asTextChannel();
                     String sendSlashMessage = String.format(jsonParsers.getLocale("send_slash_message", event.getGuild().getId()), textChannelEvent.getId());
 
                     try {
