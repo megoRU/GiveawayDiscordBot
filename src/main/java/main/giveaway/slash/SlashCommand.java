@@ -265,13 +265,14 @@ public class SlashCommand extends ListenerAdapter {
 
                     //Если время будет неверным. Сработает try catch
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    if (!e.getMessage().contains("Time in the past")) {
+                        e.printStackTrace();
+                    }
                     String slashErrors = jsonParsers.getLocale("slash_errors", event.getGuild().getId());
                     EmbedBuilder errors = new EmbedBuilder();
                     errors.setColor(Color.GREEN);
                     errors.setDescription(slashErrors);
-
-                    event.replyEmbeds(errors.build()).queue();
+                    event.getHook().editOriginalEmbeds(errors.build()).queue();
                     GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
                     activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
                 }

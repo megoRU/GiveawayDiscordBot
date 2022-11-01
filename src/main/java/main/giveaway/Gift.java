@@ -134,7 +134,18 @@ public class Gift {
 
         if (localDateTime.isBefore(Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime())) {
             LocalDateTime localDateTimeThrow = Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime();
-            String format = String.format("Time in the past %s Now %s", localDateTime, localDateTimeThrow);
+            String wrongDate = jsonParsers.getLocale("wrong_date", String.valueOf(guildId));
+
+            String format = String.format("Time in the past: `%s`\nNow:`%s`",
+                    localDateTime.toString().replace("T", " "),
+                    localDateTimeThrow.toString().substring(0, 16).replace("T", " "));
+
+            EmbedBuilder embedBuilder = new EmbedBuilder();
+            embedBuilder.setColor(Color.RED);
+            embedBuilder.setTitle(wrongDate);
+            embedBuilder.setDescription(format);
+
+            SenderMessage.sendMessage(embedBuilder.build(), guildId, textChannelId);
             throw new IllegalArgumentException(format);
         }
 

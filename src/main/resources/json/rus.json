@@ -52,5 +52,6 @@
   "button_notification_deny": "Теперь бот не будет уведомлять вас!",
   "button_notification_accept": "Теперь бот будет уведомлять вас!",
   "button_notification": "Отключить уведомления",
-  "change_duration": "Успешно изменили время"
+  "change_duration": "Успешно изменили время",
+  "wrong_date": "Неверная дата"
 }
