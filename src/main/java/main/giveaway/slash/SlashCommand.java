@@ -219,7 +219,6 @@ public class SlashCommand extends ListenerAdapter {
                     if (role == null && isOnlyForSpecificRole) {
                         String slashErrorOnlyForThisRole = String.format(jsonParsers.getLocale("slash_error_only_for_this_role", event.getGuild().getId()), role);
                         embedBuilder.setDescription(slashErrorOnlyForThisRole);
-
                         event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
                         return;
                     }
@@ -232,7 +231,7 @@ public class SlashCommand extends ListenerAdapter {
                     }
 
                     Gift gift = new Gift(guildIdLong,
-                            textChannel == null ? event.getChannel().getIdLong() : textChannel.getIdLong(),
+                            textChannelEvent.getIdLong(),
                             event.getUser().getIdLong(),
                             activeGiveawayRepository,
                             participantsRepository);
