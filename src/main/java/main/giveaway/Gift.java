@@ -558,7 +558,7 @@ public class Gift {
         }
     }
 
-    public boolean hasUserInList(String id) {
+    public boolean isUserPresent(String id) {
         return listUsersHash.containsKey(id);
     }
 

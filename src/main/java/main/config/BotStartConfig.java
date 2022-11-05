@@ -340,20 +340,21 @@ public class BotStartConfig {
                         activeGiveawayRepository,
                         participantsRepository);
 
-                GiveawayRegistry.getInstance().putGift(guild_long_id, gift);
+                GiveawayRegistry instance = GiveawayRegistry.getInstance();
+                instance.putGift(guild_long_id, gift);
 
                 //Устанавливаем счетчик на верное число
-                GiveawayRegistry.getInstance().getGift(guild_long_id).setCount(participantsList.size());
+                instance.getGift(guild_long_id).setCount(participantsList.size());
 
-                GiveawayRegistry.getInstance().putMessageId(guild_long_id, message_id_long);
-                GiveawayRegistry.getInstance().putTitle(guild_long_id, giveaway_title);
-                GiveawayRegistry.getInstance().putEndGiveawayDate(guild_long_id, date_end_giveaway);
-                GiveawayRegistry.getInstance().putChannelId(guild_long_id, channel_long_id);
-                GiveawayRegistry.getInstance().putCountWinners(guild_long_id, count_winners);
-                GiveawayRegistry.getInstance().putRoleId(guild_long_id, role_id_long);
-                GiveawayRegistry.getInstance().putIsForSpecificRole(guild_long_id, is_for_specific_role);
-                GiveawayRegistry.getInstance().putUrlImage(guild_long_id, url_image);
-                GiveawayRegistry.getInstance().putIdUserWhoCreateGiveaway(guild_long_id, id_user_who_create_giveaway);
+                instance.putMessageId(guild_long_id, message_id_long);
+                instance.putTitle(guild_long_id, giveaway_title);
+                instance.putEndGiveawayDate(guild_long_id, date_end_giveaway);
+                instance.putChannelId(guild_long_id, channel_long_id);
+                instance.putCountWinners(guild_long_id, count_winners);
+                instance.putRoleId(guild_long_id, role_id_long);
+                instance.putIsForSpecificRole(guild_long_id, is_for_specific_role);
+                instance.putUrlImage(guild_long_id, url_image);
+                instance.putIdUserWhoCreateGiveaway(guild_long_id, id_user_who_create_giveaway);
 
                 if (date_end_giveaway != null) {
                     Timer timer = new Timer();
@@ -361,7 +362,7 @@ public class BotStartConfig {
                     Date date = new Date(date_end_giveaway.getTime());
                     timer.schedule(stopGiveawayByTimer, date);
 
-                    GiveawayRegistry.getInstance().putGiveawayTimer(guild_long_id, stopGiveawayByTimer, timer);
+                    instance.putGiveawayTimer(guild_long_id, stopGiveawayByTimer, timer);
                 }
             }
             rs.close();
@@ -414,7 +415,7 @@ public class BotStartConfig {
                                         .complete()
                                         .stream()
                                         .filter(user -> !user.isBot())
-                                        .filter(user -> !gift.hasUserInList(user.getId()))
+                                        .filter(user -> !gift.isUserPresent(user.getId()))
                                         .collect(Collectors.toMap(User::getId, user -> user));
 
                                 if (isForSpecificRole) {

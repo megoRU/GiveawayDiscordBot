@@ -20,7 +20,7 @@ public class Notification {
     private String userIdLong;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "notification_status", nullable = false)
+    @Column(name = "notification_status", columnDefinition = "enum('ACCEPT', 'DENY')", nullable = false)
     private NotificationStatus notificationStatus;
 
     public enum NotificationStatus {
