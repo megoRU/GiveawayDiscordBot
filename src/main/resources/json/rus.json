@@ -53,5 +53,6 @@
   "button_notification_accept": "Теперь бот будет уведомлять вас!",
   "button_notification": "Отключить уведомления",
   "change_duration": "Успешно изменили время",
-  "wrong_date": "Неверная дата"
+  "wrong_date": "Неверная дата",
+  "no_access_reroll": "Скорее всего у вас нет доступа либо Giveaway ID неверный"
 }

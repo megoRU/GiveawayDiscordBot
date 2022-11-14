@@ -53,5 +53,6 @@
   "button_notification_accept": "Now the bot will notify you!",
   "button_notification": "Disable notifications",
   "change_duration": "Successfully changed the time",
-  "wrong_date": "Invalid date"
+  "wrong_date": "Invalid date",
+  "no_access_reroll": "Most likely you don't have access or the Giveaway ID is incorrect"
 }
