@@ -1,7 +1,5 @@
 package main.giveaway.slash;
 
-import api.megoru.ru.entity.Participants;
-import api.megoru.ru.entity.Reroll;
 import api.megoru.ru.entity.Winners;
 import api.megoru.ru.impl.MegoruAPI;
 import com.google.gson.Gson;
@@ -17,11 +15,10 @@ import main.giveaway.impl.GiftHelper;
 import main.jsonparser.JSONParsers;
 import main.messagesevents.EditMessage;
 import main.model.entity.Language;
+import main.model.entity.ListUsers;
 import main.model.entity.Notification;
-import main.model.repository.ActiveGiveawayRepository;
-import main.model.repository.LanguageRepository;
-import main.model.repository.NotificationRepository;
-import main.model.repository.ParticipantsRepository;
+import main.model.entity.Participants;
+import main.model.repository.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -59,6 +56,7 @@ public class SlashCommand extends ListenerAdapter {
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final ParticipantsRepository participantsRepository;
     private final NotificationRepository notificationRepository;
+    private final ListUsersRepository listUsersRepository;
     private final static MegoruAPI api = new MegoruAPI.Builder().build();
 
     /*
@@ -234,7 +232,8 @@ public class SlashCommand extends ListenerAdapter {
                             textChannelEvent.getIdLong(),
                             event.getUser().getIdLong(),
                             activeGiveawayRepository,
-                            participantsRepository);
+                            participantsRepository,
+                            listUsersRepository);
 
 
                     GiveawayRegistry.getInstance().putGift(guildIdLong, gift);
@@ -446,7 +445,7 @@ public class SlashCommand extends ListenerAdapter {
 
                 StringBuilder stringBuilder = new StringBuilder();
 
-                List<? extends Participants> participantsList = participantsRepository.getParticipantsByGuildIdLong(guildIdLong);
+                List<Participants> participantsList = participantsRepository.getParticipantsByGuildIdLong(guildIdLong);
 
                 if (participantsList.isEmpty()) {
                     String slashListUsersEmpty = jsonParsers.getLocale("slash_list_users_empty", event.getGuild().getId());
@@ -510,22 +509,19 @@ public class SlashCommand extends ListenerAdapter {
                 }
 
                 try {
-                    Participants[] listUsers = api.getListUsers(event.getUser().getId(), String.valueOf(id));
+                    List<ListUsers> listUsers = listUsersRepository.findAllByGiveawayId(guildIdLong);
 
-                    Winners winners = new Winners(1, 0, listUsers.length - 1);
+                    System.out.println(listUsers.size() - 1);
+                    System.out.println(listUsers.size());
 
-                    Reroll reroll = new Reroll();
-                    reroll.setGiveawayID(id);
-                    reroll.setIdUserWhoCreateGiveaway(event.getUser().getId());
-                    reroll.setWinners(winners);
+                    Winners winners = new Winners(1, 0, listUsers.size() - 1);
 
-
-                    String[] setWinners = api.reroll(reroll);
+                    String[] setWinners = api.setWinners(winners);
 
                     final Set<String> uniqueWinners = new LinkedHashSet<>();
 
                     for (String setWinner : setWinners) {
-                        uniqueWinners.add("<@" + listUsers[Integer.parseInt(setWinner)].getUserIdLong() + ">");
+                        uniqueWinners.add("<@" + listUsers.get(Integer.parseInt(setWinner)).getUserIdLong() + ">");
                     }
 
                     String winnerList = Arrays.toString(uniqueWinners.toArray())
@@ -620,7 +616,7 @@ public class SlashCommand extends ListenerAdapter {
             File file = new File("participants.json");
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             try {
-                Participants[] listUsers = api.getListUsers(event.getUser().getId(), id);
+                List<ListUsers> listUsers = listUsersRepository.findAllByGiveawayId(Long.parseLong(id));
 
                 String json = gson.toJson(listUsers);
 

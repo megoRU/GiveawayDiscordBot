@@ -46,7 +46,7 @@
         <dependency>
             <groupId>com.github.megoRU</groupId>
             <artifactId>boticordjava</artifactId>
-            <version>v3.6</version>
+            <version>v3.7</version>
         </dependency>
 
         <dependency>
@@ -65,7 +65,7 @@
         <dependency>
             <groupId>com.github.megoRU</groupId>
             <artifactId>api.megoru.ru</artifactId>
-            <version>v3.6</version>
+            <version>3.8</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
