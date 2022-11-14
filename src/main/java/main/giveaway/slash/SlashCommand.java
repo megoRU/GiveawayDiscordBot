@@ -509,10 +509,7 @@ public class SlashCommand extends ListenerAdapter {
                 }
 
                 try {
-                    List<ListUsers> listUsers = listUsersRepository.findAllByGiveawayId(guildIdLong);
-
-                    System.out.println(listUsers.size() - 1);
-                    System.out.println(listUsers.size());
+                    List<ListUsers> listUsers = listUsersRepository.findAllByGiveawayId(Long.valueOf(id));
 
                     Winners winners = new Winners(1, 0, listUsers.size() - 1);
 
