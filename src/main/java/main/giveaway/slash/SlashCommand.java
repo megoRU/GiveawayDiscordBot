@@ -372,8 +372,20 @@ public class SlashCommand extends ListenerAdapter {
             EmbedBuilder info = new EmbedBuilder();
             info.setColor(Color.decode("#9900FF")); //Фиолетовый
             info.setTitle("Giveaway");
-            info.addField("Slash Commands", "`/language`, `/start`, `/stop`, `/list`" +
-                    "\n`/reroll`, `/participants`, `/patreon`", false);
+
+            info.addField("Slash Commands",
+                    """
+                           </language:941286272390037534>
+                           </start:941286272390037535>
+                           </stop:941286272390037536>
+                           </list:941286272390037538>
+                           </participants:952572018077892638>
+                           </reroll:957624805446799452>
+                           </check-bot-permission:1009065886335914054>
+                           </notifications:1011570005890056262>
+                           </change:1027901550456225842>
+                           </patreon:945299399855210527>
+                            """, false);
 
             String messagesEventsLinks = jsonParsers.getLocale("messages_events_links", guildId);
             String messagesEventsSite = jsonParsers.getLocale("messages_events_site", guildId);
