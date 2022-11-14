@@ -9,22 +9,27 @@ import javax.persistence.*;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
-@Table(name = "participants")
-public class Participants {
+@Table(name = "list_users")
+public class ListUsers {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.MERGE) // Java хуита. На этом можно закончить
-    @JoinColumn(name = "guild_id", referencedColumnName = "guild_long_id", nullable = false)
-    private ActiveGiveaways activeGiveaways;
+    @Column(name = "created_user_id", nullable = false)
+    private Long createdUserId;
 
-    @Column(name = "user_long_id", nullable = false)
+    @Column(name = "giveaway_id", nullable = false)
+    private Long giveawayId;
+
+    @Column(name = "guild_id", nullable = false)
+    private Long guildIdLong;
+
+    @Column(name = "user_id", nullable = false)
     private Long userIdLong;
 
     @Column(name = "nick_name", nullable = false)
@@ -32,9 +37,5 @@ public class Participants {
 
     @Column(name = "nick_name_tag", nullable = false)
     private String nickNameTag;
-
-    public String getUserIdAsString() {
-        return String.valueOf(userIdLong);
-    }
 
 }

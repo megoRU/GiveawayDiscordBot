@@ -41,11 +41,11 @@ public class GiveawayRegistry {
     }
 
     public long getIdUserWhoCreateGiveaway(long guildId) {
-        return giveawayDataMap.get(guildId).getIdUserWhoCreateGiveaway();
+        return giveawayDataMap.get(guildId).getCreatedUserId();
     }
 
     public void putIdUserWhoCreateGiveaway(long guildId, long userId) {
-        giveawayDataMap.get(guildId).setIdUserWhoCreateGiveaway(userId);
+        giveawayDataMap.get(guildId).setCreatedUserId(userId);
     }
 
     @Nullable

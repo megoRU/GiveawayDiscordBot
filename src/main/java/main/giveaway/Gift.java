@@ -1,7 +1,6 @@
 package main.giveaway;
 
 import api.megoru.ru.entity.Winners;
-import api.megoru.ru.entity.WinnersAndParticipants;
 import api.megoru.ru.impl.MegoruAPI;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,6 +16,7 @@ import main.model.entity.ActiveGiveaways;
 import main.model.entity.Notification;
 import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
+import main.model.repository.ListUsersRepository;
 import main.model.repository.ParticipantsRepository;
 import main.threads.StopGiveawayByTimer;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -66,6 +66,7 @@ public class Gift {
     //REPO
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final ParticipantsRepository participantsRepository;
+    private final ListUsersRepository listUsersRepository;
 
     @Getter
     @Setter
@@ -79,7 +80,7 @@ public class Gift {
         private Long roleId;
         private boolean isForSpecificRole;
         private String urlImage;
-        private long idUserWhoCreateGiveaway;
+        private long createdUserId;
 
         public GiveawayData() {
         }
@@ -97,22 +98,24 @@ public class Gift {
         }
     }
 
-    public Gift(long guildId, long textChannelId, long userIdLong, ActiveGiveawayRepository activeGiveawayRepository, ParticipantsRepository participantsRepository) {
+    public Gift(long guildId, long textChannelId, long userIdLong, ActiveGiveawayRepository activeGiveawayRepository, ParticipantsRepository participantsRepository, ListUsersRepository listUsersRepository) {
         this.guildId = guildId;
         this.textChannelId = textChannelId;
         this.userIdLong = userIdLong;
         this.activeGiveawayRepository = activeGiveawayRepository;
         this.participantsRepository = participantsRepository;
+        this.listUsersRepository = listUsersRepository;
         this.listUsersHash = new LinkedHashMap<>();
         autoInsert();
     }
 
-    public Gift(long guildId, long textChannelId, long userIdLong, Map<String, String> listUsersHash, ActiveGiveawayRepository activeGiveawayRepository, ParticipantsRepository participantsRepository) {
+    public Gift(long guildId, long textChannelId, long userIdLong, Map<String, String> listUsersHash, ActiveGiveawayRepository activeGiveawayRepository, ParticipantsRepository participantsRepository, ListUsersRepository listUsersRepository) {
         this.guildId = guildId;
         this.textChannelId = textChannelId;
         this.userIdLong = userIdLong;
         this.activeGiveawayRepository = activeGiveawayRepository;
         this.participantsRepository = participantsRepository;
+        this.listUsersRepository = listUsersRepository;
         this.listUsersHash = new LinkedHashMap<>(listUsersHash);
         autoInsert();
     }
@@ -316,11 +319,11 @@ public class Gift {
                                                 textChannelId,
                                                 t.getActiveGiveaways().getMessageIdLong());
 
-                                        final String giftRegistered = String.format(jsonParsers.getLocale("gift_registered", String.valueOf(t.getGuildIdLong())), url);
+                                        final String giftRegistered = String.format(jsonParsers.getLocale("gift_registered", String.valueOf(t.getActiveGiveaways().getGuildLongId())), url);
 
-                                        final String giftVote = jsonParsers.getLocale("gift_vote", String.valueOf(t.getGuildIdLong()));
+                                        final String giftVote = jsonParsers.getLocale("gift_vote", String.valueOf(t.getActiveGiveaways().getGuildLongId()));
                                         final String userIdLong = String.valueOf(t.getUserIdLong());
-                                        final String giftRegisteredTitle = jsonParsers.getLocale("gift_registered_title", String.valueOf(t.getGuildIdLong()));
+                                        final String giftRegisteredTitle = jsonParsers.getLocale("gift_registered_title", String.valueOf(t.getActiveGiveaways().getGuildLongId()));
 
                                         EmbedBuilder embedBuilder = new EmbedBuilder();
                                         embedBuilder.setColor(Color.GREEN);
@@ -365,9 +368,6 @@ public class Gift {
         participants.setNickName(nickName);
         participants.setNickNameTag(nickNameTag);
         participants.setActiveGiveaways(activeGiveaways);
-        participants.setIdUserWhoCreateGiveaway(activeGiveaways.getIdUserWhoCreateGiveaway().toString());
-        participants.setGuildIdLong(guildIdLong);
-        participants.setGiveawayIdLong(activeGiveaways.getMessageIdLong().toString());
         participantsList.add(participants);
     }
 
@@ -408,27 +408,22 @@ public class Gift {
         LOGGER.info("\nparticipantsJSON size: " + participants.size());
 
         for (Participants participant : participants) {
-            System.out.println("getIdUserWhoCreateGiveaway " + participant.getIdUserWhoCreateGiveaway()
+            System.out.println("getIdUserWhoCreateGiveaway " + participant.getActiveGiveaways().getIdUserWhoCreateGiveaway()
                     + " getUserIdLong " + participant.getUserIdLong()
                     + " getNickNameTag " + participant.getNickNameTag()
-                    + " getGiveawayId " + participant.getGiveawayIdLong()
-                    + " getGuildId " + participant.getGuildIdLong()
+                    + " getGiveawayId " + participant.getActiveGiveaways().getMessageIdLong()
+                    + " getGuildId " + participant.getActiveGiveaways().getGuildLongId()
             );
         }
         long messageId = GiveawayRegistry.getInstance().getMessageId(guildId);
 
         Winners winners = new Winners(countWinner, 0, listUsersHash.size() - 1);
 
-        WinnersAndParticipants winnersAndParticipants = new WinnersAndParticipants();
-        winnersAndParticipants.setGiveawayID(String.valueOf(messageId));
-        winnersAndParticipants.setWinners(winners);
-        winnersAndParticipants.setUserList(participants);
-
         LOGGER.info(winners.toString());
 
         List<String> temp = new LinkedList<>(listUsersHash.values());
 
-        String[] strings = api.setWinners(winnersAndParticipants);
+        String[] strings = api.setWinners(winners);
 
         for (String string : strings) {
             uniqueWinners.add("<@" + temp.get(Integer.parseInt(string)) + ">");
@@ -509,6 +504,7 @@ public class Gift {
 
         SenderMessage.sendMessage(winners.build(), this.guildId, textChannelId);
 
+        listUsersRepository.saveAllParticipantsToUserList(guildId);
         activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
 
         //Удаляет данные из коллекций

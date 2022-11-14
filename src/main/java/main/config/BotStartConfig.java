@@ -9,10 +9,7 @@ import main.giveaway.slash.SlashCommand;
 import main.jsonparser.ParserClass;
 import main.model.entity.Notification;
 import main.model.entity.Participants;
-import main.model.repository.ActiveGiveawayRepository;
-import main.model.repository.LanguageRepository;
-import main.model.repository.NotificationRepository;
-import main.model.repository.ParticipantsRepository;
+import main.model.repository.*;
 import main.threads.StopGiveawayByTimer;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -26,6 +23,7 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import org.boticordjava.api.entity.Enums.TokenEnum;
 import org.boticordjava.api.impl.BotiCordAPI;
 import org.discordbots.api.client.DiscordBotListAPI;
 import org.json.simple.JSONObject;
@@ -65,6 +63,7 @@ public class BotStartConfig {
 
     //API
     private final BotiCordAPI api = new BotiCordAPI.Builder()
+            .tokenEnum(TokenEnum.BOT)
             .token(System.getenv("BOTICORD"))
             .build();
 
@@ -77,6 +76,7 @@ public class BotStartConfig {
     private final LanguageRepository languageRepository;
     private final ParticipantsRepository participantsRepository;
     private final NotificationRepository notificationRepository;
+    private final ListUsersRepository listUsersRepository;
 
     //DataBase
     @Value("${spring.datasource.url}")
@@ -88,11 +88,12 @@ public class BotStartConfig {
 
     @Autowired
     public BotStartConfig(ActiveGiveawayRepository activeGiveawayRepository, LanguageRepository
-            languageRepository, ParticipantsRepository participantsRepository, NotificationRepository notificationRepository) {
+            languageRepository, ParticipantsRepository participantsRepository, NotificationRepository notificationRepository, ListUsersRepository listUsersRepository) {
         this.activeGiveawayRepository = activeGiveawayRepository;
         this.languageRepository = languageRepository;
         this.participantsRepository = participantsRepository;
         this.notificationRepository = notificationRepository;
+        this.listUsersRepository = listUsersRepository;
     }
 
     @Bean
@@ -131,7 +132,7 @@ public class BotStartConfig {
             jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild(activeGiveawayRepository, languageRepository));
             jdaBuilder.addEventListeners(new ReactionsButton(languageRepository, notificationRepository));
             jdaBuilder.addEventListeners(new Reactions());
-            jdaBuilder.addEventListeners(new SlashCommand(languageRepository, activeGiveawayRepository, participantsRepository, notificationRepository));
+            jdaBuilder.addEventListeners(new SlashCommand(languageRepository, activeGiveawayRepository, participantsRepository, notificationRepository, listUsersRepository));
 
             jda = jdaBuilder.build();
             jda.awaitReady();
@@ -338,7 +339,8 @@ public class BotStartConfig {
                         //Добавляем пользователей в hashmap
                         participantsList,
                         activeGiveawayRepository,
-                        participantsRepository);
+                        participantsRepository,
+                        listUsersRepository);
 
                 GiveawayRegistry instance = GiveawayRegistry.getInstance();
                 instance.putGift(guild_long_id, gift);
