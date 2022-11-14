@@ -17,6 +17,7 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.interactions.DiscordLocale;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -147,7 +148,7 @@ public class BotStartConfig {
             System.out.println("IsDevMode: " + Config.isIsDev());
 
             //Обновить команды
-//            updateSlashCommands();
+            updateSlashCommands();
             System.out.println("20:14");
         } catch (Exception e) {
             e.printStackTrace();
@@ -160,94 +161,134 @@ public class BotStartConfig {
 
             //Get participants
             List<OptionData> participants = new ArrayList<>();
-            participants.add(new OptionData(STRING, "id", "Giveaway ID").setName("id").setRequired(true));
+            participants.add(new OptionData(STRING, "id", "Giveaway ID")
+                    .setName("id")
+                    .setRequired(true)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway ID"));
 
             //Stop
             List<OptionData> optionsStop = new ArrayList<>();
-            optionsStop.add(new OptionData(INTEGER, "count", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1").setName("count").setMinValue(1).setMaxValue(30));
+            optionsStop.add(new OptionData(INTEGER, "count", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1")
+                    .setName("count")
+                    .setMinValue(1)
+                    .setMaxValue(30)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1"));
 
             //Set language
             List<OptionData> optionsLanguage = new ArrayList<>();
             optionsLanguage.add(new OptionData(STRING, "bot", "Setting the bot language")
                     .addChoice("\uD83C\uDDEC\uD83C\uDDE7 English Language", "eng")
                     .addChoice("\uD83C\uDDF7\uD83C\uDDFA Russian Language", "rus")
-                    .setRequired(true));
+                    .setRequired(true)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Настройка языка бота"));
 
             List<OptionData> optionsNotifications = new ArrayList<>();
             optionsNotifications.add(new OptionData(STRING, "set", "Disable or Enable notifications")
-                    .addChoice("Enable", "enable")
                     .addChoice("Disable", "disable")
-                    .setRequired(true));
+                    .addChoice("Enable", "enable")
+                    .setRequired(true)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Отключить или Включить уведомления"));
 
             //Start Giveaway
             List<OptionData> optionsStart = new ArrayList<>();
-            optionsStart.add(new OptionData(STRING, "title", "Title for Giveaway. Maximum 255 characters").setName("title"));
-            optionsStart.add(new OptionData(INTEGER, "count", "Set count winners").setName("count").setMinValue(1).setMaxValue(30));
+            optionsStart.add(new OptionData(STRING, "title", "Title for Giveaway. Maximum 255 characters")
+                    .setName("title")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Название для Giveaway. Максимум 255 символов"));
+
+            optionsStart.add(new OptionData(INTEGER, "count", "Set count winners").setName("count")
+                    .setMinValue(1)
+                    .setMaxValue(30)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить колличество победителей"));
+
             optionsStart.add(new OptionData(STRING, "duration", "Examples: 5s, 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style and UTC ±0")
-                    .setName("duration"));
-            optionsStart.add(new OptionData(CHANNEL, "channel", "#TextChannel name").setName("textchannel"));
-            optionsStart.add(new OptionData(ROLE, "mention", "Mentioning a specific Role").setName("mention"));
+                    .setName("duration")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: 5s, 20m, 10h, 1d. Или: 2021.11.16 16:00. Только в этом стиле и UTC ±0"));
+
+            optionsStart.add(new OptionData(CHANNEL, "channel", "#TextChannel name")
+                    .setName("textchannel")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "#TextChannel название"));
+
+            optionsStart.add(new OptionData(ROLE, "mention", "Mentioning a specific @Role")
+                    .setName("mention")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Упоминание определенной @Роли"));
+
             optionsStart.add(new OptionData(STRING, "role", "Giveaway is only for a specific role? Don't forget to specify the Role in the previous choice.")
                     .addChoice("yes", "yes")
-                    .setName("role"));
-            optionsStart.add(new OptionData(ATTACHMENT, "image", "Your Giveaway Image").setName("image"));
+                    .setName("role")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway предназначен только для определенной роли? Не забудьте указать роль в предыдущем выборе."));
+
+            optionsStart.add(new OptionData(ATTACHMENT, "image", "Set Image for Giveaway")
+                    .setName("image")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить изображение для Giveaway"));
 
             //change
             List<OptionData> change = new ArrayList<>();
             change.add(new OptionData(STRING, "duration", "Examples: 5s, 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style and UTC ±0")
                     .setName("duration")
-                    .setRequired(true));
+                    .setRequired(true)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: 5s, 20m, 10h, 1d. Или: 2021.11.16 16:00. Только в этом стиле и UTC ±0"));
 
             List<OptionData> reroll = new ArrayList<>();
-            reroll.add(new OptionData(STRING, "id", "Giveaway ID").setName("id").setRequired(true));
-
+            reroll.add(new OptionData(STRING, "id", "Giveaway ID")
+                    .setName("id")
+                    .setRequired(true).setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway ID"));
 
             List<OptionData> botPermissions = new ArrayList<>();
             botPermissions.add(new OptionData(CHANNEL, "textchannel", "Checking the permissions of a specific channel")
-                    .setName("textchannel"));
+                    .setName("textchannel")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Проверка разрешений определенного канала"));
 
             commands.addCommands(Commands.slash("check-bot-permission", "Checking the permission bot")
                     .addOptions(botPermissions)
-                    .setGuildOnly(true));
+                    .setGuildOnly(true)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Проверка разрешений бота"));
 
-            //Build
             commands.addCommands(Commands.slash("language", "Setting language")
                     .addOptions(optionsLanguage)
-                    .setGuildOnly(true));
+                    .setGuildOnly(true)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Настройка языка"));
 
-            commands.addCommands(Commands.slash("start", "Create giveaway")
+            commands.addCommands(Commands.slash("start", "Create Giveaway")
                     .addOptions(optionsStart)
-                    .setGuildOnly(true));
+                    .setGuildOnly(true)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Создание Giveaway"));
 
             commands.addCommands(Commands.slash("stop", "Stop the Giveaway")
                     .addOptions(optionsStop)
                     .setGuildOnly(true)
-                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MESSAGE_MANAGE, Permission.ADMINISTRATOR))
-            );
+                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Остановить Giveaway"));
 
             commands.addCommands(Commands.slash("help", "Bot commands")
-                    .setGuildOnly(true));
+                    .setGuildOnly(true)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Команды бота"));
 
             commands.addCommands(Commands.slash("list", "List of participants")
-                    .setGuildOnly(true));
+                    .setGuildOnly(true)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Список участников"));
 
             commands.addCommands(Commands.slash("patreon", "Support us on Patreon")
-                    .setGuildOnly(true));
+                    .setGuildOnly(true)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Поддержите нас на Patreon"));
 
-            commands.addCommands(Commands.slash("participants", "Get file with all participants by Giveaway ID")
+            commands.addCommands(Commands.slash("participants", "Get file with all participants")
                     .addOptions(participants)
-                    .setGuildOnly(true));
+                    .setGuildOnly(true)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Получить файл со всеми участниками"));
 
-            commands.addCommands(Commands.slash("reroll", "Reroll one winner by Giveaway ID")
+            commands.addCommands(Commands.slash("reroll", "Reroll one winner")
                     .addOptions(reroll)
-                    .setGuildOnly(true));
+                    .setGuildOnly(true)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Перевыбрать одного победителя"));
 
             commands.addCommands(Commands.slash("notifications", "Configuring bot notifications")
-                    .addOptions(optionsNotifications));
+                    .addOptions(optionsNotifications)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Настройка уведомлений бота"));
 
             commands.addCommands(Commands.slash("change", "Change the time")
                     .addOptions(change)
-                    .setGuildOnly(true));
+                    .setGuildOnly(true)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Изменить время"));
 
             commands.queue();
 

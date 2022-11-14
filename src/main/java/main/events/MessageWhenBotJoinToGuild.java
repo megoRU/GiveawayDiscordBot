@@ -43,12 +43,12 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
 
             EmbedBuilder welcome = new EmbedBuilder();
             welcome.setColor(Color.GREEN);
-            welcome.addField("Giveaway", "Thanks for adding " +
-                    "**"
-                    + event.getGuild().getSelfMember().getUser().getName() +
-                    "** " + "bot to " + event.getGuild().getName() +
-                    "!\n", false);
-            welcome.addField("List of commands", "Use Slash Command: **/help** for a list of commands.", false);
+            welcome.addField("Bot Language", "Use: </language:941286272390037534>", false);
+            welcome.addField("Giveaway", "Thanks for adding " + "**" + "Giveaway" + "** " + "bot to " + event.getGuild().getName() + "!\n", false);
+            welcome.addField("Create Giveaway", "Use: </start:941286272390037535>", false);
+            welcome.addField("Reroll Winner", "Use: </reroll:957624805446799452>", false);
+            welcome.addField("Stop Giveaway manually", "Use: </stop:941286272390037536>", false);
+            welcome.addField("List of commands", "Use: </help:941286272390037537>", false);
             welcome.addField("Support server", ":helmet_with_cross: [Discord server](https://discord.com/invite/UrWG3R683d)\n", false);
             welcome.addField("Information", "Our bot supports recovery of any Giveaway, upon request in support. " +
                     "Also, the bot automatically checks the lists of participants, even if the bot is turned off or there are problems in recording while working, " +
