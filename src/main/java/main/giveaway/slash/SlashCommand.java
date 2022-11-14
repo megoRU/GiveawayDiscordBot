@@ -606,6 +606,12 @@ public class SlashCommand extends ListenerAdapter {
 
                     List<ListUsers> listUsers = listUsersRepository.findAllByGiveawayId(Long.parseLong(id), userIdLong);
 
+                    if (listUsers.isEmpty()) {
+                        String noAccessReroll = jsonParsers.getLocale("no_access_reroll", guildId);
+                        event.getHook().sendMessage(noAccessReroll).setEphemeral(true).queue();
+                        return;
+                    }
+
                     String json = gson.toJson(listUsers);
 
                     // Создание объекта FileWriter
