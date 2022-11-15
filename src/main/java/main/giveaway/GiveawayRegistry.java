@@ -5,6 +5,7 @@ import main.threads.StopGiveawayByTimer;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -12,7 +13,7 @@ import java.util.Timer;
 public class GiveawayRegistry {
 
     //Возвращает GiveawayData по long id
-    private static final Map<Long, Gift.GiveawayData> giveawayDataMap = new HashMap<>();
+    private static final Map<Long, Gift> giveawayDataMap = new HashMap<>();
     private static final Map<Long, Gift.GiveawayTimerStorage> giveawayTimer = new HashMap<>();
     private static final JSONParsers jsonParsers = new JSONParsers();
     private static volatile GiveawayRegistry giveawayRegistry;
@@ -36,46 +37,46 @@ public class GiveawayRegistry {
         return giveawayTimer.get(guildId);
     }
 
-    public static Map<Long, Gift.GiveawayData> getGiveawayDataMap() {
-        return giveawayDataMap;
+    public static Collection<Gift> getAllGift() {
+        return giveawayDataMap.values();
     }
 
     public long getIdUserWhoCreateGiveaway(long guildId) {
-        return giveawayDataMap.get(guildId).getCreatedUserId();
+        return giveawayDataMap.get(guildId).getGiveawayData().getCreatedUserId();
     }
 
     public void putIdUserWhoCreateGiveaway(long guildId, long userId) {
-        giveawayDataMap.get(guildId).setCreatedUserId(userId);
+        giveawayDataMap.get(guildId).getGiveawayData().setCreatedUserId(userId);
     }
 
     @Nullable
     public String getUrlImage(long guildId) {
-        return giveawayDataMap.get(guildId).getUrlImage();
+        return giveawayDataMap.get(guildId).getGiveawayData().getUrlImage();
     }
 
     public void putUrlImage(long guildId, String urlImage) {
-        giveawayDataMap.get(guildId).setUrlImage(urlImage);
+        giveawayDataMap.get(guildId).getGiveawayData().setUrlImage(urlImage);
     }
 
     public boolean getIsForSpecificRole(long guildId) {
-        return giveawayDataMap.get(guildId).getIsForSpecificRole();
+        return giveawayDataMap.get(guildId).getGiveawayData().getIsForSpecificRole();
     }
 
     public void putIsForSpecificRole(long guildId, boolean is_for_specific_role) {
-        giveawayDataMap.get(guildId).setIsForSpecificRole(is_for_specific_role);
+        giveawayDataMap.get(guildId).getGiveawayData().setIsForSpecificRole(is_for_specific_role);
     }
 
     @Nullable
     public Long getRoleId(long guildId) {
-        return giveawayDataMap.get(guildId).getRoleId();
+        return giveawayDataMap.get(guildId).getGiveawayData().getRoleId();
     }
 
     public void putRoleId(long guildId, Long roleIdLong) {
-        giveawayDataMap.get(guildId).setRoleId(roleIdLong);
+        giveawayDataMap.get(guildId).getGiveawayData().setRoleId(roleIdLong);
     }
 
     public Gift getGift(long guildId) {
-        return giveawayDataMap.get(guildId).getGift();
+        return giveawayDataMap.get(guildId).getGiveawayData().getGift();
     }
 
     public boolean hasGift(long guildId) {
@@ -84,23 +85,23 @@ public class GiveawayRegistry {
 
     @Nullable
     public Timestamp getEndGiveawayDate(long guildId) {
-        return giveawayDataMap.get(guildId).getEndGiveawayDate();
+        return giveawayDataMap.get(guildId).getGiveawayData().getEndGiveawayDate();
     }
 
     public int getCountWinners(long guildId) {
-        return giveawayDataMap.get(guildId).getCountWinners();
+        return giveawayDataMap.get(guildId).getGiveawayData().getCountWinners();
     }
 
     public long getMessageId(long guildId) {
-        return giveawayDataMap.get(guildId).getMessageId();
+        return giveawayDataMap.get(guildId).getGiveawayData().getMessageId();
     }
 
     public String getTitle(long guildId) {
-        return giveawayDataMap.get(guildId).getTitle();
+        return giveawayDataMap.get(guildId).getGiveawayData().getTitle();
     }
 
     public void putEndGiveawayDate(long guildId, Timestamp timestamp) {
-        giveawayDataMap.get(guildId).setEndGiveawayDate(timestamp);
+        giveawayDataMap.get(guildId).getGiveawayData().setEndGiveawayDate(timestamp);
     }
 
     public void cancelGiveawayTimer(long guildId) {
@@ -117,23 +118,23 @@ public class GiveawayRegistry {
     }
 
     public void putMessageId(long guildId, long messageId) {
-        giveawayDataMap.get(guildId).setMessageId(messageId);
+        giveawayDataMap.get(guildId).getGiveawayData().setMessageId(messageId);
     }
 
     public void putChannelId(long guildId, long channelId) {
-        giveawayDataMap.get(guildId).setChannelId(channelId);
+        giveawayDataMap.get(guildId).getGiveawayData().setChannelId(channelId);
     }
 
     public void putTitle(long guildId, String title) {
-        giveawayDataMap.get(guildId).setTitle(title);
+        giveawayDataMap.get(guildId).getGiveawayData().setTitle(title);
     }
 
     public void putGift(long guildId, Gift gift) {
-        giveawayDataMap.put(guildId, gift.new GiveawayData());
+        giveawayDataMap.put(guildId, gift);
     }
 
     public void putCountWinners(long guildId, int countWinners) {
-        giveawayDataMap.get(guildId).setCountWinners(countWinners);
+        giveawayDataMap.get(guildId).getGiveawayData().setCountWinners(countWinners);
     }
 
     public void removeGuildFromGiveaway(long guildId) {

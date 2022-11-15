@@ -6,21 +6,18 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.AllArgsConstructor;
 import main.config.BotStartConfig;
-import main.giveaway.ChecksClass;
-import main.giveaway.Exceptions;
-import main.giveaway.Gift;
-import main.giveaway.GiveawayRegistry;
+import main.giveaway.*;
 import main.giveaway.buttons.ReactionsButton;
-import main.giveaway.impl.GiftHelper;
 import main.jsonparser.JSONParsers;
 import main.messagesevents.EditMessage;
 import main.model.entity.Language;
 import main.model.entity.ListUsers;
-import main.model.entity.Notification;
 import main.model.entity.Participants;
-import main.model.repository.*;
+import main.model.repository.ActiveGiveawayRepository;
+import main.model.repository.LanguageRepository;
+import main.model.repository.ListUsersRepository;
+import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
@@ -55,7 +52,6 @@ public class SlashCommand extends ListenerAdapter {
     private final LanguageRepository languageRepository;
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final ParticipantsRepository participantsRepository;
-    private final NotificationRepository notificationRepository;
     private final ListUsersRepository listUsersRepository;
     private final static MegoruAPI api = new MegoruAPI.Builder().build();
 
@@ -98,37 +94,6 @@ public class SlashCommand extends ListenerAdapter {
 
                 event.reply(giftPermissions).queue();
             }
-            return;
-        }
-
-        //TODO: мб удалить к чертям
-        if (event.getName().equals("notifications")) {
-            event.deferReply().queue();
-            Notification.NotificationStatus notificationStatus;
-            EmbedBuilder giveaway = new EmbedBuilder();
-            giveaway.setColor(Color.GREEN);
-            Guild guild = event.getGuild();
-            if (event.getOptions().get(0).getAsString().equals("enable")) {
-                String buttonNotificationAccept = jsonParsers.getLocale("button_notification_accept", guild == null ? "0" : guild.getId());
-                notificationStatus = Notification.NotificationStatus.ACCEPT;
-                giveaway.setDescription(buttonNotificationAccept);
-            } else {
-                String buttonNotificationDeny = jsonParsers.getLocale("button_notification_deny", guild == null ? "0" : guild.getId());
-                notificationStatus = Notification.NotificationStatus.DENY;
-                giveaway.setDescription(buttonNotificationDeny);
-            }
-
-            BotStartConfig.getMapNotifications().put(userIdLongAsString, notificationStatus);
-
-            Notification notification = new Notification();
-            notification.setUserIdLong(userIdLongAsString);
-            notification.setNotificationStatus(notificationStatus);
-
-            event.getHook().sendMessageEmbeds(giveaway.build())
-                    .setEphemeral(true)
-                    .queue();
-
-            notificationRepository.save(notification);
             return;
         }
 
@@ -341,17 +306,17 @@ public class SlashCommand extends ListenerAdapter {
             info.setTitle("Giveaway");
             info.addField("Slash Commands",
                     """
-                           </language:941286272390037534>
-                           </start:941286272390037535>
-                           </stop:941286272390037536>
-                           </list:941286272390037538>
-                           </participants:952572018077892638>
-                           </reroll:957624805446799452>
-                           </check-bot-permission:1009065886335914054>
-                           </notifications:1011570005890056262>
-                           </change:1027901550456225842>
-                           </patreon:945299399855210527>
-                            """, false);
+                            </language:941286272390037534>
+                            </start:941286272390037535>
+                            </stop:941286272390037536>
+                            </list:941286272390037538>
+                            </participants:952572018077892638>
+                            </reroll:957624805446799452>
+                            </check-bot-permission:1009065886335914054>
+                            </notifications:1011570005890056262>
+                            </change:1027901550456225842>
+                            </patreon:945299399855210527>
+                             """, false);
             String messagesEventsLinks = jsonParsers.getLocale("messages_events_links", guildId);
             String messagesEventsSite = jsonParsers.getLocale("messages_events_site", guildId);
             String messagesEventsAddMeToOtherGuilds = jsonParsers.getLocale("messages_events_add_me_to_other_guilds", guildId);
@@ -484,7 +449,6 @@ public class SlashCommand extends ListenerAdapter {
             return;
         }
 
-        //TODO: говно переделать
         if (event.getName().equals("change")) {
             GiveawayRegistry instance = GiveawayRegistry.getInstance();
             if (!instance.hasGift(guildIdLong)) {
@@ -492,57 +456,19 @@ public class SlashCommand extends ListenerAdapter {
                 event.reply(slashStopNoHas).setEphemeral(true).queue();
                 return;
             }
-
-            String time = event.getOption("duration", OptionMapping::getAsString);
             EmbedBuilder start = new EmbedBuilder();
-
-            Gift gift = instance.getGift(guildIdLong);
-            String title = instance.getTitle(guildIdLong);
-            Long role = instance.getRoleId(guildIdLong);
-            boolean isOnlyForSpecificRole = instance.getIsForSpecificRole(guildIdLong);
-            int countWinners = instance.getCountWinners(guildIdLong);
-            String urlImage = instance.getUrlImage(guildIdLong);
-            long userWhoCreateGiveaway = instance.getIdUserWhoCreateGiveaway(guildIdLong);
-            long channelId = gift.getTextChannelId();
-            long messageId = instance.getMessageId(guildIdLong);
-
-            String giftReaction = jsonParsers.getLocale("gift_reaction", guildId);
-
-            start.setColor(Color.GREEN);
-            start.setTitle(title);
-            start.appendDescription(giftReaction);
-
-            if (role != null && role != 0L && isOnlyForSpecificRole) {
-                String giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", guildId), role);
-                start.appendDescription(giftOnlyFor);
-            }
-
-            String footer;
-            if (countWinners == 1) {
-                footer = String.format("1 %s", GiftHelper.setEndingWord(1, guildIdLong));
-            } else {
-                footer = String.format("%s %s", countWinners, GiftHelper.setEndingWord(countWinners, guildIdLong));
-            }
-
-            start.setFooter(footer);
-
+            String time = event.getOption("duration", OptionMapping::getAsString);
             if (time != null) {
-                gift.setTime(start, time, footer);
+                long channelId = instance.getGift(guildIdLong).getTextChannelId();
+                long messageId = instance.getMessageId(guildIdLong);
+
+                Timestamp endGiveawayDate = instance.getEndGiveawayDate(guildIdLong);
+                EmbedBuilder embedBuilder = GiveawayEmbedUtils.embedBuilder(start, guildIdLong, time);
+                activeGiveawayRepository.updateGiveawayTime(guildIdLong, endGiveawayDate);
+                EditMessage.edit(embedBuilder.build(), guildIdLong, channelId, messageId);
+                String changeDuration = jsonParsers.getLocale("change_duration", guildId);
+                event.reply(changeDuration).setEphemeral(true).queue();
             }
-
-            String hosted = String.format("\nHosted by: <@%s>", userWhoCreateGiveaway);
-            start.appendDescription(hosted);
-
-            if (urlImage != null) {
-                start.setImage(urlImage);
-            }
-            Timestamp endGiveawayDate = instance.getEndGiveawayDate(guildIdLong);
-
-            activeGiveawayRepository.updateGiveawayTime(guildIdLong, endGiveawayDate);
-            EditMessage.edit(start.build(), guildIdLong, channelId, messageId);
-
-            String changeDuration = jsonParsers.getLocale("change_duration", guildId);
-            event.reply(changeDuration).setEphemeral(true).queue();
             return;
         }
 

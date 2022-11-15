@@ -4,8 +4,6 @@ import api.megoru.ru.entity.Winners;
 import api.megoru.ru.impl.MegoruAPI;
 import lombok.Getter;
 import lombok.Setter;
-import main.config.BotStartConfig;
-import main.giveaway.buttons.ReactionsButton;
 import main.giveaway.impl.GiftHelper;
 import main.giveaway.impl.URLS;
 import main.giveaway.reactions.Reactions;
@@ -13,7 +11,6 @@ import main.giveaway.slash.SlashCommand;
 import main.jsonparser.JSONParsers;
 import main.messagesevents.SenderMessage;
 import main.model.entity.ActiveGiveaways;
-import main.model.entity.Notification;
 import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.ListUsersRepository;
@@ -44,6 +41,9 @@ public class Gift {
     private static final Logger LOGGER = Logger.getLogger(Gift.class.getName());
     public static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
     private static final JSONParsers jsonParsers = new JSONParsers();
+
+    //Giveaway Data
+    private final Gift.GiveawayData giveawayData = new GiveawayData();
 
     //API
     private final MegoruAPI api = new MegoruAPI.Builder().build();
@@ -152,7 +152,10 @@ public class Gift {
             throw new IllegalArgumentException(format);
         }
 
-        String endTimeFormat = String.format("\nEnds: <t:%s:R> (<t:%s:f>)", localDateTime.toEpochSecond(offset), localDateTime.toEpochSecond(offset));
+        String endTimeFormat =
+                String.format(jsonParsers.getLocale("gift_ends_giveaway", String.valueOf(guildId)),
+                        localDateTime.toEpochSecond(offset),
+                        localDateTime.toEpochSecond(offset));
         start.appendDescription(endTimeFormat);
 
         putTimestamp(localDateTime.toEpochSecond(offset));
@@ -242,14 +245,14 @@ public class Gift {
     private void updateCollections(int countWinners, String time, Message message, Long role,
                                    Boolean isOnlyForSpecificRole, String urlImage, String title, Long idUserWhoCreateGiveaway) {
 
-        GiveawayRegistry.getInstance().putMessageId(guildId, message.getIdLong());
-        GiveawayRegistry.getInstance().putChannelId(guildId, message.getChannel().getIdLong());
-        GiveawayRegistry.getInstance().putCountWinners(guildId, countWinners);
-        GiveawayRegistry.getInstance().putRoleId(guildId, role);
-        GiveawayRegistry.getInstance().putIsForSpecificRole(guildId, isOnlyForSpecificRole);
-        GiveawayRegistry.getInstance().putUrlImage(guildId, urlImage);
-        GiveawayRegistry.getInstance().putTitle(guildId, title == null ? "Giveaway" : title);
-        GiveawayRegistry.getInstance().putIdUserWhoCreateGiveaway(guildId, idUserWhoCreateGiveaway);
+        giveawayData.setMessageId(message.getIdLong());
+        giveawayData.setChannelId(message.getChannel().getIdLong());
+        giveawayData.setCountWinners(countWinners);
+        giveawayData.setRoleId(role);
+        giveawayData.setIsForSpecificRole(isOnlyForSpecificRole);
+        giveawayData.setUrlImage(urlImage);
+        giveawayData.setTitle(title == null ? "Giveaway" : title);
+        giveawayData.setCreatedUserId(idUserWhoCreateGiveaway);
 
         ActiveGiveaways activeGiveaways = new ActiveGiveaways();
         activeGiveaways.setGuildLongId(guildId);
@@ -262,7 +265,8 @@ public class Gift {
         activeGiveaways.setUrlImage(urlImage);
         activeGiveaways.setIdUserWhoCreateGiveaway(idUserWhoCreateGiveaway);
 
-        Timestamp endGiveawayDate = GiveawayRegistry.getInstance().getEndGiveawayDate(guildId);
+        GiveawayRegistry instance = GiveawayRegistry.getInstance();
+        Timestamp endGiveawayDate = instance.getEndGiveawayDate(guildId);
 
         if (time != null && time.length() > 4) {
             activeGiveaways.setDateEndGiveaway(endGiveawayDate);
@@ -278,7 +282,8 @@ public class Gift {
                         \nНовый участник
                         Nick: %s
                         UserID: %s
-                        Guild: %s""",
+                        Guild: %s
+                        """,
                 user.getName(),
                 user.getId(),
                 guildId));
@@ -289,64 +294,17 @@ public class Gift {
         }
     }
 
-    private void executeMultiInsert(long guildIdLong) {
+    private void executeMultiInsert() {
         try {
-            if (count.get() > localCountUsers && GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
+            if (count.get() > localCountUsers && GiveawayRegistry.getInstance().hasGift(guildId)) {
                 localCountUsers = count.get();
                 if (participantsList != null && !participantsList.isEmpty()) {
                     //Сохраняем всех участников в temp коллекцию
                     Set<Participants> temp = new LinkedHashSet<>(participantsList);
-
                     participantsRepository.saveAllAndFlush(temp);
-
-                    String buttonNotification = jsonParsers.getLocale("button_notification", String.valueOf(this.guildId));
-                    List<Button> buttons = new ArrayList<>();
-                    buttons.add(Button.danger(ReactionsButton.DISABLE_NOTIFICATIONS, buttonNotification));
-
-                    for (int i = 0; i < temp.size(); i++) {
-                        temp.forEach(t -> {
-                                    Notification.NotificationStatus notificationStatus = BotStartConfig
-                                            .getMapNotifications()
-                                            .get(String.valueOf(t.getUserIdLong()));
-
-                                    if (notificationStatus == null) {
-                                        notificationStatus = Notification.NotificationStatus.ACCEPT;
-                                    }
-
-                                    if (notificationStatus.equals(Notification.NotificationStatus.ACCEPT)) {
-                                        final String url = URLS.getDiscordUrlMessage(
-                                                guildIdLong,
-                                                textChannelId,
-                                                t.getActiveGiveaways().getMessageIdLong());
-
-                                        final String giftRegistered = String.format(jsonParsers.getLocale("gift_registered", String.valueOf(t.getActiveGiveaways().getGuildLongId())), url);
-
-                                        final String giftVote = jsonParsers.getLocale("gift_vote", String.valueOf(t.getActiveGiveaways().getGuildLongId()));
-                                        final String userIdLong = String.valueOf(t.getUserIdLong());
-                                        final String giftRegisteredTitle = jsonParsers.getLocale("gift_registered_title", String.valueOf(t.getActiveGiveaways().getGuildLongId()));
-
-                                        EmbedBuilder embedBuilder = new EmbedBuilder();
-                                        embedBuilder.setColor(Color.GREEN);
-                                        embedBuilder.setAuthor(
-                                                giftRegisteredTitle,
-                                                null,
-                                                BotStartConfig.getJda().getSelfUser().getAvatarUrl());
-                                        embedBuilder.setDescription(giftRegistered);
-                                        embedBuilder.appendDescription(giftVote);
-
-                                        SenderMessage.sendPrivateMessageWithButtons(
-                                                BotStartConfig.getJda(),
-                                                userIdLong,
-                                                embedBuilder.build(), buttons);
-                                    }
-                                }
-                        );
-                    }
-
                     //Удаляем все элементы которые уже в БД
                     participantsList.removeAll(temp);
                 }
-
                 if (participantsList.isEmpty()) {
                     synchronized (this) {
                         notifyAll();
@@ -355,9 +313,9 @@ public class Gift {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Таблица: " + guildIdLong
-                    + " больше не существует, скорее всего Giveaway завершился!\n"
-                    + "Очищаем StringBuilder!");
+            String format = String.format("Таблица: %s больше не существует, скорее всего Giveaway завершился!" +
+                    "\nОчищаем StringBuilder!", guildId);
+            LOGGER.info(format);
         }
     }
 
@@ -489,7 +447,7 @@ public class Gift {
             public void run() throws NullPointerException {
                 try {
                     if (GiveawayRegistry.getInstance().hasGift(guildId)) {
-                        executeMultiInsert(guildId);
+                        executeMultiInsert();
                     } else {
                         Thread.currentThread().interrupt();
                     }
@@ -563,5 +521,9 @@ public class Gift {
 
     public long getTextChannelId() {
         return textChannelId;
+    }
+
+    public GiveawayData getGiveawayData() {
+        return giveawayData;
     }
 }
