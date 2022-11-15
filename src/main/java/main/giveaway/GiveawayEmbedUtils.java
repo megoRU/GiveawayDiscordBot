@@ -14,7 +14,8 @@ public class GiveawayEmbedUtils {
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     public static EmbedBuilder embedBuilder(final String winners, final int countWinner, final long guildIdLong) {
-        long idUserWhoCreateGiveaway = GiveawayRegistry.getInstance().getIdUserWhoCreateGiveaway(guildIdLong);
+        GiveawayRegistry instance = GiveawayRegistry.getInstance();
+        long idUserWhoCreateGiveaway = instance.getIdUserWhoCreateGiveaway(guildIdLong);
         EmbedBuilder embedBuilder = new EmbedBuilder();
 
         LOGGER.info("\nEmbedBuilder: " +
@@ -23,7 +24,7 @@ public class GiveawayEmbedUtils {
                 +"\nguildIdLong: " + guildIdLong);
 
         embedBuilder.setColor(Color.GREEN);
-        embedBuilder.setTitle(GiveawayRegistry.getInstance().getTitle(guildIdLong));
+        embedBuilder.setTitle(instance.getTitle(guildIdLong));
 
         if (countWinner == 1) {
             String giftWinner = String.format(jsonParsers.getLocale("gift_winner", String.valueOf(guildIdLong)), winners);
@@ -38,13 +39,13 @@ public class GiveawayEmbedUtils {
         String giftEnds = String.format(jsonParsers.getLocale("gift_ends", String.valueOf(guildIdLong)), footer);
         embedBuilder.setFooter(giftEnds);
 
-        if (GiveawayRegistry.getInstance().getIsForSpecificRole(guildIdLong)) {
-            Long roleId = GiveawayRegistry.getInstance().getRoleId(guildIdLong);
+        if (instance.getIsForSpecificRole(guildIdLong)) {
+            Long roleId = instance.getRoleId(guildIdLong);
             String giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", String.valueOf(guildIdLong)), roleId);
 
             embedBuilder.appendDescription(giftOnlyFor);
         }
-        long giveawayIdLong = GiveawayRegistry.getInstance().getMessageId(guildIdLong);
+        long giveawayIdLong = instance.getMessageId(guildIdLong);
 
         String hostedBy = String.format("\nHosted by: <@%s>", idUserWhoCreateGiveaway);
         String giveawayIdDescription = String.format("\nGiveaway ID: `%s`", giveawayIdLong);
@@ -52,8 +53,8 @@ public class GiveawayEmbedUtils {
         embedBuilder.appendDescription(hostedBy);
         embedBuilder.appendDescription(giveawayIdDescription);
 
-        if (GiveawayRegistry.getInstance().getUrlImage(guildIdLong) != null) {
-            embedBuilder.setImage(GiveawayRegistry.getInstance().getUrlImage(guildIdLong));
+        if (instance.getUrlImage(guildIdLong) != null) {
+            embedBuilder.setImage(instance.getUrlImage(guildIdLong));
         }
 
         return embedBuilder;

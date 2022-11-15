@@ -246,7 +246,8 @@ public class BotStartConfig {
             commands.addCommands(Commands.slash("language", "Setting language")
                     .addOptions(optionsLanguage)
                     .setGuildOnly(true)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Настройка языка"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Настройка языка")
+                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER)));
 
             commands.addCommands(Commands.slash("start", "Create Giveaway")
                     .addOptions(optionsStart)

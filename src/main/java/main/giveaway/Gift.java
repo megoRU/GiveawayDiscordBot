@@ -371,25 +371,6 @@ public class Gift {
         participantsList.add(participants);
     }
 
-    //TODO: Не завершается после заверешения
-    //Автоматически отправляет в БД данные которые в буфере StringBuilder
-    private void autoInsert() {
-        new Timer().scheduleAtFixedRate(new TimerTask() {
-            public void run() throws NullPointerException {
-                try {
-                    if (GiveawayRegistry.getInstance().hasGift(guildId)) {
-                        executeMultiInsert(guildId);
-                    } else {
-                        Thread.currentThread().interrupt();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }, 2000, 5000);
-    }
-
     /**
      * @throws Exception Throws an exception
      */
@@ -399,14 +380,10 @@ public class Gift {
                 wait(10000L);
             }
         }
-
         List<Participants> participants = participantsRepository.getParticipantsByGuildIdLong(guildId);
-
-        if (participants.isEmpty()) throw new Exception("participantsJSON is Empty");
-
+        if (participants.isEmpty()) throw new Exception("participants is Empty");
         LOGGER.info("\nlistUsersHash size: " + listUsersHash.size());
         LOGGER.info("\nparticipantsJSON size: " + participants.size());
-
         for (Participants participant : participants) {
             System.out.println("getIdUserWhoCreateGiveaway " + participant.getActiveGiveaways().getIdUserWhoCreateGiveaway()
                     + " getUserIdLong " + participant.getUserIdLong()
@@ -415,16 +392,10 @@ public class Gift {
                     + " getGuildId " + participant.getActiveGiveaways().getGuildLongId()
             );
         }
-        long messageId = GiveawayRegistry.getInstance().getMessageId(guildId);
-
         Winners winners = new Winners(countWinner, 0, listUsersHash.size() - 1);
-
         LOGGER.info(winners.toString());
-
         List<String> temp = new LinkedList<>(listUsersHash.values());
-
         String[] strings = api.setWinners(winners);
-
         for (String string : strings) {
             uniqueWinners.add("<@" + temp.get(Integer.parseInt(string)) + ">");
         }
@@ -509,6 +480,25 @@ public class Gift {
 
         //Удаляет данные из коллекций
         clearingCollections();
+    }
+
+    //TODO: Не завершается после заверешения
+    //Автоматически отправляет в БД данные которые в буфере StringBuilder
+    private void autoInsert() {
+        new Timer().scheduleAtFixedRate(new TimerTask() {
+            public void run() throws NullPointerException {
+                try {
+                    if (GiveawayRegistry.getInstance().hasGift(guildId)) {
+                        executeMultiInsert(guildId);
+                    } else {
+                        Thread.currentThread().interrupt();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }, 2000, 5000);
     }
 
     @Getter
