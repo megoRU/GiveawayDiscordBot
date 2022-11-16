@@ -66,6 +66,7 @@ public class BotStartConfig {
     private final BotiCordAPI api = new BotiCordAPI.Builder()
             .tokenEnum(TokenEnum.BOT)
             .token(System.getenv("BOTICORD"))
+            .enableDevMode()
             .build();
 
     private final DiscordBotListAPI TOP_GG_API = new DiscordBotListAPI.Builder()

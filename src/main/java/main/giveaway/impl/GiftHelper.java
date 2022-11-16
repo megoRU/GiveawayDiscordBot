@@ -15,7 +15,6 @@ public class GiftHelper {
         this.activeGiveawayRepository = activeGiveawayRepository;
     }
 
-
     public void editMessage(EmbedBuilder embedBuilder, final long guildId, final long textChannel) {
         try {
             Guild guildById = BotStartConfig.getJda().getGuildById(guildId);
