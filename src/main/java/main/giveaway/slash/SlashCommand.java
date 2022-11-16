@@ -456,14 +456,14 @@ public class SlashCommand extends ListenerAdapter {
                 event.reply(slashStopNoHas).setEphemeral(true).queue();
                 return;
             }
-            EmbedBuilder start = new EmbedBuilder();
+            EmbedBuilder change = new EmbedBuilder();
             String time = event.getOption("duration", OptionMapping::getAsString);
             if (time != null) {
                 long channelId = instance.getGift(guildIdLong).getTextChannelId();
                 long messageId = instance.getMessageId(guildIdLong);
 
+                EmbedBuilder embedBuilder = GiveawayEmbedUtils.embedBuilder(change, guildIdLong, time);
                 Timestamp endGiveawayDate = instance.getEndGiveawayDate(guildIdLong);
-                EmbedBuilder embedBuilder = GiveawayEmbedUtils.embedBuilder(start, guildIdLong, time);
                 activeGiveawayRepository.updateGiveawayTime(guildIdLong, endGiveawayDate);
                 EditMessage.edit(embedBuilder.build(), guildIdLong, channelId, messageId);
                 String changeDuration = jsonParsers.getLocale("change_duration", guildId);

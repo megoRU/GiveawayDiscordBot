@@ -30,6 +30,7 @@ public class GiveawayEmbedUtils {
         } else {
             footer = String.format("%s %s", countWinners, GiftHelper.setEndingWord(countWinners, guildIdLong));
         }
+
         String hostedBy = String.format("\nHosted by: <@%s>", createdUserId);
         embedBuilder.setTitle(title);
         embedBuilder.setColor(Color.GREEN);
@@ -38,7 +39,7 @@ public class GiveawayEmbedUtils {
             String giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", String.valueOf(guildIdLong)), role);
             embedBuilder.appendDescription(giftOnlyFor);
         }
-        instance.getGift(guildIdLong).setTime(embedBuilder, time, footer);
+        instance.getGift(guildIdLong).setTime(embedBuilder, time);
         embedBuilder.appendDescription(hostedBy);
         embedBuilder.setImage(imageUrl);
         embedBuilder.setFooter(footer);

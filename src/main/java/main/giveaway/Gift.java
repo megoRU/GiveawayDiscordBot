@@ -120,19 +120,15 @@ public class Gift {
         autoInsert();
     }
 
-    public void setTime(final EmbedBuilder start, final String time, final String footer) {
-        String giftEndsAt = String.format(jsonParsers.getLocale("gift_ends_at", String.valueOf(guildId)), footer);
-        start.setFooter(giftEndsAt);
+    public void setTime(final EmbedBuilder start, final String time) {
         ZoneOffset offset = ZoneOffset.UTC;
         LocalDateTime localDateTime;
 
         if (time.matches(SlashCommand.ISO_TIME_REGEX)) {
             localDateTime = LocalDateTime.parse(time, formatter);
-            start.setTimestamp(localDateTime);
         } else {
             long seconds = GiftHelper.getSeconds(time);
             localDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).plusSeconds(seconds);
-            start.setTimestamp(localDateTime);
         }
 
         if (localDateTime.isBefore(Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime())) {
@@ -213,7 +209,7 @@ public class Gift {
         start.setFooter(footer);
 
         if (time != null) {
-            setTime(start, time, footer);
+            setTime(start, time);
         }
 
         String hosted = String.format("\nHosted by: <@%s>", this.userIdLong);
@@ -472,7 +468,8 @@ public class Gift {
     }
 
     public void putTimestamp(long localDateTime) {
-        GiveawayRegistry.getInstance().cancelGiveawayTimer(guildId);
+        GiveawayRegistry instance = GiveawayRegistry.getInstance();
+        instance.cancelGiveawayTimer(guildId);
 
         Timer timer = new Timer();
         StopGiveawayByTimer stopGiveawayByTimer = new StopGiveawayByTimer(this.guildId);
@@ -482,8 +479,8 @@ public class Gift {
         stopGiveawayByTimer.countDown();
         timer.schedule(stopGiveawayByTimer, date);
 
-        GiveawayRegistry.getInstance().putEndGiveawayDate(this.guildId, timestamp);
-        GiveawayRegistry.getInstance().putGiveawayTimer(this.guildId, stopGiveawayByTimer, timer);
+        instance.putEndGiveawayDate(this.guildId, timestamp);
+        instance.putGiveawayTimer(this.guildId, stopGiveawayByTimer, timer);
     }
 
     private void clearingCollections() {
@@ -502,8 +499,8 @@ public class Gift {
         }
     }
 
-    public boolean isUserPresent(String id) {
-        return listUsersHash.containsKey(id);
+    public boolean hasUserInGiveaway(String user) {
+        return listUsersHash.containsKey(user);
     }
 
     public int getListUsersSize() {

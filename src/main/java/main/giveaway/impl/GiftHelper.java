@@ -44,8 +44,9 @@ public class GiftHelper {
 
     public static String setEndingWord(int num, final long guildId) {
         String language = "eng";
-        if (BotStartConfig.getMapLanguages().get(String.valueOf(guildId)) != null) {
-            language = BotStartConfig.getMapLanguages().get(String.valueOf(guildId));
+        String languageFrom = BotStartConfig.getMapLanguages().get(String.valueOf(guildId));
+        if (languageFrom != null) {
+            language = languageFrom;
         }
 
         return switch (num % 10) {

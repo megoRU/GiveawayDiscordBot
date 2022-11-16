@@ -63,7 +63,7 @@ public class Reactions extends ListenerAdapter implements SenderMessage {
                         }
                     }
 
-                    if (!gift.isUserPresent(user.getId())) {
+                    if (!gift.hasUserInGiveaway(user.getId())) {
                         LOGGER.info(String.format("\nНовый участник: %s\nСервер: %s", user.getId(), event.getGuild().getId()));
                         gift.addUserToPoll(user);
                     }

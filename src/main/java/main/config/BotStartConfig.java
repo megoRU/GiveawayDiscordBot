@@ -146,7 +146,7 @@ public class BotStartConfig {
             System.out.println("IsDevMode: " + Config.isIsDev());
 
             //Обновить команды
-            updateSlashCommands();
+//            updateSlashCommands();
             System.out.println("20:14");
         } catch (Exception e) {
             e.printStackTrace();
@@ -276,7 +276,8 @@ public class BotStartConfig {
             commands.addCommands(Commands.slash("change", "Change the time")
                     .addOptions(change)
                     .setGuildOnly(true)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Изменить время"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Изменить время")
+                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)));
 
             commands.queue();
 
@@ -446,7 +447,7 @@ public class BotStartConfig {
                                         .complete()
                                         .stream()
                                         .filter(user -> !user.isBot())
-                                        .filter(user -> !gift.isUserPresent(user.getId()))
+                                        .filter(user -> !gift.hasUserInGiveaway(user.getId()))
                                         .collect(Collectors.toMap(User::getId, user -> user));
 
                                 if (isForSpecificRole) {
