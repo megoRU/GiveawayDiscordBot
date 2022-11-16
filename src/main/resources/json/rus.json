@@ -54,5 +54,6 @@
   "button_notification": "Отключить уведомления",
   "change_duration": "Успешно изменили время",
   "wrong_date": "Неверная дата",
-  "no_access_reroll": "Скорее всего у вас нет доступа либо Giveaway ID неверный"
+  "no_access_reroll": "Скорее всего у вас нет доступа либо Giveaway ID неверный",
+  "gift_ends_giveaway": "\nЗакончится: <t:%s:R> (<t:%s:f>)"
 }

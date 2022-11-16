@@ -54,5 +54,6 @@
   "button_notification": "Disable notifications",
   "change_duration": "Successfully changed the time",
   "wrong_date": "Invalid date",
-  "no_access_reroll": "Most likely you don't have access or the Giveaway ID is incorrect"
+  "no_access_reroll": "Most likely you don't have access or the Giveaway ID is incorrect",
+  "gift_ends_giveaway": "\nEnds: <t:%s:R> (<t:%s:f>)"
 }

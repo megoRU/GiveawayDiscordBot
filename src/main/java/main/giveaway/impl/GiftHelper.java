@@ -15,7 +15,6 @@ public class GiftHelper {
         this.activeGiveawayRepository = activeGiveawayRepository;
     }
 
-
     public void editMessage(EmbedBuilder embedBuilder, final long guildId, final long textChannel) {
         try {
             Guild guildById = BotStartConfig.getJda().getGuildById(guildId);
@@ -44,8 +43,9 @@ public class GiftHelper {
 
     public static String setEndingWord(int num, final long guildId) {
         String language = "eng";
-        if (BotStartConfig.getMapLanguages().get(String.valueOf(guildId)) != null) {
-            language = BotStartConfig.getMapLanguages().get(String.valueOf(guildId));
+        String languageFrom = BotStartConfig.getMapLanguages().get(String.valueOf(guildId));
+        if (languageFrom != null) {
+            language = languageFrom;
         }
 
         return switch (num % 10) {

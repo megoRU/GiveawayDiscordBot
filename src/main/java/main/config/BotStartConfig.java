@@ -66,6 +66,7 @@ public class BotStartConfig {
     private final BotiCordAPI api = new BotiCordAPI.Builder()
             .tokenEnum(TokenEnum.BOT)
             .token(System.getenv("BOTICORD"))
+            .enableDevMode()
             .build();
 
     private final DiscordBotListAPI TOP_GG_API = new DiscordBotListAPI.Builder()
@@ -103,12 +104,10 @@ public class BotStartConfig {
             //Загружаем GiveawayRegistry
             GiveawayRegistry.getInstance();
 
-            getLocalizationFromDB();
             //Устанавливаем языки
             setLanguages();
 
-            //Получаем уведомления
-            getNotification();
+            getLocalizationFromDB();
 
             List<GatewayIntent> intents = new ArrayList<>(
                     Arrays.asList(
@@ -133,7 +132,7 @@ public class BotStartConfig {
             jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild(activeGiveawayRepository, languageRepository));
             jdaBuilder.addEventListeners(new ReactionsButton(languageRepository, notificationRepository));
             jdaBuilder.addEventListeners(new Reactions());
-            jdaBuilder.addEventListeners(new SlashCommand(languageRepository, activeGiveawayRepository, participantsRepository, notificationRepository, listUsersRepository));
+            jdaBuilder.addEventListeners(new SlashCommand(languageRepository, activeGiveawayRepository, participantsRepository, listUsersRepository));
 
             jda = jdaBuilder.build();
             jda.awaitReady();
@@ -148,7 +147,7 @@ public class BotStartConfig {
             System.out.println("IsDevMode: " + Config.isIsDev());
 
             //Обновить команды
-            updateSlashCommands();
+//            updateSlashCommands();
             System.out.println("20:14");
         } catch (Exception e) {
             e.printStackTrace();
@@ -181,13 +180,6 @@ public class BotStartConfig {
                     .addChoice("\uD83C\uDDF7\uD83C\uDDFA Russian Language", "rus")
                     .setRequired(true)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Настройка языка бота"));
-
-            List<OptionData> optionsNotifications = new ArrayList<>();
-            optionsNotifications.add(new OptionData(STRING, "set", "Disable or Enable notifications")
-                    .addChoice("Disable", "disable")
-                    .addChoice("Enable", "enable")
-                    .setRequired(true)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Отключить или Включить уведомления"));
 
             //Start Giveaway
             List<OptionData> optionsStart = new ArrayList<>();
@@ -246,7 +238,8 @@ public class BotStartConfig {
             commands.addCommands(Commands.slash("language", "Setting language")
                     .addOptions(optionsLanguage)
                     .setGuildOnly(true)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Настройка языка"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Настройка языка")
+                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER)));
 
             commands.addCommands(Commands.slash("start", "Create Giveaway")
                     .addOptions(optionsStart)
@@ -281,14 +274,11 @@ public class BotStartConfig {
                     .setGuildOnly(true)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Перевыбрать одного победителя"));
 
-            commands.addCommands(Commands.slash("notifications", "Configuring bot notifications")
-                    .addOptions(optionsNotifications)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Настройка уведомлений бота"));
-
             commands.addCommands(Commands.slash("change", "Change the time")
                     .addOptions(change)
                     .setGuildOnly(true)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Изменить время"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Изменить время")
+                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)));
 
             commands.queue();
 
@@ -324,8 +314,8 @@ public class BotStartConfig {
             listLanguages.add("rus");
             listLanguages.add("eng");
 
-            for (int i = 0; i < listLanguages.size(); i++) {
-                InputStream inputStream = new ClassPathResource("json/" + listLanguages.get(i) + ".json").getInputStream();
+            for (String listLanguage : listLanguages) {
+                InputStream inputStream = new ClassPathResource("json/" + listLanguage + ".json").getInputStream();
 
                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
                 JSONObject jsonObject = (JSONObject) new JSONParser().parse(reader);
@@ -333,7 +323,7 @@ public class BotStartConfig {
                 for (Object o : jsonObject.keySet()) {
                     String key = (String) o;
 
-                    if (listLanguages.get(i).equals("rus")) {
+                    if (listLanguage.equals("rus")) {
                         ParserClass.russian.put(key, String.valueOf(jsonObject.get(key)));
                     } else {
                         ParserClass.english.put(key, String.valueOf(jsonObject.get(key)));
@@ -390,7 +380,7 @@ public class BotStartConfig {
                 instance.getGift(guild_long_id).setCount(participantsList.size());
 
                 instance.putMessageId(guild_long_id, message_id_long);
-                instance.putTitle(guild_long_id, giveaway_title);
+                instance.putTitle(guild_long_id, giveaway_title == null ? "Giveaway" : giveaway_title);
                 instance.putEndGiveawayDate(guild_long_id, date_end_giveaway);
                 instance.putChannelId(guild_long_id, channel_long_id);
                 instance.putCountWinners(guild_long_id, count_winners);
@@ -419,12 +409,12 @@ public class BotStartConfig {
 
     @Scheduled(fixedDelay = 240000, initialDelay = 17000)
     public void updateUserList() throws InterruptedException {
-        List<Gift.GiveawayData> giveawayDataList = new LinkedList<>(GiveawayRegistry.getGiveawayDataMap().values());
+        List<Gift> giveawayDataList = new LinkedList<>(GiveawayRegistry.getAllGift());
 
-        for (Gift.GiveawayData giveawayData : giveawayDataList) {
+        for (Gift giveawayData : giveawayDataList) {
 
-            long guildIdLong = giveawayData.getGift().getGuildId();
-            boolean isForSpecificRole = giveawayData.getIsForSpecificRole();
+            long guildIdLong = giveawayData.getGuildId();
+            boolean isForSpecificRole = giveawayData.getGiveawayData().getIsForSpecificRole();
             long messageId = GiveawayRegistry.getInstance().getMessageId(guildIdLong);
 
             if (hasGift(guildIdLong)) {
@@ -458,13 +448,13 @@ public class BotStartConfig {
                                         .complete()
                                         .stream()
                                         .filter(user -> !user.isBot())
-                                        .filter(user -> !gift.isUserPresent(user.getId()))
+                                        .filter(user -> !gift.hasUserInGiveaway(user.getId()))
                                         .collect(Collectors.toMap(User::getId, user -> user));
 
                                 if (isForSpecificRole) {
                                     try {
                                         Map<String, User> userMapTemp = new HashMap<>(userList); //bad practice but it`s work
-                                        Role roleGiveaway = jda.getRoleById(giveawayData.getRoleId());
+                                        Role roleGiveaway = jda.getRoleById(giveawayData.getGiveawayData().getRoleId());
                                         for (Map.Entry<String, User> entry : userMapTemp.entrySet()) {
                                             Guild guild = jda.getGuildById(guildIdLong);
                                             if (guild != null) {
@@ -542,28 +532,6 @@ public class BotStartConfig {
             statement.close();
             connection.close();
             System.out.println("getLocalizationFromDB()");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void getNotification() {
-        try {
-            Connection connection = DriverManager.getConnection(URL_CONNECTION, USER_CONNECTION, PASSWORD_CONNECTION);
-            Statement statement = connection.createStatement();
-            String sql = "SELECT * FROM notification";
-            ResultSet rs = statement.executeQuery(sql);
-
-            while (rs.next()) {
-                mapNotifications.put(
-                        rs.getString("user_id_long"),
-                        Enum.valueOf(Notification.NotificationStatus.class, rs.getString("notification_status")));
-            }
-
-            rs.close();
-            statement.close();
-            connection.close();
-            System.out.println("getNotification()");
         } catch (SQLException e) {
             e.printStackTrace();
         }
