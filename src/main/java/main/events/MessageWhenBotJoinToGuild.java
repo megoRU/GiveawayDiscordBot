@@ -31,13 +31,20 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
     //bot join msg
     @Override
     public void onGuildJoin(@NotNull GuildJoinEvent event) {
-
         try {
-            if (event.getGuild().getDefaultChannel() == null ||
-                    !event.getGuild().getSelfMember().hasPermission(event.getGuild().getDefaultChannel(),
-                                    Permission.MESSAGE_SEND,
-                                    Permission.MESSAGE_EMBED_LINKS,
-                                    Permission.VIEW_CHANNEL)) {
+            DefaultGuildChannelUnion defaultChannel = event.getGuild().getDefaultChannel();
+
+            if (defaultChannel != null) {
+                boolean hasPermissionSend = event.getGuild().getSelfMember().hasPermission(event.getGuild().getDefaultChannel(), Permission.MESSAGE_SEND);
+                boolean hasPermissionEmbedded = event.getGuild().getSelfMember().hasPermission(event.getGuild().getDefaultChannel(), Permission.MESSAGE_EMBED_LINKS);
+                boolean hasPermissionView = event.getGuild().getSelfMember().hasPermission(event.getGuild().getDefaultChannel(), Permission.VIEW_CHANNEL);
+
+                if (!hasPermissionSend ||
+                        !hasPermissionEmbedded ||
+                        !hasPermissionView) {
+                    return;
+                }
+            } else {
                 return;
             }
 
@@ -59,24 +66,18 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
             buttons.add(Button.link("https://patreon.com/ghbots", "Patreon"));
 
             if (BotStartConfig.getMapLanguages().get(event.getGuild().getId()) != null) {
-
                 if (BotStartConfig.getMapLanguages().get(event.getGuild().getId()).equals("eng")) {
-
-                    buttons.add(Button.secondary(event.getGuild().getId() + ":" + ReactionsButton.CHANGE_LANGUAGE,
-                                    "Сменить язык ")
+                    buttons.add(Button.secondary(event.getGuild().getId() + ":" + ReactionsButton.CHANGE_LANGUAGE, "Сменить язык ")
                             .withEmoji(Emoji.fromUnicode("U+1F1F7U+1F1FA")));
                 } else {
-                    buttons.add(Button.secondary(event.getGuild().getId() + ":" + ReactionsButton.CHANGE_LANGUAGE,
-                                    "Change language ")
+                    buttons.add(Button.secondary(event.getGuild().getId() + ":" + ReactionsButton.CHANGE_LANGUAGE, "Change language ")
                             .withEmoji(Emoji.fromUnicode("U+1F1ECU+1F1E7")));
                 }
             } else {
-                buttons.add(Button.secondary(event.getGuild().getId() + ":" + ReactionsButton.CHANGE_LANGUAGE,
-                                "Сменить язык ")
+                buttons.add(Button.secondary(event.getGuild().getId() + ":" + ReactionsButton.CHANGE_LANGUAGE, "Сменить язык ")
                         .withEmoji(Emoji.fromUnicode("U+1F1F7U+1F1FA")));
             }
 
-            DefaultGuildChannelUnion defaultChannel = event.getGuild().getDefaultChannel();
             if (defaultChannel instanceof TextChannel) {
                 defaultChannel
                         .asTextChannel()
