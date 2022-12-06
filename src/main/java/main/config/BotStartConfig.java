@@ -148,7 +148,7 @@ public class BotStartConfig {
             System.out.println("IsDevMode: " + Config.isIsDev());
 
             //Обновить команды
-            updateSlashCommands();
+//            updateSlashCommands();
             System.out.println("20:14");
         } catch (Exception e) {
             e.printStackTrace();
@@ -461,11 +461,14 @@ public class BotStartConfig {
                                     .getReactions()
                                     .stream()
                                     .filter(messageReaction -> messageReaction.getEmoji().getName().equals(Reactions.TADA))
-                                    .collect(Collectors.toList());
+                                    .toList();
                         }
 
                         //-1 because one Bot
-                        if (hasGift(guildIdLong) && reactions != null && reactions.size() > 0 && reactions.get(0).getCount() - 1 != gift.getListUsersSize()) {
+                        if (hasGift(guildIdLong) &&
+                                reactions != null &&
+                                reactions.size() > 0 &&
+                                reactions.get(0).getCount() - 1 != gift.getListUsersSize()) {
                             for (MessageReaction reaction : reactions) {
                                 Map<String, User> userList = reaction
                                         .retrieveUsers()
