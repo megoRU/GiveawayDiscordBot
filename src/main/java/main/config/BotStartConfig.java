@@ -111,6 +111,7 @@ public class BotStartConfig {
 
             List<GatewayIntent> intents = new ArrayList<>(
                     Arrays.asList(
+                            GatewayIntent.GUILD_MEMBERS,
                             GatewayIntent.GUILD_MESSAGES,
                             GatewayIntent.GUILD_EMOJIS_AND_STICKERS,
                             GatewayIntent.GUILD_MESSAGE_REACTIONS,
@@ -147,7 +148,7 @@ public class BotStartConfig {
             System.out.println("IsDevMode: " + Config.isIsDev());
 
             //Обновить команды
-//            updateSlashCommands();
+            updateSlashCommands();
             System.out.println("20:14");
         } catch (Exception e) {
             e.printStackTrace();
@@ -187,10 +188,11 @@ public class BotStartConfig {
                     .setName("title")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Название для Giveaway. Максимум 255 символов"));
 
-            optionsStart.add(new OptionData(INTEGER, "count", "Set count winners").setName("count")
+            optionsStart.add(new OptionData(INTEGER, "count", "Set count winners")
+                    .setName("count")
                     .setMinValue(1)
                     .setMaxValue(30)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить колличество победителей"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить количество победителей"));
 
             optionsStart.add(new OptionData(STRING, "duration", "Examples: 5s, 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style and UTC ±0")
                     .setName("duration")
@@ -212,6 +214,22 @@ public class BotStartConfig {
             optionsStart.add(new OptionData(ATTACHMENT, "image", "Set Image for Giveaway")
                     .setName("image")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить изображение для Giveaway"));
+
+            List<OptionData> predefined = new ArrayList<>();
+            predefined.add(new OptionData(STRING, "title", "Title for Giveaway. Maximum 255 characters")
+                    .setName("title")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Название для Giveaway. Максимум 255 символов")
+                    .setRequired(true));
+            predefined.add(new OptionData(INTEGER, "count", "Set count winners")
+                    .setName("count")
+                    .setMinValue(1)
+                    .setMaxValue(30)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить количество победителей")
+                    .setRequired(true));
+            predefined.add(new OptionData(ROLE, "role", "Installing a @Role for collecting")
+                    .setName("set")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установка @Роли для сбора")
+                    .setRequired(true));
 
             //change
             List<OptionData> change = new ArrayList<>();
@@ -278,6 +296,12 @@ public class BotStartConfig {
                     .addOptions(change)
                     .setGuildOnly(true)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Изменить время")
+                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)));
+
+            commands.addCommands(Commands.slash("predefined", "Gather participants and immediately hold a drawing for a certain @Role")
+                    .addOptions(predefined)
+                    .setGuildOnly(true)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Собрать участников и сразу провести розыгрыш для определенной @Роли")
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)));
 
             commands.queue();
@@ -441,7 +465,7 @@ public class BotStartConfig {
                         }
 
                         //-1 because one Bot
-                        if (hasGift(guildIdLong) && reactions != null && reactions.get(0).getCount() - 1 != gift.getListUsersSize()) {
+                        if (hasGift(guildIdLong) && reactions != null && reactions.size() > 0 && reactions.get(0).getCount() - 1 != gift.getListUsersSize()) {
                             for (MessageReaction reaction : reactions) {
                                 Map<String, User> userList = reaction
                                         .retrieveUsers()

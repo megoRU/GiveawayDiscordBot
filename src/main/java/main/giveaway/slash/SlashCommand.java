@@ -18,9 +18,7 @@ import main.model.repository.LanguageRepository;
 import main.model.repository.ListUsersRepository;
 import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
@@ -33,6 +31,7 @@ import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.FileUpload;
+import net.dv8tion.jda.api.utils.concurrent.Task;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
@@ -220,7 +219,8 @@ public class SlashCommand extends ListenerAdapter {
                             role,
                             isOnlyForSpecificRole,
                             urlImage,
-                            userIdLong);
+                            userIdLong,
+                            false);
 
                     //Мы не будет очищать это, всё равно рано или поздно будет перезаписываться или даже не будет в случае Exception
                     GiveawayRegistry.getInstance().putIdUserWhoCreateGiveaway(guildIdLong, userIdLong);
@@ -298,6 +298,87 @@ public class SlashCommand extends ListenerAdapter {
                     .getGift(guildIdLong)
                     .stopGift(guildIdLong, Integer.parseInt(event.getOptions().get(0).getAsString()));
             return;
+        }
+
+        if (event.getName().equals("predefined")) {
+            if (GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
+                String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_stop_giveaway", guildId);
+                EmbedBuilder errors = new EmbedBuilder();
+                errors.setColor(Color.GREEN);
+                errors.setDescription(messageGiftNeedStopGiveaway);
+                event.replyEmbeds(errors.build()).queue();
+                return;
+            }
+
+            event.deferReply().queue();
+            TextChannel textChannel;
+
+            try {
+                textChannel = event.getChannel().asTextChannel();
+            } catch (Exception e) {
+                e.printStackTrace();
+                event.getHook().sendMessage(e.getMessage()).queue();
+                return;
+            }
+
+            Role role = event.getOption("set", OptionMapping::getAsRole);
+            String countString = event.getOption("count", OptionMapping::getAsString);
+            String title = event.getOption("title", OptionMapping::getAsString);
+
+            if (role != null) {
+                if (role.getId().equals(guildId)) {
+                    String notificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_everyone", guildId), "@everyone");
+                    event.getHook().sendMessage(notificationForThisRole).queue();
+                    return;
+                }
+            }
+
+            if (countString != null) {
+                try {
+                    Integer.parseInt(countString);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    event.getHook().sendMessage(e.getMessage()).queue();
+                    return;
+                }
+            }
+
+            Gift gift = new Gift(guildIdLong,
+                    textChannel.getIdLong(),
+                    userIdLong,
+                    activeGiveawayRepository,
+                    participantsRepository,
+                    listUsersRepository);
+
+            GiveawayRegistry.getInstance().putGift(guildIdLong, gift);
+
+            gift.startGift(event.getGuild(),
+                    textChannel,
+                    title,
+                    Integer.parseInt(countString),
+                    "20s",
+                    null,
+                    false,
+                    null,
+                    userIdLong,
+                    true);
+
+            GiveawayRegistry.getInstance().putIdUserWhoCreateGiveaway(guildIdLong, userIdLong);
+
+            Task<List<Member>> listTask = event.getGuild().loadMembers()
+                    .onSuccess(members -> {
+                        event.getHook()
+                                .sendMessage("Default message")
+                                .flatMap(Message::delete)
+                                .queue();
+
+                        members.stream()
+                                .filter(member -> member.getRoles().contains(role))
+                                .map(Member::getUser)
+                                .filter(user -> !user.isBot())
+                                .forEach(gift::addUserToPoll);
+
+                    });
         }
 
         if (event.getName().equals("help")) {

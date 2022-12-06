@@ -101,7 +101,10 @@ public class GiveawayRegistry {
     }
 
     public void putEndGiveawayDate(long guildId, Timestamp timestamp) {
-        giveawayDataMap.get(guildId).getGiveawayData().setEndGiveawayDate(timestamp);
+        Gift gift = giveawayDataMap.get(guildId);
+        if (gift != null) {
+            gift.getGiveawayData().setEndGiveawayDate(timestamp);
+        }
     }
 
     public void cancelGiveawayTimer(long guildId) {
