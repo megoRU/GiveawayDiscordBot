@@ -53,6 +53,7 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
             welcome.addField("Bot Language", "Use: </language:941286272390037534>", false);
             welcome.addField("Giveaway", "Thanks for adding " + "**" + "Giveaway" + "** " + "bot to " + event.getGuild().getName() + "!\n", false);
             welcome.addField("Create Giveaway", "Use: </start:941286272390037535>", false);
+            welcome.addField("Create predefined Giveaway", "Use: </predefined:1049647289779630080>", false);
             welcome.addField("Reroll Winner", "Use: </reroll:957624805446799452>", false);
             welcome.addField("Stop Giveaway manually", "Use: </stop:941286272390037536>", false);
             welcome.addField("List of commands", "Use: </help:941286272390037537>", false);

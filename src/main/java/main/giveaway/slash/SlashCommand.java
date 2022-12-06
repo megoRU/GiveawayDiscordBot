@@ -397,6 +397,7 @@ public class SlashCommand extends ListenerAdapter {
                             </notifications:1011570005890056262>
                             </change:1027901550456225842>
                             </patreon:945299399855210527>
+                            </predefined:1049647289779630080>
                              """, false);
             String messagesEventsLinks = jsonParsers.getLocale("messages_events_links", guildId);
             String messagesEventsSite = jsonParsers.getLocale("messages_events_site", guildId);
