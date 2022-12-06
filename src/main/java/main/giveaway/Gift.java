@@ -164,7 +164,8 @@ public class Gift {
                                    final String time,
                                    final Long role,
                                    final boolean isOnlyForSpecificRole,
-                                   final String urlImage) {
+                                   final String urlImage,
+                                   final boolean predefined) {
         EmbedBuilder start = new EmbedBuilder();
 
         LOGGER.info("\nGuild id: " + guild.getId()
@@ -181,7 +182,9 @@ public class Gift {
 
         start.setColor(Color.GREEN);
         start.setTitle(title);
-        start.appendDescription(giftReaction);
+        if (!predefined) {
+            start.appendDescription(giftReaction);
+        }
 
         if (role != null) {
             String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guild.getId()), role);
@@ -224,21 +227,26 @@ public class Gift {
     public void startGift(Guild guild,
                           GuildMessageChannel textChannel, String newTitle, int countWinners,
                           String time, Long role, boolean isOnlyForSpecificRole,
-                          String urlImage, Long idUserWhoCreateGiveaway) {
+                          String urlImage, Long idUserWhoCreateGiveaway, boolean predefined) {
 
-        EmbedBuilder start = extracted(guild, textChannel, newTitle, countWinners, time, role, isOnlyForSpecificRole, urlImage);
+        EmbedBuilder start = extracted(guild, textChannel, newTitle, countWinners, time, role, isOnlyForSpecificRole, urlImage, predefined);
 
-        textChannel.sendMessageEmbeds(start.build())
-                .queue(message -> {
-                    message.addReaction(Emoji.fromUnicode(Reactions.TADA)).queue();
-                    updateCollections(countWinners, time, message, role, isOnlyForSpecificRole, urlImage, newTitle, idUserWhoCreateGiveaway);
-                });
+        if (predefined) {
+            textChannel.sendMessageEmbeds(start.build())
+                    .queue(message -> updateCollections(countWinners, time, message, role, isOnlyForSpecificRole, urlImage, newTitle, idUserWhoCreateGiveaway));
+        } else {
+            textChannel.sendMessageEmbeds(start.build())
+                    .queue(message -> {
+                        message.addReaction(Emoji.fromUnicode(Reactions.TADA)).queue();
+                        updateCollections(countWinners, time, message, role, isOnlyForSpecificRole, urlImage, newTitle, idUserWhoCreateGiveaway);
+                    });
+        }
 
         //Вот мы запускаем бесконечный поток.
         autoInsert();
     }
 
-    private void updateCollections(int countWinners, String time, Message message, Long role,
+    private synchronized void updateCollections(int countWinners, String time, Message message, Long role,
                                    Boolean isOnlyForSpecificRole, String urlImage, String title, Long idUserWhoCreateGiveaway) {
 
         giveawayData.setMessageId(message.getIdLong());
@@ -270,6 +278,10 @@ public class Gift {
             activeGiveaways.setDateEndGiveaway(time == null ? null : endGiveawayDate);
         }
         activeGiveawayRepository.saveAndFlush(activeGiveaways);
+        try {
+            Thread.sleep(2000);
+        } catch (Exception ignored) {
+        }
     }
 
     public synchronized void addUserToPoll(final User user) {
@@ -297,6 +309,7 @@ public class Gift {
                 if (participantsList != null && !participantsList.isEmpty()) {
                     //Сохраняем всех участников в temp коллекцию
                     Set<Participants> temp = new LinkedHashSet<>(participantsList);
+                    //TODO: not-null property references a null or transient value : main.model.entity.Participants.activeGiveaways
                     participantsRepository.saveAllAndFlush(temp);
                     //Удаляем все элементы которые уже в БД
                     participantsList.removeAll(temp);
