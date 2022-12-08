@@ -4,6 +4,7 @@ import api.megoru.ru.entity.Winners;
 import api.megoru.ru.impl.MegoruAPI;
 import lombok.Getter;
 import lombok.Setter;
+import main.config.Config;
 import main.giveaway.impl.GiftHelper;
 import main.giveaway.impl.URLS;
 import main.giveaway.reactions.Reactions;
@@ -25,6 +26,9 @@ import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import java.awt.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -32,6 +36,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
@@ -60,8 +65,10 @@ public class Gift {
     private final AtomicInteger count = new AtomicInteger(0);
     private int localCountUsers;
 
+    private ActiveGiveaways activeGiveaways;
+
     //DTO
-    private volatile Set<Participants> participantsList = new LinkedHashSet<>();
+    private volatile ConcurrentLinkedQueue<Participants> participantsList = new ConcurrentLinkedQueue<>();
 
     //REPO
     private final ActiveGiveawayRepository activeGiveawayRepository;
@@ -117,6 +124,7 @@ public class Gift {
         this.participantsRepository = participantsRepository;
         this.listUsersRepository = listUsersRepository;
         this.listUsersHash = new LinkedHashMap<>(listUsersHash);
+        this.activeGiveaways = activeGiveawayRepository.getActiveGiveawaysByGuildIdLong(guildId);
         autoInsert();
     }
 
@@ -247,7 +255,8 @@ public class Gift {
     }
 
     private synchronized void updateCollections(int countWinners, String time, Message message, Long role,
-                                   Boolean isOnlyForSpecificRole, String urlImage, String title, Long idUserWhoCreateGiveaway) {
+                                                Boolean isOnlyForSpecificRole, String urlImage, String title,
+                                                Long idUserWhoCreateGiveaway) {
 
         giveawayData.setMessageId(message.getIdLong());
         giveawayData.setChannelId(message.getChannel().getIdLong());
@@ -258,7 +267,7 @@ public class Gift {
         giveawayData.setTitle(title == null ? "Giveaway" : title);
         giveawayData.setCreatedUserId(idUserWhoCreateGiveaway);
 
-        ActiveGiveaways activeGiveaways = new ActiveGiveaways();
+        activeGiveaways = new ActiveGiveaways();
         activeGiveaways.setGuildLongId(guildId);
         activeGiveaways.setMessageIdLong(message.getIdLong());
         activeGiveaways.setChannelIdLong(message.getChannel().getIdLong());
@@ -307,12 +316,29 @@ public class Gift {
             if (count.get() > localCountUsers && GiveawayRegistry.getInstance().hasGift(guildId)) {
                 localCountUsers = count.get();
                 if (participantsList != null && !participantsList.isEmpty()) {
-                    //Сохраняем всех участников в temp коллекцию
-                    Set<Participants> temp = new LinkedHashSet<>(participantsList);
-                    //TODO: not-null property references a null or transient value : main.model.entity.Participants.activeGiveaways
-                    participantsRepository.saveAllAndFlush(temp);
-                    //Удаляем все элементы которые уже в БД
-                    participantsList.removeAll(temp);
+                    StringBuilder stringBuilder = new StringBuilder();
+                    Connection connection = DriverManager.getConnection(
+                            Config.getDatabaseUrl(),
+                            Config.getDatabaseUser(),
+                            Config.getDatabasePass());
+                    Statement statement = connection.createStatement();
+                    int size = participantsList.size();
+                    for (int i = 0; i < size; i++) {
+                        Participants poll = participantsList.poll();
+                        if (poll != null) {
+                            stringBuilder
+                                    .append(stringBuilder.length() == 0 ? "(" : ", (")
+                                    .append("\"").append(poll.getNickName()).append("\", ")
+                                    .append(poll.getUserIdLong()).append(", ")
+                                    .append(poll.getActiveGiveaways().getGuildLongId()).append(", ")
+                                    .append("\"").append(poll.getNickNameTag()).append("\")");
+                        }
+                    }
+
+                    String executeQuery = String.format("INSERT INTO participants (nick_name, user_long_id, guild_id, nick_name_tag) VALUES %s", stringBuilder);
+                    statement.execute(executeQuery);
+                    statement.close();
+                    connection.close();
                 }
                 if (participantsList.isEmpty()) {
                     synchronized (this) {
@@ -329,7 +355,9 @@ public class Gift {
     }
 
     private void addUserToInsertQuery(final String nickName, final String nickNameTag, final long userIdLong, final long guildIdLong) {
-        ActiveGiveaways activeGiveaways = activeGiveawayRepository.getActiveGiveawaysByGuildIdLong(guildIdLong);
+        if (activeGiveaways == null) {
+            activeGiveaways = activeGiveawayRepository.getActiveGiveawaysByGuildIdLong(guildIdLong);
+        }
         Participants participants = new Participants();
         participants.setUserIdLong(userIdLong);
         participants.setNickName(nickName);
@@ -347,24 +375,26 @@ public class Gift {
                 wait(10000L);
             }
         }
-        List<Participants> participants = participantsRepository.getParticipantsByGuildIdLong(guildId);
+        List<Participants> participants = participantsRepository.getParticipantsByGuildIdLong(guildId); //TODO: Native use may be
         if (participants.isEmpty()) throw new Exception("participants is Empty");
         LOGGER.info("\nlistUsersHash size: " + listUsersHash.size());
         LOGGER.info("\nparticipantsJSON size: " + participants.size());
+        StringBuilder stringBuilder = new StringBuilder();
         for (Participants participant : participants) {
-            System.out.println("getIdUserWhoCreateGiveaway " + participant.getActiveGiveaways().getIdUserWhoCreateGiveaway()
-                    + " getUserIdLong " + participant.getUserIdLong()
-                    + " getNickNameTag " + participant.getNickNameTag()
-                    + " getGiveawayId " + participant.getActiveGiveaways().getMessageIdLong()
-                    + " getGuildId " + participant.getActiveGiveaways().getGuildLongId()
-            );
+            stringBuilder
+                    .append("getIdUserWhoCreateGiveaway ").append(participant.getActiveGiveaways().getIdUserWhoCreateGiveaway())
+                    .append("getUserIdLong ").append(participant.getUserIdLong())
+                    .append("getNickNameTag ").append(participant.getNickNameTag())
+                    .append("getGiveawayId ").append(participant.getActiveGiveaways().getMessageIdLong())
+                    .append("getGuildId ").append(participant.getActiveGiveaways().getGuildLongId())
+                    .append("\n");
         }
+        System.out.println(stringBuilder);
         Winners winners = new Winners(countWinner, 0, listUsersHash.size() - 1);
         LOGGER.info(winners.toString());
-        List<String> temp = new LinkedList<>(listUsersHash.values());
         String[] strings = api.setWinners(winners);
         for (String string : strings) {
-            uniqueWinners.add("<@" + temp.get(Integer.parseInt(string)) + ">");
+            uniqueWinners.add("<@" + participants.get(Integer.parseInt(string)).getUserIdLong() + ">");
         }
     }
 

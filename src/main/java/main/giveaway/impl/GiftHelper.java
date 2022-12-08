@@ -5,7 +5,7 @@ import main.giveaway.GiveawayRegistry;
 import main.model.repository.ActiveGiveawayRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 
 public class GiftHelper {
 
@@ -19,8 +19,8 @@ public class GiftHelper {
         try {
             Guild guildById = BotStartConfig.getJda().getGuildById(guildId);
             if (guildById != null) {
-                TextChannel textChannelById = guildById.getTextChannelById(textChannel);
-
+                GuildMessageChannel textChannelById = guildById.getTextChannelById(textChannel);
+                if (textChannelById == null) textChannelById = guildById.getNewsChannelById(textChannel);
                 if (textChannelById != null) {
                     textChannelById
                             .retrieveMessageById(GiveawayRegistry.getInstance().getMessageId(guildId))
@@ -30,6 +30,7 @@ public class GiftHelper {
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
             if (e.getMessage().contains("10008: Unknown Message")
                     || e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
                 System.out.println(e.getMessage() + " удаляем!");

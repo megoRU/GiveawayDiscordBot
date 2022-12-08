@@ -103,11 +103,11 @@ public class BotStartConfig {
         try {
             //Загружаем GiveawayRegistry
             GiveawayRegistry.getInstance();
-
             //Устанавливаем языки
             setLanguages();
-
             getLocalizationFromDB();
+            //Получаем Giveaway и пользователей. Устанавливаем данные
+            setGiveawayAndUsersInGift();
 
             List<GatewayIntent> intents = new ArrayList<>(
                     Arrays.asList(
@@ -137,9 +137,6 @@ public class BotStartConfig {
 
             jda = jdaBuilder.build();
             jda.awaitReady();
-
-            //Получаем Giveaway и пользователей. Устанавливаем данные
-            setGiveawayAndUsersInGift();
 
             System.out.println(jda.retrieveCommands().complete());
             //Обновляем список участников при запуске бота
@@ -548,7 +545,7 @@ public class BotStartConfig {
         try {
             Connection connection = DriverManager.getConnection(URL_CONNECTION, USER_CONNECTION, PASSWORD_CONNECTION);
             Statement statement = connection.createStatement();
-            String sql = "SELECT * FROM language";
+            String sql = "SELECT * FROM language ";
             ResultSet rs = statement.executeQuery(sql);
 
             while (rs.next()) {
@@ -562,6 +559,21 @@ public class BotStartConfig {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public void saveParticipants(String query) {
+        try {
+            Connection connection = DriverManager.getConnection(URL_CONNECTION, USER_CONNECTION, PASSWORD_CONNECTION);
+            Statement statement = connection.createStatement();
+            String sql = "INSERT INTO participants (nick_name, user_long_id, guild_id, nick_name_tag) VALUES " + query;
+            statement.executeQuery(sql);
+            statement.close();
+            connection.close();
+        } catch (SQLException e) {
+            System.out.println("saveParticipants()");
+            e.printStackTrace();
+        }
+
     }
 
     private boolean hasGift(long guildIdLong) {

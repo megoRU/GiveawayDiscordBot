@@ -443,6 +443,7 @@ public class SlashCommand extends ListenerAdapter {
         }
 
         if (event.getName().equals("list")) {
+            event.deferReply().queue();
             if (GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
                 StringBuilder stringBuilder = new StringBuilder();
                 List<Participants> participantsList = participantsRepository.getParticipantsByGuildIdLong(guildIdLong);
@@ -453,7 +454,7 @@ public class SlashCommand extends ListenerAdapter {
                     EmbedBuilder list = new EmbedBuilder();
                     list.setColor(Color.GREEN);
                     list.setDescription(slashListUsersEmpty);
-                    event.replyEmbeds(list.build()).setEphemeral(true).queue();
+                    event.getHook().sendMessageEmbeds(list.build()).setEphemeral(true).queue();
                     return;
                 }
 
@@ -472,15 +473,14 @@ public class SlashCommand extends ListenerAdapter {
                 list.setColor(Color.GREEN);
                 list.setTitle(slashListUsers);
                 list.setDescription(stringBuilder);
-
-                event.replyEmbeds(list.build()).queue();
+                event.getHook().sendMessageEmbeds(list.build()).queue();
             } else {
                 String slashStopNoHas = jsonParsers.getLocale("slash_stop_no_has", guildId);
 
                 EmbedBuilder noGiveaway = new EmbedBuilder();
                 noGiveaway.setColor(Color.orange);
                 noGiveaway.setDescription(slashStopNoHas);
-                event.replyEmbeds(noGiveaway.build()).setEphemeral(true).queue();
+                event.getHook().sendMessageEmbeds(noGiveaway.build()).setEphemeral(true).queue();
             }
             return;
         }
