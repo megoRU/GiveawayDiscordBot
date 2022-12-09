@@ -258,7 +258,7 @@ public class SlashCommand extends ListenerAdapter {
                 stop.setColor(Color.GREEN);
                 stop.setDescription(slashStop);
                 event.replyEmbeds(stop.build()).queue();
-                giveaway.stopGift(guildIdLong, giveaway.getCountWinners());
+                giveaway.stopGiveaway(giveaway.getCountWinners());
                 return;
             }
 
@@ -292,7 +292,7 @@ public class SlashCommand extends ListenerAdapter {
                 event.replyEmbeds(stop.build()).queue();
             }
 
-            giveaway.stopGift(guildIdLong, Integer.parseInt(event.getOptions().get(0).getAsString()));
+            giveaway.stopGiveaway(Integer.parseInt(event.getOptions().get(0).getAsString()));
             return;
         }
 

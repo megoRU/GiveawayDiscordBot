@@ -29,6 +29,11 @@ public class Reactions extends ListenerAdapter implements SenderMessage {
             User user = event.retrieveUser().complete();
             Member member = event.getMember();
 
+            if (event.getUser() != null) {
+                System.out.println("event.getUser().getName() " + event.getUser().getName());
+            }
+            System.out.println("user.getName() " + user.getName());
+
             if (member == null || user.isBot()) return;
 
             String emoji = event.getEmoji().getName();

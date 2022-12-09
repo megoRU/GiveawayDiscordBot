@@ -2,7 +2,6 @@ package main.giveaway;
 
 import api.megoru.ru.entity.Winners;
 import api.megoru.ru.impl.MegoruAPI;
-import lombok.Getter;
 import main.config.Config;
 import main.giveaway.impl.GiftHelper;
 import main.giveaway.impl.URLS;
@@ -323,14 +322,16 @@ public class Giveaway {
                         if (poll != null) {
                             stringBuilder
                                     .append(stringBuilder.length() == 0 ? "(" : ", (")
-                                    .append("\"").append(poll.getNickName()).append("\", ")
+                                    .append("'").append(poll.getNickName()).append("', ")
                                     .append(poll.getUserIdLong()).append(", ")
                                     .append(guildId).append(", ")
-                                    .append("\"").append(poll.getNickNameTag()).append("\")");
+                                    .append("'").append(poll.getNickNameTag()).append("')");
                         }
                     }
 
-                    String executeQuery = String.format("INSERT INTO participants (nick_name, user_long_id, guild_id, nick_name_tag) VALUES %s", stringBuilder);
+                    System.out.println(stringBuilder);
+
+                    String executeQuery = String.format("INSERT INTO participants (nick_name, user_long_id, guild_id, nick_name_tag) VALUES %s; ", stringBuilder);
                     statement.execute(executeQuery);
                     statement.close();
                     connection.close();
@@ -343,8 +344,7 @@ public class Giveaway {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            String format = String.format("Таблица: %s больше не существует, скорее всего Giveaway завершился!" +
-                    "\nОчищаем StringBuilder!", guildId);
+            String format = String.format("Таблица: %s больше не существует, скорее всего Giveaway завершился!", guildId);
             LOGGER.info(format);
         }
     }
@@ -390,23 +390,23 @@ public class Giveaway {
         }
     }
 
-    public void stopGift(final long guildIdLong, final int countWinner) {
+    public void stopGiveaway(final int countWinner) {
         LOGGER.info("\nstopGift method" + "\nCount winner: " + countWinner);
         GiftHelper giftHelper = new GiftHelper(activeGiveawayRepository);
         try {
             if (listUsersHash.size() < 2) {
 
-                String giftNotEnoughUsers = jsonParsers.getLocale("gift_not_enough_users", String.valueOf(guildIdLong));
-                String giftGiveawayDeleted = jsonParsers.getLocale("gift_giveaway_deleted", String.valueOf(guildIdLong));
+                String giftNotEnoughUsers = jsonParsers.getLocale("gift_not_enough_users", String.valueOf(guildId));
+                String giftGiveawayDeleted = jsonParsers.getLocale("gift_giveaway_deleted", String.valueOf(guildId));
 
                 EmbedBuilder notEnoughUsers = new EmbedBuilder();
                 notEnoughUsers.setColor(Color.GREEN);
                 notEnoughUsers.setTitle(giftNotEnoughUsers);
                 notEnoughUsers.setDescription(giftGiveawayDeleted);
                 //Отправляет сообщение
-                giftHelper.editMessage(notEnoughUsers, guildIdLong, textChannelId);
+                giftHelper.editMessage(notEnoughUsers, guildId, textChannelId);
 
-                activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
+                activeGiveawayRepository.deleteActiveGiveaways(guildId);
                 //Удаляет данные из коллекций
                 clearingCollections();
 
@@ -444,19 +444,19 @@ public class Giveaway {
                 .replaceAll("]", "");
 
         if (uniqueWinners.size() == 1) {
-            String giftCongratulations = String.format(jsonParsers.getLocale("gift_congratulations", String.valueOf(guildIdLong)), url, winnerArray);
+            String giftCongratulations = String.format(jsonParsers.getLocale("gift_congratulations", String.valueOf(guildId)), url, winnerArray);
             winners.setDescription(giftCongratulations);
 
             giftHelper.editMessage(
-                    GiveawayEmbedUtils.embedBuilder(winnerArray, countWinner, guildIdLong),
+                    GiveawayEmbedUtils.embedBuilder(winnerArray, countWinner, guildId),
                     this.guildId,
                     textChannelId);
         } else {
-            String giftCongratulationsMany = String.format(jsonParsers.getLocale("gift_congratulations_many", String.valueOf(guildIdLong)), url, winnerArray);
+            String giftCongratulationsMany = String.format(jsonParsers.getLocale("gift_congratulations_many", String.valueOf(guildId)), url, winnerArray);
             winners.setDescription(giftCongratulationsMany);
 
             giftHelper.editMessage(
-                    GiveawayEmbedUtils.embedBuilder(winnerArray, countWinner, guildIdLong),
+                    GiveawayEmbedUtils.embedBuilder(winnerArray, countWinner, guildId),
                     this.guildId,
                     textChannelId);
         }
@@ -464,7 +464,7 @@ public class Giveaway {
         SenderMessage.sendMessage(winners.build(), this.guildId, textChannelId);
 
         listUsersRepository.saveAllParticipantsToUserList(guildId);
-        activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
+        activeGiveawayRepository.deleteActiveGiveaways(guildId);
 
         //Удаляет данные из коллекций
         clearingCollections();
@@ -489,7 +489,6 @@ public class Giveaway {
         }, 2000, 5000);
     }
 
-    @Getter
     public record GiveawayTimerStorage(StopGiveawayByTimer stopGiveawayByTimer, Timer timer) {
     }
 

@@ -49,7 +49,7 @@ public final class StopGiveawayByTimer extends TimerTask {
 
                 //TODO завершать если прошёл месяц?
                 if (listUsersSize < 2 || countWinners < listUsersSize) {
-                    giveaway.stopGift(idGuild, countWinners);
+                    giveaway.stopGiveaway(countWinners);
                     return;
                 }
 
