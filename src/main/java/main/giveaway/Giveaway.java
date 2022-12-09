@@ -305,7 +305,7 @@ public class Giveaway {
         }
     }
 
-    private void multiInsert() {
+    private synchronized void multiInsert() {
         try {
             if (count.get() > localCountUsers && GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
                 localCountUsers = count.get();
@@ -329,10 +329,10 @@ public class Giveaway {
                         }
                     }
 
-                    System.out.println(stringBuilder);
-
-                    String executeQuery = String.format("INSERT INTO participants (nick_name, user_long_id, guild_id, nick_name_tag) VALUES %s; ", stringBuilder);
-                    statement.execute(executeQuery);
+                    if (stringBuilder.length() != 0) {
+                        String executeQuery = String.format("INSERT INTO participants (nick_name, user_long_id, guild_id, nick_name_tag) VALUES %s;", stringBuilder);
+                        statement.execute(executeQuery);
+                    }
                     statement.close();
                     connection.close();
                 }
