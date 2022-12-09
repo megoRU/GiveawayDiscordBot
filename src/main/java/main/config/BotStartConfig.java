@@ -1,7 +1,7 @@
 package main.config;
 
 import main.events.MessageWhenBotJoinToGuild;
-import main.giveaway.Gift;
+import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
 import main.giveaway.buttons.ReactionsButton;
 import main.giveaway.reactions.Reactions;
@@ -385,30 +385,27 @@ public class BotStartConfig {
                         .stream()
                         .collect(Collectors.toMap(Participants::getUserIdAsString, Participants::getUserIdAsString));
 
-                Gift gift = new Gift(guild_long_id,
+                Giveaway giveaway = new Giveaway(guild_long_id,
                         channel_long_id,
                         id_user_who_create_giveaway,
                         //Добавляем пользователей в hashmap
                         participantsList,
                         activeGiveawayRepository,
                         participantsRepository,
-                        listUsersRepository);
+                        listUsersRepository,
+                        message_id_long,
+                        count_winners,
+                        role_id_long,
+                        is_for_specific_role,
+                        url_image,
+                        giveaway_title == null ? "Giveaway" : giveaway_title,
+                        date_end_giveaway);
 
                 GiveawayRegistry instance = GiveawayRegistry.getInstance();
-                instance.putGift(guild_long_id, gift);
+                instance.putGift(guild_long_id, giveaway);
 
                 //Устанавливаем счетчик на верное число
-                instance.getGift(guild_long_id).setCount(participantsList.size());
-
-                instance.putMessageId(guild_long_id, message_id_long);
-                instance.putTitle(guild_long_id, giveaway_title == null ? "Giveaway" : giveaway_title);
-                instance.putEndGiveawayDate(guild_long_id, date_end_giveaway);
-                instance.putChannelId(guild_long_id, channel_long_id);
-                instance.putCountWinners(guild_long_id, count_winners);
-                instance.putRoleId(guild_long_id, role_id_long);
-                instance.putIsForSpecificRole(guild_long_id, is_for_specific_role);
-                instance.putUrlImage(guild_long_id, url_image);
-                instance.putIdUserWhoCreateGiveaway(guild_long_id, id_user_who_create_giveaway);
+                giveaway.setCount(participantsList.size());
 
                 if (date_end_giveaway != null) {
                     Timer timer = new Timer();
@@ -430,19 +427,16 @@ public class BotStartConfig {
 
     @Scheduled(fixedDelay = 240000, initialDelay = 17000)
     public void updateUserList() throws InterruptedException {
-        List<Gift> giveawayDataList = new LinkedList<>(GiveawayRegistry.getAllGift());
+        List<Giveaway> giveawayDataList = new LinkedList<>(GiveawayRegistry.getAllGiveaway());
 
-        for (Gift giveawayData : giveawayDataList) {
+        for (Giveaway giveawayData : giveawayDataList) {
 
             long guildIdLong = giveawayData.getGuildId();
-            boolean isForSpecificRole = giveawayData.getGiveawayData().getIsForSpecificRole();
-            long messageId = GiveawayRegistry.getInstance().getMessageId(guildIdLong);
+            boolean isForSpecificRole = giveawayData.isForSpecificRole();
+            long messageId = giveawayData.getMessageId();
 
             if (hasGift(guildIdLong)) {
-
-                long channelId = GiveawayRegistry.getInstance().getGift(guildIdLong).getTextChannelId();
-                Gift gift = GiveawayRegistry.getInstance().getGift(guildIdLong);
-
+                long channelId = giveawayData.getTextChannelId();
                 //System.out.println("Guild ID: " + guildIdLong);
 
                 List<MessageReaction> reactions = null;
@@ -465,20 +459,20 @@ public class BotStartConfig {
                         if (hasGift(guildIdLong) &&
                                 reactions != null &&
                                 reactions.size() > 0 &&
-                                reactions.get(0).getCount() - 1 != gift.getListUsersSize()) {
+                                reactions.get(0).getCount() - 1 != giveawayData.getListUsersSize()) {
                             for (MessageReaction reaction : reactions) {
                                 Map<String, User> userList = reaction
                                         .retrieveUsers()
                                         .complete()
                                         .stream()
                                         .filter(user -> !user.isBot())
-                                        .filter(user -> !gift.hasUserInGiveaway(user.getId()))
+                                        .filter(user -> !giveawayData.hasUserInGiveaway(user.getId()))
                                         .collect(Collectors.toMap(User::getId, user -> user));
 
                                 if (isForSpecificRole) {
                                     try {
                                         Map<String, User> userMapTemp = new HashMap<>(userList); //bad practice but it`s work
-                                        Role roleGiveaway = jda.getRoleById(giveawayData.getGiveawayData().getRoleId());
+                                        Role roleGiveaway = jda.getRoleById(giveawayData.getRoleId());
                                         for (Map.Entry<String, User> entry : userMapTemp.entrySet()) {
                                             Guild guild = jda.getGuildById(guildIdLong);
                                             if (guild != null) {
@@ -509,7 +503,7 @@ public class BotStartConfig {
                                 //Перебираем Users в реакциях
                                 for (Map.Entry<String, User> entry : userList.entrySet()) {
                                     if (!hasGift(guildIdLong)) return;
-                                    gift.addUserToPoll(entry.getValue());
+                                    giveawayData.addUser(entry.getValue());
                                     //System.out.println("User id: " + user.getIdLong());
                                 }
                             }
@@ -527,9 +521,9 @@ public class BotStartConfig {
             }
             try {
                 //Что это такое и для чего?
-                Gift.GiveawayTimerStorage giveawayTimer = GiveawayRegistry.getInstance().getGiveawayTimer(guildIdLong);
+                Giveaway.GiveawayTimerStorage giveawayTimer = GiveawayRegistry.getInstance().getGiveawayTimer(guildIdLong);
                 if (giveawayTimer != null) {
-                    StopGiveawayByTimer stopGiveawayByTimer = giveawayTimer.getStopGiveawayByTimer();
+                    StopGiveawayByTimer stopGiveawayByTimer = giveawayTimer.stopGiveawayByTimer();
                     if (stopGiveawayByTimer.getCountDown() == 1) {
                         stopGiveawayByTimer.countDown();
                     }
@@ -545,7 +539,7 @@ public class BotStartConfig {
         try {
             Connection connection = DriverManager.getConnection(URL_CONNECTION, USER_CONNECTION, PASSWORD_CONNECTION);
             Statement statement = connection.createStatement();
-            String sql = "SELECT * FROM language ";
+            String sql = "SELECT * FROM language";
             ResultSet rs = statement.executeQuery(sql);
 
             while (rs.next()) {
@@ -561,23 +555,8 @@ public class BotStartConfig {
         }
     }
 
-    public void saveParticipants(String query) {
-        try {
-            Connection connection = DriverManager.getConnection(URL_CONNECTION, USER_CONNECTION, PASSWORD_CONNECTION);
-            Statement statement = connection.createStatement();
-            String sql = "INSERT INTO participants (nick_name, user_long_id, guild_id, nick_name_tag) VALUES " + query;
-            statement.executeQuery(sql);
-            statement.close();
-            connection.close();
-        } catch (SQLException e) {
-            System.out.println("saveParticipants()");
-            e.printStackTrace();
-        }
-
-    }
-
     private boolean hasGift(long guildIdLong) {
-        return GiveawayRegistry.getInstance().hasGift(guildIdLong);
+        return GiveawayRegistry.getInstance().hasGiveaway(guildIdLong);
     }
 
     public static Map<String, String> getMapLanguages() {

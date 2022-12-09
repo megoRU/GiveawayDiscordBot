@@ -1,6 +1,7 @@
 package main.giveaway.impl;
 
 import main.config.BotStartConfig;
+import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
 import main.model.repository.ActiveGiveawayRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -22,11 +23,15 @@ public class GiftHelper {
                 GuildMessageChannel textChannelById = guildById.getTextChannelById(textChannel);
                 if (textChannelById == null) textChannelById = guildById.getNewsChannelById(textChannel);
                 if (textChannelById != null) {
-                    textChannelById
-                            .retrieveMessageById(GiveawayRegistry.getInstance().getMessageId(guildId))
-                            .complete()
-                            .editMessageEmbeds(embedBuilder.build())
-                            .submit();
+                    GiveawayRegistry instance = GiveawayRegistry.getInstance();
+                    Giveaway giveaway = instance.getGiveaway(guildId);
+                    if (giveaway != null) {
+                        textChannelById
+                                .retrieveMessageById(giveaway.getMessageId())
+                                .complete()
+                                .editMessageEmbeds(embedBuilder.build())
+                                .submit();
+                    }
                 }
             }
         } catch (Exception e) {

@@ -62,19 +62,19 @@ public interface SenderMessage {
                 });
     }
 
-    static void sendPrivateMessageWithButtons(JDA jda, String userId, MessageEmbed messageEmbed, List<Button> actionRows) {
-        RestAction<User> action = jda.retrieveUserById(userId);
-        action.submit()
-                .thenCompose((user) -> user.openPrivateChannel().submit())
-                .thenCompose((channel) -> channel.sendMessageEmbeds(messageEmbed)
-                        .setActionRow(actionRows)
-                        .submit())
-                .whenComplete((v, throwable) -> {
-                    if (throwable != null) {
-                        if (throwable.getMessage().contains("50007: Cannot send messages to this user")) {
-                            System.out.println("50007: Cannot send messages to this user");
-                        }
-                    }
-                });
-    }
+//    static void sendPrivateMessageWithButtons(JDA jda, String userId, MessageEmbed messageEmbed, List<Button> actionRows) {
+//        RestAction<User> action = jda.retrieveUserById(userId);
+//        action.submit()
+//                .thenCompose((user) -> user.openPrivateChannel().submit())
+//                .thenCompose((channel) -> channel.sendMessageEmbeds(messageEmbed)
+//                        .setActionRow(actionRows)
+//                        .submit())
+//                .whenComplete((v, throwable) -> {
+//                    if (throwable != null) {
+//                        if (throwable.getMessage().contains("50007: Cannot send messages to this user")) {
+//                            System.out.println("50007: Cannot send messages to this user");
+//                        }
+//                    }
+//                });
+//    }
 }

@@ -1,6 +1,6 @@
 package main.giveaway.reactions;
 
-import main.giveaway.Gift;
+import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
 import main.jsonparser.JSONParsers;
 import main.messagesevents.SenderMessage;
@@ -29,25 +29,31 @@ public class Reactions extends ListenerAdapter implements SenderMessage {
             User user = event.retrieveUser().complete();
             Member member = event.getMember();
 
+            if (event.getUser() != null) {
+                System.out.println("event.getUser().getName() " + event.getUser().getName());
+            }
+            System.out.println("user.getName() " + user.getName());
+
             if (member == null || user.isBot()) return;
 
             String emoji = event.getEmoji().getName();
             long guildIdLong = event.getGuild().getIdLong();
+            GiveawayRegistry instance = GiveawayRegistry.getInstance();
+            Giveaway giveaway = instance.getGiveaway(guildIdLong);
 
-            if (GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
+            if (giveaway != null) {
                 if (emoji.equals(TADA)) {
                     //Проверяем event id message с Giveaway message id
                     long messageIdWithReactionCurrent = event.getMessageIdLong();
-                    long messageIdWithReaction = GiveawayRegistry.getInstance().getMessageId(guildIdLong);
+                    long messageIdWithReaction = giveaway.getMessageId();
 
                     if (messageIdWithReactionCurrent != messageIdWithReaction) return;
                     String url = getDiscordUrlMessage(guildIdLong, event.getGuildChannel().getIdLong(), messageIdWithReactionCurrent);
-                    Gift gift = GiveawayRegistry.getInstance().getGift(guildIdLong);
-                    Long roleId = GiveawayRegistry.getInstance().getRoleId(guildIdLong); // null -> 0
+                    Long roleId = giveaway.getRoleId(); // null -> 0
 
                     if (roleId != null && roleId != 0L) {
                         Role roleById = event.getGuild().getRoleById(roleId);
-                        boolean isForSpecificRole = GiveawayRegistry.getInstance().getIsForSpecificRole(guildIdLong);
+                        boolean isForSpecificRole = giveaway.isForSpecificRole();
 
                         if (isForSpecificRole && !event.getMember().getRoles().contains(roleById)) {
                             LOGGER.info(String.format("\nНажал на эмодзи, но у него нет доступа к розыгрышу: %s", user.getId()));
@@ -63,9 +69,9 @@ public class Reactions extends ListenerAdapter implements SenderMessage {
                         }
                     }
 
-                    if (!gift.hasUserInGiveaway(user.getId())) {
+                    if (!giveaway.hasUserInGiveaway(user.getId())) {
                         LOGGER.info(String.format("\nНовый участник: %s\nСервер: %s", user.getId(), event.getGuild().getId()));
-                        gift.addUserToPoll(user);
+                        giveaway.addUser(user);
                     }
                 }
             }
