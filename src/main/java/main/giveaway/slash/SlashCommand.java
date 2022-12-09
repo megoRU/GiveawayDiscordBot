@@ -19,6 +19,7 @@ import main.model.repository.ListUsersRepository;
 import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
@@ -311,13 +312,17 @@ public class SlashCommand extends ListenerAdapter {
             }
 
             event.deferReply().queue();
-            TextChannel textChannel;
+            ChannelType channelType = event.getChannelType();
+            GuildMessageChannel textChannel;
 
-            try {
+            System.out.println(channelType);
+
+            if (channelType == ChannelType.NEWS) {
+                textChannel = event.getChannel().asNewsChannel();
+            } else if (channelType == ChannelType.TEXT) {
                 textChannel = event.getChannel().asTextChannel();
-            } catch (Exception e) {
-                e.printStackTrace();
-                event.getHook().sendMessage(e.getMessage()).queue();
+            } else {
+                event.getHook().sendMessage("TextChannel is `NULL`").queue();
                 return;
             }
 
@@ -381,7 +386,9 @@ public class SlashCommand extends ListenerAdapter {
                     });
         }
 
-        if (event.getName().equals("help")) {
+        if (event.getName().
+
+                equals("help")) {
             EmbedBuilder info = new EmbedBuilder();
             info.setColor(Color.decode("#9900FF")); //Фиолетовый
             info.setTitle("Giveaway");
@@ -423,7 +430,9 @@ public class SlashCommand extends ListenerAdapter {
         }
 
         //0 - bot
-        if (event.getName().equals("language")) {
+        if (event.getName().
+
+                equals("language")) {
             BotStartConfig.getMapLanguages().put(guildId, event.getOptions().get(0).getAsString());
 
             String lang = event.getOptions().get(0).getAsString().equals("rus") ? "Русский" : "English";
@@ -442,7 +451,9 @@ public class SlashCommand extends ListenerAdapter {
             return;
         }
 
-        if (event.getName().equals("list")) {
+        if (event.getName().
+
+                equals("list")) {
             event.deferReply().queue();
             if (GiveawayRegistry.getInstance().hasGift(guildIdLong)) {
                 StringBuilder stringBuilder = new StringBuilder();
@@ -485,7 +496,9 @@ public class SlashCommand extends ListenerAdapter {
             return;
         }
 
-        if (event.getName().equals("reroll")) {
+        if (event.getName().
+
+                equals("reroll")) {
             event.deferReply().queue();
             String id = event.getOption("id", OptionMapping::getAsString);
 
@@ -531,7 +544,9 @@ public class SlashCommand extends ListenerAdapter {
             return;
         }
 
-        if (event.getName().equals("change")) {
+        if (event.getName().
+
+                equals("change")) {
             GiveawayRegistry instance = GiveawayRegistry.getInstance();
             if (!instance.hasGift(guildIdLong)) {
                 String slashStopNoHas = jsonParsers.getLocale("slash_stop_no_has", guildId);
@@ -554,7 +569,9 @@ public class SlashCommand extends ListenerAdapter {
             return;
         }
 
-        if (event.getName().equals("participants")) {
+        if (event.getName().
+
+                equals("participants")) {
             event.deferReply().setEphemeral(true).queue();
             String id = event.getOption("id", OptionMapping::getAsString);
             try {
@@ -586,7 +603,9 @@ public class SlashCommand extends ListenerAdapter {
             return;
         }
 
-        if (event.getName().equals("patreon")) {
+        if (event.getName().
+
+                equals("patreon")) {
             EmbedBuilder patreon = new EmbedBuilder();
             patreon.setColor(Color.YELLOW);
             patreon.setTitle("Patreon", "https://www.patreon.com/ghbots");

@@ -36,6 +36,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
@@ -54,7 +55,7 @@ public class Gift {
     private final MegoruAPI api = new MegoruAPI.Builder().build();
 
     //User LIST
-    private final Map<String, String> listUsersHash;
+    private final ConcurrentHashMap<String, String> listUsersHash;
     private final Set<String> uniqueWinners = new LinkedHashSet<>();
 
     //USER DATA
@@ -64,8 +65,6 @@ public class Gift {
 
     private final AtomicInteger count = new AtomicInteger(0);
     private int localCountUsers;
-
-    private ActiveGiveaways activeGiveaways;
 
     //DTO
     private volatile ConcurrentLinkedQueue<Participants> participantsList = new ConcurrentLinkedQueue<>();
@@ -112,7 +111,7 @@ public class Gift {
         this.activeGiveawayRepository = activeGiveawayRepository;
         this.participantsRepository = participantsRepository;
         this.listUsersRepository = listUsersRepository;
-        this.listUsersHash = new LinkedHashMap<>();
+        this.listUsersHash = new ConcurrentHashMap<>();
         autoInsert();
     }
 
@@ -123,8 +122,7 @@ public class Gift {
         this.activeGiveawayRepository = activeGiveawayRepository;
         this.participantsRepository = participantsRepository;
         this.listUsersRepository = listUsersRepository;
-        this.listUsersHash = new LinkedHashMap<>(listUsersHash);
-        this.activeGiveaways = activeGiveawayRepository.getActiveGiveawaysByGuildIdLong(guildId);
+        this.listUsersHash = new ConcurrentHashMap<>(listUsersHash);
         autoInsert();
     }
 
@@ -254,9 +252,9 @@ public class Gift {
         autoInsert();
     }
 
-    private synchronized void updateCollections(int countWinners, String time, Message message, Long role,
-                                                Boolean isOnlyForSpecificRole, String urlImage, String title,
-                                                Long idUserWhoCreateGiveaway) {
+    private void updateCollections(int countWinners, String time, Message message, Long role,
+                                   Boolean isOnlyForSpecificRole, String urlImage, String title,
+                                   Long idUserWhoCreateGiveaway) {
 
         giveawayData.setMessageId(message.getIdLong());
         giveawayData.setChannelId(message.getChannel().getIdLong());
@@ -267,7 +265,7 @@ public class Gift {
         giveawayData.setTitle(title == null ? "Giveaway" : title);
         giveawayData.setCreatedUserId(idUserWhoCreateGiveaway);
 
-        activeGiveaways = new ActiveGiveaways();
+        ActiveGiveaways activeGiveaways = new ActiveGiveaways();
         activeGiveaways.setGuildLongId(guildId);
         activeGiveaways.setMessageIdLong(message.getIdLong());
         activeGiveaways.setChannelIdLong(message.getChannel().getIdLong());
@@ -293,7 +291,7 @@ public class Gift {
         }
     }
 
-    public synchronized void addUserToPoll(final User user) {
+    public void addUserToPoll(final User user) {
         LOGGER.info(String.format(
                 """
                         \nНовый участник
@@ -307,7 +305,7 @@ public class Gift {
         if (!listUsersHash.containsKey(user.getId())) {
             count.incrementAndGet();
             listUsersHash.put(user.getId(), user.getId());
-            addUserToInsertQuery(user.getName(), user.getAsTag(), user.getIdLong(), guildId);
+            addUserToInsertQuery(user.getName(), user.getAsTag(), user.getIdLong());
         }
     }
 
@@ -330,7 +328,7 @@ public class Gift {
                                     .append(stringBuilder.length() == 0 ? "(" : ", (")
                                     .append("\"").append(poll.getNickName()).append("\", ")
                                     .append(poll.getUserIdLong()).append(", ")
-                                    .append(poll.getActiveGiveaways().getGuildLongId()).append(", ")
+                                    .append(guildId).append(", ")
                                     .append("\"").append(poll.getNickNameTag()).append("\")");
                         }
                     }
@@ -354,15 +352,12 @@ public class Gift {
         }
     }
 
-    private void addUserToInsertQuery(final String nickName, final String nickNameTag, final long userIdLong, final long guildIdLong) {
-        if (activeGiveaways == null) {
-            activeGiveaways = activeGiveawayRepository.getActiveGiveawaysByGuildIdLong(guildIdLong);
-        }
+    private void addUserToInsertQuery(final String nickName, final String nickNameTag, final long userIdLong) {
         Participants participants = new Participants();
         participants.setUserIdLong(userIdLong);
         participants.setNickName(nickName);
         participants.setNickNameTag(nickNameTag);
-        participants.setActiveGiveaways(activeGiveaways);
+//        participants.setActiveGiveaways(activeGiveaways); //Can`t be null
         participantsList.add(participants);
     }
 
@@ -379,15 +374,24 @@ public class Gift {
         if (participants.isEmpty()) throw new Exception("participants is Empty");
         LOGGER.info("\nlistUsersHash size: " + listUsersHash.size());
         LOGGER.info("\nparticipantsJSON size: " + participants.size());
+
+        if (listUsersHash.size() != participants.size()) {
+            throw new Exception(
+                    "listUsersHash.size(): " + listUsersHash.size() +
+                            " != participants.size(): " + participants.size());
+        }
+
         StringBuilder stringBuilder = new StringBuilder();
         for (Participants participant : participants) {
-            stringBuilder
-                    .append("getIdUserWhoCreateGiveaway ").append(participant.getActiveGiveaways().getIdUserWhoCreateGiveaway())
-                    .append("getUserIdLong ").append(participant.getUserIdLong())
-                    .append("getNickNameTag ").append(participant.getNickNameTag())
-                    .append("getGiveawayId ").append(participant.getActiveGiveaways().getMessageIdLong())
-                    .append("getGuildId ").append(participant.getActiveGiveaways().getGuildLongId())
-                    .append("\n");
+            if (participant.getActiveGiveaways() != null) {
+                stringBuilder
+                        .append("getIdUserWhoCreateGiveaway ").append(participant.getActiveGiveaways().getIdUserWhoCreateGiveaway())
+                        .append("getUserIdLong ").append(participant.getUserIdLong())
+                        .append("getNickNameTag ").append(participant.getNickNameTag())
+                        .append("getGiveawayId ").append(participant.getActiveGiveaways().getMessageIdLong())
+                        .append("getGuildId ").append(participant.getActiveGiveaways().getGuildLongId())
+                        .append("\n");
+            }
         }
         System.out.println(stringBuilder);
         Winners winners = new Winners(countWinner, 0, listUsersHash.size() - 1);
