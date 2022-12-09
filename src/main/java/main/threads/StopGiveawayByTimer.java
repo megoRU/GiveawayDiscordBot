@@ -1,5 +1,6 @@
 package main.threads;
 
+import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
 
 import java.util.TimerTask;
@@ -20,7 +21,9 @@ public final class StopGiveawayByTimer extends TimerTask {
     public void run() {
         try {
             while (true) {
-                if (!GiveawayRegistry.getInstance().hasGift(idGuild)) return;
+                GiveawayRegistry instance = GiveawayRegistry.getInstance();
+                Giveaway giveaway = instance.getGiveaway(idGuild);
+                if (giveaway == null) return;
 
 //                synchronized (this) {
 //                    System.out.println();
@@ -31,9 +34,8 @@ public final class StopGiveawayByTimer extends TimerTask {
 //                }
 
                 latch.await();
-                int listUsersSize = GiveawayRegistry.getInstance().getGift(idGuild).getListUsersSize();
-                int countWinners = GiveawayRegistry.getInstance().getCountWinners(idGuild);
-
+                int listUsersSize = giveaway.getListUsersSize();
+                int countWinners = giveaway.getCountWinners();
 
                 String logMessage = String.format(
                         """
@@ -47,7 +49,7 @@ public final class StopGiveawayByTimer extends TimerTask {
 
                 //TODO завершать если прошёл месяц?
                 if (listUsersSize < 2 || countWinners < listUsersSize) {
-                    GiveawayRegistry.getInstance().getGift(idGuild).stopGift(idGuild, countWinners);
+                    giveaway.stopGift(idGuild, countWinners);
                     return;
                 }
 

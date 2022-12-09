@@ -3,7 +3,6 @@ package main.giveaway;
 import api.megoru.ru.entity.Winners;
 import api.megoru.ru.impl.MegoruAPI;
 import lombok.Getter;
-import lombok.Setter;
 import main.config.Config;
 import main.giveaway.impl.GiftHelper;
 import main.giveaway.impl.URLS;
@@ -41,15 +40,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
-@Setter
-public class Gift {
+public class Giveaway {
 
-    private static final Logger LOGGER = Logger.getLogger(Gift.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(Giveaway.class.getName());
     public static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
     private static final JSONParsers jsonParsers = new JSONParsers();
-
-    //Giveaway Data
-    private final Gift.GiveawayData giveawayData = new GiveawayData();
 
     //API
     private final MegoruAPI api = new MegoruAPI.Builder().build();
@@ -63,48 +58,30 @@ public class Gift {
     private final long textChannelId;
     private final long userIdLong;
 
+    //GiveawayData
+    private long messageId;
+    private int countWinners;
+    private String title;
+    private Timestamp endGiveawayDate;
+    private Long roleId;
+    private boolean isForSpecificRole;
+    private String urlImage;
+
     private final AtomicInteger count = new AtomicInteger(0);
     private int localCountUsers;
 
     //DTO
-    private volatile ConcurrentLinkedQueue<Participants> participantsList = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<Participants> participantsList = new ConcurrentLinkedQueue<>();
 
     //REPO
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final ParticipantsRepository participantsRepository;
     private final ListUsersRepository listUsersRepository;
 
-    @Getter
-    @Setter
-    public class GiveawayData {
-
-        private long channelId;
-        private long messageId;
-        private int countWinners;
-        private String title;
-        private Timestamp endGiveawayDate;
-        private Long roleId;
-        private boolean isForSpecificRole;
-        private String urlImage;
-        private long createdUserId;
-
-        public GiveawayData() {
-        }
-
-        public Gift getGift() {
-            return Gift.this;
-        }
-
-        public boolean getIsForSpecificRole() {
-            return isForSpecificRole;
-        }
-
-        public void setIsForSpecificRole(boolean is_for_specific_role) {
-            isForSpecificRole = is_for_specific_role;
-        }
-    }
-
-    public Gift(long guildId, long textChannelId, long userIdLong, ActiveGiveawayRepository activeGiveawayRepository, ParticipantsRepository participantsRepository, ListUsersRepository listUsersRepository) {
+    public Giveaway(long guildId, long textChannelId, long userIdLong,
+                    ActiveGiveawayRepository activeGiveawayRepository,
+                    ParticipantsRepository participantsRepository,
+                    ListUsersRepository listUsersRepository) {
         this.guildId = guildId;
         this.textChannelId = textChannelId;
         this.userIdLong = userIdLong;
@@ -115,7 +92,18 @@ public class Gift {
         autoInsert();
     }
 
-    public Gift(long guildId, long textChannelId, long userIdLong, Map<String, String> listUsersHash, ActiveGiveawayRepository activeGiveawayRepository, ParticipantsRepository participantsRepository, ListUsersRepository listUsersRepository) {
+    public Giveaway(long guildId, long textChannelId, long userIdLong,
+                    Map<String, String> listUsersHash,
+                    ActiveGiveawayRepository activeGiveawayRepository,
+                    ParticipantsRepository participantsRepository,
+                    ListUsersRepository listUsersRepository,
+                    Long messageId,
+                    int countWinners,
+                    Long role,
+                    boolean isOnlyForSpecificRole,
+                    String urlImage,
+                    String title,
+                    Timestamp endGiveawayDate) {
         this.guildId = guildId;
         this.textChannelId = textChannelId;
         this.userIdLong = userIdLong;
@@ -123,6 +111,15 @@ public class Gift {
         this.participantsRepository = participantsRepository;
         this.listUsersRepository = listUsersRepository;
         this.listUsersHash = new ConcurrentHashMap<>(listUsersHash);
+
+        this.messageId = messageId;
+        this.countWinners = countWinners;
+        this.roleId = role;
+        this.isForSpecificRole = isOnlyForSpecificRole;
+        this.urlImage = urlImage;
+        this.title = title == null ? "Giveaway" : title;
+        this.endGiveawayDate = endGiveawayDate;
+
         autoInsert();
     }
 
@@ -230,21 +227,21 @@ public class Gift {
         return start;
     }
 
-    public void startGift(Guild guild,
-                          GuildMessageChannel textChannel, String newTitle, int countWinners,
-                          String time, Long role, boolean isOnlyForSpecificRole,
-                          String urlImage, Long idUserWhoCreateGiveaway, boolean predefined) {
+    public void startGiveaway(Guild guild,
+                              GuildMessageChannel textChannel, String newTitle, int countWinners,
+                              String time, Long role, boolean isOnlyForSpecificRole,
+                              String urlImage, boolean predefined) {
 
         EmbedBuilder start = extracted(guild, textChannel, newTitle, countWinners, time, role, isOnlyForSpecificRole, urlImage, predefined);
 
         if (predefined) {
             textChannel.sendMessageEmbeds(start.build())
-                    .queue(message -> updateCollections(countWinners, time, message, role, isOnlyForSpecificRole, urlImage, newTitle, idUserWhoCreateGiveaway));
+                    .queue(message -> updateCollections(countWinners, time, message, role, isOnlyForSpecificRole, urlImage, newTitle));
         } else {
             textChannel.sendMessageEmbeds(start.build())
                     .queue(message -> {
                         message.addReaction(Emoji.fromUnicode(Reactions.TADA)).queue();
-                        updateCollections(countWinners, time, message, role, isOnlyForSpecificRole, urlImage, newTitle, idUserWhoCreateGiveaway);
+                        updateCollections(countWinners, time, message, role, isOnlyForSpecificRole, urlImage, newTitle);
                     });
         }
 
@@ -253,17 +250,13 @@ public class Gift {
     }
 
     private void updateCollections(int countWinners, String time, Message message, Long role,
-                                   Boolean isOnlyForSpecificRole, String urlImage, String title,
-                                   Long idUserWhoCreateGiveaway) {
-
-        giveawayData.setMessageId(message.getIdLong());
-        giveawayData.setChannelId(message.getChannel().getIdLong());
-        giveawayData.setCountWinners(countWinners);
-        giveawayData.setRoleId(role);
-        giveawayData.setIsForSpecificRole(isOnlyForSpecificRole);
-        giveawayData.setUrlImage(urlImage);
-        giveawayData.setTitle(title == null ? "Giveaway" : title);
-        giveawayData.setCreatedUserId(idUserWhoCreateGiveaway);
+                                   Boolean isOnlyForSpecificRole, String urlImage, String title) {
+        this.messageId = message.getIdLong();
+        this.countWinners = countWinners;
+        this.roleId = role;
+        this.isForSpecificRole = isOnlyForSpecificRole;
+        this.urlImage = urlImage;
+        this.title = title == null ? "Giveaway" : title;
 
         ActiveGiveaways activeGiveaways = new ActiveGiveaways();
         activeGiveaways.setGuildLongId(guildId);
@@ -274,10 +267,7 @@ public class Gift {
         activeGiveaways.setRoleIdLong(role);
         activeGiveaways.setIsForSpecificRole(isOnlyForSpecificRole);
         activeGiveaways.setUrlImage(urlImage);
-        activeGiveaways.setIdUserWhoCreateGiveaway(idUserWhoCreateGiveaway);
-
-        GiveawayRegistry instance = GiveawayRegistry.getInstance();
-        Timestamp endGiveawayDate = instance.getEndGiveawayDate(guildId);
+        activeGiveaways.setIdUserWhoCreateGiveaway(userIdLong);
 
         if (time != null && time.length() > 4) {
             activeGiveaways.setDateEndGiveaway(endGiveawayDate);
@@ -291,7 +281,7 @@ public class Gift {
         }
     }
 
-    public void addUserToPoll(final User user) {
+    public void addUser(final User user) {
         LOGGER.info(String.format(
                 """
                         \nНовый участник
@@ -305,15 +295,22 @@ public class Gift {
         if (!listUsersHash.containsKey(user.getId())) {
             count.incrementAndGet();
             listUsersHash.put(user.getId(), user.getId());
-            addUserToInsertQuery(user.getName(), user.getAsTag(), user.getIdLong());
+
+            //Add user to Collection
+            Participants participants = new Participants();
+            participants.setUserIdLong(user.getIdLong());
+            participants.setNickName(user.getName());
+            participants.setNickNameTag(user.getAsTag());
+//            participants.setActiveGiveaways(activeGiveaways); //Can`t be null
+            participantsList.add(participants);
         }
     }
 
-    private void executeMultiInsert() {
+    private void multiInsert() {
         try {
-            if (count.get() > localCountUsers && GiveawayRegistry.getInstance().hasGift(guildId)) {
+            if (count.get() > localCountUsers && GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
                 localCountUsers = count.get();
-                if (participantsList != null && !participantsList.isEmpty()) {
+                if (!participantsList.isEmpty()) {
                     StringBuilder stringBuilder = new StringBuilder();
                     Connection connection = DriverManager.getConnection(
                             Config.getDatabaseUrl(),
@@ -350,15 +347,6 @@ public class Gift {
                     "\nОчищаем StringBuilder!", guildId);
             LOGGER.info(format);
         }
-    }
-
-    private void addUserToInsertQuery(final String nickName, final String nickNameTag, final long userIdLong) {
-        Participants participants = new Participants();
-        participants.setUserIdLong(userIdLong);
-        participants.setNickName(nickName);
-        participants.setNickNameTag(nickNameTag);
-//        participants.setActiveGiveaways(activeGiveaways); //Can`t be null
-        participantsList.add(participants);
     }
 
     /**
@@ -449,7 +437,6 @@ public class Gift {
         EmbedBuilder winners = new EmbedBuilder();
         winners.setColor(Color.GREEN);
 
-        long messageId = GiveawayRegistry.getInstance().getMessageId(this.guildId);
         String url = URLS.getDiscordUrlMessage(this.guildId, this.textChannelId, messageId);
 
         String winnerArray = Arrays.toString(uniqueWinners.toArray())
@@ -489,8 +476,8 @@ public class Gift {
         new Timer().scheduleAtFixedRate(new TimerTask() {
             public void run() throws NullPointerException {
                 try {
-                    if (GiveawayRegistry.getInstance().hasGift(guildId)) {
-                        executeMultiInsert();
+                    if (GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
+                        multiInsert();
                     } else {
                         Thread.currentThread().interrupt();
                     }
@@ -503,15 +490,7 @@ public class Gift {
     }
 
     @Getter
-    public static class GiveawayTimerStorage {
-
-        private final StopGiveawayByTimer stopGiveawayByTimer;
-        private final Timer timer;
-
-        public GiveawayTimerStorage(StopGiveawayByTimer stopGiveawayByTimer, Timer timer) {
-            this.stopGiveawayByTimer = stopGiveawayByTimer;
-            this.timer = timer;
-        }
+    public record GiveawayTimerStorage(StopGiveawayByTimer stopGiveawayByTimer, Timer timer) {
     }
 
     public void putTimestamp(long localDateTime) {
@@ -526,7 +505,7 @@ public class Gift {
         stopGiveawayByTimer.countDown();
         timer.schedule(stopGiveawayByTimer, date);
 
-        instance.putEndGiveawayDate(this.guildId, timestamp);
+        endGiveawayDate = timestamp;
         instance.putGiveawayTimer(this.guildId, stopGiveawayByTimer, timer);
     }
 
@@ -567,7 +546,35 @@ public class Gift {
         return textChannelId;
     }
 
-    public GiveawayData getGiveawayData() {
-        return giveawayData;
+    public long getUserIdLong() {
+        return userIdLong;
+    }
+
+    public long getMessageId() {
+        return messageId;
+    }
+
+    public int getCountWinners() {
+        return countWinners;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public Timestamp getEndGiveawayDate() {
+        return endGiveawayDate;
+    }
+
+    public Long getRoleId() {
+        return roleId;
+    }
+
+    public boolean isForSpecificRole() {
+        return isForSpecificRole;
+    }
+
+    public String getUrlImage() {
+        return urlImage;
     }
 }
