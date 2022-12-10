@@ -34,16 +34,19 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 public class Giveaway {
 
     private static final Logger LOGGER = Logger.getLogger(Giveaway.class.getName());
     public static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
     private static final JSONParsers jsonParsers = new JSONParsers();
+
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private final List<Future<?>> futureTasks = new ArrayList<>();
 
     //API
     private final MegoruAPI api = new MegoruAPI.Builder().build();
@@ -408,8 +411,8 @@ public class Giveaway {
 
                 activeGiveawayRepository.deleteActiveGiveaways(guildId);
                 //Удаляет данные из коллекций
-                clearingCollections();
-
+                GiveawayRegistry instance = GiveawayRegistry.getInstance();
+                instance.clearingCollections(guildId);
                 return;
             }
         } catch (Exception e) {
@@ -420,17 +423,21 @@ public class Giveaway {
             //выбираем победителей
             getWinners(countWinner);
         } catch (Exception e) {
-            EmbedBuilder errors = new EmbedBuilder();
-            errors.setColor(Color.RED);
-            errors.setTitle("Errors with API");
-            errors.setDescription("Repeat later. Or write to us about it.");
-            errors.appendDescription("\nYou have not completed the Giveaway");
-
-            List<Button> buttons = new ArrayList<>();
-            buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
-
-            SenderMessage.sendMessage(errors.build(), guildId, textChannelId, buttons);
-            e.printStackTrace();
+            if (futureTasks.isEmpty()) {
+                String errorsWithApi = jsonParsers.getLocale("errors_with_api", String.valueOf(guildId));
+                String errorsDescriptions = jsonParsers.getLocale("errors_descriptions", String.valueOf(guildId));
+                EmbedBuilder errors = new EmbedBuilder();
+                errors.setColor(Color.RED);
+                errors.setTitle(errorsWithApi);
+                errors.setDescription(errorsDescriptions);
+                List<Button> buttons = new ArrayList<>();
+                buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
+                SenderMessage.sendMessage(errors.build(), guildId, textChannelId, buttons);
+                StopGiveawayThread stopGiveawayThread = new StopGiveawayThread();
+                Future<?> submit = executorService.submit(stopGiveawayThread);
+                futureTasks.add(submit);
+                e.printStackTrace();
+            }
             return;
         }
 
@@ -467,7 +474,11 @@ public class Giveaway {
         activeGiveawayRepository.deleteActiveGiveaways(guildId);
 
         //Удаляет данные из коллекций
-        clearingCollections();
+        GiveawayRegistry instance = GiveawayRegistry.getInstance();
+        instance.clearingCollections(guildId);
+
+        Stream<Boolean> booleanStream = futureTasks.stream().map(future -> future.cancel(true));
+        futureTasks.clear();
     }
 
     //TODO: Не завершается после заверешения
@@ -492,6 +503,23 @@ public class Giveaway {
     public record GiveawayTimerStorage(StopGiveawayByTimer stopGiveawayByTimer, Timer timer) {
     }
 
+    private class StopGiveawayThread implements Runnable {
+
+        @Override
+        public void run() {
+            while (true) {
+                if (!GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
+                    return;
+                }
+                stopGiveaway(countWinners);
+                try {
+                    Thread.sleep(10000);
+                } catch (Exception ignored) {
+                }
+            }
+        }
+    }
+
     public void putTimestamp(long localDateTime) {
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
         instance.cancelGiveawayTimer(guildId);
@@ -506,22 +534,6 @@ public class Giveaway {
 
         endGiveawayDate = timestamp;
         instance.putGiveawayTimer(this.guildId, stopGiveawayByTimer, timer);
-    }
-
-    private void clearingCollections() {
-        try {
-            GiveawayRegistry.getInstance().removeGuildFromGiveaway(this.guildId);
-            GiveawayTimerStorage giveawayTimer = GiveawayRegistry.getInstance().getGiveawayTimer(this.guildId);
-
-            if (giveawayTimer != null) {
-                giveawayTimer.stopGiveawayByTimer.cancel();
-                giveawayTimer.stopGiveawayByTimer.countDown();
-            }
-            GiveawayRegistry.getInstance().removeGiveawayTimer(this.guildId);
-            setCount(0);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     public boolean hasUserInGiveaway(String user) {
@@ -575,5 +587,9 @@ public class Giveaway {
 
     public String getUrlImage() {
         return urlImage;
+    }
+
+    public boolean isHasFutureTasks() {
+        return futureTasks.isEmpty();
     }
 }

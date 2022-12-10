@@ -55,5 +55,8 @@
   "change_duration": "Successfully changed the time",
   "wrong_date": "Invalid date",
   "no_access_reroll": "Most likely you don't have access or the Giveaway ID is incorrect",
-  "gift_ends_giveaway": "\nEnds: <t:%s:R> (<t:%s:f>)"
+  "gift_ends_giveaway": "\nEnds: <t:%s:R> (<t:%s:f>)",
+  "errors_with_api": "Errors with API",
+  "errors_descriptions": "We have created a task.\nWe will complete your Giveaway when it becomes possible.\nIf you still have questions, ask us them.",
+  "errors_descriptions_again": "Don't worry, the task is already running.\nWe will complete your Giveaway as soon as we can."
 }

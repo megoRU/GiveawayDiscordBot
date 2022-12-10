@@ -253,6 +253,18 @@ public class SlashCommand extends ListenerAdapter {
             }
 
             if (event.getOptions().isEmpty()) {
+                if (!giveaway.isHasFutureTasks()) {
+                    EmbedBuilder errorsAgain = new EmbedBuilder();
+                    String errorsWithApi = jsonParsers.getLocale("errors_with_api", guildId);
+                    String errorsDescriptionsAgain = jsonParsers.getLocale("errors_descriptions_again", guildId);
+                    errorsAgain.setColor(Color.RED);
+                    errorsAgain.setTitle(errorsWithApi);
+                    errorsAgain.setDescription(errorsDescriptionsAgain);
+                    List<Button> buttons = new ArrayList<>();
+                    buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
+                    event.replyEmbeds(errorsAgain.build()).setActionRow(buttons).queue();
+                    return;
+                }
                 String slashStop = jsonParsers.getLocale("slash_stop", guildId);
                 EmbedBuilder stop = new EmbedBuilder();
                 stop.setColor(Color.GREEN);

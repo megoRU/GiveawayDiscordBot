@@ -71,4 +71,24 @@ public class GiveawayRegistry {
     public void removeGiveawayTimer(long guildId) {
         giveawayTimer.remove(guildId);
     }
+
+    public void clearingCollections(long guildId) {
+        try {
+            removeGuildFromGiveaway(guildId);
+            Giveaway.GiveawayTimerStorage giveawayTimer = getGiveawayTimer(guildId);
+
+            if (giveawayTimer != null) {
+                giveawayTimer.stopGiveawayByTimer().cancel();
+                giveawayTimer.stopGiveawayByTimer().countDown();
+            }
+            removeGiveawayTimer(guildId);
+
+            Giveaway giveaway = getGiveaway(guildId);
+            if (giveaway != null) {
+                giveaway.setCount(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
