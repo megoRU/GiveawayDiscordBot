@@ -507,15 +507,22 @@ public class Giveaway {
 
         @Override
         public void run() {
-            while (true) {
-                if (!GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
-                    return;
-                }
-                stopGiveaway(countWinners);
-                try {
+            try {
+                while (true) {
+                    if (!GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
+                        for (Future<?> futureTask : futureTasks) {
+                            futureTask.cancel(true);
+                            futureTasks.clear();
+                        }
+                        return;
+                    }
+                    stopGiveaway(countWinners);
                     Thread.sleep(10000);
-                } catch (Exception ignored) {
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                futureTasks.clear();
             }
         }
     }
