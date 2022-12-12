@@ -16,7 +16,6 @@ import main.model.repository.ListUsersRepository;
 import main.model.repository.ParticipantsRepository;
 import main.threads.StopGiveawayByTimer;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
@@ -125,7 +124,8 @@ public class Giveaway {
         autoInsert();
     }
 
-    public void setTime(final EmbedBuilder start, final String time) {
+    public Timestamp updateTime(final String time) {
+        if (time == null) return this.endGiveawayDate;
         ZoneOffset offset = ZoneOffset.UTC;
         LocalDateTime localDateTime;
 
@@ -153,112 +153,61 @@ public class Giveaway {
             throw new IllegalArgumentException(format);
         }
 
-        String endTimeFormat =
-                String.format(jsonParsers.getLocale("gift_ends_giveaway", String.valueOf(guildId)),
-                        localDateTime.toEpochSecond(offset),
-                        localDateTime.toEpochSecond(offset));
-        start.appendDescription(endTimeFormat);
+        long toEpochSecond = localDateTime.toEpochSecond(offset);
+        this.endGiveawayDate = new Timestamp(toEpochSecond * 1000);
 
-        putTimestamp(localDateTime.toEpochSecond(offset));
+        GiveawayRegistry instance = GiveawayRegistry.getInstance();
+        instance.cancelGiveawayTimer(guildId);
+
+        Timer timer = new Timer();
+        StopGiveawayByTimer stopGiveawayByTimer = new StopGiveawayByTimer(this.guildId);
+        Date date = new Date(this.endGiveawayDate.getTime());
+
+        stopGiveawayByTimer.countDown();
+        timer.schedule(stopGiveawayByTimer, date);
+        instance.putGiveawayTimer(this.guildId, stopGiveawayByTimer, timer);
+        return endGiveawayDate;
     }
 
-    private EmbedBuilder extracted(final Guild guild,
-                                   final GuildMessageChannel channel,
-                                   final String newTitle,
-                                   final int countWinners,
-                                   final String time,
-                                   final Long role,
-                                   final boolean isOnlyForSpecificRole,
-                                   final String urlImage,
-                                   final boolean predefined) {
-        EmbedBuilder start = new EmbedBuilder();
-
-        LOGGER.info("\nGuild id: " + guild.getId()
-                + "\nTextChannel: " + channel.getName() + " " + channel.getId()
-                + "\nTitle: " + newTitle
+    public void startGiveaway(GuildMessageChannel textChannel, String title, int countWinners,
+                              String time, Long role, boolean isOnlyForSpecificRole,
+                              String urlImage, boolean predefined) {
+        //Записываем данные:
+        LOGGER.info("\nGuild id: " + guildId
+                + "\nTextChannel: " + textChannel.getName() + " " + textChannel.getId()
+                + "\nTitle: " + title
                 + "\nCount winners: " + countWinners
                 + "\nTime: " + time
                 + "\nRole: " + role
                 + "\nisOnlyForSpecificRole: " + isOnlyForSpecificRole
-                + "\nurlImage: " + urlImage);
+                + "\nurlImage: " + urlImage
+                + "\npredefined: " + predefined);
 
-        String title = newTitle == null ? "Giveaway" : newTitle;
-        String giftReaction = jsonParsers.getLocale("gift_reaction", guild.getId());
 
-        start.setColor(Color.GREEN);
-        start.setTitle(title);
-        if (!predefined) {
-            start.appendDescription(giftReaction);
-        }
+        this.title = title == null ? "Giveaway" : title;
+        this.countWinners = countWinners;
+        this.roleId = role;
+        this.urlImage = urlImage;
+        this.isForSpecificRole = isOnlyForSpecificRole;
+        updateTime(time); //Обновляем время
 
-        if (role != null) {
-            String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guild.getId()), role);
-            if (isOnlyForSpecificRole) {
-                channel.sendMessage(giftNotificationForThisRole).queue();
-                String giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", guild.getId()), role);
-                start.appendDescription(giftOnlyFor);
-            } else {
-                if (role == guildId) {
-                    String notificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_everyone", guild.getId()), "@everyone");
-                    channel.sendMessage(notificationForThisRole).queue();
-                } else {
-                    channel.sendMessage(giftNotificationForThisRole).queue();
-                }
-            }
-        }
-
-        String footer;
-        if (countWinners == 1) {
-            footer = String.format("1 %s", GiftHelper.setEndingWord(1, guildId));
-        } else {
-            footer = String.format("%s %s", countWinners, GiftHelper.setEndingWord(countWinners, guildId));
-        }
-
-        start.setFooter(footer);
-
-        if (time != null) {
-            setTime(start, time);
-        }
-
-        String hosted = String.format("\nHosted by: <@%s>", this.userIdLong);
-        start.appendDescription(hosted);
-
-        if (urlImage != null) {
-            start.setImage(urlImage);
-        }
-        return start;
-    }
-
-    public void startGiveaway(Guild guild,
-                              GuildMessageChannel textChannel, String newTitle, int countWinners,
-                              String time, Long role, boolean isOnlyForSpecificRole,
-                              String urlImage, boolean predefined) {
-
-        EmbedBuilder start = extracted(guild, textChannel, newTitle, countWinners, time, role, isOnlyForSpecificRole, urlImage, predefined);
-
+        //Отправка сообщения
         if (predefined) {
-            textChannel.sendMessageEmbeds(start.build())
-                    .queue(message -> updateCollections(countWinners, time, message, role, isOnlyForSpecificRole, urlImage, newTitle));
+            textChannel.sendMessageEmbeds(GiveawayEmbedUtils.giveawayPattern(guildId).build())
+                    .queue(this::updateCollections);
         } else {
-            textChannel.sendMessageEmbeds(start.build())
+            textChannel.sendMessageEmbeds(GiveawayEmbedUtils.giveawayPattern(guildId).build())
                     .queue(message -> {
                         message.addReaction(Emoji.fromUnicode(Reactions.TADA)).queue();
-                        updateCollections(countWinners, time, message, role, isOnlyForSpecificRole, urlImage, newTitle);
+                        updateCollections(message);
                     });
         }
-
         //Вот мы запускаем бесконечный поток.
         autoInsert();
     }
 
-    private void updateCollections(int countWinners, String time, Message message, Long role,
-                                   Boolean isOnlyForSpecificRole, String urlImage, String title) {
+    private void updateCollections(Message message) {
         this.messageId = message.getIdLong();
-        this.countWinners = countWinners;
-        this.roleId = role;
-        this.isForSpecificRole = isOnlyForSpecificRole;
-        this.urlImage = urlImage;
-        this.title = title == null ? "Giveaway" : title;
 
         ActiveGiveaways activeGiveaways = new ActiveGiveaways();
         activeGiveaways.setGuildLongId(guildId);
@@ -266,16 +215,17 @@ public class Giveaway {
         activeGiveaways.setChannelIdLong(message.getChannel().getIdLong());
         activeGiveaways.setCountWinners(countWinners);
         activeGiveaways.setGiveawayTitle(title);
-        activeGiveaways.setRoleIdLong(role);
-        activeGiveaways.setIsForSpecificRole(isOnlyForSpecificRole);
+
+        if (this.roleId == null || this.roleId == 0) {
+            activeGiveaways.setRoleIdLong(null);
+        } else {
+            activeGiveaways.setRoleIdLong(this.roleId);
+        }
+        activeGiveaways.setIsForSpecificRole(this.isForSpecificRole);
         activeGiveaways.setUrlImage(urlImage);
         activeGiveaways.setIdUserWhoCreateGiveaway(userIdLong);
+        activeGiveaways.setDateEndGiveaway(endGiveawayDate == null ? null : endGiveawayDate);
 
-        if (time != null && time.length() > 4) {
-            activeGiveaways.setDateEndGiveaway(endGiveawayDate);
-        } else {
-            activeGiveaways.setDateEndGiveaway(time == null ? null : endGiveawayDate);
-        }
         activeGiveawayRepository.saveAndFlush(activeGiveaways);
         try {
             Thread.sleep(2000);
@@ -394,7 +344,7 @@ public class Giveaway {
     }
 
     public void stopGiveaway(final int countWinner) {
-        LOGGER.info("\nstopGift method" + "\nCount winner: " + countWinner);
+        LOGGER.info("\nstopGift method" + "\nCount winners: " + countWinner);
         GiftHelper giftHelper = new GiftHelper(activeGiveawayRepository);
         try {
             if (listUsersHash.size() < 2) {
@@ -435,6 +385,7 @@ public class Giveaway {
                 SenderMessage.sendMessage(errors.build(), guildId, textChannelId, buttons);
                 StopGiveawayThread stopGiveawayThread = new StopGiveawayThread();
                 Future<?> submit = executorService.submit(stopGiveawayThread);
+                executorService.shutdown();
                 futureTasks.add(submit);
                 e.printStackTrace();
             }
@@ -443,9 +394,7 @@ public class Giveaway {
 
         EmbedBuilder winners = new EmbedBuilder();
         winners.setColor(Color.GREEN);
-
         String url = URLS.getDiscordUrlMessage(this.guildId, this.textChannelId, messageId);
-
         String winnerArray = Arrays.toString(uniqueWinners.toArray())
                 .replaceAll("\\[", "")
                 .replaceAll("]", "");
@@ -455,7 +404,7 @@ public class Giveaway {
             winners.setDescription(giftCongratulations);
 
             giftHelper.editMessage(
-                    GiveawayEmbedUtils.embedBuilder(winnerArray, countWinner, guildId),
+                    GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId),
                     this.guildId,
                     textChannelId);
         } else {
@@ -463,7 +412,7 @@ public class Giveaway {
             winners.setDescription(giftCongratulationsMany);
 
             giftHelper.editMessage(
-                    GiveawayEmbedUtils.embedBuilder(winnerArray, countWinner, guildId),
+                    GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId),
                     this.guildId,
                     textChannelId);
         }
@@ -481,7 +430,7 @@ public class Giveaway {
         futureTasks.clear();
     }
 
-    //TODO: Не завершается после заверешения
+    //TODO: Не завершается после завершения
     //Автоматически отправляет в БД данные которые в буфере StringBuilder
     private void autoInsert() {
         new Timer().scheduleAtFixedRate(new TimerTask() {
@@ -505,42 +454,28 @@ public class Giveaway {
 
     private class StopGiveawayThread implements Runnable {
 
-        @Override
         public void run() {
-            try {
-                while (true) {
-                    if (!GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
-                        for (Future<?> futureTask : futureTasks) {
-                            futureTask.cancel(true);
-                            futureTasks.clear();
+            new Timer().scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    try {
+                        if (!GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
+                            for (Future<?> futureTask : futureTasks) {
+                                futureTask.cancel(true);
+                                futureTasks.clear();
+                            }
+                            return;
                         }
-                        return;
+                        stopGiveaway(countWinners);
+                        Thread.sleep(10000);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        futureTasks.clear();
                     }
-                    stopGiveaway(countWinners);
-                    Thread.sleep(10000);
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                futureTasks.clear();
-            }
+            }, 1000, 10000);
         }
-    }
-
-    public void putTimestamp(long localDateTime) {
-        GiveawayRegistry instance = GiveawayRegistry.getInstance();
-        instance.cancelGiveawayTimer(guildId);
-
-        Timer timer = new Timer();
-        StopGiveawayByTimer stopGiveawayByTimer = new StopGiveawayByTimer(this.guildId);
-        Timestamp timestamp = new Timestamp(localDateTime * 1000);
-        Date date = new Date(timestamp.getTime());
-
-        stopGiveawayByTimer.countDown();
-        timer.schedule(stopGiveawayByTimer, date);
-
-        endGiveawayDate = timestamp;
-        instance.putGiveawayTimer(this.guildId, stopGiveawayByTimer, timer);
     }
 
     public boolean hasUserInGiveaway(String user) {
