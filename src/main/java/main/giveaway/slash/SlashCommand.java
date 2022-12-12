@@ -67,7 +67,7 @@ public class SlashCommand extends ListenerAdapter {
     30с 30м 1ч
     2021.11.16 16:00
     */
-    private static final String TIME_REGEX = "(\\d{4}.\\d{2}.\\d{2}\\s\\d{2}:\\d{2})|(\\d{1,2}[smhdсмдч]| )+";
+    private static final String TIME_REGEX = "(\\d{4}.\\d{2}.\\d{2}\\s\\d{2}:\\d{2})|(\\d{1,2}[smhdсмдч]|\\s)+";
     public static final String ISO_TIME_REGEX = "^\\d{4}.\\d{2}.\\d{2}\\s\\d{2}:\\d{2}$"; //2021.11.16 16:00
 
     @Override
@@ -165,9 +165,7 @@ public class SlashCommand extends ListenerAdapter {
 
                     if (time != null && !time.matches(TIME_REGEX)) {
                         String startExamples = jsonParsers.getLocale("start_examples", guildId);
-                        String startWrongTime = String.format(jsonParsers.getLocale("start_wrong_time", guildId),
-                                time,
-                                startExamples);
+                        String startWrongTime = String.format(jsonParsers.getLocale("start_wrong_time", guildId), time, startExamples);
 
                         embedBuilder.setDescription(startWrongTime);
                         event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
@@ -182,17 +180,21 @@ public class SlashCommand extends ListenerAdapter {
                     }
 
                     if (role == null && isOnlyForSpecificRole) {
-                        String slashErrorOnlyForThisRole = String.format(jsonParsers.getLocale("slash_error_only_for_this_role", guildId), role);
-                        embedBuilder.setDescription(slashErrorOnlyForThisRole);
-                        event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
+                        String slashErrorOnlyForThisRole = jsonParsers.getLocale("slash_error_only_for_this_role", guildId);
+                        event.reply(slashErrorOnlyForThisRole).setEphemeral(true).queue();
                         return;
-                    }
-
-                    if (role != null && role == guildIdLong && isOnlyForSpecificRole) {
+                    } else if (role != null && role == guildIdLong && isOnlyForSpecificRole) {
                         String slashErrorRoleCanNotBeEveryone = jsonParsers.getLocale("slash_error_role_can_not_be_everyone", guildId);
-                        embedBuilder.setDescription(slashErrorRoleCanNotBeEveryone);
-                        event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
+                        event.reply(slashErrorRoleCanNotBeEveryone).setEphemeral(true).queue();
                         return;
+                    } else if (role != null && !isOnlyForSpecificRole) {
+                        String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guildId), role);
+                        if (role == guildIdLong) {
+                            giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_everyone", guildId), "@everyone");
+                            event.reply(giftNotificationForThisRole).queue();
+                        } else {
+                            event.reply(giftNotificationForThisRole).queue();
+                        }
                     }
 
                     Giveaway giveaway = new Giveaway(guildIdLong,
@@ -204,14 +206,16 @@ public class SlashCommand extends ListenerAdapter {
 
                     GiveawayRegistry.getInstance().putGift(guildIdLong, giveaway);
 
-                    String sendSlashMessage = String.format(jsonParsers.getLocale("send_slash_message", guildId), guildId);
+                    String sendSlashMessage = String.format(jsonParsers.getLocale("send_slash_message", guildId), textChannelEvent.getId());
 
-                    try {
-                        event.reply(sendSlashMessage)
-                                .delay(5, TimeUnit.SECONDS)
-                                .flatMap(InteractionHook::deleteOriginal)
-                                .queue();
-                    } catch (Exception ignored) {
+                    if (!event.isAcknowledged()) {
+                        try {
+                            event.reply(sendSlashMessage)
+                                    .delay(5, TimeUnit.SECONDS)
+                                    .flatMap(InteractionHook::deleteOriginal)
+                                    .queue();
+                        } catch (Exception ignored) {
+                        }
                     }
 
                     giveaway.startGiveaway(
@@ -232,7 +236,8 @@ public class SlashCommand extends ListenerAdapter {
                     EmbedBuilder errors = new EmbedBuilder();
                     errors.setColor(Color.GREEN);
                     errors.setDescription(slashErrors);
-                    event.getHook().editOriginalEmbeds(errors.build()).queue();
+                    if (event.isAcknowledged()) event.getHook().editOriginalEmbeds(errors.build()).queue();
+                    else event.getChannel().sendMessageEmbeds(errors.build()).queue();
                     GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
                     activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
                 }

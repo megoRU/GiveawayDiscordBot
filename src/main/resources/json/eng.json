@@ -28,7 +28,7 @@
   "gift_special_role": "This Giveaway only for a Special Role: <@&%s>",
   "gift_notification_for_this_role": "Notification for this role: <@&%s>",
   "gift_notification_for_everyone": "Notification for this role: %s",
-  "slash_error_only_for_this_role": "You can't make a Giveaway just for a Role: `%s`",
+  "slash_error_only_for_this_role": "You didn't specify @Role!",
   "slash_error_256": "The number of characters in the name should not exceed 256!",
   "slash_error_role_can_not_be_everyone": "`@everyone` can only be used to mention!",
   "button_giveaway_not_access": "You don't have access to [this](%s) Giveaway!",

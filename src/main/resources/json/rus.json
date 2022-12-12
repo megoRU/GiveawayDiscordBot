@@ -28,7 +28,7 @@
   "gift_special_role": "Этот розыгрыш только для Этой Роли: <@&%s>",
   "gift_notification_for_this_role": "Уведомление для этой роли: <@&%s>",
   "gift_notification_for_everyone": "Уведомление для этой роли: %s",
-  "slash_error_only_for_this_role": "Вы не можете сделать Giveaway только для Роли: `%s`",
+  "slash_error_only_for_this_role": "Вы не указали @Role!",
   "slash_error_256": "Количество символов в название не должно превышать 256!",
   "slash_error_role_can_not_be_everyone": "`@everyone` можно использовать только для упоминания!",
   "button_giveaway_not_access": "У вас нет доступа к [этой](%s) раздаче!",
