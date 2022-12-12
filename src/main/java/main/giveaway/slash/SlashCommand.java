@@ -339,7 +339,7 @@ public class SlashCommand extends ListenerAdapter {
                 return;
             }
 
-            Role role = event.getOption("set", OptionMapping::getAsRole);
+            Role role = event.getOption("role", OptionMapping::getAsRole);
             String countString = event.getOption("count", OptionMapping::getAsString);
             String title = event.getOption("title", OptionMapping::getAsString);
 
@@ -383,7 +383,7 @@ public class SlashCommand extends ListenerAdapter {
             Task<List<Member>> listTask = event.getGuild().loadMembers()
                     .onSuccess(members -> {
                         try {
-                            String sendSlashMessage = String.format(jsonParsers.getLocale("send_slash_message", guildId), guildId);
+                            String sendSlashMessage = String.format(jsonParsers.getLocale("send_slash_message", guildId), event.getChannel().getId());
                             event.getHook()
                                     .sendMessage(sendSlashMessage)
                                     .flatMap(Message::delete)
