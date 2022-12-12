@@ -195,6 +195,9 @@ public class SlashCommand extends ListenerAdapter {
                         } else {
                             event.reply(giftNotificationForThisRole).queue();
                         }
+                    } else if (role != null) {
+                        String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guildId), role);
+                        event.reply(giftNotificationForThisRole).queue();
                     }
 
                     Giveaway giveaway = new Giveaway(guildIdLong,
