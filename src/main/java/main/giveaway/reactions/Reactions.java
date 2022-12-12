@@ -43,7 +43,6 @@ public class Reactions extends ListenerAdapter implements SenderMessage {
                     long messageIdWithReaction = giveaway.getMessageId();
 
                     if (messageIdWithReactionCurrent != messageIdWithReaction) return;
-                    String url = getDiscordUrlMessage(guildIdLong, event.getGuildChannel().getIdLong(), messageIdWithReactionCurrent);
                     Long roleId = giveaway.getRoleId(); // null -> 0
 
                     if (roleId != null && roleId != 0L) {
@@ -51,6 +50,7 @@ public class Reactions extends ListenerAdapter implements SenderMessage {
                         boolean isForSpecificRole = giveaway.isForSpecificRole();
 
                         if (isForSpecificRole && !event.getMember().getRoles().contains(roleById)) {
+                            String url = getDiscordUrlMessage(guildIdLong, event.getGuildChannel().getIdLong(), messageIdWithReactionCurrent);
                             LOGGER.info(String.format("\nНажал на эмодзи, но у него нет доступа к розыгрышу: %s", user.getId()));
                             //Получаем ссылку на Giveaway
 

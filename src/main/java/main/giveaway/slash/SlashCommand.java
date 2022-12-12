@@ -349,6 +349,9 @@ public class SlashCommand extends ListenerAdapter {
                     event.getHook().sendMessage(notificationForThisRole).queue();
                     return;
                 }
+            } else {
+                event.getHook().sendMessage("Role is Null").queue();
+                return;
             }
 
             if (countString == null) {
@@ -375,8 +378,8 @@ public class SlashCommand extends ListenerAdapter {
                     title,
                     Integer.parseInt(countString),
                     "20s",
-                    null,
-                    false,
+                    role.getIdLong(),
+                    true,
                     null,
                     true);
 
