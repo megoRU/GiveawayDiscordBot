@@ -18,6 +18,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.interactions.DiscordLocale;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -138,14 +139,13 @@ public class BotStartConfig {
             jda = jdaBuilder.build();
             jda.awaitReady();
 
-            System.out.println(jda.retrieveCommands().complete());
-            //Обновляем список участников при запуске бота
+            List<Command> complete = jda.retrieveCommands().complete();
+            complete.forEach(command -> System.out.println(command.toString()));
 
-            System.out.println("updateUserList()");
             System.out.println("IsDevMode: " + Config.isIsDev());
 
             //Обновить команды
-//            updateSlashCommands();
+            updateSlashCommands();
             System.out.println("20:14");
         } catch (Exception e) {
             e.printStackTrace();
@@ -224,7 +224,7 @@ public class BotStartConfig {
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить количество победителей")
                     .setRequired(true));
             predefined.add(new OptionData(ROLE, "role", "Installing a @Role for collecting")
-                    .setName("set")
+                    .setName("role")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установка @Роли для сбора")
                     .setRequired(true));
 
@@ -510,7 +510,8 @@ public class BotStartConfig {
                         }
                     }
                 } catch (Exception e) {
-                    if (e.getMessage() != null && e.getMessage().contains("10008: Unknown Message") || e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
+                    if (e.getMessage() != null && e.getMessage().contains("10008: Unknown Message")
+                            || e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
                         System.out.println("updateUserList() " + e.getMessage() + " удаляем!");
                         activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
                         GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
