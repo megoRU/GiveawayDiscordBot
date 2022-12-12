@@ -5,6 +5,7 @@ import main.jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
 
 import java.awt.*;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.logging.Logger;
 
@@ -13,81 +14,95 @@ public class GiveawayEmbedUtils {
     private static final Logger LOGGER = Logger.getLogger(GiveawayEmbedUtils.class.getName());
     private static final JSONParsers jsonParsers = new JSONParsers();
 
-    public static EmbedBuilder embedBuilder(final EmbedBuilder embedBuilder, final long guildIdLong, String time) {
+    public static EmbedBuilder giveawayPattern(final long guildId) {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
-        Giveaway giveaway = instance.getGiveaway(guildIdLong);
+        Giveaway giveaway = instance.getGiveaway(guildId);
 
         if (giveaway != null) {
             String title = giveaway.getTitle();
             long createdUserId = giveaway.getUserIdLong();
-            String giftReaction = jsonParsers.getLocale("gift_reaction", String.valueOf(guildIdLong));
+            String giftReaction = jsonParsers.getLocale("gift_reaction", String.valueOf(guildId));
             int countWinners = giveaway.getCountWinners();
             String imageUrl = giveaway.getUrlImage();
             Long role = giveaway.getRoleId();
             boolean isForSpecificRole = giveaway.isForSpecificRole();
+            Timestamp endGiveaway = giveaway.getEndGiveawayDate();
+
+            //Title
+            embedBuilder.setTitle(title);
+            //Color
+            embedBuilder.setColor(Color.GREEN);
 
             String footer;
             if (countWinners == 1) {
-                footer = String.format("1 %s", GiftHelper.setEndingWord(1, guildIdLong));
+                footer = String.format("1 %s", GiftHelper.setEndingWord(1, guildId));
             } else {
-                footer = String.format("%s %s", countWinners, GiftHelper.setEndingWord(countWinners, guildIdLong));
+                footer = String.format("%s %s", countWinners, GiftHelper.setEndingWord(countWinners, guildId));
             }
 
-            String hostedBy = String.format("\nHosted by: <@%s>", createdUserId);
-            embedBuilder.setTitle(title);
-            embedBuilder.setColor(Color.GREEN);
+            //Reaction
             embedBuilder.setDescription(giftReaction);
+
+            //Giveaway only for Role
             if (isForSpecificRole) {
-                String giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", String.valueOf(guildIdLong)), role);
+                String giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", String.valueOf(guildId)), role);
                 embedBuilder.appendDescription(giftOnlyFor);
             }
-            giveaway.setTime(embedBuilder, time);
+            
+            //EndGiveaway
+            if (endGiveaway != null) {
+                long endTime = endGiveaway.getTime() / 1000;
+                String endTimeFormat =
+                        String.format(jsonParsers.getLocale("gift_ends_giveaway", String.valueOf(guildId)), endTime, endTime);
+                embedBuilder.appendDescription(endTimeFormat);
+            }
+            
+            //Hosted By
+            String hostedBy = String.format("\nHosted by: <@%s>", createdUserId);
             embedBuilder.appendDescription(hostedBy);
+            //Image
             embedBuilder.setImage(imageUrl);
+            //Footer
             embedBuilder.setFooter(footer);
         }
-
         return embedBuilder;
     }
 
-    public static EmbedBuilder embedBuilder(final String winners, final int countWinner, final long guildIdLong) {
-        GiveawayRegistry instance = GiveawayRegistry.getInstance();
-        Giveaway giveaway = instance.getGiveaway(guildIdLong);
-
+    public static EmbedBuilder giveawayEnd(final String winners, int countWinners, final long guildId) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
+        GiveawayRegistry instance = GiveawayRegistry.getInstance();
+        Giveaway giveaway = instance.getGiveaway(guildId);
 
         if (giveaway != null) {
-            long idUserWhoCreateGiveaway = giveaway.getUserIdLong();
-            LOGGER.info("\nEmbedBuilder: " +
-                    "\nwinners: " + winners +
-                    "\ncountWinner: " + countWinner
-                    + "\nguildIdLong: " + guildIdLong);
+            String title = giveaway.getTitle();
+            long createdUserId = giveaway.getUserIdLong();
 
             embedBuilder.setColor(Color.GREEN);
-            embedBuilder.setTitle(giveaway.getTitle());
+            embedBuilder.setTitle(title);
 
-            if (countWinner == 1) {
-                String giftWinner = String.format(jsonParsers.getLocale("gift_winner", String.valueOf(guildIdLong)), winners);
+            if (countWinners == 1) {
+                String giftWinner = String.format(jsonParsers.getLocale("gift_winner", String.valueOf(guildId)), winners);
                 embedBuilder.appendDescription(giftWinner);
             } else {
-                String giftWinners = String.format(jsonParsers.getLocale("gift_winners", String.valueOf(guildIdLong)), winners);
+                String giftWinners = String.format(jsonParsers.getLocale("gift_winners", String.valueOf(guildId)), winners);
                 embedBuilder.appendDescription(giftWinners);
             }
 
-            String footer = countWinner + " " + GiftHelper.setEndingWord(countWinner, guildIdLong);
+            String footer = countWinners + " " + GiftHelper.setEndingWord(countWinners, guildId);
             embedBuilder.setTimestamp(Instant.now());
-            String giftEnds = String.format(jsonParsers.getLocale("gift_ends", String.valueOf(guildIdLong)), footer);
+            String giftEnds = String.format(jsonParsers.getLocale("gift_ends", String.valueOf(guildId)), footer);
             embedBuilder.setFooter(giftEnds);
 
             if (giveaway.isForSpecificRole()) {
                 Long roleId = giveaway.getRoleId();
-                String giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", String.valueOf(guildIdLong)), roleId);
+                String giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", String.valueOf(guildId)), roleId);
 
                 embedBuilder.appendDescription(giftOnlyFor);
             }
             long giveawayIdLong = giveaway.getMessageId();
 
-            String hostedBy = String.format("\nHosted by: <@%s>", idUserWhoCreateGiveaway);
+            String hostedBy = String.format("\nHosted by: <@%s>", createdUserId);
             String giveawayIdDescription = String.format("\nGiveaway ID: `%s`", giveawayIdLong);
 
             embedBuilder.appendDescription(hostedBy);
