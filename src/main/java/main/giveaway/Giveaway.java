@@ -313,14 +313,7 @@ public class Giveaway {
         }
         List<Participants> participants = participantsRepository.getParticipantsByGuildIdLong(guildId); //TODO: Native use may be
         if (participants.isEmpty()) throw new Exception("participants is Empty");
-        LOGGER.info("\nlistUsersHash size: " + listUsersHash.size());
-        LOGGER.info("\nparticipantsJSON size: " + participants.size());
-
-        if (listUsersHash.size() != participants.size()) {
-            throw new Exception(
-                    "listUsersHash.size(): " + listUsersHash.size() +
-                            " != participants.size(): " + participants.size());
-        }
+        LOGGER.info("\nparticipants size: " + participants.size());
 
         StringBuilder stringBuilder = new StringBuilder();
         for (Participants participant : participants) {
