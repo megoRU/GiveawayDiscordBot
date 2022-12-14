@@ -455,26 +455,23 @@ public class Giveaway {
     private class StopGiveawayThread implements Runnable {
 
         public void run() {
-            new Timer().scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    try {
-                        if (!GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
-                            for (Future<?> futureTask : futureTasks) {
-                                futureTask.cancel(true);
-                                futureTasks.clear();
-                            }
-                            return;
+            try {
+                while (true) {
+                    if (!GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
+                        for (Future<?> futureTask : futureTasks) {
+                            futureTask.cancel(true);
+                            futureTasks.clear();
                         }
-                        stopGiveaway(countWinners);
-                        Thread.sleep(10000);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    } finally {
-                        futureTasks.clear();
+                        return;
                     }
+                    stopGiveaway(countWinners);
+                    Thread.sleep(10000);
                 }
-            }, 1000, 10000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                futureTasks.clear();
+            }
         }
     }
 
