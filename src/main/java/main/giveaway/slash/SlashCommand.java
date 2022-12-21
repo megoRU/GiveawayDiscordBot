@@ -394,7 +394,6 @@ public class SlashCommand extends ListenerAdapter {
                         } catch (Exception ignored) {
                         }
 
-
                         members.stream()
                                 .filter(member -> member.getRoles().contains(role))
                                 .map(Member::getUser)

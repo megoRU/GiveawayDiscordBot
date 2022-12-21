@@ -275,7 +275,11 @@ public class Giveaway {
                         if (poll != null) {
                             stringBuilder
                                     .append(stringBuilder.length() == 0 ? "(" : ", (")
-                                    .append("'").append(poll.getNickName()).append("', ")
+                                    .append("'").append(poll.getNickName()
+                                            .replaceAll("'", "")
+                                            .replaceAll("\"", "")
+                                            .replaceAll("`", ""))
+                                    .append("', ")
                                     .append(poll.getUserIdLong()).append(", ")
                                     .append(guildId).append(", ")
                                     .append("'").append(poll.getNickNameTag()).append("')");
