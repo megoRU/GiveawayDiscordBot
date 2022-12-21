@@ -282,7 +282,11 @@ public class Giveaway {
                                     .append("', ")
                                     .append(poll.getUserIdLong()).append(", ")
                                     .append(guildId).append(", ")
-                                    .append("'").append(poll.getNickNameTag()).append("')");
+                                    .append("'").append(poll.getNickNameTag()
+                                            .replaceAll("'", "")
+                                            .replaceAll("\"", "")
+                                            .replaceAll("`", ""))
+                                    .append("')");
                         }
                     }
 
