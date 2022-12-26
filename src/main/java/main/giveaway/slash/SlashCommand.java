@@ -407,20 +407,20 @@ public class SlashCommand extends ListenerAdapter {
         if (event.getName().equals("help")) {
 
             EmbedBuilder info = new EmbedBuilder();
-            info.setColor(Color.decode("#9900FF")); //Фиолетовый
+            info.setColor(Color.GREEN);
             info.setTitle("Giveaway");
             info.addField("Slash Commands",
                     """
-                            </language:941286272390037534>
-                            </start:941286272390037535>
-                            </stop:941286272390037536>
-                            </list:941286272390037538>
-                            </participants:952572018077892638>
-                            </reroll:957624805446799452>
-                            </check-bot-permission:1009065886335914054>
-                            </change:1027901550456225842>
-                            </patreon:945299399855210527>
-                            </predefined:1049647289779630080>
+                            </start:941286272390037535> - Start Giveaway with lots of parameters
+                            </stop:941286272390037536> - Stop Giveaway
+                            </reroll:957624805446799452> - Reroll one winner by Giveaway ID
+                            </predefined:1049647289779630080> - Gather participants and immediately hold a drawing for a certain @Role.
+                            </list:941286272390037538> - List of participants
+                            </language:941286272390037534> - Setup Bot Language
+                            </participants:952572018077892638> - Get a list of participants by the Giveaway ID
+                            </check-bot-permission:1009065886335914054> - Check bot permissions
+                            </change:1027901550456225842> - Change the active Giveaway time
+                            </patreon:945299399855210527> - Patreon
                              """, false);
             String messagesEventsLinks = jsonParsers.getLocale("messages_events_links", guildId);
             String messagesEventsSite = jsonParsers.getLocale("messages_events_site", guildId);
