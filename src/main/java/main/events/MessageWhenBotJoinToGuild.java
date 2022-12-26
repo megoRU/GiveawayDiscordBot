@@ -7,6 +7,7 @@ import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.LanguageRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.unions.DefaultGuildChannelUnion;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -32,22 +33,6 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
     @Override
     public void onGuildJoin(@NotNull GuildJoinEvent event) {
         try {
-            DefaultGuildChannelUnion defaultChannel = event.getGuild().getDefaultChannel();
-
-            if (defaultChannel != null) {
-                boolean hasPermissionSend = event.getGuild().getSelfMember().hasPermission(event.getGuild().getDefaultChannel(), Permission.MESSAGE_SEND);
-                boolean hasPermissionEmbedded = event.getGuild().getSelfMember().hasPermission(event.getGuild().getDefaultChannel(), Permission.MESSAGE_EMBED_LINKS);
-                boolean hasPermissionView = event.getGuild().getSelfMember().hasPermission(event.getGuild().getDefaultChannel(), Permission.VIEW_CHANNEL);
-
-                if (!hasPermissionSend ||
-                        !hasPermissionEmbedded ||
-                        !hasPermissionView) {
-                    return;
-                }
-            } else {
-                return;
-            }
-
             EmbedBuilder welcome = new EmbedBuilder();
             welcome.setColor(Color.GREEN);
             welcome.addField("Bot Language", "Use: </language:941286272390037534>", false);
@@ -79,12 +64,22 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
                         .withEmoji(Emoji.fromUnicode("U+1F1F7U+1F1FA")));
             }
 
-            if (defaultChannel instanceof TextChannel) {
-                defaultChannel
-                        .asTextChannel()
-                        .sendMessageEmbeds(welcome.build())
-                        .setActionRow(buttons)
-                        .queue();
+            DefaultGuildChannelUnion defaultChannel = event.getGuild().getDefaultChannel();
+
+            if (defaultChannel != null) {
+                if (defaultChannel.getType() == ChannelType.TEXT) {
+                    TextChannel textChannel = defaultChannel.asTextChannel();
+                    if (event.getGuild().getSelfMember().hasPermission(textChannel,
+                            Permission.MESSAGE_SEND,
+                            Permission.VIEW_CHANNEL,
+                            Permission.MESSAGE_EMBED_LINKS)) {
+                        defaultChannel
+                                .asTextChannel()
+                                .sendMessageEmbeds(welcome.build())
+                                .setActionRow(buttons)
+                                .queue();
+                    }
+                }
             }
         } catch (Exception e) {
             System.out.println("Скорее всего нет `DefaultChannel`!");

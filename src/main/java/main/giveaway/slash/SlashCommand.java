@@ -418,7 +418,6 @@ public class SlashCommand extends ListenerAdapter {
                             </participants:952572018077892638>
                             </reroll:957624805446799452>
                             </check-bot-permission:1009065886335914054>
-                            </notifications:1011570005890056262>
                             </change:1027901550456225842>
                             </patreon:945299399855210527>
                             </predefined:1049647289779630080>
