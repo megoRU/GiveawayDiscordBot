@@ -13,6 +13,7 @@ public interface EditMessage {
             if (guildById != null) {
                 GuildMessageChannel textChannelById = guildById.getTextChannelById(textChannel);
                 if (textChannelById == null) textChannelById = guildById.getNewsChannelById(textChannel);
+                if (textChannelById == null) textChannelById = guildById.getThreadChannelById(textChannel);
                 if (textChannelById != null) {
                     textChannelById
                             .editMessageEmbedsById(messageId, embedBuilder)

@@ -23,9 +23,6 @@ public class ActiveGiveaways {
     @Column(name = "guild_long_id", nullable = false)
     private Long guildLongId;
 
-    @Column(name = "message_id_long", nullable = false)
-    private Long messageIdLong;
-
     @Column(name = "channel_id_long", nullable = false)
     private Long channelIdLong;
 
@@ -38,15 +35,19 @@ public class ActiveGiveaways {
     @Column(name = "giveaway_title")
     private String giveawayTitle;
 
-    @Column(name = "role_id_long")
-    private Long roleIdLong;
+    @Column(name = "message_id_long", nullable = false)
+    private Long messageIdLong;
 
     @Column(name = "is_for_specific_role")
     private Boolean isForSpecificRole;
 
-    @Column(name = "url_image")
-    private String urlImage;
+    @Column(name = "role_id_long")
+    private Long roleIdLong;
 
     @Column(name = "id_user_who_create_giveaway", nullable = false)
     private Long idUserWhoCreateGiveaway;
+
+    @Column(name = "url_image")
+    private String urlImage;
+
 }
