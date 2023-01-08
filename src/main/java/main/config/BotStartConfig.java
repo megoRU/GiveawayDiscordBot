@@ -471,13 +471,13 @@ public class BotStartConfig {
 
                                 if (isForSpecificRole) {
                                     try {
-                                        Map<String, User> userMapTemp = new HashMap<>(userList); //bad practice but it`s work
+                                        Map<String, User> localUserMap = new HashMap<>(userList); //bad practice but it`s work
                                         Role roleGiveaway = jda.getRoleById(giveawayData.getRoleId());
-                                        for (Map.Entry<String, User> entry : userMapTemp.entrySet()) {
+                                        for (Map.Entry<String, User> entry : localUserMap.entrySet()) {
                                             Guild guild = jda.getGuildById(guildIdLong);
                                             if (guild != null) {
                                                 try {
-                                                    Member member = guild.retrieveMember(entry.getValue()).complete();
+                                                    Member member = guild.retrieveMemberById(entry.getKey()).complete();
                                                     if (member != null) {
                                                         boolean contains = member.getRoles().contains(roleGiveaway);
                                                         if (!contains) {
@@ -485,8 +485,8 @@ public class BotStartConfig {
                                                         }
                                                     }
                                                 } catch (Exception e) {
+                                                    //Если пользователя нет в Гильдии удаляем из списка
                                                     if (e.getMessage().contains("10007: Unknown Member")) {
-                                                        System.out.println("10007: Unknown Member");
                                                         userList.remove(entry.getKey());
                                                     } else {
                                                         e.printStackTrace();
@@ -521,7 +521,7 @@ public class BotStartConfig {
                 }
             }
             try {
-                //Что это такое и для чего?
+                //Для чего это я писал?
                 Giveaway.GiveawayTimerStorage giveawayTimer = GiveawayRegistry.getInstance().getGiveawayTimer(guildIdLong);
                 if (giveawayTimer != null) {
                     StopGiveawayByTimer stopGiveawayByTimer = giveawayTimer.stopGiveawayByTimer();
