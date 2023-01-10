@@ -520,7 +520,7 @@ public class SlashCommand extends ListenerAdapter {
         if (event.getName().equals("reroll")) {
 
             event.deferReply().queue();
-            String id = event.getOption("id", OptionMapping::getAsString);
+            String id = event.getOption("giveaway_id", OptionMapping::getAsString);
 
             if (id != null) {
                 if (!id.matches("\\d+")) {
@@ -591,7 +591,7 @@ public class SlashCommand extends ListenerAdapter {
         if (event.getName().equals("participants")) {
 
             event.deferReply().setEphemeral(true).queue();
-            String id = event.getOption("id", OptionMapping::getAsString);
+            String id = event.getOption("giveaway_id", OptionMapping::getAsString);
             try {
                 if (id != null) {
                     File file = new File("participants.json");
