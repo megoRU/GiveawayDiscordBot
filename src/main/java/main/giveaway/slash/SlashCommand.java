@@ -326,7 +326,6 @@ public class SlashCommand extends ListenerAdapter {
                 return;
             }
 
-            event.deferReply().queue();
             ChannelType channelType = event.getChannelType();
             GuildMessageChannel textChannel;
 
@@ -335,7 +334,7 @@ public class SlashCommand extends ListenerAdapter {
             } else if (channelType == ChannelType.TEXT) {
                 textChannel = event.getChannel().asTextChannel();
             } else {
-                event.getHook().sendMessage("TextChannel is `NULL`").queue();
+                event.reply("TextChannel is `NULL`").queue();
                 return;
             }
 
@@ -346,20 +345,19 @@ public class SlashCommand extends ListenerAdapter {
             if (role != null) {
                 if (role.getId().equals(guildId)) {
                     String notificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_everyone", guildId), "@everyone");
-                    event.getHook().sendMessage(notificationForThisRole).queue();
-                    return;
+                    event.reply(notificationForThisRole).queue();
                 }
             } else {
-                event.getHook().sendMessage("Role is Null").queue();
+                event.reply("Role is Null").queue();
                 return;
             }
 
             if (countString == null) {
-                event.getHook().sendMessage("Count is Null").queue();
+                event.reply("Count is Null").queue();
                 return;
             } else {
                 if (!countString.matches("[0-9]+")) {
-                    event.getHook().sendMessage("Count not a number").queue();
+                    event.reply("Count not a number").queue();
                     return;
                 }
             }
@@ -373,6 +371,7 @@ public class SlashCommand extends ListenerAdapter {
 
             GiveawayRegistry.getInstance().putGift(guildIdLong, giveaway);
 
+            //TODO: Возможно будет проблема когда Guild слишком большая
             giveaway.startGiveaway(
                     textChannel,
                     title,
@@ -386,20 +385,28 @@ public class SlashCommand extends ListenerAdapter {
             Task<List<Member>> listTask = event.getGuild().loadMembers()
                     .onSuccess(members -> {
                         try {
-                            String sendSlashMessage = String.format(jsonParsers.getLocale("send_slash_message", guildId), event.getChannel().getId());
-                            event.getHook()
-                                    .sendMessage(sendSlashMessage)
-                                    .flatMap(Message::delete)
-                                    .queue();
+                            if (!event.isAcknowledged()) {
+                                String sendSlashMessage = String.format(jsonParsers.getLocale("send_slash_message", guildId), event.getChannel().getId());
+                                event.reply(sendSlashMessage)
+                                        .delay(5, TimeUnit.SECONDS)
+                                        .flatMap(InteractionHook::deleteOriginal)
+                                        .queue();
+                            }
                         } catch (Exception ignored) {
                         }
 
-                        members.stream()
-                                .filter(member -> member.getRoles().contains(role))
-                                .map(Member::getUser)
-                                .filter(user -> !user.isBot())
-                                .forEach(giveaway::addUser);
-
+                        if (role.getIdLong() == guildIdLong) {
+                            members.stream()
+                                    .map(Member::getUser)
+                                    .filter(user -> !user.isBot())
+                                    .forEach(giveaway::addUser);
+                        } else {
+                            members.stream()
+                                    .filter(member -> member.getRoles().contains(role))
+                                    .map(Member::getUser)
+                                    .filter(user -> !user.isBot())
+                                    .forEach(giveaway::addUser);
+                        }
                     });
             listTask.isStarted();
         }

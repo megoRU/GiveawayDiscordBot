@@ -7,11 +7,9 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import java.awt.*;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.logging.Logger;
 
 public class GiveawayEmbedUtils {
 
-    private static final Logger LOGGER = Logger.getLogger(GiveawayEmbedUtils.class.getName());
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     public static EmbedBuilder giveawayPattern(final long guildId) {
@@ -46,7 +44,13 @@ public class GiveawayEmbedUtils {
 
             //Giveaway only for Role
             if (isForSpecificRole) {
-                String giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", String.valueOf(guildId)), role);
+                String giftOnlyFor;
+                if (role == guildId) {
+                    giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", String.valueOf(guildId)), role)
+                            .replace("<@&" + guildId + ">", "@everyone");
+                } else {
+                    giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", String.valueOf(guildId)), role);
+                }
                 embedBuilder.appendDescription(giftOnlyFor);
             }
             
@@ -96,7 +100,14 @@ public class GiveawayEmbedUtils {
 
             if (giveaway.isForSpecificRole()) {
                 Long roleId = giveaway.getRoleId();
-                String giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", String.valueOf(guildId)), roleId);
+                String giftOnlyFor;
+
+                if (roleId == guildId) {
+                    giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", String.valueOf(guildId)), roleId)
+                            .replaceAll("<@&" + guildId + ">", "@everyone");
+                } else {
+                    giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", String.valueOf(guildId)), roleId);
+                }
 
                 embedBuilder.appendDescription(giftOnlyFor);
             }
