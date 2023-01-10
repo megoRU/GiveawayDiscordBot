@@ -31,6 +31,25 @@ public interface SenderMessage {
         }
     }
 
+    static void sendMessage(MessageEmbed embedBuilder, String messageContent, Long guildId, Long textChannel) {
+        try {
+            Guild guildById = BotStartConfig.getJda().getGuildById(guildId);
+            if (guildById != null) {
+                GuildMessageChannel textChannelById = guildById.getTextChannelById(textChannel);
+                if (textChannelById == null) textChannelById = guildById.getNewsChannelById(textChannel);
+                if (textChannelById == null) textChannelById = guildById.getThreadChannelById(textChannel);
+                if (textChannelById != null) {
+                    textChannelById
+                            .sendMessageEmbeds(embedBuilder)
+                            .setContent(messageContent)
+                            .queue();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     static void sendMessage(MessageEmbed embedBuilder, Long guildId, Long textChannel, List<Button> buttons) {
         try {
             Guild guildById = BotStartConfig.getJda().getGuildById(guildId);
