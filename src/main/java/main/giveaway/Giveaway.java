@@ -393,32 +393,27 @@ public class Giveaway {
             return;
         }
 
-        EmbedBuilder winners = new EmbedBuilder();
-        winners.setColor(Color.GREEN);
+        EmbedBuilder urlEmbedded = new EmbedBuilder();
+        urlEmbedded.setColor(Color.GREEN);
         String url = URLS.getDiscordUrlMessage(this.guildId, this.textChannelId, messageId);
         String winnerArray = Arrays.toString(uniqueWinners.toArray())
                 .replaceAll("\\[", "")
                 .replaceAll("]", "");
 
+        String winnersContent;
         if (uniqueWinners.size() == 1) {
-            String giftCongratulations = String.format(jsonParsers.getLocale("gift_congratulations", String.valueOf(guildId)), url, winnerArray);
-            winners.setDescription(giftCongratulations);
-
-            giftHelper.editMessage(
-                    GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId),
-                    this.guildId,
-                    textChannelId);
+            winnersContent = String.format(jsonParsers.getLocale("gift_congratulations", String.valueOf(guildId)), winnerArray);
+            String giftUrl = String.format(jsonParsers.getLocale("gift_url", String.valueOf(guildId)), url);
+            urlEmbedded.setDescription(giftUrl);
+            giftHelper.editMessage(GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId), this.guildId, textChannelId);
         } else {
-            String giftCongratulationsMany = String.format(jsonParsers.getLocale("gift_congratulations_many", String.valueOf(guildId)), url, winnerArray);
-            winners.setDescription(giftCongratulationsMany);
-
-            giftHelper.editMessage(
-                    GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId),
-                    this.guildId,
-                    textChannelId);
+            winnersContent = String.format(jsonParsers.getLocale("gift_congratulations_many", String.valueOf(guildId)), winnerArray);
+            String giftUrl = String.format(jsonParsers.getLocale("gift_url", String.valueOf(guildId)), url);
+            urlEmbedded.setDescription(giftUrl);
+            giftHelper.editMessage(GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId), this.guildId, textChannelId);
         }
 
-        SenderMessage.sendMessage(winners.build(), this.guildId, textChannelId);
+        SenderMessage.sendMessage(urlEmbedded.build(), winnersContent, this.guildId, textChannelId);
 
         listUsersRepository.saveAllParticipantsToUserList(guildId);
         activeGiveawayRepository.deleteActiveGiveaways(guildId);
