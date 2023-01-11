@@ -145,7 +145,7 @@ public class BotStartConfig {
             System.out.println("IsDevMode: " + Config.isIsDev());
 
             //Обновить команды
-//            updateSlashCommands();
+            updateSlashCommands();
             System.out.println("20:14");
         } catch (Exception e) {
             e.printStackTrace();
@@ -158,8 +158,8 @@ public class BotStartConfig {
 
             //Get participants
             List<OptionData> participants = new ArrayList<>();
-            participants.add(new OptionData(STRING, "id", "Giveaway ID")
-                    .setName("id")
+            participants.add(new OptionData(STRING, "giveaway_id", "Giveaway ID")
+                    .setName("giveaway_id")
                     .setRequired(true)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway ID"));
 
@@ -236,8 +236,8 @@ public class BotStartConfig {
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: 5s, 20m, 10h, 1d. Или: 2021.11.16 16:00. Только в этом стиле и UTC ±0"));
 
             List<OptionData> reroll = new ArrayList<>();
-            reroll.add(new OptionData(STRING, "id", "Giveaway ID")
-                    .setName("id")
+            reroll.add(new OptionData(STRING, "giveaway_id", "Giveaway ID")
+                    .setName("giveaway_id")
                     .setRequired(true).setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway ID"));
 
             List<OptionData> botPermissions = new ArrayList<>();
