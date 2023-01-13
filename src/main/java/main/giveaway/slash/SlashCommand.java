@@ -40,6 +40,10 @@ import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -69,6 +73,7 @@ public class SlashCommand extends ListenerAdapter {
     */
     private static final String TIME_REGEX = "(\\d{4}.\\d{2}.\\d{2}\\s\\d{2}:\\d{2})|(\\d{1,2}[smhdсмдч]|\\s)+";
     public static final String ISO_TIME_REGEX = "^\\d{4}.\\d{2}.\\d{2}\\s\\d{2}:\\d{2}$"; //2021.11.16 16:00
+    public static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
@@ -146,10 +151,9 @@ public class SlashCommand extends ListenerAdapter {
 
                     int count = 1;
                     String countString = event.getOption("count", OptionMapping::getAsString);
-                    if (countString != null) {
-                        count = Integer.parseInt(countString);
-                    }
+                    if (countString != null) count = Integer.parseInt(countString);
                     String time = event.getOption("duration", OptionMapping::getAsString);
+                    if (time != null) time = time.replaceAll("-", ".");
                     Long role = event.getOption("mention", OptionMapping::getAsLong);
                     Message.Attachment image = event.getOption("image", OptionMapping::getAsAttachment);
                     String urlImage = null;
@@ -177,6 +181,10 @@ public class SlashCommand extends ListenerAdapter {
                         embedBuilder.setDescription(slashError256);
                         event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
                         return;
+                    }
+
+                    if (time != null && time.matches(SlashCommand.ISO_TIME_REGEX)) {
+                        if (timeHandler(event, guildId, time)) return;
                     }
 
                     if (role == null && isOnlyForSpecificRole) {
@@ -565,70 +573,96 @@ public class SlashCommand extends ListenerAdapter {
         }
 
         if (event.getName().equals("change")) {
-            event.deferReply().queue();
             Giveaway giveaway = GiveawayRegistry.getInstance().getGiveaway(guildIdLong);
             if (giveaway == null) {
                 String slashStopNoHas = jsonParsers.getLocale("slash_stop_no_has", guildId);
-                event.getHook().sendMessage(slashStopNoHas).setEphemeral(true).queue();
+                event.reply(slashStopNoHas).setEphemeral(true).queue();
                 return;
             }
             String time = event.getOption("duration", OptionMapping::getAsString);
             if (time != null) {
-                long channelId = giveaway.getTextChannelId();
-                long messageId = giveaway.getMessageId();
+                if (time.matches(SlashCommand.ISO_TIME_REGEX)) {
+                    if (timeHandler(event, guildId, time)) return;
 
-                Timestamp timestamp = giveaway.updateTime(time);
-                activeGiveawayRepository.updateGiveawayTime(guildIdLong, timestamp);
+                    long channelId = giveaway.getTextChannelId();
+                    long messageId = giveaway.getMessageId();
 
-                EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayPattern(guildIdLong);
-                EditMessage.edit(embedBuilder.build(), guildIdLong, channelId, messageId);
-                String changeDuration = jsonParsers.getLocale("change_duration", guildId);
-                event.getHook().sendMessage(changeDuration).setEphemeral(true).queue();
-            }
-            return;
-        }
+                    Timestamp timestamp = giveaway.updateTime(time);
 
-        if (event.getName().equals("participants")) {
+                    String changeDuration = jsonParsers.getLocale("change_duration", guildId);
+                    event.reply(changeDuration).setEphemeral(true).queue();
 
-            event.deferReply().setEphemeral(true).queue();
-            String id = event.getOption("giveaway_id", OptionMapping::getAsString);
-            try {
-                if (id != null) {
-                    File file = new File("participants.json");
-                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                    List<ListUsers> listUsers = listUsersRepository.findAllByGiveawayId(Long.parseLong(id), userIdLong);
-                    if (listUsers.isEmpty()) {
-                        String noAccessReroll = jsonParsers.getLocale("no_access_reroll", guildId);
-                        event.getHook().sendMessage(noAccessReroll).setEphemeral(true).queue();
-                        return;
-                    }
-                    String json = gson.toJson(listUsers);
-                    // Создание объекта FileWriter
-                    FileWriter writer = new FileWriter(file);
-                    // Запись содержимого в файл
-                    writer.write(json);
-                    writer.flush();
-                    writer.close();
-                    FileUpload fileUpload = FileUpload.fromData(file);
-                    event.getHook().sendFiles(fileUpload).setEphemeral(true).queue();
-                } else {
-                    event.getHook().sendMessage("Options is null").setEphemeral(true).queue();
+                    activeGiveawayRepository.updateGiveawayTime(guildIdLong, timestamp);
+                    EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayPattern(guildIdLong);
+                    EditMessage.edit(embedBuilder.build(), guildIdLong, channelId, messageId);
                 }
-            } catch (Exception exception) {
-                Exceptions.handle(exception, event.getHook());
                 return;
             }
-            return;
-        }
 
-        if (event.getName().equals("patreon")) {
+            if (event.getName().equals("participants")) {
 
-            EmbedBuilder patreon = new EmbedBuilder();
-            patreon.setColor(Color.YELLOW);
-            patreon.setTitle("Patreon", "https://www.patreon.com/ghbots");
-            patreon.setDescription("If you want to support the work of our bots." +
-                    "\nYou can do it here click: [here](https://www.patreon.com/ghbots)");
-            event.replyEmbeds(patreon.build()).setEphemeral(true).queue();
+                event.deferReply().setEphemeral(true).queue();
+                String id = event.getOption("giveaway_id", OptionMapping::getAsString);
+                try {
+                    if (id != null) {
+                        File file = new File("participants.json");
+                        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                        List<ListUsers> listUsers = listUsersRepository.findAllByGiveawayId(Long.parseLong(id), userIdLong);
+                        if (listUsers.isEmpty()) {
+                            String noAccessReroll = jsonParsers.getLocale("no_access_reroll", guildId);
+                            event.getHook().sendMessage(noAccessReroll).setEphemeral(true).queue();
+                            return;
+                        }
+                        String json = gson.toJson(listUsers);
+                        // Создание объекта FileWriter
+                        FileWriter writer = new FileWriter(file);
+                        // Запись содержимого в файл
+                        writer.write(json);
+                        writer.flush();
+                        writer.close();
+                        FileUpload fileUpload = FileUpload.fromData(file);
+                        event.getHook().sendFiles(fileUpload).setEphemeral(true).queue();
+                    } else {
+                        event.getHook().sendMessage("Options is null").setEphemeral(true).queue();
+                    }
+                } catch (Exception exception) {
+                    Exceptions.handle(exception, event.getHook());
+                    return;
+                }
+                return;
+            }
+
+            if (event.getName().equals("patreon")) {
+
+                EmbedBuilder patreon = new EmbedBuilder();
+                patreon.setColor(Color.YELLOW);
+                patreon.setTitle("Patreon", "https://www.patreon.com/ghbots");
+                patreon.setDescription("If you want to support the work of our bots." +
+                        "\nYou can do it here click: [here](https://www.patreon.com/ghbots)");
+                event.replyEmbeds(patreon.build()).setEphemeral(true).queue();
+            }
         }
+    }
+
+    private boolean timeHandler(@NotNull SlashCommandInteractionEvent event, String guildId, String time) {
+        LocalDateTime localDateTime = LocalDateTime.parse(time, formatter);
+        LocalDateTime now = Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime();
+        if (localDateTime.isBefore(now)) {
+            String wrongDate = jsonParsers.getLocale("wrong_date", (guildId));
+            String youWroteDate = jsonParsers.getLocale("you_wrote_date", (guildId));
+
+            String format = String.format(youWroteDate,
+                    localDateTime.toString().replace("T", " "),
+                    now.toString().substring(0, 16).replace("T", " "));
+
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.setColor(Color.RED);
+            builder.setTitle(wrongDate);
+            builder.setDescription(format);
+
+            event.replyEmbeds(builder.build()).queue();
+            return true;
+        }
+        return false;
     }
 }

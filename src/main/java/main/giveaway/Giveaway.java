@@ -30,7 +30,6 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.*;
@@ -41,7 +40,6 @@ import java.util.stream.Stream;
 public class Giveaway {
 
     private static final Logger LOGGER = Logger.getLogger(Giveaway.class.getName());
-    public static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -130,27 +128,10 @@ public class Giveaway {
         LocalDateTime localDateTime;
 
         if (time.matches(SlashCommand.ISO_TIME_REGEX)) {
-            localDateTime = LocalDateTime.parse(time, formatter);
+            localDateTime = LocalDateTime.parse(time, SlashCommand.formatter);
         } else {
             long seconds = GiftHelper.getSeconds(time);
             localDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).plusSeconds(seconds);
-        }
-
-        if (localDateTime.isBefore(Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime())) {
-            LocalDateTime localDateTimeThrow = Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime();
-            String wrongDate = jsonParsers.getLocale("wrong_date", String.valueOf(guildId));
-
-            String format = String.format("Time in the past: `%s`\nNow:`%s`",
-                    localDateTime.toString().replace("T", " "),
-                    localDateTimeThrow.toString().substring(0, 16).replace("T", " "));
-
-            EmbedBuilder embedBuilder = new EmbedBuilder();
-            embedBuilder.setColor(Color.RED);
-            embedBuilder.setTitle(wrongDate);
-            embedBuilder.setDescription(format);
-
-            SenderMessage.sendMessage(embedBuilder.build(), guildId, textChannelId);
-            throw new IllegalArgumentException(format);
         }
 
         long toEpochSecond = localDateTime.toEpochSecond(offset);
