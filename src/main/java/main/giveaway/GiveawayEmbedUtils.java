@@ -114,7 +114,7 @@ public class GiveawayEmbedUtils {
             long giveawayIdLong = giveaway.getMessageId();
 
             String hostedBy = String.format("\nHosted by: <@%s>", createdUserId);
-            String giveawayIdDescription = String.format("\nGiveaway ID: `%s`", giveawayIdLong);
+            String giveawayIdDescription = String.format("\n\nGiveaway ID: `%s`", giveawayIdLong);
 
             embedBuilder.appendDescription(hostedBy);
             embedBuilder.appendDescription(giveawayIdDescription);
