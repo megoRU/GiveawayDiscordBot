@@ -4,6 +4,7 @@ import main.giveaway.Giveaway;
 import main.giveaway.GiveawayEmbedUtils;
 import main.giveaway.GiveawayRegistry;
 import main.giveaway.impl.Formats;
+import main.giveaway.impl.TimeHandler;
 import main.jsonparser.JSONParsers;
 import main.messagesevents.EditMessage;
 import main.model.repository.ActiveGiveawayRepository;
@@ -14,11 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.awt.*;
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Objects;
 
 @Service
@@ -47,7 +44,7 @@ public class ChangeCommand {
         String time = event.getOption("duration", OptionMapping::getAsString);
         if (time != null) {
             if (time.matches(Formats.ISO_TIME_REGEX)) {
-                if (timeHandler(event, guildId, time)) return;
+                if (TimeHandler.get(event, guildId, time)) return;
 
                 long channelId = giveaway.getTextChannelId();
                 long messageId = giveaway.getMessageId();
@@ -62,27 +59,5 @@ public class ChangeCommand {
                 EditMessage.edit(embedBuilder.build(), guildIdLong, channelId, messageId);
             }
         }
-    }
-
-    private boolean timeHandler(@NotNull SlashCommandInteractionEvent event, String guildId, String time) {
-        LocalDateTime localDateTime = LocalDateTime.parse(time, Formats.FORMATTER);
-        LocalDateTime now = Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime();
-        if (localDateTime.isBefore(now)) {
-            String wrongDate = jsonParsers.getLocale("wrong_date", (guildId));
-            String youWroteDate = jsonParsers.getLocale("you_wrote_date", (guildId));
-
-            String format = String.format(youWroteDate,
-                    localDateTime.toString().replace("T", " "),
-                    now.toString().substring(0, 16).replace("T", " "));
-
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.setColor(Color.RED);
-            builder.setTitle(wrongDate);
-            builder.setDescription(format);
-
-            event.replyEmbeds(builder.build()).queue();
-            return true;
-        }
-        return false;
     }
 }

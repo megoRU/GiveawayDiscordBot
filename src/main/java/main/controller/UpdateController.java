@@ -68,6 +68,12 @@ public class UpdateController {
     private void slashEvent(@NotNull SlashCommandInteractionEvent event) {
         if (event.getUser().isBot()) return;
 
+        if (event.getGuild() != null && event.getChannelType().isThread()) {
+            LanguageHandler languageHandler = new LanguageHandler();
+            languageHandler.handler(event, "start_in_thread");
+            return;
+        }
+
         switch (event.getName()) {
             case "help" -> {
                 HelpCommand helpCommand = new HelpCommand();
@@ -109,6 +115,10 @@ public class UpdateController {
             case "patreon" -> {
                 PatreonCommand patreonCommand = new PatreonCommand();
                 patreonCommand.patreon(event);
+            }
+            case "check-bot-permission" -> {
+                CheckBot checkBot = new CheckBot();
+                checkBot.check(event);
             }
         }
     }
