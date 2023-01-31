@@ -1,6 +1,6 @@
 package main.messagesevents;
 
-import main.config.BotStartConfig;
+import main.config.BotStart;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -15,7 +15,7 @@ public interface SenderMessage {
 
     static void sendMessage(MessageEmbed embedBuilder, Long guildId, Long textChannel) {
         try {
-            Guild guildById = BotStartConfig.getJda().getGuildById(guildId);
+            Guild guildById = BotStart.getJda().getGuildById(guildId);
             if (guildById != null) {
                 GuildMessageChannel textChannelById = guildById.getTextChannelById(textChannel);
                 if (textChannelById == null) textChannelById = guildById.getNewsChannelById(textChannel);
@@ -33,7 +33,7 @@ public interface SenderMessage {
 
     static void sendMessage(MessageEmbed embedBuilder, String messageContent, Long guildId, Long textChannel) {
         try {
-            Guild guildById = BotStartConfig.getJda().getGuildById(guildId);
+            Guild guildById = BotStart.getJda().getGuildById(guildId);
             if (guildById != null) {
                 GuildMessageChannel textChannelById = guildById.getTextChannelById(textChannel);
                 if (textChannelById == null) textChannelById = guildById.getNewsChannelById(textChannel);
@@ -52,7 +52,7 @@ public interface SenderMessage {
 
     static void sendMessage(MessageEmbed embedBuilder, Long guildId, Long textChannel, List<Button> buttons) {
         try {
-            Guild guildById = BotStartConfig.getJda().getGuildById(guildId);
+            Guild guildById = BotStart.getJda().getGuildById(guildId);
             if (guildById != null) {
                 GuildMessageChannel textChannelById = guildById.getTextChannelById(textChannel);
                 if (textChannelById == null) textChannelById = guildById.getNewsChannelById(textChannel);
