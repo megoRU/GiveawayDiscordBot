@@ -1,12 +1,12 @@
 package main.core.events;
 
+import main.controller.UpdateController;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayEmbedUtils;
 import main.giveaway.GiveawayRegistry;
 import main.giveaway.impl.Formats;
 import main.giveaway.impl.TimeHandler;
 import main.jsonparser.JSONParsers;
-import main.messagesevents.EditMessage;
 import main.model.repository.ActiveGiveawayRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -30,7 +30,7 @@ public class ChangeCommand {
         this.activeGiveawayRepository = activeGiveawayRepository;
     }
 
-    public void change(@NotNull SlashCommandInteractionEvent event) {
+    public void change(@NotNull SlashCommandInteractionEvent event, UpdateController updateController) {
 
         var guildIdLong = Objects.requireNonNull(event.getGuild()).getIdLong();
         var guildId = Objects.requireNonNull(event.getGuild()).getId();
@@ -56,7 +56,8 @@ public class ChangeCommand {
 
                 activeGiveawayRepository.updateGiveawayTime(guildIdLong, timestamp);
                 EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayPattern(guildIdLong);
-                EditMessage.edit(embedBuilder.build(), guildIdLong, channelId, messageId);
+
+                updateController.setView(embedBuilder.build(), guildIdLong, channelId, messageId);
             }
         }
     }

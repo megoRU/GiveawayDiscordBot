@@ -105,11 +105,6 @@ public class BotStart {
         try {
             //Загружаем GiveawayRegistry
             GiveawayRegistry.getInstance();
-            //Устанавливаем языки
-            setLanguages();
-            getLocalizationFromDB();
-            //Получаем Giveaway и пользователей. Устанавливаем данные
-            setGiveawayAndUsersInGift();
 
             List<GatewayIntent> intents = new ArrayList<>(
                     Arrays.asList(
@@ -327,7 +322,8 @@ public class BotStart {
         }
     }
 
-    private void setLanguages() {
+    @Bean
+    void setLanguages() {
         try {
             List<String> listLanguages = new ArrayList<>();
             listLanguages.add("rus");
@@ -358,7 +354,8 @@ public class BotStart {
         }
     }
 
-    private void setGiveawayAndUsersInGift() {
+    @Bean
+    void setGiveawayAndUsersInGift() {
         try {
             Connection connection = DriverManager.getConnection(URL_CONNECTION, USER_CONNECTION, PASSWORD_CONNECTION);
 
@@ -539,7 +536,8 @@ public class BotStart {
         Thread.sleep(2000L);
     }
 
-    private void getLocalizationFromDB() {
+    @Bean
+    void getLocalizationFromDB() {
         try {
             Connection connection = DriverManager.getConnection(URL_CONNECTION, USER_CONNECTION, PASSWORD_CONNECTION);
             Statement statement = connection.createStatement();

@@ -1,9 +1,9 @@
 package main.core.events;
 
+import main.controller.UpdateController;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
 import main.jsonparser.JSONParsers;
-import main.messagesevents.SenderMessage;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
@@ -22,7 +22,7 @@ public class ReactionEvent {
     public static final String TADA = "\uD83C\uDF89";
     private static final JSONParsers jsonParsers = new JSONParsers();
 
-    public void reaction(@NotNull MessageReactionAddEvent event) {
+    public void reaction(@NotNull MessageReactionAddEvent event, UpdateController updateController) {
         try {
             User user = event.retrieveUser().complete();
             Member member = event.getMember();
@@ -57,7 +57,7 @@ public class ReactionEvent {
                             embedBuilder.setColor(Color.RED);
                             embedBuilder.setDescription(buttonGiveawayNotAccess);
 
-                            SenderMessage.sendPrivateMessage(event.getJDA(), user.getId(), embedBuilder.build());
+                            updateController.setView(event.getJDA(), user.getId(), embedBuilder.build());
                             return;
                         }
                     }

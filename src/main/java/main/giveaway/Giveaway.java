@@ -11,7 +11,6 @@ import main.giveaway.impl.Formats;
 import main.giveaway.impl.Seconds;
 import main.giveaway.impl.URLS;
 import main.jsonparser.JSONParsers;
-import main.messagesevents.SenderMessage;
 import main.model.entity.ActiveGiveaways;
 import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
@@ -375,7 +374,7 @@ public class Giveaway {
                 errors.setDescription(errorsDescriptions);
                 List<Button> buttons = new ArrayList<>();
                 buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
-                SenderMessage.sendMessage(errors.build(), guildId, textChannelId, buttons);
+                updateController.setView(errors.build(), guildId, textChannelId, buttons);
                 StopGiveawayThread stopGiveawayThread = new StopGiveawayThread();
                 Future<?> submit = executorService.submit(stopGiveawayThread);
                 executorService.shutdown();
@@ -407,7 +406,7 @@ public class Giveaway {
             updateController.setView(embedBuilder, guildId, textChannelId);
         }
 
-        SenderMessage.sendMessage(urlEmbedded.build(), winnersContent, this.guildId, textChannelId);
+        updateController.setView(urlEmbedded.build(), winnersContent, this.guildId, textChannelId);
 
         listUsersRepository.saveAllParticipantsToUserList(guildId);
         activeGiveawayRepository.deleteActiveGiveaways(guildId);
