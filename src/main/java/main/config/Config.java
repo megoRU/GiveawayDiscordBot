@@ -7,7 +7,6 @@ public class Config {
     private static final String TOKEN = PRODUCTION_BOT_TOKEN;
     private static final String TOP_GG_API_TOKEN = System.getenv("TOP_GG_API_TOKEN");
     private static final String BOT_ID = "808277484524011531"; //megoDev: 780145910764142613 //giveaway: 808277484524011531
-    private static final String URL = "https://discord.com/oauth2/authorize?client_id=808277484524011531&permissions=2147740736&scope=applications.commands%20bot";
 
     private static final String DATABASE_URL_DEV = System.getenv("DATABASE_URL_DEV");
     private static final String DATABASE_URL = System.getenv("DATABASE_URL");
@@ -16,6 +15,8 @@ public class Config {
     private static final String DATABASE_USER = System.getenv("DATABASE_USER");
 
     private static final String DATABASE_PASS = System.getenv("DATABASE_PASS");
+
+    private static final String BOTICORD = System.getenv("BOTICORD");
 
     private static volatile boolean IS_DEV = true;
 
@@ -53,5 +54,9 @@ public class Config {
 
     public static boolean isIsDev() {
         return IS_DEV;
+    }
+
+    public static String getBoticord() {
+        return BOTICORD;
     }
 }

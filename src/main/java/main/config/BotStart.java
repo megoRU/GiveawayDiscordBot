@@ -1,15 +1,16 @@
 package main.config;
 
-import main.events.MessageWhenBotJoinToGuild;
+import main.controller.UpdateController;
+import main.core.CoreBot;
+import main.core.events.ReactionEvent;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
-import main.giveaway.buttons.ReactionsButton;
-import main.giveaway.reactions.Reactions;
-import main.giveaway.slash.SlashCommand;
 import main.jsonparser.ParserClass;
 import main.model.entity.Notification;
 import main.model.entity.Participants;
-import main.model.repository.*;
+import main.model.repository.ActiveGiveawayRepository;
+import main.model.repository.ListUsersRepository;
+import main.model.repository.ParticipantsRepository;
 import main.threads.StopGiveawayByTimer;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -53,7 +54,7 @@ import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
 
 @Configuration
 @EnableScheduling
-public class BotStartConfig {
+public class BotStart {
 
     public static final String activity = "/help | ";
     //String - guildLongId
@@ -66,7 +67,7 @@ public class BotStartConfig {
     //API
     private final BotiCordAPI api = new BotiCordAPI.Builder()
             .tokenEnum(TokenEnum.BOT)
-            .token(System.getenv("BOTICORD"))
+            .token(Config.getBoticord())
             .enableDevMode()
             .build();
 
@@ -76,10 +77,9 @@ public class BotStartConfig {
 
     //REPOSITORY
     private final ActiveGiveawayRepository activeGiveawayRepository;
-    private final LanguageRepository languageRepository;
     private final ParticipantsRepository participantsRepository;
-    private final NotificationRepository notificationRepository;
     private final ListUsersRepository listUsersRepository;
+    private final UpdateController updateController;
 
     //DataBase
     @Value("${spring.datasource.url}")
@@ -90,13 +90,14 @@ public class BotStartConfig {
     private String PASSWORD_CONNECTION;
 
     @Autowired
-    public BotStartConfig(ActiveGiveawayRepository activeGiveawayRepository, LanguageRepository
-            languageRepository, ParticipantsRepository participantsRepository, NotificationRepository notificationRepository, ListUsersRepository listUsersRepository) {
+    public BotStart(ActiveGiveawayRepository activeGiveawayRepository,
+                    ParticipantsRepository participantsRepository,
+                    ListUsersRepository listUsersRepository,
+                    UpdateController updateController) {
         this.activeGiveawayRepository = activeGiveawayRepository;
-        this.languageRepository = languageRepository;
         this.participantsRepository = participantsRepository;
-        this.notificationRepository = notificationRepository;
         this.listUsersRepository = listUsersRepository;
+        this.updateController = updateController;
     }
 
     @Bean
@@ -131,10 +132,7 @@ public class BotStartConfig {
             jdaBuilder.setStatus(OnlineStatus.ONLINE);
             jdaBuilder.setActivity(Activity.playing("Starting..."));
             jdaBuilder.setBulkDeleteSplittingEnabled(false);
-            jdaBuilder.addEventListeners(new MessageWhenBotJoinToGuild(activeGiveawayRepository, languageRepository));
-            jdaBuilder.addEventListeners(new ReactionsButton(languageRepository, notificationRepository));
-            jdaBuilder.addEventListeners(new Reactions());
-            jdaBuilder.addEventListeners(new SlashCommand(languageRepository, activeGiveawayRepository, participantsRepository, listUsersRepository));
+            jdaBuilder.addEventListeners(new CoreBot(updateController));
 
             jda = jdaBuilder.build();
             jda.awaitReady();
@@ -313,14 +311,14 @@ public class BotStartConfig {
     private void topGGAndStatcord() {
         if (!Config.isIsDev()) {
             try {
-                int serverCount = BotStartConfig.jda.getGuilds().size();
+                int serverCount = BotStart.jda.getGuilds().size();
 
                 TOP_GG_API.setStats(serverCount);
-                BotStartConfig.jda.getPresence().setActivity(Activity.playing(BotStartConfig.activity + serverCount + " guilds"));
+                BotStart.jda.getPresence().setActivity(Activity.playing(BotStart.activity + serverCount + " guilds"));
 
                 //BOTICORD API
                 AtomicInteger usersCount = new AtomicInteger();
-                BotStartConfig.jda.getGuilds().forEach(g -> usersCount.addAndGet(g.getMembers().size()));
+                BotStart.jda.getGuilds().forEach(g -> usersCount.addAndGet(g.getMembers().size()));
 
                 api.setStats(serverCount, 1, usersCount.get());
             } catch (Exception e) {
@@ -385,6 +383,16 @@ public class BotStartConfig {
                         .stream()
                         .collect(Collectors.toMap(Participants::getUserIdAsString, Participants::getUserIdAsString));
 
+
+                Giveaway.GiveawayData giveawayData = new Giveaway.GiveawayData(
+                        message_id_long,
+                        count_winners,
+                        role_id_long,
+                        is_for_specific_role,
+                        url_image,
+                        giveaway_title == null ? "Giveaway" : giveaway_title,
+                        date_end_giveaway);
+
                 Giveaway giveaway = new Giveaway(guild_long_id,
                         channel_long_id,
                         id_user_who_create_giveaway,
@@ -393,13 +401,8 @@ public class BotStartConfig {
                         activeGiveawayRepository,
                         participantsRepository,
                         listUsersRepository,
-                        message_id_long,
-                        count_winners,
-                        role_id_long,
-                        is_for_specific_role,
-                        url_image,
-                        giveaway_title == null ? "Giveaway" : giveaway_title,
-                        date_end_giveaway);
+                        giveawayData,
+                        updateController);
 
                 GiveawayRegistry instance = GiveawayRegistry.getInstance();
                 instance.putGift(guild_long_id, giveaway);
@@ -451,7 +454,7 @@ public class BotStartConfig {
                                     .complete()
                                     .getReactions()
                                     .stream()
-                                    .filter(messageReaction -> messageReaction.getEmoji().getName().equals(Reactions.TADA))
+                                    .filter(messageReaction -> messageReaction.getEmoji().getName().equals(ReactionEvent.TADA))
                                     .toList();
                         }
 

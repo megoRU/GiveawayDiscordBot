@@ -1,15 +1,14 @@
-package main.giveaway.reactions;
+package main.core.events;
 
+import main.controller.UpdateController;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
 import main.jsonparser.JSONParsers;
-import main.messagesevents.SenderMessage;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -17,14 +16,13 @@ import java.util.logging.Logger;
 
 import static main.giveaway.impl.URLS.getDiscordUrlMessage;
 
-public class Reactions extends ListenerAdapter implements SenderMessage {
+public class ReactionEvent {
 
+    private final static Logger LOGGER = Logger.getLogger(ReactionEvent.class.getName());
     public static final String TADA = "\uD83C\uDF89";
     private static final JSONParsers jsonParsers = new JSONParsers();
-    private final static Logger LOGGER = Logger.getLogger(Reactions.class.getName());
 
-    @Override
-    public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
+    public void reaction(@NotNull MessageReactionAddEvent event, UpdateController updateController) {
         try {
             User user = event.retrieveUser().complete();
             Member member = event.getMember();
@@ -59,7 +57,7 @@ public class Reactions extends ListenerAdapter implements SenderMessage {
                             embedBuilder.setColor(Color.RED);
                             embedBuilder.setDescription(buttonGiveawayNotAccess);
 
-                            SenderMessage.sendPrivateMessage(event.getJDA(), user.getId(), embedBuilder.build());
+                            updateController.setView(event.getJDA(), user.getId(), embedBuilder.build());
                             return;
                         }
                     }
