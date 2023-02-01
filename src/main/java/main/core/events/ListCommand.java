@@ -30,7 +30,7 @@ public class ListCommand {
         var guildIdLong = Objects.requireNonNull(event.getGuild()).getIdLong();
         var guildId = Objects.requireNonNull(event.getGuild()).getId();
 
-        event.deferReply().queue();
+        event.deferReply().setEphemeral(true).queue();
         if (GiveawayRegistry.getInstance().hasGiveaway(guildIdLong)) {
             StringBuilder stringBuilder = new StringBuilder();
             List<Participants> participantsList = participantsRepository.getParticipantsByGuildIdLong(guildIdLong);
@@ -60,7 +60,7 @@ public class ListCommand {
             list.setColor(Color.GREEN);
             list.setTitle(slashListUsers);
             list.setDescription(stringBuilder);
-            event.getHook().sendMessageEmbeds(list.build()).queue();
+            event.getHook().sendMessageEmbeds(list.build()).setEphemeral(true).queue();
         } else {
             String slashStopNoHas = jsonParsers.getLocale("slash_stop_no_has", guildId);
 
