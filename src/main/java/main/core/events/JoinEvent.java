@@ -1,10 +1,6 @@
-package main.events;
+package main.core.events;
 
-import lombok.AllArgsConstructor;
-import main.config.BotStartConfig;
-import main.giveaway.buttons.ReactionsButton;
-import main.model.repository.ActiveGiveawayRepository;
-import main.model.repository.LanguageRepository;
+import main.config.BotStart;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
@@ -12,8 +8,6 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.unions.DefaultGuildChannelUnion;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
-import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -22,16 +16,10 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@AllArgsConstructor
 @Service
-public class MessageWhenBotJoinToGuild extends ListenerAdapter {
+public class JoinEvent {
 
-    private final ActiveGiveawayRepository activeGiveawayRepository;
-    private final LanguageRepository languageRepository;
-
-    //bot join msg
-    @Override
-    public void onGuildJoin(@NotNull GuildJoinEvent event) {
+    public void join(@NotNull GuildJoinEvent event) {
         try {
             EmbedBuilder welcome = new EmbedBuilder();
             welcome.setColor(Color.GREEN);
@@ -51,16 +39,16 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
             buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
             buttons.add(Button.link("https://patreon.com/ghbots", "Patreon"));
 
-            if (BotStartConfig.getMapLanguages().get(event.getGuild().getId()) != null) {
-                if (BotStartConfig.getMapLanguages().get(event.getGuild().getId()).equals("eng")) {
-                    buttons.add(Button.secondary(event.getGuild().getId() + ":" + ReactionsButton.CHANGE_LANGUAGE, "Сменить язык ")
+            if (BotStart.getMapLanguages().get(event.getGuild().getId()) != null) {
+                if (BotStart.getMapLanguages().get(event.getGuild().getId()).equals("eng")) {
+                    buttons.add(Button.secondary(event.getGuild().getId() + ":" + ButtonChangeLanguage.CHANGE_LANGUAGE, "Сменить язык ")
                             .withEmoji(Emoji.fromUnicode("U+1F1F7U+1F1FA")));
                 } else {
-                    buttons.add(Button.secondary(event.getGuild().getId() + ":" + ReactionsButton.CHANGE_LANGUAGE, "Change language ")
+                    buttons.add(Button.secondary(event.getGuild().getId() + ":" + ButtonChangeLanguage.CHANGE_LANGUAGE, "Change language ")
                             .withEmoji(Emoji.fromUnicode("U+1F1ECU+1F1E7")));
                 }
             } else {
-                buttons.add(Button.secondary(event.getGuild().getId() + ":" + ReactionsButton.CHANGE_LANGUAGE, "Сменить язык ")
+                buttons.add(Button.secondary(event.getGuild().getId() + ":" + ButtonChangeLanguage.CHANGE_LANGUAGE, "Сменить язык ")
                         .withEmoji(Emoji.fromUnicode("U+1F1F7U+1F1FA")));
             }
 
@@ -83,18 +71,6 @@ public class MessageWhenBotJoinToGuild extends ListenerAdapter {
             }
         } catch (Exception e) {
             System.out.println("Скорее всего нет `DefaultChannel`!");
-            e.printStackTrace();
-        }
-    }
-
-    //TODO: Сделать в таблице ON DELETE CASCADE
-    @Override
-    public void onGuildLeave(@NotNull GuildLeaveEvent event) {
-        try {
-            System.out.println("Удаляем данные после удаления бота из Guild");
-            languageRepository.deleteLanguage(event.getGuild().getId());
-            activeGiveawayRepository.deleteActiveGiveaways(event.getGuild().getIdLong());
-        } catch (Exception e) {
             e.printStackTrace();
         }
     }

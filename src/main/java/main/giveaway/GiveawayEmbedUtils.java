@@ -1,6 +1,6 @@
 package main.giveaway;
 
-import main.giveaway.impl.GiftHelper;
+import main.giveaway.impl.WordBuilder;
 import main.jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
 
@@ -34,9 +34,9 @@ public class GiveawayEmbedUtils {
 
             String footer;
             if (countWinners == 1) {
-                footer = String.format("1 %s", GiftHelper.setEndingWord(1, guildId));
+                footer = String.format("1 %s", WordBuilder.setEndingWord(1, guildId));
             } else {
-                footer = String.format("%s %s", countWinners, GiftHelper.setEndingWord(countWinners, guildId));
+                footer = String.format("%s %s", countWinners, WordBuilder.setEndingWord(countWinners, guildId));
             }
 
             //Reaction
@@ -93,7 +93,7 @@ public class GiveawayEmbedUtils {
                 embedBuilder.appendDescription(giftWinners);
             }
 
-            String footer = countWinners + " " + GiftHelper.setEndingWord(countWinners, guildId);
+            String footer = countWinners + " " + WordBuilder.setEndingWord(countWinners, guildId);
             embedBuilder.setTimestamp(Instant.now());
             String giftEnds = String.format(jsonParsers.getLocale("gift_ends", String.valueOf(guildId)), footer);
             embedBuilder.setFooter(giftEnds);
