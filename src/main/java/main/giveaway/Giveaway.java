@@ -85,8 +85,9 @@ public class Giveaway {
         private String urlImage;
         private String title;
         private Timestamp endGiveawayDate;
+        private int minParticipants = 2;
 
-        public GiveawayData(long messageId, int countWinners, Long roleId, boolean isForSpecificRole, String urlImage, String title, Timestamp endGiveawayDate) {
+        public GiveawayData(long messageId, int countWinners, Long roleId, boolean isForSpecificRole, String urlImage, String title, Timestamp endGiveawayDate, int minParticipants) {
             this.messageId = messageId;
             this.countWinners = countWinners;
             this.roleId = roleId;
@@ -94,6 +95,7 @@ public class Giveaway {
             this.urlImage = urlImage;
             this.title = title;
             this.endGiveawayDate = endGiveawayDate;
+            this.minParticipants = minParticipants;
         }
     }
 
@@ -163,7 +165,7 @@ public class Giveaway {
 
     public void startGiveaway(GuildMessageChannel textChannel, String title, int countWinners,
                               String time, Long role, boolean isOnlyForSpecificRole,
-                              String urlImage, boolean predefined) {
+                              String urlImage, boolean predefined, int min_participants) {
         //Записываем данные:
         LOGGER.info("\nGuild id: " + guildId
                 + "\nTextChannel: " + textChannel.getName() + " " + textChannel.getId()
@@ -180,6 +182,7 @@ public class Giveaway {
         this.giveawayData.roleId = role;
         this.giveawayData.urlImage = urlImage;
         this.giveawayData.isForSpecificRole = isOnlyForSpecificRole;
+        this.giveawayData.minParticipants = min_participants == 0 ? 2 : min_participants;
         updateTime(time); //Обновляем время
 
         //Отправка сообщения
@@ -206,6 +209,7 @@ public class Giveaway {
         activeGiveaways.setChannelIdLong(message.getChannel().getIdLong());
         activeGiveaways.setCountWinners(this.giveawayData.countWinners);
         activeGiveaways.setGiveawayTitle(this.giveawayData.title);
+        activeGiveaways.setMinParticipants(this.giveawayData.minParticipants);
 
         if (this.giveawayData.roleId == null || this.giveawayData.roleId == 0) {
             activeGiveaways.setRoleIdLong(null);
@@ -338,7 +342,7 @@ public class Giveaway {
     public void stopGiveaway(final int countWinner) {
         LOGGER.info("\nstopGift method" + "\nCount winners: " + countWinner);
         try {
-            if (listUsersHash.size() < 2) {
+            if (listUsersHash.size() < this.giveawayData.minParticipants) {
 
                 String giftNotEnoughUsers = jsonParsers.getLocale("gift_not_enough_users", String.valueOf(guildId));
                 String giftGiveawayDeleted = jsonParsers.getLocale("gift_giveaway_deleted", String.valueOf(guildId));

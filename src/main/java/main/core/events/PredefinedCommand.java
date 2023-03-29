@@ -110,7 +110,8 @@ public class PredefinedCommand {
                 role.getIdLong(),
                 true,
                 null,
-                true);
+                true,
+                2);
 
         Task<List<Member>> listTask = event.getGuild().loadMembers()
                 .onSuccess(members -> {
