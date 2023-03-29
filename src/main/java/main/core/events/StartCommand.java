@@ -107,7 +107,7 @@ public class StartCommand {
                 String urlImage = null;
                 Integer minParticipants = event.getOption("min-participants", OptionMapping::getAsInt);
 
-                if (minParticipants == null || minParticipants == 0) {
+                if (minParticipants == null || minParticipants == 0 || minParticipants == 1) {
                     minParticipants = 2;
                 }
 
