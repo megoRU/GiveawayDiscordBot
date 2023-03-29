@@ -144,7 +144,7 @@ public class BotStart {
 
             //Обновить команды
             updateSlashCommands();
-            System.out.println("20:14");
+            System.out.println("14:07");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -209,6 +209,10 @@ public class BotStart {
             optionsStart.add(new OptionData(ATTACHMENT, "image", "Set Image for Giveaway")
                     .setName("image")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить изображение для Giveaway"));
+
+            optionsStart.add(new OptionData(INTEGER, "min-participants", "Delete Giveaway if the number of participants is less than this number")
+                    .setName("min-participants")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Удалить Giveaway если участников меньше этого числа"));
 
             List<OptionData> predefined = new ArrayList<>();
             predefined.add(new OptionData(STRING, "title", "Title for Giveaway. Maximum 255 characters")
@@ -377,12 +381,12 @@ public class BotStart {
                 boolean is_for_specific_role = rs.getBoolean("is_for_specific_role");
                 String url_image = rs.getString("url_image");
                 long id_user_who_create_giveaway = rs.getLong("id_user_who_create_giveaway");
+                int min_participants = rs.getInt("min_participants");
 
                 Map<String, String> participantsList = participantsRepository
                         .getParticipantsByGuildIdLong(guild_long_id)
                         .stream()
                         .collect(Collectors.toMap(Participants::getUserIdAsString, Participants::getUserIdAsString));
-
 
                 Giveaway.GiveawayData giveawayData = new Giveaway.GiveawayData(
                         message_id_long,
@@ -391,7 +395,8 @@ public class BotStart {
                         is_for_specific_role,
                         url_image,
                         giveaway_title == null ? "Giveaway" : giveaway_title,
-                        date_end_giveaway);
+                        date_end_giveaway,
+                        min_participants == 0 ? 2 : min_participants);
 
                 Giveaway giveaway = new Giveaway(guild_long_id,
                         channel_long_id,

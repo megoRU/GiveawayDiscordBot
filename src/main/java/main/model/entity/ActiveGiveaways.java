@@ -50,4 +50,6 @@ public class ActiveGiveaways {
     @Column(name = "url_image")
     private String urlImage;
 
+    @Column(name = "min_participants")
+    private Integer minParticipants;
 }

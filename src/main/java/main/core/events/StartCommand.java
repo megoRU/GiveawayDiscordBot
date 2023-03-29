@@ -105,6 +105,13 @@ public class StartCommand {
                 Long role = event.getOption("mention", OptionMapping::getAsLong);
                 Message.Attachment image = event.getOption("image", OptionMapping::getAsAttachment);
                 String urlImage = null;
+                Integer minParticipants = event.getOption("min-participants", OptionMapping::getAsInt);
+
+                System.out.println("minParticipants " + minParticipants);
+                if (minParticipants == null || minParticipants == 0) {
+                    System.out.println("Попали");
+                    minParticipants = 2;
+                }
 
                 if (image != null && image.isImage()) {
                     urlImage = image.getUrl();
@@ -186,7 +193,8 @@ public class StartCommand {
                         role,
                         isOnlyForSpecificRole,
                         urlImage,
-                        false);
+                        false,
+                        minParticipants);
 
             } catch (Exception e) {
                 if (!e.getMessage().contains("Time in the past")) {
