@@ -416,6 +416,8 @@ public class BotStart {
                 giveaway.setCount(participantsList.size());
 
                 if (date_end_giveaway != null) {
+                    updateGiveawayByGuild(giveaway);
+
                     Timer timer = new Timer();
                     StopGiveawayByTimer stopGiveawayByTimer = new StopGiveawayByTimer(guild_long_id);
                     Date date = new Date(date_end_giveaway.getTime());
@@ -433,16 +435,20 @@ public class BotStart {
         }
     }
 
-    @Scheduled(fixedDelay = 240000, initialDelay = 17000)
-    public void updateUserList() throws InterruptedException {
+    @Scheduled(fixedDelay = 240000, initialDelay = 25000)
+    public void updateUserList() {
         List<Giveaway> giveawayDataList = new LinkedList<>(GiveawayRegistry.getAllGiveaway());
+        for (Giveaway giveaway : giveawayDataList) {
+            updateGiveawayByGuild(giveaway);
+        }
+    }
 
-        for (Giveaway giveawayData : giveawayDataList) {
+    public void updateGiveawayByGuild(Giveaway giveawayData) {
+        long guildIdLong = giveawayData.getGuildId();
+        boolean isForSpecificRole = giveawayData.isForSpecificRole();
+        long messageId = giveawayData.getMessageId();
 
-            long guildIdLong = giveawayData.getGuildId();
-            boolean isForSpecificRole = giveawayData.isForSpecificRole();
-            long messageId = giveawayData.getMessageId();
-
+        if (jda != null) {
             if (hasGift(guildIdLong)) {
                 long channelId = giveawayData.getTextChannelId();
                 //System.out.println("Guild ID: " + guildIdLong);
@@ -540,8 +546,12 @@ public class BotStart {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            try {
+                Thread.sleep(2000L);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-        Thread.sleep(2000L);
     }
 
     private void getLocalizationFromDB() {
