@@ -443,7 +443,7 @@ public class BotStart {
         }
     }
 
-    public void updateGiveawayByGuild(Giveaway giveawayData) {
+    public synchronized void updateGiveawayByGuild(Giveaway giveawayData) {
         long guildIdLong = giveawayData.getGuildId();
         boolean isForSpecificRole = giveawayData.isForSpecificRole();
         long messageId = giveawayData.getMessageId();
