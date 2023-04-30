@@ -32,6 +32,7 @@ public class StopCommand {
             return;
         }
 
+        //TODO: Что это?
         if (event.getOptions().isEmpty()) {
             if (!giveaway.isHasFutureTasks()) {
                 EmbedBuilder errorsAgain = new EmbedBuilder();

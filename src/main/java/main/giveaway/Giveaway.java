@@ -165,7 +165,7 @@ public class Giveaway {
 
     public void startGiveaway(GuildMessageChannel textChannel, String title, int countWinners,
                               String time, Long role, boolean isOnlyForSpecificRole,
-                              String urlImage, boolean predefined, int min_participants) {
+                              String urlImage, boolean predefined, int minParticipants) {
         //Записываем данные:
         LOGGER.info("\nGuild id: " + guildId
                 + "\nTextChannel: " + textChannel.getName() + " " + textChannel.getId()
@@ -182,7 +182,7 @@ public class Giveaway {
         this.giveawayData.roleId = role;
         this.giveawayData.urlImage = urlImage;
         this.giveawayData.isForSpecificRole = isOnlyForSpecificRole;
-        this.giveawayData.minParticipants = min_participants == 0 ? 2 : min_participants;
+        this.giveawayData.minParticipants = minParticipants == 0 ? 2 : minParticipants;
         updateTime(time); //Обновляем время
 
         //Отправка сообщения

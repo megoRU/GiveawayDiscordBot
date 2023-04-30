@@ -31,6 +31,7 @@ public class UpdateController {
     private final ParticipantsRepository participantsRepository;
     private final NotificationRepository notificationRepository;
     private final ListUsersRepository listUsersRepository;
+    private final SchedulingRepository schedulingRepository;
 
     //LOGGER
     private final static Logger LOGGER = Logger.getLogger(UpdateController.class.getName());
@@ -39,12 +40,18 @@ public class UpdateController {
     private CoreBot coreBot;
 
     @Autowired
-    public UpdateController(ActiveGiveawayRepository activeGiveawayRepository, LanguageRepository languageRepository, ParticipantsRepository participantsRepository, NotificationRepository notificationRepository, ListUsersRepository listUsersRepository) {
+    public UpdateController(ActiveGiveawayRepository activeGiveawayRepository,
+                            LanguageRepository languageRepository,
+                            ParticipantsRepository participantsRepository,
+                            NotificationRepository notificationRepository,
+                            ListUsersRepository listUsersRepository,
+                            SchedulingRepository schedulingRepository) {
         this.activeGiveawayRepository = activeGiveawayRepository;
         this.languageRepository = languageRepository;
         this.participantsRepository = participantsRepository;
         this.notificationRepository = notificationRepository;
         this.listUsersRepository = listUsersRepository;
+        this.schedulingRepository = schedulingRepository;
     }
 
     public void registerBot(CoreBot coreBot) {
@@ -112,6 +119,10 @@ public class UpdateController {
                 ChangeCommand changeCommand = new ChangeCommand(activeGiveawayRepository);
                 changeCommand.change(event, this);
             }
+            case "scheduling" -> {
+                SchedulingCommand schedulingCommand = new SchedulingCommand(schedulingRepository);
+                schedulingCommand.scheduling(event);
+            }
             case "participants" -> {
                 ParticipantsCommand participantsCommand = new ParticipantsCommand(listUsersRepository);
                 participantsCommand.participants(event);
@@ -119,6 +130,10 @@ public class UpdateController {
             case "patreon" -> {
                 PatreonCommand patreonCommand = new PatreonCommand();
                 patreonCommand.patreon(event);
+            }
+            case "cancel" -> {
+                CancelCommand cancelCommand = new CancelCommand(schedulingRepository, activeGiveawayRepository);
+                cancelCommand.cancel(event);
             }
             case "check-bot-permission" -> {
                 CheckBot checkBot = new CheckBot();
