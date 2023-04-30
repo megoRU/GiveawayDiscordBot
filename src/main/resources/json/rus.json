@@ -4,6 +4,7 @@
   "messages_events_add_me_to_other_guilds": ":robot: [Добавь меня в другие гильдии](https://discord.com/oauth2/authorize?client_id=808277484524011531&permissions=2147740736&scope=applications.commands%20bot)\n",
   "message_gift_not_admin": "Вы не являетесь Админом или не можете управлять сообщениями!",
   "message_gift_need_stop_giveaway": "Сначала вам нужно завершить Giveaway: </stop:941286272390037536>",
+  "message_gift_need_cancel_giveaway": "Сначала вам нужно отменить Giveaway: </cancel>",
   "giveaway_registry_error": "Giveaway был отменен, потому что бот не смог получить ID своего сообщения\nПожалуйста, попробуйте снова. **Напишите нам, что именно произошло.\nМы пытаемся исправить эту ошибку. Сервер поддержки:** https://discord.gg/UrWG3R683d",
   "gift_ends_at": "%s | Завершится:",
   "gift_ends": "Завершилась",
@@ -60,5 +61,6 @@
   "errors_with_api": "Проблема с нашим API",
   "errors_descriptions": "Не беспокойтесь, мы завершим ваш Giveaway автоматически, когда это станет возможным.\nЕсли у вас все еще есть вопросы, задавайте их нам.",
   "errors_descriptions_again": "Не волнуйтесь, задача уже запущена.\nМы завершим ваш Giveaway, как только сможем.",
-  "you_wrote_date": "Вы написали дату: `%s`\nСейчас (UTC±0):⠀ ⠀`%s`"
+  "you_wrote_date": "Вы написали дату: `%s`\nСейчас (UTC±0):⠀ ⠀`%s`",
+  "schedule_start": "Дата и время запуска: <t:%s:R> (<t:%s:f>)\nВ канале: <#%s>"
 }

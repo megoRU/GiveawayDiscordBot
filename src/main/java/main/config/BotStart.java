@@ -5,12 +5,15 @@ import main.core.CoreBot;
 import main.core.events.ReactionEvent;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
+import main.jsonparser.JSONParsers;
 import main.jsonparser.ParserClass;
 import main.model.entity.Notification;
 import main.model.entity.Participants;
+import main.model.entity.Scheduling;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.ListUsersRepository;
 import main.model.repository.ParticipantsRepository;
+import main.model.repository.SchedulingRepository;
 import main.threads.StopGiveawayByTimer;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -47,6 +50,7 @@ import java.util.Date;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -56,6 +60,7 @@ import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
 @EnableScheduling
 public class BotStart {
 
+    private static final JSONParsers jsonParsers = new JSONParsers();
     public static final String activity = "/help | ";
     //String - guildLongId
     private static final ConcurrentMap<String, String> mapLanguages = new ConcurrentHashMap<>();
@@ -80,6 +85,7 @@ public class BotStart {
     private final ParticipantsRepository participantsRepository;
     private final ListUsersRepository listUsersRepository;
     private final UpdateController updateController;
+    private final SchedulingRepository schedulingRepository;
 
     //DataBase
     @Value("${spring.datasource.url}")
@@ -93,11 +99,13 @@ public class BotStart {
     public BotStart(ActiveGiveawayRepository activeGiveawayRepository,
                     ParticipantsRepository participantsRepository,
                     ListUsersRepository listUsersRepository,
-                    UpdateController updateController) {
+                    UpdateController updateController,
+                    SchedulingRepository schedulingRepository) {
         this.activeGiveawayRepository = activeGiveawayRepository;
         this.participantsRepository = participantsRepository;
         this.listUsersRepository = listUsersRepository;
         this.updateController = updateController;
+        this.schedulingRepository = schedulingRepository;
     }
 
     @Bean
@@ -177,10 +185,56 @@ public class BotStart {
                     .setRequired(true)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Настройка языка бота"));
 
+            //Scheduling Giveaway
+            List<OptionData> optionsScheduling = new ArrayList<>();
+
+            optionsScheduling.add(new OptionData(STRING, "start-time", "Examples: 2023.04.29 16:00. Only in this style and UTC ±0")
+                    .setName("start-time")
+                    .setRequired(true)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: 2023.04.29 16:00. Только в этом стиле и UTC ±0"));
+
+            optionsScheduling.add(new OptionData(CHANNEL, "channel", "#TextChannel name")
+                    .setName("textchannel")
+                    .setRequired(true)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "#TextChannel название"));
+
+            optionsScheduling.add(new OptionData(STRING, "end-time", "Examples: 2023.04.29 17:00. Only in this style and UTC ±0")
+                    .setName("end-time")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: 2023.04.29 17:00. Только в этом стиле и UTC ±0"));
+
+            optionsScheduling.add(new OptionData(STRING, "title", "Title for Giveaway. Maximum 255 characters")
+                    .setName("title")
+                    .setMaxLength(255)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Название для Giveaway. Максимум 255 символов"));
+
+            optionsScheduling.add(new OptionData(INTEGER, "count", "Set count winners")
+                    .setName("count")
+                    .setMinValue(1)
+                    .setMaxValue(30)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить количество победителей"));
+
+            optionsScheduling.add(new OptionData(ROLE, "mention", "Mentioning a specific @Role")
+                    .setName("mention")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Упоминание определенной @Роли"));
+
+            optionsScheduling.add(new OptionData(STRING, "role", "Giveaway is only for a specific role? Don't forget to specify the Role in the previous choice.")
+                    .addChoice("yes", "yes")
+                    .setName("role")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway предназначен только для определенной роли? Не забудьте указать роль в предыдущем выборе."));
+
+            optionsScheduling.add(new OptionData(ATTACHMENT, "image", "Set Image for Giveaway")
+                    .setName("image")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить изображение для Giveaway"));
+
+            optionsScheduling.add(new OptionData(INTEGER, "min-participants", "Delete Giveaway if the number of participants is less than this number")
+                    .setName("min-participants")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Удалить Giveaway если участников меньше этого числа"));
+
             //Start Giveaway
             List<OptionData> optionsStart = new ArrayList<>();
             optionsStart.add(new OptionData(STRING, "title", "Title for Giveaway. Maximum 255 characters")
                     .setName("title")
+                    .setMaxLength(255)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Название для Giveaway. Максимум 255 символов"));
 
             optionsStart.add(new OptionData(INTEGER, "count", "Set count winners")
@@ -263,6 +317,11 @@ public class BotStart {
                     .setGuildOnly(true)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Создание Giveaway"));
 
+            commands.addCommands(Commands.slash("scheduling", "Create Scheduling Giveaway")
+                    .addOptions(optionsScheduling)
+                    .setGuildOnly(true)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Создать Giveaway по расписанию"));
+
             commands.addCommands(Commands.slash("stop", "Stop the Giveaway")
                     .addOptions(optionsStop)
                     .setGuildOnly(true)
@@ -303,6 +362,10 @@ public class BotStart {
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Собрать участников и сразу провести розыгрыш для определенной @Роли")
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)));
 
+            commands.addCommands(Commands.slash("cancel", "Cancel Giveaway")
+                    .setGuildOnly(true)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Отменить Giveaway"));
+
             commands.queue();
 
             System.out.println("Готово");
@@ -311,7 +374,7 @@ public class BotStart {
         }
     }
 
-    @Scheduled(fixedDelay = 900000L, initialDelay = 8000L)
+    @Scheduled(fixedDelay = 120, initialDelay = 8, timeUnit = TimeUnit.SECONDS)
     private void topGGAndStatcord() {
         if (!Config.isIsDev()) {
             try {
@@ -327,6 +390,81 @@ public class BotStart {
                 api.setStats(serverCount, 1, usersCount.get());
             } catch (Exception e) {
                 e.printStackTrace();
+            }
+        }
+    }
+
+    @Scheduled(fixedDelay = 30, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
+    private void scheduleStartGiveaway() {
+        List<Scheduling> allScheduling = schedulingRepository.getAllScheduling();
+        for (Scheduling scheduling : allScheduling) {
+            Timestamp localTime = new Timestamp(System.currentTimeMillis());
+
+            if (localTime.after(scheduling.getDateCreateGiveaway())) {
+                try {
+                    Long channelIdLong = scheduling.getChannelIdLong();
+                    Guild guildById = jda.getGuildById(scheduling.getGuildLongId());
+
+                    if (guildById != null) {
+                        TextChannel textChannelById = guildById.getTextChannelById(channelIdLong);
+                        if (textChannelById != null) {
+                            Long role = scheduling.getRoleIdLong();
+                            Boolean isOnlyForSpecificRole = scheduling.getIsForSpecificRole();
+                            Long guildIdLong = scheduling.getGuildLongId();
+                            String guildId = String.valueOf(scheduling.getGuildLongId());
+
+                            Giveaway giveaway = new Giveaway(
+                                    scheduling.getGuildLongId(),
+                                    textChannelById.getIdLong(),
+                                    scheduling.getIdUserWhoCreateGiveaway(),
+                                    activeGiveawayRepository,
+                                    participantsRepository,
+                                    listUsersRepository,
+                                    updateController);
+
+                            GiveawayRegistry instance = GiveawayRegistry.getInstance();
+                            instance.putGift(scheduling.getGuildLongId(), giveaway);
+
+                            //TODO: Лютый пиз*ец
+                            String formattedDate = null;
+                            if (scheduling.getDateEndGiveaway() != null) {
+                                Timestamp dateEndGiveaway = scheduling.getDateEndGiveaway();
+                                formattedDate = dateEndGiveaway.toInstant().toString()
+                                        .replaceAll("-", ".")
+                                        .replaceAll("T", " ")
+                                        .replaceAll(":00Z", "");
+                            }
+
+                            System.out.println("role " + role);
+                            System.out.println("isOnlyForSpecificRole " + isOnlyForSpecificRole);
+
+                            if (role != null && isOnlyForSpecificRole) {
+                                String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guildId), role);
+                                if (Objects.equals(role, guildIdLong)) {
+                                    giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_everyone", guildId), "@everyone");
+                                    textChannelById.sendMessage(giftNotificationForThisRole).queue();
+                                } else {
+                                    textChannelById.sendMessage(giftNotificationForThisRole).queue();
+                                }
+                            }
+
+                            giveaway.startGiveaway(
+                                    textChannelById,
+                                    scheduling.getGiveawayTitle(),
+                                    scheduling.getCountWinners(),
+                                    formattedDate,
+                                    scheduling.getRoleIdLong(),
+                                    scheduling.getIsForSpecificRole(),
+                                    scheduling.getUrlImage(),
+                                    false,
+                                    scheduling.getMinParticipants());
+
+                            schedulingRepository.deleteById(scheduling.getGuildLongId());
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
