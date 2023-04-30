@@ -7,9 +7,11 @@ import main.giveaway.GiveawayRegistry;
 import main.giveaway.impl.Formats;
 import main.giveaway.impl.TimeHandler;
 import main.jsonparser.JSONParsers;
+import main.model.entity.Scheduling;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.ListUsersRepository;
 import main.model.repository.ParticipantsRepository;
+import main.model.repository.SchedulingRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -34,15 +36,19 @@ public class StartCommand {
     private final ListUsersRepository listUsersRepository;
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final ParticipantsRepository participantsRepository;
-
+    private final SchedulingRepository schedulingRepository;
 
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     @Autowired
-    public StartCommand(ListUsersRepository listUsersRepository, ActiveGiveawayRepository activeGiveawayRepository, ParticipantsRepository participantsRepository) {
+    public StartCommand(ListUsersRepository listUsersRepository,
+                        ActiveGiveawayRepository activeGiveawayRepository,
+                        ParticipantsRepository participantsRepository,
+                        SchedulingRepository schedulingRepository) {
         this.listUsersRepository = listUsersRepository;
         this.activeGiveawayRepository = activeGiveawayRepository;
         this.participantsRepository = participantsRepository;
+        this.schedulingRepository = schedulingRepository;
     }
 
     public void start(@NotNull SlashCommandInteractionEvent event, UpdateController updateController) {
@@ -50,14 +56,19 @@ public class StartCommand {
         var guildId = Objects.requireNonNull(event.getGuild()).getId();
         var userIdLong = event.getUser().getIdLong();
 
+        Scheduling schedulingByGuildLongId = schedulingRepository.getSchedulingByGuildLongId(guildIdLong);
         GuildMessageChannel textChannelEvent = null;
         if (GiveawayRegistry.getInstance().hasGiveaway(guildIdLong)) {
             String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_stop_giveaway", guildId);
-
             EmbedBuilder errors = new EmbedBuilder();
             errors.setColor(Color.GREEN);
             errors.setDescription(messageGiftNeedStopGiveaway);
-
+            event.replyEmbeds(errors.build()).queue();
+        } else if (schedulingByGuildLongId != null) {
+            String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_cancel_giveaway", guildId);
+            EmbedBuilder errors = new EmbedBuilder();
+            errors.setColor(Color.GREEN);
+            errors.setDescription(messageGiftNeedStopGiveaway);
             event.replyEmbeds(errors.build()).queue();
         } else {
             GuildChannelUnion textChannel = event.getOption("textchannel", OptionMapping::getAsChannel);

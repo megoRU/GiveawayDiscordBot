@@ -91,7 +91,7 @@ public class UpdateController {
                 helpCommand.help(event);
             }
             case "start" -> {
-                StartCommand startCommand = new StartCommand(listUsersRepository, activeGiveawayRepository, participantsRepository);
+                StartCommand startCommand = new StartCommand(listUsersRepository, activeGiveawayRepository, participantsRepository, schedulingRepository);
                 startCommand.start(event, this);
             }
             case "stop" -> {

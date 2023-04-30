@@ -68,8 +68,9 @@ public class StopCommand {
         Long count = event.getOption("count", OptionMapping::getAsLong);
         boolean isHasErrors = false;
         if (count == null) return;
+        int listUsersSize = giveaway.getListUsersSize();
 
-        if (giveaway.getListUsersSize() <= count) {
+        if (listUsersSize != 0 && listUsersSize <= count) {
             isHasErrors = true;
         }
 

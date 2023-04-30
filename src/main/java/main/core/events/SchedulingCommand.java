@@ -49,7 +49,16 @@ public class SchedulingCommand {
         String startTime = event.getOption("start-time", OptionMapping::getAsString);
         String endTime = event.getOption("end-time", OptionMapping::getAsString);
 
+        Scheduling schedulingByGuildLongId = schedulingRepository.getSchedulingByGuildLongId(guildIdLong);
+
         if (GiveawayRegistry.getInstance().hasGiveaway(guildIdLong)) {
+            String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_stop_giveaway", guildId);
+            EmbedBuilder errors = new EmbedBuilder();
+            errors.setColor(Color.GREEN);
+            errors.setDescription(messageGiftNeedStopGiveaway);
+            event.replyEmbeds(errors.build()).queue();
+            return;
+        } else if (schedulingByGuildLongId != null) {
             String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_cancel_giveaway", guildId);
             EmbedBuilder errors = new EmbedBuilder();
             errors.setColor(Color.GREEN);
@@ -58,13 +67,8 @@ public class SchedulingCommand {
             return;
         }
 
-        if (startTime != null && !startTime.matches(Formats.ISO_TIME_REGEX)) {
-            String wrongDate = jsonParsers.getLocale("wrong_date", guildId);
-            event.reply(wrongDate).queue();
-            return;
-        }
-
-        if (endTime != null && !endTime.matches(Formats.ISO_TIME_REGEX)) {
+        if ((startTime != null && !startTime.matches(Formats.ISO_TIME_REGEX)
+                || (endTime != null && !endTime.matches(Formats.ISO_TIME_REGEX)))) {
             String wrongDate = jsonParsers.getLocale("wrong_date", guildId);
             event.reply(wrongDate).queue();
             return;
@@ -74,8 +78,9 @@ public class SchedulingCommand {
             event.reply("TextChannel is `Null`").queue();
             return;
         }
+
         boolean canSendGiveaway = ChecksClass.canSendGiveaway(textChannel, event);
-        if (!canSendGiveaway) return;
+        if (!canSendGiveaway) return; //Сообщение уже отправлено
 
         if (textChannel instanceof NewsChannel || textChannel instanceof TextChannel) {
             int count = 1;
@@ -99,17 +104,6 @@ public class SchedulingCommand {
                 String slashErrorRoleCanNotBeEveryone = jsonParsers.getLocale("slash_error_role_can_not_be_everyone", guildId);
                 event.reply(slashErrorRoleCanNotBeEveryone).setEphemeral(true).queue();
                 return;
-            } else if (role != null && !isOnlyForSpecificRole) {
-                String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guildId), role);
-                if (role == guildIdLong) {
-                    giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_everyone", guildId), "@everyone");
-                    event.reply(giftNotificationForThisRole).queue();
-                } else {
-                    event.reply(giftNotificationForThisRole).queue();
-                }
-            } else if (role != null) {
-                String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guildId), role);
-                event.reply(giftNotificationForThisRole).queue();
             }
 
             Scheduling scheduling = new Scheduling();
@@ -117,9 +111,6 @@ public class SchedulingCommand {
             scheduling.setChannelIdLong(textChannel.getIdLong());
             scheduling.setCountWinners(count);
             scheduling.setDateCreateGiveaway(timeProcessor(startTime));
-
-            System.out.println("endTime " + endTime);
-            System.out.println("timeProcessor(endTime) " + timeProcessor(endTime));
             scheduling.setDateEndGiveaway(timeProcessor(endTime) == null ? null : timeProcessor(endTime));
             scheduling.setGiveawayTitle(title);
             scheduling.setRoleIdLong(role);
@@ -130,7 +121,10 @@ public class SchedulingCommand {
 
             schedulingRepository.save(scheduling);
 
-            String scheduleStart = String.format(jsonParsers.getLocale("schedule_start", guildId), startTime, textChannel.getId());
+            String scheduleStart = String.format(jsonParsers.getLocale("schedule_start", guildId),
+                    Objects.requireNonNull(timeProcessor(startTime)).getTime() / 1000,
+                    Objects.requireNonNull(timeProcessor(startTime)).getTime() / 1000,
+                    textChannel.getId());
             EmbedBuilder start = new EmbedBuilder();
             start.setColor(Color.GREEN);
             start.setDescription(scheduleStart);

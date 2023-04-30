@@ -5,6 +5,7 @@ import main.core.CoreBot;
 import main.core.events.ReactionEvent;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
+import main.jsonparser.JSONParsers;
 import main.jsonparser.ParserClass;
 import main.model.entity.Notification;
 import main.model.entity.Participants;
@@ -45,7 +46,6 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,6 +60,7 @@ import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
 @EnableScheduling
 public class BotStart {
 
+    private static final JSONParsers jsonParsers = new JSONParsers();
     public static final String activity = "/help | ";
     //String - guildLongId
     private static final ConcurrentMap<String, String> mapLanguages = new ConcurrentHashMap<>();
@@ -397,8 +398,9 @@ public class BotStart {
     private void scheduleStartGiveaway() {
         List<Scheduling> allScheduling = schedulingRepository.getAllScheduling();
         for (Scheduling scheduling : allScheduling) {
-            LocalDateTime now = LocalDateTime.now();
-            if (now.isAfter(scheduling.getDateCreateGiveaway().toLocalDateTime().minusDays(1))) {
+            Timestamp localTime = new Timestamp(System.currentTimeMillis());
+
+            if (localTime.after(scheduling.getDateCreateGiveaway())) {
                 try {
                     Long channelIdLong = scheduling.getChannelIdLong();
                     Guild guildById = jda.getGuildById(scheduling.getGuildLongId());
@@ -406,6 +408,10 @@ public class BotStart {
                     if (guildById != null) {
                         TextChannel textChannelById = guildById.getTextChannelById(channelIdLong);
                         if (textChannelById != null) {
+                            Long role = scheduling.getRoleIdLong();
+                            Boolean isOnlyForSpecificRole = scheduling.getIsForSpecificRole();
+                            Long guildIdLong = scheduling.getGuildLongId();
+                            String guildId = String.valueOf(scheduling.getGuildLongId());
 
                             Giveaway giveaway = new Giveaway(
                                     scheduling.getGuildLongId(),
@@ -419,6 +425,7 @@ public class BotStart {
                             GiveawayRegistry instance = GiveawayRegistry.getInstance();
                             instance.putGift(scheduling.getGuildLongId(), giveaway);
 
+                            //TODO: Лютый пиз*ец
                             String formattedDate = null;
                             if (scheduling.getDateEndGiveaway() != null) {
                                 Timestamp dateEndGiveaway = scheduling.getDateEndGiveaway();
@@ -426,6 +433,19 @@ public class BotStart {
                                         .replaceAll("-", ".")
                                         .replaceAll("T", " ")
                                         .replaceAll(":00Z", "");
+                            }
+
+                            System.out.println("role " + role);
+                            System.out.println("isOnlyForSpecificRole " + isOnlyForSpecificRole);
+
+                            if (role != null && isOnlyForSpecificRole) {
+                                String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guildId), role);
+                                if (Objects.equals(role, guildIdLong)) {
+                                    giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_everyone", guildId), "@everyone");
+                                    textChannelById.sendMessage(giftNotificationForThisRole).queue();
+                                } else {
+                                    textChannelById.sendMessage(giftNotificationForThisRole).queue();
+                                }
                             }
 
                             giveaway.startGiveaway(
