@@ -4,7 +4,7 @@
   "messages_events_add_me_to_other_guilds": ":robot: [Добавь меня в другие гильдии](https://discord.com/oauth2/authorize?client_id=808277484524011531&permissions=2147740736&scope=applications.commands%20bot)\n",
   "message_gift_not_admin": "Вы не являетесь Админом или не можете управлять сообщениями!",
   "message_gift_need_stop_giveaway": "Сначала вам нужно завершить Giveaway: </stop:941286272390037536>",
-  "message_gift_need_cancel_giveaway": "Сначала вам нужно отменить Giveaway: </cancel>",
+  "message_gift_need_cancel_giveaway": "Сначала вам нужно отменить Giveaway: </cancel:1102283573349851167>",
   "giveaway_registry_error": "Giveaway был отменен, потому что бот не смог получить ID своего сообщения\nПожалуйста, попробуйте снова. **Напишите нам, что именно произошло.\nМы пытаемся исправить эту ошибку. Сервер поддержки:** https://discord.gg/UrWG3R683d",
   "gift_ends_at": "%s | Завершится:",
   "gift_ends": "Завершилась",

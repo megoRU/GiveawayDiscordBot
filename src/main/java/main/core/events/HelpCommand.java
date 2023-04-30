@@ -29,6 +29,8 @@ public class HelpCommand {
                 """
                         </start:941286272390037535> - Start Giveaway with lots of parameters
                         </stop:941286272390037536> - Stop Giveaway
+                        </scheduling:1102283573349851166> - Run scheduled Giveaway
+                        </cancel:1102283573349851167> - Cancel Giveaway
                         </reroll:957624805446799452> - Reroll one winner by Giveaway ID
                         </predefined:1049647289779630080> - Gather participants and immediately hold a drawing for a certain @Role.
                         </list:941286272390037538> - List of participants
