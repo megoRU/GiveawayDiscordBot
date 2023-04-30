@@ -151,7 +151,7 @@ public class BotStart {
             System.out.println("IsDevMode: " + Config.isIsDev());
 
             //Обновить команды
-//            updateSlashCommands();
+            updateSlashCommands();
             System.out.println("14:07");
         } catch (Exception e) {
             e.printStackTrace();
@@ -320,7 +320,7 @@ public class BotStart {
             commands.addCommands(Commands.slash("scheduling", "Create Scheduling Giveaway")
                     .addOptions(optionsScheduling)
                     .setGuildOnly(true)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Создать Giveaway по рассписанию"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Создать Giveaway по расписанию"));
 
             commands.addCommands(Commands.slash("stop", "Stop the Giveaway")
                     .addOptions(optionsStop)
