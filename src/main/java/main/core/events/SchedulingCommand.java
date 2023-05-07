@@ -121,9 +121,19 @@ public class SchedulingCommand {
 
             schedulingRepository.save(scheduling);
 
+            String scheduleEnd = jsonParsers.getLocale("schedule_end", guildId);
+            long timeStart = Objects.requireNonNull(timeProcessor(startTime)).getTime() / 1000;
+            if (endTime != null) {
+                long timeEnd = Objects.requireNonNull(timeProcessor(endTime)).getTime() / 1000;
+                if (timeEnd != 0) {
+                    scheduleEnd = String.format("<t:%s:R> (<t:%s:f>)", timeEnd, timeEnd);
+                }
+            }
+
             String scheduleStart = String.format(jsonParsers.getLocale("schedule_start", guildId),
-                    Objects.requireNonNull(timeProcessor(startTime)).getTime() / 1000,
-                    Objects.requireNonNull(timeProcessor(startTime)).getTime() / 1000,
+                    timeStart,
+                    timeStart,
+                    scheduleEnd,
                     textChannel.getId());
             EmbedBuilder start = new EmbedBuilder();
             start.setColor(Color.GREEN);

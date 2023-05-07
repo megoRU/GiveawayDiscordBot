@@ -46,6 +46,8 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -391,11 +393,13 @@ public class BotStart {
         }
     }
 
-    @Scheduled(fixedDelay = 30, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = 5, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
     private void scheduleStartGiveaway() {
         List<Scheduling> allScheduling = schedulingRepository.getAllScheduling();
         for (Scheduling scheduling : allScheduling) {
             Timestamp localTime = new Timestamp(System.currentTimeMillis());
+
+            System.out.println(scheduling.getDateEndGiveaway().toLocalDateTime());
 
             if (localTime.after(scheduling.getDateCreateGiveaway())) {
                 try {
@@ -422,18 +426,13 @@ public class BotStart {
                             GiveawayRegistry instance = GiveawayRegistry.getInstance();
                             instance.putGift(scheduling.getGuildLongId(), giveaway);
 
-                            //TODO: Лютый пиз*ец
                             String formattedDate = null;
                             if (scheduling.getDateEndGiveaway() != null) {
-                                Timestamp dateEndGiveaway = scheduling.getDateEndGiveaway();
-                                formattedDate = dateEndGiveaway.toInstant().toString()
-                                        .replaceAll("-", ".")
-                                        .replaceAll("T", " ")
-                                        .replaceAll(":00Z", "");
+                                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
+                                LocalDateTime dateEndGiveaway = scheduling.getDateEndGiveaway().toLocalDateTime();
+                                dateEndGiveaway.format(dateTimeFormatter);
+                                formattedDate = dateEndGiveaway.toString();
                             }
-
-                            System.out.println("role " + role);
-                            System.out.println("isOnlyForSpecificRole " + isOnlyForSpecificRole);
 
                             if (role != null && isOnlyForSpecificRole) {
                                 String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guildId), role);
