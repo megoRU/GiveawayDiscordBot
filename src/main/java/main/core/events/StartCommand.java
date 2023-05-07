@@ -1,7 +1,6 @@
 package main.core.events;
 
 import main.controller.UpdateController;
-import main.giveaway.ChecksClass;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
 import main.giveaway.impl.Formats;
@@ -15,12 +14,7 @@ import main.model.repository.SchedulingRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
-import net.dv8tion.jda.api.entities.channel.unions.GuildChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +22,6 @@ import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class StartCommand {
@@ -57,7 +50,6 @@ public class StartCommand {
         var userIdLong = event.getUser().getIdLong();
 
         Scheduling schedulingByGuildLongId = schedulingRepository.getSchedulingByGuildLongId(guildIdLong);
-        GuildMessageChannel textChannelEvent = null;
         if (GiveawayRegistry.getInstance().hasGiveaway(guildIdLong)) {
             String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_stop_giveaway", guildId);
             EmbedBuilder errors = new EmbedBuilder();
@@ -71,40 +63,6 @@ public class StartCommand {
             errors.setDescription(messageGiftNeedStopGiveaway);
             event.replyEmbeds(errors.build()).queue();
         } else {
-            GuildChannelUnion textChannel = event.getOption("textchannel", OptionMapping::getAsChannel);
-
-            //Если не указали конкретный канал
-            if (textChannel == null) {
-                if (event.getChannel() instanceof TextChannel) {
-                    textChannelEvent = event.getChannel().asTextChannel();
-                    boolean canSendGiveaway = ChecksClass.canSendGiveaway(textChannelEvent, event);
-                    if (!canSendGiveaway) return;
-                } else if (event.getChannel() instanceof NewsChannel) {
-                    textChannelEvent = event.getChannel().asNewsChannel();
-                    boolean canSendGiveaway = ChecksClass.canSendGiveaway(textChannelEvent, event);
-                    if (!canSendGiveaway) return;
-                }
-                //Если указывали
-            } else {
-                if (textChannel instanceof TextChannel) {
-                    textChannelEvent = textChannel.asTextChannel();
-                    boolean canSendGiveaway = ChecksClass.canSendGiveaway(textChannelEvent, event);
-                    if (!canSendGiveaway) return;
-                } else if (textChannel instanceof NewsChannel) {
-                    textChannelEvent = textChannel.asNewsChannel();
-                    boolean canSendGiveaway = ChecksClass.canSendGiveaway(textChannelEvent, event);
-                    if (!canSendGiveaway) return;
-                } else {
-                    String startInNotTextChannels = jsonParsers.getLocale("start_in_not_text_channels", guildId);
-                    event.reply(startInNotTextChannels).queue();
-                    return;
-                }
-            }
-            if (textChannelEvent == null) {
-                event.reply("TextChannel is `Null`").queue();
-                return;
-            }
-
             try {
                 String title = event.getOption("title", OptionMapping::getAsString);
 
@@ -116,7 +74,7 @@ public class StartCommand {
                 Long role = event.getOption("mention", OptionMapping::getAsLong);
                 Message.Attachment image = event.getOption("image", OptionMapping::getAsAttachment);
                 String urlImage = null;
-                Integer minParticipants = event.getOption("min-participants", OptionMapping::getAsInt);
+                Integer minParticipants = event.getOption("min_participants", OptionMapping::getAsInt);
 
                 if (minParticipants == null || minParticipants == 0 || minParticipants == 1) {
                     minParticipants = 2;
@@ -173,7 +131,7 @@ public class StartCommand {
                 }
 
                 Giveaway giveaway = new Giveaway(guildIdLong,
-                        textChannelEvent.getIdLong(),
+                        event.getChannel().getIdLong(),
                         userIdLong,
                         activeGiveawayRepository,
                         participantsRepository,
@@ -182,20 +140,16 @@ public class StartCommand {
 
                 GiveawayRegistry.getInstance().putGift(guildIdLong, giveaway);
 
-                String sendSlashMessage = String.format(jsonParsers.getLocale("send_slash_message", guildId), textChannelEvent.getId());
-
                 if (!event.isAcknowledged()) {
                     try {
-                        event.reply(sendSlashMessage)
-                                .delay(5, TimeUnit.SECONDS)
-                                .flatMap(InteractionHook::deleteOriginal)
-                                .queue();
+                        String sendSlashMessage = String.format(jsonParsers.getLocale("send_slash_message", guildId), event.getChannel().getId());
+                        event.reply(sendSlashMessage).setEphemeral(true).queue();
                     } catch (Exception ignored) {
                     }
                 }
 
                 giveaway.startGiveaway(
-                        textChannelEvent,
+                        event.getGuildChannel(),
                         title,
                         count,
                         time,
