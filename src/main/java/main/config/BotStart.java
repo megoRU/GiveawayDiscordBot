@@ -5,6 +5,7 @@ import main.core.CoreBot;
 import main.core.events.ReactionEvent;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
+import main.giveaway.impl.Formats;
 import main.jsonparser.JSONParsers;
 import main.jsonparser.ParserClass;
 import main.model.entity.Notification;
@@ -47,7 +48,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -399,8 +400,6 @@ public class BotStart {
         for (Scheduling scheduling : allScheduling) {
             Timestamp localTime = new Timestamp(System.currentTimeMillis());
 
-            System.out.println(scheduling.getDateEndGiveaway().toLocalDateTime());
-
             if (localTime.after(scheduling.getDateCreateGiveaway())) {
                 try {
                     Long channelIdLong = scheduling.getChannelIdLong();
@@ -428,10 +427,8 @@ public class BotStart {
 
                             String formattedDate = null;
                             if (scheduling.getDateEndGiveaway() != null) {
-                                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
-                                LocalDateTime dateEndGiveaway = scheduling.getDateEndGiveaway().toLocalDateTime();
-                                dateEndGiveaway.format(dateTimeFormatter);
-                                formattedDate = dateEndGiveaway.toString();
+                                LocalDateTime dateEndGiveaway = LocalDateTime.ofInstant(scheduling.getDateEndGiveaway().toInstant(), ZoneOffset.UTC);
+                                formattedDate = dateEndGiveaway.format(Formats.FORMATTER);
                             }
 
                             if (role != null && isOnlyForSpecificRole) {
@@ -667,18 +664,6 @@ public class BotStart {
                         e.printStackTrace();
                     }
                 }
-            }
-            try {
-                //Для чего это я писал?
-                Giveaway.GiveawayTimerStorage giveawayTimer = GiveawayRegistry.getInstance().getGiveawayTimer(guildIdLong);
-                if (giveawayTimer != null) {
-                    StopGiveawayByTimer stopGiveawayByTimer = giveawayTimer.stopGiveawayByTimer();
-                    if (stopGiveawayByTimer.getCountDown() == 1) {
-                        stopGiveawayByTimer.countDown();
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
             try {
                 Thread.sleep(2000L);
