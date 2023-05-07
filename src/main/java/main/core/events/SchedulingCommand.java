@@ -45,9 +45,9 @@ public class SchedulingCommand {
         GuildChannelUnion textChannel = event.getOption("textchannel", OptionMapping::getAsChannel);
         Message.Attachment image = event.getOption("image", OptionMapping::getAsAttachment);
         String urlImage = image != null ? image.getUrl() : null;
-        Integer minParticipants = event.getOption("min-participants", OptionMapping::getAsInt);
-        String startTime = event.getOption("start-time", OptionMapping::getAsString);
-        String endTime = event.getOption("end-time", OptionMapping::getAsString);
+        Integer minParticipants = event.getOption("min_participants", OptionMapping::getAsInt);
+        String startTime = event.getOption("start_time", OptionMapping::getAsString);
+        String endTime = event.getOption("end_time", OptionMapping::getAsString);
 
         Scheduling schedulingByGuildLongId = schedulingRepository.getSchedulingByGuildLongId(guildIdLong);
 

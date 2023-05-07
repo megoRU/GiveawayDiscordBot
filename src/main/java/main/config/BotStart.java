@@ -151,7 +151,7 @@ public class BotStart {
             System.out.println("IsDevMode: " + Config.isIsDev());
 
             //Обновить команды
-//            updateSlashCommands();
+            updateSlashCommands();
             System.out.println("20:22");
         } catch (Exception e) {
             e.printStackTrace();
@@ -171,11 +171,11 @@ public class BotStart {
 
             //Stop
             List<OptionData> optionsStop = new ArrayList<>();
-            optionsStop.add(new OptionData(INTEGER, "count", "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1")
+            optionsStop.add(new OptionData(INTEGER, "count", "Examples: 1, 2... If not specified -> default value at startup")
                     .setName("count")
                     .setMinValue(1)
                     .setMaxValue(30)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Examples: 1, 2... If not specified, it will end with the specified at creation or with the default 1"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: 1, 2... Если не указано -> стандартное значение при запуске"));
 
             //Set language
             List<OptionData> optionsLanguage = new ArrayList<>();
@@ -188,30 +188,30 @@ public class BotStart {
             //Scheduling Giveaway
             List<OptionData> optionsScheduling = new ArrayList<>();
 
-            optionsScheduling.add(new OptionData(STRING, "start-time", "Examples: 2023.04.29 16:00. Only in this style and UTC ±0")
-                    .setName("start-time")
+            optionsScheduling.add(new OptionData(STRING, "start_time", "Examples: 2023.04.29 16:00. Only in this style and UTC ±0")
+                    .setName("start_time")
                     .setRequired(true)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: 2023.04.29 16:00. Только в этом стиле и UTC ±0"));
 
-            optionsScheduling.add(new OptionData(CHANNEL, "channel", "#TextChannel name")
+            optionsScheduling.add(new OptionData(CHANNEL, "channel", "Choose #TextChannel")
                     .setName("textchannel")
                     .setRequired(true)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "#TextChannel название"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Выбрать #TextChannel"));
 
-            optionsScheduling.add(new OptionData(STRING, "end-time", "Examples: 2023.04.29 17:00. Only in this style and UTC ±0")
-                    .setName("end-time")
+            optionsScheduling.add(new OptionData(STRING, "end_time", "Examples: 2023.04.29 17:00. Only in this style and UTC ±0")
+                    .setName("end_time")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: 2023.04.29 17:00. Только в этом стиле и UTC ±0"));
 
-            optionsScheduling.add(new OptionData(STRING, "title", "Title for Giveaway. Maximum 255 characters")
+            optionsScheduling.add(new OptionData(STRING, "title", "Title for Giveaway")
                     .setName("title")
                     .setMaxLength(255)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Название для Giveaway. Максимум 255 символов"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Название для Giveaway"));
 
-            optionsScheduling.add(new OptionData(INTEGER, "count", "Set count winners")
+            optionsScheduling.add(new OptionData(INTEGER, "count", "Set count winners. Default 1")
                     .setName("count")
                     .setMinValue(1)
                     .setMaxValue(30)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить количество победителей"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить количество победителей. По умолчанию 1"));
 
             optionsScheduling.add(new OptionData(ROLE, "mention", "Mentioning a specific @Role")
                     .setName("mention")
@@ -226,30 +226,26 @@ public class BotStart {
                     .setName("image")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить изображение для Giveaway"));
 
-            optionsScheduling.add(new OptionData(INTEGER, "min-participants", "Delete Giveaway if the number of participants is less than this number")
-                    .setName("min-participants")
+            optionsScheduling.add(new OptionData(INTEGER, "min_participants", "Delete Giveaway if the number of participants is less than this number")
+                    .setName("min_participants")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Удалить Giveaway если участников меньше этого числа"));
 
             //Start Giveaway
             List<OptionData> optionsStart = new ArrayList<>();
-            optionsStart.add(new OptionData(STRING, "title", "Title for Giveaway. Maximum 255 characters")
+            optionsStart.add(new OptionData(STRING, "title", "Title for Giveaway")
                     .setName("title")
                     .setMaxLength(255)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Название для Giveaway. Максимум 255 символов"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Название для Giveaway"));
 
-            optionsStart.add(new OptionData(INTEGER, "count", "Set count winners")
+            optionsStart.add(new OptionData(INTEGER, "count", "Set count winners. Default 1")
                     .setName("count")
                     .setMinValue(1)
                     .setMaxValue(30)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить количество победителей"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить количество победителей. По умолчанию 1"));
 
             optionsStart.add(new OptionData(STRING, "duration", "Examples: 5s, 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style and UTC ±0")
                     .setName("duration")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: 5s, 20m, 10h, 1d. Или: 2021.11.16 16:00. Только в этом стиле и UTC ±0"));
-
-            optionsStart.add(new OptionData(CHANNEL, "channel", "#TextChannel name")
-                    .setName("textchannel")
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "#TextChannel название"));
 
             optionsStart.add(new OptionData(ROLE, "mention", "Mentioning a specific @Role")
                     .setName("mention")
@@ -264,14 +260,15 @@ public class BotStart {
                     .setName("image")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить изображение для Giveaway"));
 
-            optionsStart.add(new OptionData(INTEGER, "min-participants", "Delete Giveaway if the number of participants is less than this number")
-                    .setName("min-participants")
+            optionsStart.add(new OptionData(INTEGER, "min_participants", "Delete Giveaway if the number of participants is less than this number")
+                    .setName("min_participants")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Удалить Giveaway если участников меньше этого числа"));
 
             List<OptionData> predefined = new ArrayList<>();
-            predefined.add(new OptionData(STRING, "title", "Title for Giveaway. Maximum 255 characters")
+            predefined.add(new OptionData(STRING, "title", "Title for Giveaway")
                     .setName("title")
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Название для Giveaway. Максимум 255 символов")
+                    .setMaxLength(255)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Название для Giveaway")
                     .setRequired(true));
             predefined.add(new OptionData(INTEGER, "count", "Set count winners")
                     .setName("count")

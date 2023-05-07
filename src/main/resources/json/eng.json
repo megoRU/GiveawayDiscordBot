@@ -22,7 +22,7 @@
   "slash_stop": "You have completed Giveaway",
   "slash_stop_errors": "You have not completed the Giveaway",
   "slash_errors": "You made a mistake, look at the documentation",
-  "send_slash_message": "Created Giveaway in the text channel: <#%s>\nDo not delete this message. The bot will do it for you!",
+  "send_slash_message": "Created Giveaway in the text channel: <#%s>",
   "slash_list_users": "List of participants",
   "slash_list_users_empty": "There are no participants yet",
   "gift_notification": "Notification",
