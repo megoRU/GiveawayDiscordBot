@@ -37,7 +37,6 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 
 public class Giveaway {
 
@@ -45,7 +44,7 @@ public class Giveaway {
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
-    private final List<Future<?>> futureTasks = new ArrayList<>();
+    private static final HashMap<Long, Future<?>> futureTasks = new HashMap<>();
 
     //API
     private final MegoruAPI api = new MegoruAPI.Builder().build();
@@ -157,7 +156,6 @@ public class Giveaway {
         StopGiveawayByTimer stopGiveawayByTimer = new StopGiveawayByTimer(this.guildId);
         Date date = new Date(this.giveawayData.endGiveawayDate.getTime());
 
-        stopGiveawayByTimer.countDown();
         timer.schedule(stopGiveawayByTimer, date);
         instance.putGiveawayTimer(this.guildId, stopGiveawayByTimer, timer);
         return this.giveawayData.endGiveawayDate;
@@ -369,7 +367,9 @@ public class Giveaway {
             //выбираем победителей
             getWinners(countWinner);
         } catch (Exception e) {
-            if (futureTasks.isEmpty()) {
+            Future<?> future = futureTasks.get(guildId);
+
+            if (future == null) {
                 String errorsWithApi = jsonParsers.getLocale("errors_with_api", String.valueOf(guildId));
                 String errorsDescriptions = jsonParsers.getLocale("errors_descriptions", String.valueOf(guildId));
                 EmbedBuilder errors = new EmbedBuilder();
@@ -379,10 +379,12 @@ public class Giveaway {
                 List<Button> buttons = new ArrayList<>();
                 buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
                 updateController.setView(errors.build(), guildId, textChannelId, buttons);
+
+                //Создаем задачу
                 StopGiveawayThread stopGiveawayThread = new StopGiveawayThread();
                 Future<?> submit = executorService.submit(stopGiveawayThread);
                 executorService.shutdown();
-                futureTasks.add(submit);
+                futureTasks.put(guildId, submit);
                 e.printStackTrace();
             }
             return;
@@ -419,8 +421,11 @@ public class Giveaway {
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
         instance.clearingCollections(guildId);
 
-        Stream<Boolean> booleanStream = futureTasks.stream().map(future -> future.cancel(true));
-        futureTasks.clear();
+        Future<?> future = futureTasks.get(guildId);
+        if (future != null) {
+            future.cancel(true);
+            futureTasks.remove(guildId);
+        }
     }
 
     //TODO: Не завершается после завершения
@@ -451,9 +456,10 @@ public class Giveaway {
             try {
                 while (true) {
                     if (!GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
-                        for (Future<?> futureTask : futureTasks) {
-                            futureTask.cancel(true);
-                            futureTasks.clear();
+                        Future<?> future = futureTasks.get(guildId);
+                        if (future != null) {
+                            future.cancel(true);
+                            futureTasks.remove(guildId);
                         }
                         return;
                     }

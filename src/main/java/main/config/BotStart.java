@@ -5,6 +5,7 @@ import main.core.CoreBot;
 import main.core.events.ReactionEvent;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
+import main.giveaway.impl.Formats;
 import main.jsonparser.JSONParsers;
 import main.jsonparser.ParserClass;
 import main.model.entity.Notification;
@@ -46,6 +47,8 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -391,7 +394,7 @@ public class BotStart {
         }
     }
 
-    @Scheduled(fixedDelay = 30, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = 5, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
     private void scheduleStartGiveaway() {
         List<Scheduling> allScheduling = schedulingRepository.getAllScheduling();
         for (Scheduling scheduling : allScheduling) {
@@ -422,18 +425,11 @@ public class BotStart {
                             GiveawayRegistry instance = GiveawayRegistry.getInstance();
                             instance.putGift(scheduling.getGuildLongId(), giveaway);
 
-                            //TODO: Лютый пиз*ец
                             String formattedDate = null;
                             if (scheduling.getDateEndGiveaway() != null) {
-                                Timestamp dateEndGiveaway = scheduling.getDateEndGiveaway();
-                                formattedDate = dateEndGiveaway.toInstant().toString()
-                                        .replaceAll("-", ".")
-                                        .replaceAll("T", " ")
-                                        .replaceAll(":00Z", "");
+                                LocalDateTime dateEndGiveaway = LocalDateTime.ofInstant(scheduling.getDateEndGiveaway().toInstant(), ZoneOffset.UTC);
+                                formattedDate = dateEndGiveaway.format(Formats.FORMATTER);
                             }
-
-                            System.out.println("role " + role);
-                            System.out.println("isOnlyForSpecificRole " + isOnlyForSpecificRole);
 
                             if (role != null && isOnlyForSpecificRole) {
                                 String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guildId), role);
@@ -668,18 +664,6 @@ public class BotStart {
                         e.printStackTrace();
                     }
                 }
-            }
-            try {
-                //Для чего это я писал?
-                Giveaway.GiveawayTimerStorage giveawayTimer = GiveawayRegistry.getInstance().getGiveawayTimer(guildIdLong);
-                if (giveawayTimer != null) {
-                    StopGiveawayByTimer stopGiveawayByTimer = giveawayTimer.stopGiveawayByTimer();
-                    if (stopGiveawayByTimer.getCountDown() == 1) {
-                        stopGiveawayByTimer.countDown();
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
             try {
                 Thread.sleep(2000L);
