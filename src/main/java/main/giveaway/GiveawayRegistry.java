@@ -79,7 +79,6 @@ public class GiveawayRegistry {
 
             if (giveawayTimer != null) {
                 giveawayTimer.stopGiveawayByTimer().cancel();
-                giveawayTimer.stopGiveawayByTimer().countDown();
             }
             removeGiveawayTimer(guildId);
 
