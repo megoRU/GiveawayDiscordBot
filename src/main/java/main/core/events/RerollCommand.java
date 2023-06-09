@@ -43,7 +43,7 @@ public class RerollCommand {
                 return;
             }
             User user = event.getUser();
-            List<ListUsers> listUsers = listUsersRepository.findAllByGiveawayId(Long.valueOf(id), user.getIdLong());
+            List<ListUsers> listUsers = listUsersRepository.findAllByGiveawayIdAndCreatedUserId(Long.valueOf(id), user.getIdLong());
 
             if (listUsers.isEmpty()) {
                 String noAccessReroll = jsonParsers.getLocale("no_access_reroll", guildId);

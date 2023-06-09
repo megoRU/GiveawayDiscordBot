@@ -29,7 +29,6 @@ public class UpdateController {
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final LanguageRepository languageRepository;
     private final ParticipantsRepository participantsRepository;
-    private final NotificationRepository notificationRepository;
     private final ListUsersRepository listUsersRepository;
     private final SchedulingRepository schedulingRepository;
 
@@ -43,13 +42,11 @@ public class UpdateController {
     public UpdateController(ActiveGiveawayRepository activeGiveawayRepository,
                             LanguageRepository languageRepository,
                             ParticipantsRepository participantsRepository,
-                            NotificationRepository notificationRepository,
                             ListUsersRepository listUsersRepository,
                             SchedulingRepository schedulingRepository) {
         this.activeGiveawayRepository = activeGiveawayRepository;
         this.languageRepository = languageRepository;
         this.participantsRepository = participantsRepository;
-        this.notificationRepository = notificationRepository;
         this.listUsersRepository = listUsersRepository;
         this.schedulingRepository = schedulingRepository;
     }

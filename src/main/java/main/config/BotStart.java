@@ -8,7 +8,6 @@ import main.giveaway.GiveawayRegistry;
 import main.giveaway.impl.Formats;
 import main.jsonparser.JSONParsers;
 import main.jsonparser.ParserClass;
-import main.model.entity.Notification;
 import main.model.entity.Participants;
 import main.model.entity.Scheduling;
 import main.model.repository.ActiveGiveawayRepository;
@@ -67,7 +66,6 @@ public class BotStart {
     public static final String activity = "/help | ";
     //String - guildLongId
     private static final ConcurrentMap<String, String> mapLanguages = new ConcurrentHashMap<>();
-    private static final ConcurrentMap<String, Notification.NotificationStatus> mapNotifications = new ConcurrentHashMap<>();
 
     private static JDA jda;
     private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
@@ -396,7 +394,7 @@ public class BotStart {
 
     @Scheduled(fixedDelay = 5, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
     private void scheduleStartGiveaway() {
-        List<Scheduling> allScheduling = schedulingRepository.getAllScheduling();
+        List<Scheduling> allScheduling = schedulingRepository.findAll();
         for (Scheduling scheduling : allScheduling) {
             Timestamp localTime = new Timestamp(System.currentTimeMillis());
 
@@ -515,7 +513,7 @@ public class BotStart {
                 int min_participants = rs.getInt("min_participants");
 
                 Map<String, String> participantsList = participantsRepository
-                        .getParticipantsByGuildIdLong(guild_long_id)
+                        .findAllByActiveGiveaways_GuildLongId(guild_long_id)
                         .stream()
                         .collect(Collectors.toMap(Participants::getUserIdAsString, Participants::getUserIdAsString));
 
@@ -658,7 +656,7 @@ public class BotStart {
                     if (e.getMessage() != null && e.getMessage().contains("10008: Unknown Message")
                             || e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
                         System.out.println("updateUserList() " + e.getMessage() + " удаляем!");
-                        activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
+                        activeGiveawayRepository.deleteById(guildIdLong);
                         GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
                     } else {
                         e.printStackTrace();
@@ -701,12 +699,7 @@ public class BotStart {
         return mapLanguages;
     }
 
-    public static Map<String, Notification.NotificationStatus> getMapNotifications() {
-        return mapNotifications;
-    }
-
     public static JDA getJda() {
         return jda;
     }
-
 }

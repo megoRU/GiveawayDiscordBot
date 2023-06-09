@@ -49,7 +49,7 @@ public class SchedulingCommand {
         String startTime = event.getOption("start_time", OptionMapping::getAsString);
         String endTime = event.getOption("end_time", OptionMapping::getAsString);
 
-        Scheduling schedulingByGuildLongId = schedulingRepository.getSchedulingByGuildLongId(guildIdLong);
+        Scheduling scheduling = schedulingRepository.findByGuildLongId(guildIdLong);
 
         if (GiveawayRegistry.getInstance().hasGiveaway(guildIdLong)) {
             String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_stop_giveaway", guildId);
@@ -58,7 +58,7 @@ public class SchedulingCommand {
             errors.setDescription(messageGiftNeedStopGiveaway);
             event.replyEmbeds(errors.build()).queue();
             return;
-        } else if (schedulingByGuildLongId != null) {
+        } else if (scheduling != null) {
             String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_cancel_giveaway", guildId);
             EmbedBuilder errors = new EmbedBuilder();
             errors.setColor(Color.GREEN);
@@ -106,7 +106,7 @@ public class SchedulingCommand {
                 return;
             }
 
-            Scheduling scheduling = new Scheduling();
+            scheduling = new Scheduling();
             scheduling.setGuildLongId(guildIdLong);
             scheduling.setChannelIdLong(textChannel.getIdLong());
             scheduling.setCountWinners(count);
@@ -139,9 +139,7 @@ public class SchedulingCommand {
             start.setColor(Color.GREEN);
             start.setDescription(scheduleStart);
 
-            event.replyEmbeds(start.build())
-                    .setEphemeral(true)
-                    .queue();
+            event.replyEmbeds(start.build()).setEphemeral(true).queue();
         } else {
             String startInNotTextChannels = jsonParsers.getLocale("start_in_not_text_channels", guildId);
             event.reply(startInNotTextChannels).queue();

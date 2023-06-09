@@ -312,7 +312,7 @@ public class Giveaway {
                 wait(10000L);
             }
         }
-        List<Participants> participants = participantsRepository.getParticipantsByGuildIdLong(guildId); //TODO: Native use may be
+        List<Participants> participants = participantsRepository.findAllByActiveGiveaways_GuildLongId(guildId); //TODO: Native use may be
         if (participants.isEmpty()) throw new Exception("participants is Empty");
         LOGGER.info("\nparticipants size: " + participants.size());
 
@@ -353,7 +353,7 @@ public class Giveaway {
 
                 updateController.setView(notEnoughUsers, guildId, textChannelId);
 
-                activeGiveawayRepository.deleteActiveGiveaways(guildId);
+                activeGiveawayRepository.deleteById(guildId);
                 //Удаляет данные из коллекций
                 GiveawayRegistry instance = GiveawayRegistry.getInstance();
                 instance.clearingCollections(guildId);
@@ -415,7 +415,7 @@ public class Giveaway {
         updateController.setView(urlEmbedded.build(), winnersContent, this.guildId, textChannelId);
 
         listUsersRepository.saveAllParticipantsToUserList(guildId);
-        activeGiveawayRepository.deleteActiveGiveaways(guildId);
+        activeGiveawayRepository.deleteById(guildId);
 
         //Удаляет данные из коллекций
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
