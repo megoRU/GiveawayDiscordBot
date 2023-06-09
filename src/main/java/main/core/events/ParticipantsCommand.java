@@ -40,7 +40,7 @@ public class ParticipantsCommand {
             if (id != null) {
                 File file = new File("participants.json");
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                List<ListUsers> listUsers = listUsersRepository.findAllByGiveawayId(Long.parseLong(id), userIdLong);
+                List<ListUsers> listUsers = listUsersRepository.findAllByGiveawayIdAndCreatedUserId(Long.parseLong(id), userIdLong);
                 if (listUsers.isEmpty()) {
                     String noAccessReroll = jsonParsers.getLocale("no_access_reroll", guildId);
                     event.getHook().sendMessage(noAccessReroll).setEphemeral(true).queue();

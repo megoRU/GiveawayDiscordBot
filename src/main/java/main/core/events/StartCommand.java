@@ -49,7 +49,7 @@ public class StartCommand {
         var guildId = Objects.requireNonNull(event.getGuild()).getId();
         var userIdLong = event.getUser().getIdLong();
 
-        Scheduling schedulingByGuildLongId = schedulingRepository.getSchedulingByGuildLongId(guildIdLong);
+        Scheduling schedulingByGuildLongId = schedulingRepository.findByGuildLongId(guildIdLong);
         if (GiveawayRegistry.getInstance().hasGiveaway(guildIdLong)) {
             String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_stop_giveaway", guildId);
             EmbedBuilder errors = new EmbedBuilder();
@@ -170,7 +170,7 @@ public class StartCommand {
                 if (event.isAcknowledged()) event.getHook().editOriginalEmbeds(errors.build()).queue();
                 else event.getChannel().sendMessageEmbeds(errors.build()).queue();
                 GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
-                activeGiveawayRepository.deleteActiveGiveaways(guildIdLong);
+                activeGiveawayRepository.deleteById(guildIdLong);
             }
         }
     }

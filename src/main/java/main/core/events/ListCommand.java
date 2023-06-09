@@ -33,7 +33,7 @@ public class ListCommand {
         event.deferReply().setEphemeral(true).queue();
         if (GiveawayRegistry.getInstance().hasGiveaway(guildIdLong)) {
             StringBuilder stringBuilder = new StringBuilder();
-            List<Participants> participantsList = participantsRepository.getParticipantsByGuildIdLong(guildIdLong);
+            List<Participants> participantsList = participantsRepository.findAllByActiveGiveaways_GuildLongId(guildIdLong);
 
             if (participantsList.isEmpty()) {
                 String slashListUsersEmpty = jsonParsers.getLocale("slash_list_users_empty", guildId);

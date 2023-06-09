@@ -22,8 +22,8 @@ public class LeaveEvent {
     public void leave(@NotNull GuildLeaveEvent event) {
         try {
             System.out.println("Удаляем данные после удаления бота из Guild");
-            languageRepository.deleteLanguage(event.getGuild().getId());
-            activeGiveawayRepository.deleteActiveGiveaways(event.getGuild().getIdLong());
+            languageRepository.deleteById(event.getGuild().getId());
+            activeGiveawayRepository.deleteById(event.getGuild().getIdLong());
         } catch (Exception e) {
             e.printStackTrace();
         }

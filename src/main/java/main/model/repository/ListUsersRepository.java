@@ -21,6 +21,5 @@ public interface ListUsersRepository extends JpaRepository<ListUsers, Long> {
             "WHERE ag.guild_long_id = :guildId AND p.guild_id = :guildId", nativeQuery = true)
     void saveAllParticipantsToUserList(@Param("guildId") Long guildId);
 
-    @Query("SELECT lu FROM ListUsers lu WHERE lu.giveawayId = :giveawayId AND lu.createdUserId = :createdUserId")
-    List<ListUsers> findAllByGiveawayId(@Param("giveawayId") Long giveawayId, @Param("createdUserId") Long createdUserId);
+    List<ListUsers> findAllByGiveawayIdAndCreatedUserId(Long giveawayId, Long createdUserId);
 }

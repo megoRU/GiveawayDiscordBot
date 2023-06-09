@@ -88,7 +88,7 @@ public class CoreBot extends ListenerAdapter {
             if (e.getMessage().contains("10008: Unknown Message")
                     || e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
                 System.out.println(e.getMessage() + " удаляем!");
-                updateController.getActiveGiveawayRepository().deleteActiveGiveaways(guildId);
+                updateController.getActiveGiveawayRepository().deleteById(guildId);
                 GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildId);
             } else {
                 e.printStackTrace();
