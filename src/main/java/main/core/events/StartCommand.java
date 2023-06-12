@@ -1,6 +1,7 @@
 package main.core.events;
 
 import main.controller.UpdateController;
+import main.giveaway.ChecksClass;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
 import main.giveaway.impl.Formats;
@@ -75,6 +76,9 @@ public class StartCommand {
                 Message.Attachment image = event.getOption("image", OptionMapping::getAsAttachment);
                 String urlImage = null;
                 Integer minParticipants = event.getOption("min_participants", OptionMapping::getAsInt);
+
+                boolean canSendGiveaway = ChecksClass.canSendGiveaway(event.getGuildChannel(), event);
+                if (!canSendGiveaway) return; //Сообщение уже отправлено
 
                 if (minParticipants == null || minParticipants == 0 || minParticipants == 1) {
                     minParticipants = 2;
