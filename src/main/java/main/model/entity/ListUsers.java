@@ -34,7 +34,4 @@ public class ListUsers {
     @Column(name = "nick_name", nullable = false)
     private String nickName;
 
-    @Column(name = "nick_name_tag", nullable = false)
-    private String nickNameTag;
-
 }

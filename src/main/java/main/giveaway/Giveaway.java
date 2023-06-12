@@ -245,7 +245,6 @@ public class Giveaway {
             Participants participants = new Participants();
             participants.setUserIdLong(user.getIdLong());
             participants.setNickName(user.getName());
-            participants.setNickNameTag(user.getAsTag());
 //            participants.setActiveGiveaways(activeGiveaways); //Can`t be null
             participantsList.add(participants);
         }
@@ -274,17 +273,13 @@ public class Giveaway {
                                             .replaceAll("`", ""))
                                     .append("', ")
                                     .append(poll.getUserIdLong()).append(", ")
-                                    .append(guildId).append(", ")
-                                    .append("'").append(poll.getNickNameTag()
-                                            .replaceAll("'", "")
-                                            .replaceAll("\"", "")
-                                            .replaceAll("`", ""))
-                                    .append("')");
+                                    .append(guildId)
+                                    .append(")");
                         }
                     }
 
                     if (stringBuilder.length() != 0) {
-                        String executeQuery = String.format("INSERT INTO participants (nick_name, user_long_id, guild_id, nick_name_tag) VALUES %s;", stringBuilder);
+                        String executeQuery = String.format("INSERT INTO participants (nick_name, user_long_id, guild_id) VALUES %s;", stringBuilder);
                         statement.execute(executeQuery);
                     }
                     statement.close();
@@ -322,7 +317,6 @@ public class Giveaway {
                 stringBuilder
                         .append("getIdUserWhoCreateGiveaway ").append(participant.getActiveGiveaways().getIdUserWhoCreateGiveaway())
                         .append("getUserIdLong ").append(participant.getUserIdLong())
-                        .append("getNickNameTag ").append(participant.getNickNameTag())
                         .append("getGiveawayId ").append(participant.getActiveGiveaways().getMessageIdLong())
                         .append("getGuildId ").append(participant.getActiveGiveaways().getGuildLongId())
                         .append("\n");
