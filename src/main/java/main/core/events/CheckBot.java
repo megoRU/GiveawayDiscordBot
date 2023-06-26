@@ -24,7 +24,6 @@ public class CheckBot {
         boolean canSendGiveaway = ChecksClass.canSendGiveaway(guildChannel, event);
         if (canSendGiveaway) {
             String giftPermissions = String.format(jsonParsers.getLocale("gift_permissions", guildId), guildChannel.getId());
-
             event.reply(giftPermissions).queue();
         }
     }
