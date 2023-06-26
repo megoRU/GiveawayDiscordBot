@@ -3,6 +3,7 @@ package main.core.events;
 import main.controller.UpdateController;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
+import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
@@ -13,8 +14,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.util.logging.Logger;
-
-import static main.giveaway.impl.URLS.getDiscordUrlMessage;
 
 public class ReactionEvent {
 
@@ -48,7 +47,7 @@ public class ReactionEvent {
                         boolean isForSpecificRole = giveaway.isForSpecificRole();
 
                         if (isForSpecificRole && !event.getMember().getRoles().contains(roleById)) {
-                            String url = getDiscordUrlMessage(guildIdLong, event.getGuildChannel().getIdLong(), messageIdWithReactionCurrent);
+                            String url = GiveawayUtils.getDiscordUrlMessage(guildIdLong, event.getGuildChannel().getIdLong(), messageIdWithReactionCurrent);
                             LOGGER.info(String.format("\nНажал на эмодзи, но у него нет доступа к розыгрышу: %s", user.getId()));
                             //Получаем ссылку на Giveaway
 

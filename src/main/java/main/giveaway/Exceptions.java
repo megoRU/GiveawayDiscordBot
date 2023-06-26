@@ -16,8 +16,7 @@ public class Exceptions {
     private final static Logger LOG = JDALogger.getLog(Exceptions.class);
 
     public static void handle(Throwable e, InteractionHook hook) {
-        if (e instanceof UnsuccessfulHttpException) {
-            UnsuccessfulHttpException uhe = (UnsuccessfulHttpException) e;
+        if (e instanceof UnsuccessfulHttpException uhe) {
             if (uhe.getCode() == 404) {
                 hook.sendMessage(uhe.getMessage()).setEphemeral(true).queue();
                 LOG.info(uhe.getMessage());

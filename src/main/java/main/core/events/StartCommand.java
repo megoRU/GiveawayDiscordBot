@@ -4,8 +4,7 @@ import main.controller.UpdateController;
 import main.giveaway.ChecksClass;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
-import main.giveaway.impl.Formats;
-import main.giveaway.impl.TimeHandler;
+import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.model.entity.Scheduling;
 import main.model.repository.ActiveGiveawayRepository;
@@ -46,9 +45,19 @@ public class StartCommand {
     }
 
     public void start(@NotNull SlashCommandInteractionEvent event, UpdateController updateController) {
+        boolean canSendGiveaway = ChecksClass.canSendGiveaway(event.getGuildChannel(), event);
+        if (!canSendGiveaway) return; //Сообщение уже отправлено
+
         var guildIdLong = Objects.requireNonNull(event.getGuild()).getIdLong();
         var guildId = Objects.requireNonNull(event.getGuild()).getId();
         var userIdLong = event.getUser().getIdLong();
+        String title = event.getOption("title", OptionMapping::getAsString);
+        String countString = event.getOption("count", OptionMapping::getAsString);
+        String time = event.getOption("duration", OptionMapping::getAsString);
+        if (time != null) time = time.replaceAll("-", ".");
+        Long role = event.getOption("mention", OptionMapping::getAsLong);
+        Message.Attachment image = event.getOption("image", OptionMapping::getAsAttachment);
+        Integer minParticipants = event.getOption("min_participants", OptionMapping::getAsInt);
 
         Scheduling schedulingByGuildLongId = schedulingRepository.findByGuildLongId(guildIdLong);
         if (GiveawayRegistry.getInstance().hasGiveaway(guildIdLong)) {
@@ -65,20 +74,9 @@ public class StartCommand {
             event.replyEmbeds(errors.build()).queue();
         } else {
             try {
-                String title = event.getOption("title", OptionMapping::getAsString);
-
-                int count = 1;
-                String countString = event.getOption("count", OptionMapping::getAsString);
-                if (countString != null) count = Integer.parseInt(countString);
-                String time = event.getOption("duration", OptionMapping::getAsString);
-                if (time != null) time = time.replaceAll("-", ".");
-                Long role = event.getOption("mention", OptionMapping::getAsLong);
-                Message.Attachment image = event.getOption("image", OptionMapping::getAsAttachment);
                 String urlImage = null;
-                Integer minParticipants = event.getOption("min_participants", OptionMapping::getAsInt);
-
-                boolean canSendGiveaway = ChecksClass.canSendGiveaway(event.getGuildChannel(), event);
-                if (!canSendGiveaway) return; //Сообщение уже отправлено
+                int count = 1;
+                if (countString != null) count = Integer.parseInt(countString);
 
                 if (minParticipants == null || minParticipants == 0 || minParticipants == 1) {
                     minParticipants = 2;
@@ -93,7 +91,7 @@ public class StartCommand {
                 EmbedBuilder embedBuilder = new EmbedBuilder();
                 embedBuilder.setColor(Color.BLACK);
 
-                if (time != null && !time.matches(Formats.TIME_REGEX)) {
+                if (time != null && !time.matches(GiveawayUtils.TIME_REGEX)) {
                     String startExamples = jsonParsers.getLocale("start_examples", guildId);
                     String startWrongTime = String.format(jsonParsers.getLocale("start_wrong_time", guildId), time, startExamples);
 
@@ -109,8 +107,8 @@ public class StartCommand {
                     return;
                 }
 
-                if (time != null && time.matches(Formats.ISO_TIME_REGEX)) {
-                    if (TimeHandler.get(event, guildId, time)) return;
+                if (time != null && time.matches(GiveawayUtils.ISO_TIME_REGEX)) {
+                    if (GiveawayUtils.timeHandler(event, guildId, time)) return;
                 }
 
                 if (role == null && isOnlyForSpecificRole) {

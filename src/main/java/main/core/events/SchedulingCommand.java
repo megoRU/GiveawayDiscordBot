@@ -2,7 +2,7 @@ package main.core.events;
 
 import main.giveaway.ChecksClass;
 import main.giveaway.GiveawayRegistry;
-import main.giveaway.impl.Formats;
+import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.model.entity.Scheduling;
 import main.model.repository.SchedulingRepository;
@@ -49,6 +49,14 @@ public class SchedulingCommand {
         String startTime = event.getOption("start_time", OptionMapping::getAsString);
         String endTime = event.getOption("end_time", OptionMapping::getAsString);
 
+        if (textChannel == null) {
+            event.reply("TextChannel is `Null`").queue();
+            return;
+        }
+
+        boolean canSendGiveaway = ChecksClass.canSendGiveaway(textChannel, event);
+        if (!canSendGiveaway) return; //Сообщение уже отправлено
+
         Scheduling scheduling = schedulingRepository.findByGuildLongId(guildIdLong);
 
         if (GiveawayRegistry.getInstance().hasGiveaway(guildIdLong)) {
@@ -67,20 +75,12 @@ public class SchedulingCommand {
             return;
         }
 
-        if ((startTime != null && !startTime.matches(Formats.ISO_TIME_REGEX)
-                || (endTime != null && !endTime.matches(Formats.ISO_TIME_REGEX)))) {
+        if ((startTime != null && !startTime.matches(GiveawayUtils.ISO_TIME_REGEX)
+                || (endTime != null && !endTime.matches(GiveawayUtils.ISO_TIME_REGEX)))) {
             String wrongDate = jsonParsers.getLocale("wrong_date", guildId);
             event.reply(wrongDate).queue();
             return;
         }
-
-        if (textChannel == null) {
-            event.reply("TextChannel is `Null`").queue();
-            return;
-        }
-
-        boolean canSendGiveaway = ChecksClass.canSendGiveaway(textChannel, event);
-        if (!canSendGiveaway) return; //Сообщение уже отправлено
 
         if (textChannel instanceof NewsChannel || textChannel instanceof TextChannel) {
             int count = 1;
@@ -149,7 +149,7 @@ public class SchedulingCommand {
     private Timestamp timeProcessor(String time) {
         if (time == null) return null;
         ZoneOffset offset = ZoneOffset.UTC;
-        LocalDateTime localDateTime = LocalDateTime.parse(time, Formats.FORMATTER);
+        LocalDateTime localDateTime = LocalDateTime.parse(time, GiveawayUtils.FORMATTER);
         long toEpochSecond = localDateTime.toEpochSecond(offset);
         return new Timestamp(toEpochSecond * 1000);
     }
