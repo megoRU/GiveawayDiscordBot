@@ -10,4 +10,9 @@ import java.util.List;
 public interface ParticipantsRepository extends JpaRepository<Participants, Long> {
 
     List<Participants> findAllByActiveGiveaways_GuildLongId(Long activeGiveaways_guildLongId);
+
+//    @Override
+//    @Modifying
+//    @NotNull
+//    <S extends Participants> List<S> saveAll(@NotNull Iterable<S> entities);
 }

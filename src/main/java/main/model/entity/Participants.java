@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.jetbrains.annotations.Nullable;
 
 @Getter
 @Setter
@@ -16,11 +15,9 @@ import org.jetbrains.annotations.Nullable;
 public class Participants {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    @Nullable
     @ManyToOne(cascade = CascadeType.MERGE) // Java хуита. На этом можно закончить
     @JoinColumn(name = "guild_id", referencedColumnName = "guild_long_id", nullable = false)
     private ActiveGiveaways activeGiveaways;

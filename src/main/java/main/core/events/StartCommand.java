@@ -46,9 +46,19 @@ public class StartCommand {
     }
 
     public void start(@NotNull SlashCommandInteractionEvent event, UpdateController updateController) {
+        boolean canSendGiveaway = ChecksClass.canSendGiveaway(event.getGuildChannel(), event);
+        if (!canSendGiveaway) return; //Сообщение уже отправлено
+
         var guildIdLong = Objects.requireNonNull(event.getGuild()).getIdLong();
         var guildId = Objects.requireNonNull(event.getGuild()).getId();
         var userIdLong = event.getUser().getIdLong();
+        String title = event.getOption("title", OptionMapping::getAsString);
+        String countString = event.getOption("count", OptionMapping::getAsString);
+        String time = event.getOption("duration", OptionMapping::getAsString);
+        if (time != null) time = time.replaceAll("-", ".");
+        Long role = event.getOption("mention", OptionMapping::getAsLong);
+        Message.Attachment image = event.getOption("image", OptionMapping::getAsAttachment);
+        Integer minParticipants = event.getOption("min_participants", OptionMapping::getAsInt);
 
         Scheduling schedulingByGuildLongId = schedulingRepository.findByGuildLongId(guildIdLong);
         if (GiveawayRegistry.getInstance().hasGiveaway(guildIdLong)) {
@@ -65,20 +75,9 @@ public class StartCommand {
             event.replyEmbeds(errors.build()).queue();
         } else {
             try {
-                String title = event.getOption("title", OptionMapping::getAsString);
-
-                int count = 1;
-                String countString = event.getOption("count", OptionMapping::getAsString);
-                if (countString != null) count = Integer.parseInt(countString);
-                String time = event.getOption("duration", OptionMapping::getAsString);
-                if (time != null) time = time.replaceAll("-", ".");
-                Long role = event.getOption("mention", OptionMapping::getAsLong);
-                Message.Attachment image = event.getOption("image", OptionMapping::getAsAttachment);
                 String urlImage = null;
-                Integer minParticipants = event.getOption("min_participants", OptionMapping::getAsInt);
-
-                boolean canSendGiveaway = ChecksClass.canSendGiveaway(event.getGuildChannel(), event);
-                if (!canSendGiveaway) return; //Сообщение уже отправлено
+                int count = 1;
+                if (countString != null) count = Integer.parseInt(countString);
 
                 if (minParticipants == null || minParticipants == 0 || minParticipants == 1) {
                     minParticipants = 2;

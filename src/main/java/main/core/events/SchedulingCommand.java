@@ -49,6 +49,14 @@ public class SchedulingCommand {
         String startTime = event.getOption("start_time", OptionMapping::getAsString);
         String endTime = event.getOption("end_time", OptionMapping::getAsString);
 
+        if (textChannel == null) {
+            event.reply("TextChannel is `Null`").queue();
+            return;
+        }
+
+        boolean canSendGiveaway = ChecksClass.canSendGiveaway(textChannel, event);
+        if (!canSendGiveaway) return; //Сообщение уже отправлено
+
         Scheduling scheduling = schedulingRepository.findByGuildLongId(guildIdLong);
 
         if (GiveawayRegistry.getInstance().hasGiveaway(guildIdLong)) {
@@ -73,14 +81,6 @@ public class SchedulingCommand {
             event.reply(wrongDate).queue();
             return;
         }
-
-        if (textChannel == null) {
-            event.reply("TextChannel is `Null`").queue();
-            return;
-        }
-
-        boolean canSendGiveaway = ChecksClass.canSendGiveaway(textChannel, event);
-        if (!canSendGiveaway) return; //Сообщение уже отправлено
 
         if (textChannel instanceof NewsChannel || textChannel instanceof TextChannel) {
             int count = 1;

@@ -4,7 +4,6 @@ import api.megoru.ru.entity.Winners;
 import api.megoru.ru.impl.MegoruAPI;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import main.config.Config;
 import main.controller.UpdateController;
 import main.core.events.ReactionEvent;
 import main.giveaway.impl.Formats;
@@ -25,9 +24,6 @@ import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import java.awt.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -237,6 +233,20 @@ public class Giveaway {
                 user.getName(),
                 user.getId(),
                 guildId));
+
+        ActiveGiveaways activeGiveaways = updateController.getActiveGiveawayRepository().getReferenceById(guildId);
+
+        System.out.println(activeGiveaways.getGuildLongId());
+
+        for (int i = 0; i < 1000; i++) {
+            //Add user to Collection
+            Participants participants = new Participants();
+            participants.setUserIdLong(Long.parseLong(String.valueOf(i)));
+            participants.setNickName("test: " + i);
+            participants.setActiveGiveaways(activeGiveaways); //Can`t be null
+            participantsList.add(participants);
+        }
+
         if (!listUsersHash.containsKey(user.getId())) {
             count.incrementAndGet();
             listUsersHash.put(user.getId(), user.getId());
@@ -245,45 +255,22 @@ public class Giveaway {
             Participants participants = new Participants();
             participants.setUserIdLong(user.getIdLong());
             participants.setNickName(user.getName());
-//            participants.setActiveGiveaways(activeGiveaways); //Can`t be null
+            participants.setActiveGiveaways(activeGiveaways); //Can`t be null
             participantsList.add(participants);
         }
     }
 
-    private synchronized void multiInsert() {
+    private void multiInsert() {
         try {
             if (count.get() > localCountUsers && GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
                 localCountUsers = count.get();
                 if (!participantsList.isEmpty()) {
-                    StringBuilder stringBuilder = new StringBuilder();
-                    Connection connection = DriverManager.getConnection(
-                            Config.getDatabaseUrl(),
-                            Config.getDatabaseUser(),
-                            Config.getDatabasePass());
-                    Statement statement = connection.createStatement();
-                    int size = participantsList.size();
-                    for (int i = 0; i < size; i++) {
-                        Participants poll = participantsList.poll();
-                        if (poll != null) {
-                            stringBuilder
-                                    .append(stringBuilder.length() == 0 ? "(" : ", (")
-                                    .append("'").append(poll.getNickName()
-                                            .replaceAll("'", "")
-                                            .replaceAll("\"", "")
-                                            .replaceAll("`", ""))
-                                    .append("', ")
-                                    .append(poll.getUserIdLong()).append(", ")
-                                    .append(guildId)
-                                    .append(")");
-                        }
-                    }
+                    //Сохраняем всех участников в temp коллекцию
+                    Set<Participants> temp = new LinkedHashSet<>(participantsList);
 
-                    if (stringBuilder.length() != 0) {
-                        String executeQuery = String.format("INSERT INTO participants (nick_name, user_long_id, guild_id) VALUES %s;", stringBuilder);
-                        statement.execute(executeQuery);
-                    }
-                    statement.close();
-                    connection.close();
+                    participantsRepository.saveAll(temp);
+                    //Удаляем все элементы которые уже в БД
+                    participantsList.removeAll(temp);
                 }
                 if (participantsList.isEmpty()) {
                     synchronized (this) {
@@ -293,10 +280,59 @@ public class Giveaway {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            String format = String.format("Таблица: %s больше не существует, скорее всего Giveaway завершился!", guildId);
+            String format = String.format("Таблица: %s больше не существует, скорее всего Giveaway завершился!" +
+                    "\nОчищаем StringBuilder!", guildId);
             LOGGER.info(format);
         }
     }
+
+//    private synchronized void multiInsert() {
+//        try {
+//            if (count.get() > localCountUsers && GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
+//                localCountUsers = count.get();
+//                if (!participantsList.isEmpty()) {
+//                    StringBuilder stringBuilder = new StringBuilder();
+//                    Connection connection = DriverManager.getConnection(
+//                            Config.getDatabaseUrl(),
+//                            Config.getDatabaseUser(),
+//                            Config.getDatabasePass());
+//                    Statement statement = connection.createStatement();
+//                    int size = participantsList.size();
+//                    for (int i = 0; i < size; i++) {
+//                        Participants poll = participantsList.poll();
+//                        if (poll != null) {
+//                            stringBuilder
+//                                    .append(stringBuilder.length() == 0 ? "(" : ", (")
+//                                    .append("'").append(poll.getNickName()
+//                                            .replaceAll("'", "")
+//                                            .replaceAll("\"", "")
+//                                            .replaceAll("`", ""))
+//                                    .append("', ")
+//                                    .append(poll.getUserIdLong()).append(", ")
+//                                    .append(guildId)
+//                                    .append(")");
+//                        }
+//                    }
+//
+//                    if (stringBuilder.length() != 0) {
+//                        String executeQuery = String.format("INSERT INTO participants (nick_name, user_long_id, guild_id) VALUES %s;", stringBuilder);
+//                        statement.execute(executeQuery);
+//                    }
+//                    statement.close();
+//                    connection.close();
+//                }
+//                if (participantsList.isEmpty()) {
+//                    synchronized (this) {
+//                        notifyAll();
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            String format = String.format("Таблица: %s больше не существует, скорее всего Giveaway завершился!", guildId);
+//            LOGGER.info(format);
+//        }
+//    }
 
     /**
      * @throws Exception Throws an exception
