@@ -4,8 +4,7 @@ import main.controller.UpdateController;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayEmbedUtils;
 import main.giveaway.GiveawayRegistry;
-import main.giveaway.impl.Formats;
-import main.giveaway.impl.TimeHandler;
+import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.model.repository.ActiveGiveawayRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -43,8 +42,8 @@ public class ChangeCommand {
         }
         String time = event.getOption("duration", OptionMapping::getAsString);
         if (time != null) {
-            if (time.matches(Formats.ISO_TIME_REGEX)) {
-                if (TimeHandler.get(event, guildId, time)) return;
+            if (time.matches(GiveawayUtils.ISO_TIME_REGEX)) {
+                if (GiveawayUtils.timeHandler(event, guildId, time)) return;
 
                 long channelId = giveaway.getTextChannelId();
                 long messageId = giveaway.getMessageId();

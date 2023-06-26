@@ -5,7 +5,7 @@ import main.core.CoreBot;
 import main.core.events.ReactionEvent;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
-import main.giveaway.impl.Formats;
+import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.jsonparser.ParserClass;
 import main.model.entity.Participants;
@@ -426,7 +426,7 @@ public class BotStart {
                             String formattedDate = null;
                             if (scheduling.getDateEndGiveaway() != null) {
                                 LocalDateTime dateEndGiveaway = LocalDateTime.ofInstant(scheduling.getDateEndGiveaway().toInstant(), ZoneOffset.UTC);
-                                formattedDate = dateEndGiveaway.format(Formats.FORMATTER);
+                                formattedDate = dateEndGiveaway.format(GiveawayUtils.FORMATTER);
                             }
 
                             if (role != null && isOnlyForSpecificRole) {

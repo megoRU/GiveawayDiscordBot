@@ -82,6 +82,7 @@ public class GiveawayRegistry {
             }
             removeGiveawayTimer(guildId);
 
+            //Что это?
             Giveaway giveaway = getGiveaway(guildId);
             if (giveaway != null) {
                 giveaway.setCount(0);

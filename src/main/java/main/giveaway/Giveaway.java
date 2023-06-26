@@ -7,9 +7,6 @@ import lombok.NoArgsConstructor;
 import main.config.Config;
 import main.controller.UpdateController;
 import main.core.events.ReactionEvent;
-import main.giveaway.impl.Formats;
-import main.giveaway.impl.Seconds;
-import main.giveaway.impl.URLS;
 import main.jsonparser.JSONParsers;
 import main.model.entity.ActiveGiveaways;
 import main.model.entity.Participants;
@@ -139,10 +136,10 @@ public class Giveaway {
         ZoneOffset offset = ZoneOffset.UTC;
         LocalDateTime localDateTime;
 
-        if (time.matches(Formats.ISO_TIME_REGEX)) {
-            localDateTime = LocalDateTime.parse(time, Formats.FORMATTER);
+        if (time.matches(GiveawayUtils.ISO_TIME_REGEX)) {
+            localDateTime = LocalDateTime.parse(time, GiveawayUtils.FORMATTER);
         } else {
-            long seconds = Seconds.getSeconds(time);
+            long seconds = GiveawayUtils.getSeconds(time);
             localDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).plusSeconds(seconds);
         }
 
@@ -386,7 +383,7 @@ public class Giveaway {
 
         EmbedBuilder urlEmbedded = new EmbedBuilder();
         urlEmbedded.setColor(Color.GREEN);
-        String url = URLS.getDiscordUrlMessage(this.guildId, this.textChannelId, this.giveawayData.messageId);
+        String url = GiveawayUtils.getDiscordUrlMessage(this.guildId, this.textChannelId, this.giveawayData.messageId);
         String winnerArray = Arrays.toString(uniqueWinners.toArray())
                 .replaceAll("\\[", "")
                 .replaceAll("]", "");
