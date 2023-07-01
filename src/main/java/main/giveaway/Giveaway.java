@@ -295,39 +295,6 @@ public class Giveaway {
         }
     }
 
-    /**
-     * @throws Exception Throws an exception
-     */
-    private void getWinners(int countWinner) throws Exception {
-        if (!participantsList.isEmpty()) {
-            synchronized (this) {
-                wait(10000L);
-            }
-        }
-        List<Participants> participants = participantsRepository.findAllByActiveGiveaways_GuildLongId(guildId); //TODO: Native use may be
-        if (participants.isEmpty()) throw new Exception("participants is Empty");
-        LOGGER.info("\nparticipants size: " + participants.size());
-
-        StringBuilder stringBuilder = new StringBuilder();
-        for (Participants participant : participants) {
-            if (participant.getActiveGiveaways() != null) {
-                stringBuilder
-                        .append("getIdUserWhoCreateGiveaway ").append(participant.getActiveGiveaways().getIdUserWhoCreateGiveaway())
-                        .append("getUserIdLong ").append(participant.getUserIdLong())
-                        .append("getGiveawayId ").append(participant.getActiveGiveaways().getMessageIdLong())
-                        .append("getGuildId ").append(participant.getActiveGiveaways().getGuildLongId())
-                        .append("\n");
-            }
-        }
-        System.out.println(stringBuilder);
-        Winners winners = new Winners(countWinner, 0, listUsersHash.size() - 1);
-        LOGGER.info(winners.toString());
-        String[] strings = api.setWinners(winners);
-        for (String string : strings) {
-            uniqueWinners.add("<@" + participants.get(Integer.parseInt(string)).getUserIdLong() + ">");
-        }
-    }
-
     public void stopGiveaway(final int countWinner) {
         LOGGER.info("\nstopGift method" + "\nCount winners: " + countWinner);
         try {
@@ -356,7 +323,33 @@ public class Giveaway {
 
         try {
             //выбираем победителей
-            getWinners(countWinner);
+            if (!participantsList.isEmpty()) {
+                synchronized (this) {
+                    wait(10000L);
+                }
+            }
+            List<Participants> participants = participantsRepository.findAllByActiveGiveaways_GuildLongId(guildId); //TODO: Native use may be
+            if (participants.isEmpty()) throw new Exception("participants is Empty");
+            LOGGER.info("\nparticipants size: " + participants.size());
+
+            StringBuilder stringBuilder = new StringBuilder();
+            for (Participants participant : participants) {
+                if (participant.getActiveGiveaways() != null) {
+                    stringBuilder
+                            .append("getIdUserWhoCreateGiveaway ").append(participant.getActiveGiveaways().getIdUserWhoCreateGiveaway())
+                            .append("getUserIdLong ").append(participant.getUserIdLong())
+                            .append("getGiveawayId ").append(participant.getActiveGiveaways().getMessageIdLong())
+                            .append("getGuildId ").append(participant.getActiveGiveaways().getGuildLongId())
+                            .append("\n");
+                }
+            }
+            System.out.println(stringBuilder);
+            Winners winners = new Winners(countWinner, 0, listUsersHash.size() - 1);
+            LOGGER.info(winners.toString());
+            String[] strings = api.setWinners(winners);
+            for (String string : strings) {
+                uniqueWinners.add("<@" + participants.get(Integer.parseInt(string)).getUserIdLong() + ">");
+            }
         } catch (Exception e) {
             Future<?> future = futureTasks.get(guildId);
 
