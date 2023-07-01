@@ -29,7 +29,7 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
-import org.boticordjava.api.entity.Enums.TokenEnum;
+import org.boticordjava.api.entity.bot.stats.BotStats;
 import org.boticordjava.api.impl.BotiCordAPI;
 import org.discordbots.api.client.DiscordBotListAPI;
 import org.json.simple.JSONObject;
@@ -72,7 +72,6 @@ public class BotStart {
 
     //API
     private final BotiCordAPI api = new BotiCordAPI.Builder()
-            .tokenEnum(TokenEnum.BOT)
             .token(Config.getBoticord())
             .enableDevMode()
             .build();
@@ -385,7 +384,8 @@ public class BotStart {
                 AtomicInteger usersCount = new AtomicInteger();
                 BotStart.jda.getGuilds().forEach(g -> usersCount.addAndGet(g.getMembers().size()));
 
-                api.setStats(serverCount, 1, usersCount.get());
+                BotStats botStats = new BotStats(usersCount.get(), serverCount, 1);
+                api.setBotStats(Config.getBotId(), botStats);
             } catch (Exception e) {
                 e.printStackTrace();
             }
