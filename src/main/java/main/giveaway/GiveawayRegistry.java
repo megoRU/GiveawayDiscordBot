@@ -4,15 +4,15 @@ import main.threads.StopGiveawayByTimer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class GiveawayRegistry {
 
     //Возвращает GiveawayData по long id
-    private static final Map<Long, Giveaway> giveawayMap = new HashMap<>();
-    private static final Map<Long, Giveaway.GiveawayTimerStorage> giveawayTimer = new HashMap<>();
+    private static final Map<Long, Giveaway> giveawayMap = new ConcurrentHashMap<>();
+    private static final Map<Long, Giveaway.GiveawayTimerStorage> giveawayTimer = new ConcurrentHashMap<>();
     private static volatile GiveawayRegistry giveawayRegistry;
 
     private GiveawayRegistry() {
