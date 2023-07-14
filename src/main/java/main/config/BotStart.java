@@ -150,7 +150,7 @@ public class BotStart {
             System.out.println("IsDevMode: " + Config.isIsDev());
 
             //Обновить команды
-            updateSlashCommands();
+//            updateSlashCommands();
             System.out.println("20:22");
         } catch (Exception e) {
             e.printStackTrace();
@@ -567,11 +567,15 @@ public class BotStart {
     public void updateUserList() {
         List<Giveaway> giveawayDataList = new LinkedList<>(GiveawayRegistry.getAllGiveaway());
         for (Giveaway giveaway : giveawayDataList) {
-            updateGiveawayByGuild(giveaway);
+            try {
+                updateGiveawayByGuild(giveaway);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    public synchronized void updateGiveawayByGuild(Giveaway giveawayData) {
+    public void updateGiveawayByGuild(Giveaway giveawayData) {
         long guildIdLong = giveawayData.getGuildId();
         boolean isForSpecificRole = giveawayData.isForSpecificRole();
         long messageId = giveawayData.getMessageId();
@@ -651,6 +655,7 @@ public class BotStart {
                             }
                         }
                     }
+                    Thread.sleep(2000L);
                 } catch (Exception e) {
                     if (e.getMessage() != null && e.getMessage().contains("10008: Unknown Message")
                             || e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
@@ -659,13 +664,9 @@ public class BotStart {
                         GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
                     } else {
                         e.printStackTrace();
+                        Thread.currentThread().interrupt();
                     }
                 }
-            }
-            try {
-                Thread.sleep(2000L);
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         }
     }
