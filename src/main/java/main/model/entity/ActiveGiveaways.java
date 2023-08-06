@@ -1,15 +1,14 @@
 package main.model.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Timestamp;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -52,4 +51,7 @@ public class ActiveGiveaways {
 
     @Column(name = "min_participants")
     private Integer minParticipants;
+
+    @OneToMany(mappedBy = "activeGiveaways", cascade = CascadeType.ALL)
+    private Set<Participants> participants = new HashSet<>();
 }

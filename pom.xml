@@ -8,8 +8,8 @@
         <version>3.1.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.mego</groupId>
-    <artifactId>giveaway.discord.bot</artifactId>
+    <groupId>com.giveaway.bot</groupId>
+    <artifactId>GiveawayDiscordBot</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>giveaway.discord.bot</name>
     <description>Discord Giveaway Bot</description>

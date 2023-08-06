@@ -6,4 +6,4 @@ COPY . .
 
 RUN ["mvn", "install"]
 
-ENTRYPOINT ["java", "-jar", "./target/giveaway.discord.bot-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "./target/GiveawayDiscordBot-0.0.1-SNAPSHOT.jar"]
