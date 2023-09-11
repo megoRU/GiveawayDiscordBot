@@ -1,5 +1,6 @@
 package main.config;
 
+import lombok.Getter;
 import main.controller.UpdateController;
 import main.core.CoreBot;
 import main.core.events.ReactionEvent;
@@ -8,6 +9,7 @@ import main.giveaway.GiveawayRegistry;
 import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.jsonparser.ParserClass;
+import main.model.entity.ActiveGiveaways;
 import main.model.entity.Participants;
 import main.model.entity.Scheduling;
 import main.model.repository.ActiveGiveawayRepository;
@@ -58,6 +60,7 @@ import java.util.stream.Collectors;
 
 import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
 
+
 @Configuration
 @EnableScheduling
 public class BotStart {
@@ -67,7 +70,7 @@ public class BotStart {
     //String - guildLongId
     private static final ConcurrentMap<String, String> mapLanguages = new ConcurrentHashMap<>();
 
-    private static JDA jda;
+    @Getter private static JDA jda;
     private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
 
     //API
@@ -490,31 +493,31 @@ public class BotStart {
         }
     }
 
-    private void setGiveawayAndUsersInGift() {
+    public void setGiveawayAndUsersInGift() {
         try {
-            Connection connection = DriverManager.getConnection(URL_CONNECTION, USER_CONNECTION, PASSWORD_CONNECTION);
+            List<ActiveGiveaways> activeGiveawaysList = activeGiveawayRepository.findAll();
 
-            Statement statement = connection.createStatement();
-            String sql = "SELECT * FROM active_giveaways";
-            ResultSet rs = statement.executeQuery(sql);
-            while (rs.next()) {
+            for (ActiveGiveaways activeGiveaways : activeGiveawaysList) {
+                long guild_long_id = activeGiveaways.getGuildLongId();
+                long channel_long_id = activeGiveaways.getChannelIdLong();
+                int count_winners = activeGiveaways.getCountWinners();
+                long message_id_long = activeGiveaways.getMessageIdLong();
+                String giveaway_title = activeGiveaways.getGiveawayTitle();
+                Timestamp date_end_giveaway = activeGiveaways.getDateEndGiveaway();
+                Long role_id_long = activeGiveaways.getRoleIdLong(); // null -> 0
+                boolean is_for_specific_role = activeGiveaways.getIsForSpecificRole();
+                String url_image = activeGiveaways.getUrlImage();
+                long id_user_who_create_giveaway = activeGiveaways.getIdUserWhoCreateGiveaway();
+                int min_participants = activeGiveaways.getMinParticipants();
 
-                long guild_long_id = rs.getLong("guild_long_id");
-                long channel_long_id = rs.getLong("channel_id_long");
-                int count_winners = rs.getInt("count_winners");
-                long message_id_long = rs.getLong("message_id_long");
-                String giveaway_title = rs.getString("giveaway_title");
-                Timestamp date_end_giveaway = rs.getTimestamp("date_end_giveaway");
-                Long role_id_long = rs.getLong("role_id_long"); // null -> 0
-                boolean is_for_specific_role = rs.getBoolean("is_for_specific_role");
-                String url_image = rs.getString("url_image");
-                long id_user_who_create_giveaway = rs.getLong("id_user_who_create_giveaway");
-                int min_participants = rs.getInt("min_participants");
+                Map<String, String> participantsMap = new HashMap<>();
+                Set<Participants> participantsList = activeGiveaways.getParticipants();
 
-                Map<String, String> participantsList = participantsRepository
-                        .findAllByActiveGiveaways_GuildLongId(guild_long_id)
-                        .stream()
-                        .collect(Collectors.toMap(Participants::getUserIdAsString, Participants::getUserIdAsString));
+                participantsList.forEach(participants -> {
+                            String userIdAsString = participants.getUserIdAsString();
+                            participantsMap.put(userIdAsString, userIdAsString);
+                        }
+                );
 
                 Giveaway.GiveawayData giveawayData = new Giveaway.GiveawayData(
                         message_id_long,
@@ -530,7 +533,7 @@ public class BotStart {
                         channel_long_id,
                         id_user_who_create_giveaway,
                         //Добавляем пользователей в hashmap
-                        participantsList,
+                        participantsMap,
                         activeGiveawayRepository,
                         participantsRepository,
                         listUsersRepository,
@@ -554,11 +557,8 @@ public class BotStart {
                     instance.putGiveawayTimer(guild_long_id, stopGiveawayByTimer, timer);
                 }
             }
-            rs.close();
-            statement.close();
-            connection.close();
             System.out.println("getMessageIdFromDB()");
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -604,7 +604,7 @@ public class BotStart {
                         //-1 because one Bot
                         if (hasGift(guildIdLong) &&
                                 reactions != null &&
-                                reactions.size() > 0 &&
+                                !reactions.isEmpty() &&
                                 reactions.get(0).getCount() - 1 != giveawayData.getListUsersSize()) {
                             for (MessageReaction reaction : reactions) {
                                 Map<String, User> userList = reaction
@@ -697,9 +697,5 @@ public class BotStart {
 
     public static Map<String, String> getMapLanguages() {
         return mapLanguages;
-    }
-
-    public static JDA getJda() {
-        return jda;
     }
 }

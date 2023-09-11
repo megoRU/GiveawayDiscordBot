@@ -1,4 +1,4 @@
-FROM maven:3.8.3-openjdk-17
+FROM maven:3.8.4-openjdk-20
 
 WORKDIR /app
 
@@ -6,4 +6,4 @@ COPY . .
 
 RUN ["mvn", "install"]
 
-ENTRYPOINT ["java", "-jar", "./target/giveaway.discord.bot-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "./target/GiveawayDiscordBot-0.0.1-SNAPSHOT.jar"]

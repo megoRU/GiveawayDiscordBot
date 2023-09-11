@@ -51,8 +51,11 @@ public class Giveaway {
     private final Set<String> uniqueWinners = new LinkedHashSet<>();
 
     //USER DATA
+    @Getter
     private final long guildId;
+    @Getter
     private final long textChannelId;
+    @Getter
     private final long userIdLong;
 
     //GiveawayData
@@ -263,7 +266,7 @@ public class Giveaway {
                         Participants poll = participantsList.poll();
                         if (poll != null) {
                             stringBuilder
-                                    .append(stringBuilder.length() == 0 ? "(" : ", (")
+                                    .append(stringBuilder.isEmpty() ? "(" : ", (")
                                     .append("'").append(poll.getNickName()
                                             .replaceAll("'", "")
                                             .replaceAll("\"", "")
@@ -275,7 +278,7 @@ public class Giveaway {
                         }
                     }
 
-                    if (stringBuilder.length() != 0) {
+                    if (!stringBuilder.isEmpty()) {
                         String executeQuery = String.format("INSERT INTO participants (nick_name, user_long_id, guild_id) VALUES %s;", stringBuilder);
                         statement.execute(executeQuery);
                     }
@@ -469,18 +472,6 @@ public class Giveaway {
     public void setCount(int count) {
         this.count.set(count);
         this.localCountUsers = count;
-    }
-
-    public long getGuildId() {
-        return guildId;
-    }
-
-    public long getTextChannelId() {
-        return textChannelId;
-    }
-
-    public long getUserIdLong() {
-        return userIdLong;
     }
 
     public long getMessageId() {

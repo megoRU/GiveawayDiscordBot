@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.jetbrains.annotations.Nullable;
 
 @Getter
 @Setter
@@ -20,8 +19,7 @@ public class Participants {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Nullable
-    @ManyToOne(cascade = CascadeType.MERGE) // Java хуита. На этом можно закончить
+    @ManyToOne
     @JoinColumn(name = "guild_id", referencedColumnName = "guild_long_id", nullable = false)
     private ActiveGiveaways activeGiveaways;
 
