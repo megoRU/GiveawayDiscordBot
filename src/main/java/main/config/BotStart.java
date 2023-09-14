@@ -70,7 +70,8 @@ public class BotStart {
     //String - guildLongId
     private static final ConcurrentMap<String, String> mapLanguages = new ConcurrentHashMap<>();
 
-    @Getter private static JDA jda;
+    @Getter
+    private static JDA jda;
     private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
 
     //API
@@ -494,10 +495,10 @@ public class BotStart {
     }
 
     public void setGiveawayAndUsersInGift() {
-        try {
-            List<ActiveGiveaways> activeGiveawaysList = activeGiveawayRepository.findAll();
+        List<ActiveGiveaways> activeGiveawaysList = activeGiveawayRepository.findAll();
 
-            for (ActiveGiveaways activeGiveaways : activeGiveawaysList) {
+        for (ActiveGiveaways activeGiveaways : activeGiveawaysList) {
+            try {
                 long guild_long_id = activeGiveaways.getGuildLongId();
                 long channel_long_id = activeGiveaways.getChannelIdLong();
                 int count_winners = activeGiveaways.getCountWinners();
@@ -508,7 +509,7 @@ public class BotStart {
                 boolean is_for_specific_role = activeGiveaways.getIsForSpecificRole();
                 String url_image = activeGiveaways.getUrlImage();
                 long id_user_who_create_giveaway = activeGiveaways.getIdUserWhoCreateGiveaway();
-                int min_participants = activeGiveaways.getMinParticipants();
+                Integer min_participants = activeGiveaways.getMinParticipants();
 
                 Map<String, String> participantsMap = new HashMap<>();
                 Set<Participants> participantsList = activeGiveaways.getParticipants();
@@ -527,7 +528,7 @@ public class BotStart {
                         url_image,
                         giveaway_title == null ? "Giveaway" : giveaway_title,
                         date_end_giveaway,
-                        min_participants == 0 ? 2 : min_participants);
+                        min_participants == null ? 2 : min_participants);
 
                 Giveaway giveaway = new Giveaway(guild_long_id,
                         channel_long_id,
@@ -556,10 +557,10 @@ public class BotStart {
 
                     instance.putGiveawayTimer(guild_long_id, stopGiveawayByTimer, timer);
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
             System.out.println("getMessageIdFromDB()");
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
