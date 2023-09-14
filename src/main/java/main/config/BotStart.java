@@ -70,7 +70,8 @@ public class BotStart {
     //String - guildLongId
     private static final ConcurrentMap<String, String> mapLanguages = new ConcurrentHashMap<>();
 
-    @Getter private static JDA jda;
+    @Getter
+    private static JDA jda;
     private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
 
     //API
@@ -494,10 +495,10 @@ public class BotStart {
     }
 
     public void setGiveawayAndUsersInGift() {
-        try {
-            List<ActiveGiveaways> activeGiveawaysList = activeGiveawayRepository.findAll();
+        List<ActiveGiveaways> activeGiveawaysList = activeGiveawayRepository.findAll();
 
-            for (ActiveGiveaways activeGiveaways : activeGiveawaysList) {
+        for (ActiveGiveaways activeGiveaways : activeGiveawaysList) {
+            try {
                 long guild_long_id = activeGiveaways.getGuildLongId();
                 long channel_long_id = activeGiveaways.getChannelIdLong();
                 int count_winners = activeGiveaways.getCountWinners();
@@ -556,10 +557,10 @@ public class BotStart {
 
                     instance.putGiveawayTimer(guild_long_id, stopGiveawayByTimer, timer);
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
             System.out.println("getMessageIdFromDB()");
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
