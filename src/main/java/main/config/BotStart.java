@@ -508,7 +508,7 @@ public class BotStart {
                 boolean is_for_specific_role = activeGiveaways.getIsForSpecificRole();
                 String url_image = activeGiveaways.getUrlImage();
                 long id_user_who_create_giveaway = activeGiveaways.getIdUserWhoCreateGiveaway();
-                int min_participants = activeGiveaways.getMinParticipants();
+                Integer min_participants = activeGiveaways.getMinParticipants();
 
                 Map<String, String> participantsMap = new HashMap<>();
                 Set<Participants> participantsList = activeGiveaways.getParticipants();
@@ -527,7 +527,7 @@ public class BotStart {
                         url_image,
                         giveaway_title == null ? "Giveaway" : giveaway_title,
                         date_end_giveaway,
-                        min_participants == 0 ? 2 : min_participants);
+                        min_participants == null ? 2 : min_participants);
 
                 Giveaway giveaway = new Giveaway(guild_long_id,
                         channel_long_id,
