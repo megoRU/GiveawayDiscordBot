@@ -60,7 +60,6 @@ import java.util.stream.Collectors;
 
 import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
 
-
 @Configuration
 @EnableScheduling
 public class BotStart {
@@ -613,7 +612,7 @@ public class BotStart {
                                         .complete()
                                         .stream()
                                         .filter(user -> !user.isBot())
-                                        .filter(user -> !giveawayData.hasUserInGiveaway(user.getId()))
+                                        .filter(user -> !giveawayData.isUsercontainsInGiveaway(user.getId()))
                                         .collect(Collectors.toMap(User::getId, user -> user));
 
                                 if (isForSpecificRole) {

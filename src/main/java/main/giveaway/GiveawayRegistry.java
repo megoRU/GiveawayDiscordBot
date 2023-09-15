@@ -4,15 +4,18 @@ import main.threads.StopGiveawayByTimer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 
 public class GiveawayRegistry {
 
     //Возвращает GiveawayData по long id
     private static final Map<Long, Giveaway> giveawayMap = new ConcurrentHashMap<>();
     private static final Map<Long, Giveaway.GiveawayTimerStorage> giveawayTimer = new ConcurrentHashMap<>();
+    private static final HashMap<Long, Future<?>> futureTasks = new HashMap<>();
     private static volatile GiveawayRegistry giveawayRegistry;
 
     private GiveawayRegistry() {
@@ -53,6 +56,18 @@ public class GiveawayRegistry {
             giveawayTimerStorage.stopGiveawayByTimer().cancel();
             giveawayTimerStorage.timer().cancel();
         }
+    }
+
+    public Future<?> getFutureTasks(long guildId) {
+        return futureTasks.get(guildId);
+    }
+
+    public void putFutureTasks(long guildId, Future<?> future) {
+        futureTasks.put(guildId, future);
+    }
+
+    public void removeFutureTasks(long guildId) {
+        futureTasks.remove(guildId);
     }
 
     public void putGift(long guildId, Giveaway giveaway) {
