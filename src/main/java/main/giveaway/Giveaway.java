@@ -14,6 +14,7 @@ import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.ListUsersRepository;
 import main.model.repository.ParticipantsRepository;
 import main.threads.StopGiveawayByTimer;
+import main.threads.StopGiveawayThread;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Giveaway {
@@ -41,7 +43,6 @@ public class Giveaway {
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
-    private static final HashMap<Long, Future<?>> futureTasks = new HashMap<>();
 
     //API
     private final MegoruAPI api = new MegoruAPI.Builder().build();
@@ -292,9 +293,9 @@ public class Giveaway {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
             String format = String.format("Таблица: %s больше не существует, скорее всего Giveaway завершился!", guildId);
             LOGGER.info(format);
+            LOGGER.log(Level.WARNING, e.getMessage(), e);
         }
     }
 
@@ -321,7 +322,7 @@ public class Giveaway {
                 return;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, e.getMessage(), e);
         }
 
         try {
@@ -333,20 +334,9 @@ public class Giveaway {
             }
             List<Participants> participants = participantsRepository.findAllByActiveGiveaways_GuildLongId(guildId); //TODO: Native use may be
             if (participants.isEmpty()) throw new Exception("participants is Empty");
-            LOGGER.info("\nparticipants size: " + participants.size());
 
-            StringBuilder stringBuilder = new StringBuilder();
-            for (Participants participant : participants) {
-                if (participant.getActiveGiveaways() != null) {
-                    stringBuilder
-                            .append("getIdUserWhoCreateGiveaway ").append(participant.getActiveGiveaways().getIdUserWhoCreateGiveaway())
-                            .append("getUserIdLong ").append(participant.getUserIdLong())
-                            .append("getGiveawayId ").append(participant.getActiveGiveaways().getMessageIdLong())
-                            .append("getGuildId ").append(participant.getActiveGiveaways().getGuildLongId())
-                            .append("\n");
-                }
-            }
-            System.out.println(stringBuilder);
+            LOGGER.info(String.format("Завершаем Giveaway: %s, Участников: %s", guildId, participants.size()));
+
             Winners winners = new Winners(countWinner, 0, listUsersHash.size() - 1);
             LOGGER.info(winners.toString());
             String[] strings = api.setWinners(winners);
@@ -354,7 +344,8 @@ public class Giveaway {
                 uniqueWinners.add("<@" + participants.get(Integer.parseInt(string)).getUserIdLong() + ">");
             }
         } catch (Exception e) {
-            Future<?> future = futureTasks.get(guildId);
+            GiveawayRegistry instance = GiveawayRegistry.getInstance();
+            Future<?> future = instance.getFutureTasks(guildId);
 
             if (future == null) {
                 String errorsWithApi = jsonParsers.getLocale("errors_with_api", String.valueOf(guildId));
@@ -368,11 +359,11 @@ public class Giveaway {
                 updateController.setView(errors.build(), guildId, textChannelId, buttons);
 
                 //Создаем задачу
-                StopGiveawayThread stopGiveawayThread = new StopGiveawayThread();
+                StopGiveawayThread stopGiveawayThread = new StopGiveawayThread(this);
                 Future<?> submit = executorService.submit(stopGiveawayThread);
                 executorService.shutdown();
-                futureTasks.put(guildId, submit);
-                e.printStackTrace();
+                instance.putFutureTasks(guildId, submit);
+                LOGGER.log(Level.WARNING, e.getMessage(), e);
             }
             return;
         }
@@ -408,10 +399,10 @@ public class Giveaway {
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
         instance.clearingCollections(guildId);
 
-        Future<?> future = futureTasks.get(guildId);
+        Future<?> future = instance.getFutureTasks(guildId);
         if (future != null) {
             future.cancel(true);
-            futureTasks.remove(guildId);
+            instance.removeFutureTasks(guildId);
         }
     }
 
@@ -427,7 +418,7 @@ public class Giveaway {
                         Thread.currentThread().interrupt();
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LOGGER.log(Level.WARNING, e.getMessage(), e);
                     Thread.currentThread().interrupt();
                 }
             }
@@ -437,31 +428,7 @@ public class Giveaway {
     public record GiveawayTimerStorage(StopGiveawayByTimer stopGiveawayByTimer, Timer timer) {
     }
 
-    private class StopGiveawayThread implements Runnable {
-
-        public void run() {
-            try {
-                while (true) {
-                    if (!GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
-                        Future<?> future = futureTasks.get(guildId);
-                        if (future != null) {
-                            future.cancel(true);
-                            futureTasks.remove(guildId);
-                        }
-                        return;
-                    }
-                    stopGiveaway(giveawayData.countWinners);
-                    Thread.sleep(10000);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                futureTasks.clear();
-            }
-        }
-    }
-
-    public boolean hasUserInGiveaway(String user) {
+    public boolean isUsercontainsInGiveaway(String user) {
         return listUsersHash.containsKey(user);
     }
 
@@ -503,6 +470,8 @@ public class Giveaway {
     }
 
     public boolean isHasFutureTasks() {
-        return futureTasks.isEmpty();
+        GiveawayRegistry instance = GiveawayRegistry.getInstance();
+        Future<?> futureTasks = instance.getFutureTasks(guildId);
+        return futureTasks == null;
     }
 }

@@ -4,6 +4,7 @@ import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
 
 import java.util.TimerTask;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class StopGiveawayByTimer extends TimerTask {
@@ -42,7 +43,7 @@ public final class StopGiveawayByTimer extends TimerTask {
             }
         } catch (Exception e) {
             Thread.currentThread().interrupt();
-            e.printStackTrace();
+            LOGGER.log(Level.WARNING, e.getMessage(), e);
         }
     }
 }

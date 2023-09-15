@@ -61,7 +61,7 @@ public class ReactionEvent {
                         }
                     }
 
-                    if (!giveaway.hasUserInGiveaway(user.getId())) {
+                    if (!giveaway.isUsercontainsInGiveaway(user.getId())) {
                         LOGGER.info(String.format("\nНовый участник: %s\nСервер: %s", user.getId(), event.getGuild().getId()));
                         giveaway.addUser(user);
                     }
