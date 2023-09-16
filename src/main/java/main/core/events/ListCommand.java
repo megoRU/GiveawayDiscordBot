@@ -47,7 +47,7 @@ public class ListCommand {
 
             for (Participants participants : participantsList) {
                 if (stringBuilder.length() < 4000) {
-                    stringBuilder.append(stringBuilder.length() == 0 ? "<@" : ", <@").append(participants.getUserIdLong()).append(">");
+                    stringBuilder.append(stringBuilder.isEmpty() ? "<@" : ", <@").append(participants.getUserIdLong()).append(">");
                 } else {
                     stringBuilder.append(" and others...");
                     break;
