@@ -32,7 +32,7 @@ public class StopCommand {
             return;
         }
 
-        //TODO: Что это?
+        //Это для того чтобы когда мы останавливаем Giveaway повторно
         if (event.getOptions().isEmpty()) {
             if (!giveaway.isHasFutureTasks()) {
                 EmbedBuilder errorsAgain = new EmbedBuilder();
