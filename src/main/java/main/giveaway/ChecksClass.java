@@ -22,22 +22,22 @@ public class ChecksClass {
         }
 
         if (!selfMember.hasPermission(dstChannel, Permission.VIEW_CHANNEL)) {
-            stringBuilder.append(stringBuilder.length() == 0 ? "`Permission.VIEW_CHANNEL`" : ",\n`Permission.VIEW_CHANNEL`");
+            stringBuilder.append(stringBuilder.isEmpty() ? "`Permission.VIEW_CHANNEL`" : ",\n`Permission.VIEW_CHANNEL`");
             bool = false;
         }
 
         if (!selfMember.hasPermission(dstChannel, Permission.MESSAGE_HISTORY)) {
-            stringBuilder.append(stringBuilder.length() == 0 ? "`Permission.MESSAGE_HISTORY`" : ",\n`Permission.MESSAGE_HISTORY`");
+            stringBuilder.append(stringBuilder.isEmpty() ? "`Permission.MESSAGE_HISTORY`" : ",\n`Permission.MESSAGE_HISTORY`");
             bool = false;
         }
 
         if (!selfMember.hasPermission(dstChannel, Permission.MESSAGE_EMBED_LINKS)) {
-            stringBuilder.append(stringBuilder.length() == 0 ? "`Permission.MESSAGE_EMBED_LINKS`" : ",\n`Permission.MESSAGE_EMBED_LINKS`");
+            stringBuilder.append(stringBuilder.isEmpty() ? "`Permission.MESSAGE_EMBED_LINKS`" : ",\n`Permission.MESSAGE_EMBED_LINKS`");
             bool = false;
         }
 
         if (!selfMember.hasPermission(dstChannel, Permission.MESSAGE_ADD_REACTION)) {
-            stringBuilder.append(stringBuilder.length() == 0 ? "`Permission.MESSAGE_ADD_REACTION`" : ",\n`Permission.MESSAGE_ADD_REACTION`");
+            stringBuilder.append(stringBuilder.isEmpty() ? "`Permission.MESSAGE_ADD_REACTION`" : ",\n`Permission.MESSAGE_ADD_REACTION`");
             bool = false;
         }
 
