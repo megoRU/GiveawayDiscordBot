@@ -338,7 +338,6 @@ public class Giveaway {
             LOGGER.info(String.format("Завершаем Giveaway: %s, Участников: %s", guildId, participants.size()));
 
             Winners winners = new Winners(countWinner, 0, listUsersHash.size() - 1);
-            LOGGER.info(winners.toString());
             String[] strings = api.setWinners(winners);
             for (String string : strings) {
                 uniqueWinners.add("<@" + participants.get(Integer.parseInt(string)).getUserIdLong() + ">");
