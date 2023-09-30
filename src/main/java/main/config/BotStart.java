@@ -41,6 +41,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -563,19 +564,22 @@ public class BotStart {
         }
     }
 
+    @Async
     @Scheduled(fixedDelay = 240000, initialDelay = 25000)
-    public void updateUserList() {
+    public synchronized void updateUserList() {
         List<Giveaway> giveawayDataList = new LinkedList<>(GiveawayRegistry.getAllGiveaway());
         for (Giveaway giveaway : giveawayDataList) {
             try {
                 updateGiveawayByGuild(giveaway);
+                Thread.sleep(2000L);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public void updateGiveawayByGuild(Giveaway giveawayData) {
+    @Async
+    public synchronized void updateGiveawayByGuild(Giveaway giveawayData) {
         long guildIdLong = giveawayData.getGuildId();
         boolean isForSpecificRole = giveawayData.isForSpecificRole();
         long messageId = giveawayData.getMessageId();
@@ -655,7 +659,7 @@ public class BotStart {
                             }
                         }
                     }
-                    Thread.sleep(2000L);
+
                 } catch (Exception e) {
                     if (e.getMessage() != null && e.getMessage().contains("10008: Unknown Message")
                             || e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
@@ -664,7 +668,6 @@ public class BotStart {
                         GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
                     } else {
                         e.printStackTrace();
-                        Thread.currentThread().interrupt();
                     }
                 }
             }
