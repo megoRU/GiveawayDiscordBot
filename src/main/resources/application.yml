@@ -7,6 +7,5 @@ spring:
 
   jpa:
     show-sql: false
-    database-platform: org.hibernate.dialect.MariaDBDialect
     hibernate:
       ddl-auto: validate
