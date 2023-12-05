@@ -1,5 +1,6 @@
 package main.config;
 
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import main.controller.UpdateController;
 import main.core.CoreBot;
@@ -33,12 +34,12 @@ import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.boticordjava.api.entity.bot.stats.BotStats;
 import org.boticordjava.api.impl.BotiCordAPI;
-import org.discordbots.api.client.DiscordBotListAPI;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.Async;
@@ -64,6 +65,7 @@ import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
 @Configuration
 @EnableScheduling
 public class BotStart {
+    private final static Logger LOGGER = LoggerFactory.getLogger(BotStart.class.getName());
 
     private static final JSONParsers jsonParsers = new JSONParsers();
     public static final String activity = "/help | ";
@@ -78,10 +80,6 @@ public class BotStart {
     private final BotiCordAPI api = new BotiCordAPI.Builder()
             .token(Config.getBoticord())
             .build();
-
-    private final DiscordBotListAPI TOP_GG_API = new DiscordBotListAPI.Builder()
-            .token(Config.getTopGgApiToken())
-            .botId(Config.getBotId()).build();
 
     //REPOSITORY
     private final ActiveGiveawayRepository activeGiveawayRepository;
@@ -111,7 +109,7 @@ public class BotStart {
         this.schedulingRepository = schedulingRepository;
     }
 
-    @Bean
+    @PostConstruct
     public synchronized void startBot() {
         try {
             //Загружаем GiveawayRegistry
@@ -157,7 +155,7 @@ public class BotStart {
 //            updateSlashCommands();
             System.out.println("20:22");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
         }
     }
 
@@ -370,7 +368,7 @@ public class BotStart {
 
             System.out.println("Готово");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
         }
     }
 
@@ -379,8 +377,6 @@ public class BotStart {
         if (!Config.isIsDev()) {
             try {
                 int serverCount = BotStart.jda.getGuilds().size();
-
-                TOP_GG_API.setStats(serverCount);
                 BotStart.jda.getPresence().setActivity(Activity.playing(BotStart.activity + serverCount + " guilds"));
 
                 //BOTICORD API
@@ -390,7 +386,7 @@ public class BotStart {
                 BotStats botStats = new BotStats(usersCount.get(), serverCount, 1);
                 api.setBotStats(Config.getBotId(), botStats);
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.error(e.getMessage(), e);
             }
         }
     }
@@ -457,7 +453,7 @@ public class BotStart {
                         }
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LOGGER.error(e.getMessage(), e);
                 }
             }
         }
@@ -490,7 +486,7 @@ public class BotStart {
             }
             System.out.println("setLanguages()");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
         }
     }
 
@@ -558,22 +554,21 @@ public class BotStart {
                     instance.putGiveawayTimer(guild_long_id, stopGiveawayByTimer, timer);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.error(e.getMessage(), e);
             }
             System.out.println("getMessageIdFromDB()");
         }
     }
 
-    @Async
     @Scheduled(fixedDelay = 240000, initialDelay = 25000)
     public synchronized void updateUserList() {
         List<Giveaway> giveawayDataList = new LinkedList<>(GiveawayRegistry.getAllGiveaway());
         for (Giveaway giveaway : giveawayDataList) {
             try {
                 updateGiveawayByGuild(giveaway);
-                Thread.sleep(2000L);
+                Thread.sleep(1000L);
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.error(e.getMessage(), e);
             }
         }
     }
@@ -639,13 +634,13 @@ public class BotStart {
                                                     if (e.getMessage().contains("10007: Unknown Member")) {
                                                         userList.remove(entry.getKey());
                                                     } else {
-                                                        e.printStackTrace();
+                                                        LOGGER.error(e.getMessage(), e);
                                                     }
                                                 }
                                             }
                                         }
                                     } catch (Exception e) {
-                                        e.printStackTrace();
+                                        LOGGER.error(e.getMessage(), e);
                                     }
                                 }
 
@@ -667,7 +662,7 @@ public class BotStart {
                         activeGiveawayRepository.deleteById(guildIdLong);
                         GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
                     } else {
-                        e.printStackTrace();
+                        LOGGER.error(e.getMessage(), e);
                     }
                 }
             }
@@ -690,7 +685,7 @@ public class BotStart {
             connection.close();
             System.out.println("getLocalizationFromDB()");
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
         }
     }
 

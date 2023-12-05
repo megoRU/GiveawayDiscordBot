@@ -4,7 +4,6 @@ import api.megoru.ru.entity.Winners;
 import api.megoru.ru.impl.MegoruAPI;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import main.config.Config;
 import main.controller.UpdateController;
 import main.core.events.ReactionEvent;
 import main.jsonparser.JSONParsers;
@@ -23,9 +22,6 @@ import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import java.awt.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -53,16 +49,12 @@ public class Giveaway {
 
     //USER DATA
     @Getter
-    private final long guildId;
-    @Getter
-    private final long textChannelId;
-    @Getter
-    private final long userIdLong;
+    private final long guildId, textChannelId, userIdLong;
+
+    private ActiveGiveaways activeGiveaways;
 
     //GiveawayData
     private final GiveawayData giveawayData;
-
-    private final UpdateController updateController;
 
     private final AtomicInteger count = new AtomicInteger(0);
     private int localCountUsers;
@@ -74,6 +66,8 @@ public class Giveaway {
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final ParticipantsRepository participantsRepository;
     private final ListUsersRepository listUsersRepository;
+
+    private final UpdateController updateController;
 
     @Getter
     @NoArgsConstructor
@@ -87,7 +81,14 @@ public class Giveaway {
         private Timestamp endGiveawayDate;
         private int minParticipants = 2;
 
-        public GiveawayData(long messageId, int countWinners, Long roleId, boolean isForSpecificRole, String urlImage, String title, Timestamp endGiveawayDate, int minParticipants) {
+        public GiveawayData(long messageId,
+                            int countWinners,
+                            Long roleId,
+                            boolean isForSpecificRole,
+                            String urlImage,
+                            String title,
+                            Timestamp endGiveawayDate,
+                            int minParticipants) {
             this.messageId = messageId;
             this.countWinners = countWinners;
             this.roleId = roleId;
@@ -202,7 +203,7 @@ public class Giveaway {
     private void updateCollections(Message message) {
         this.giveawayData.messageId = message.getIdLong();
 
-        ActiveGiveaways activeGiveaways = new ActiveGiveaways();
+        activeGiveaways = new ActiveGiveaways();
         activeGiveaways.setGuildLongId(guildId);
         activeGiveaways.setMessageIdLong(message.getIdLong());
         activeGiveaways.setChannelIdLong(message.getChannel().getIdLong());
@@ -210,21 +211,15 @@ public class Giveaway {
         activeGiveaways.setGiveawayTitle(this.giveawayData.title);
         activeGiveaways.setMinParticipants(this.giveawayData.minParticipants);
 
-        if (this.giveawayData.roleId == null || this.giveawayData.roleId == 0) {
-            activeGiveaways.setRoleIdLong(null);
-        } else {
-            activeGiveaways.setRoleIdLong(this.giveawayData.roleId);
-        }
+        if (this.giveawayData.roleId == null || this.giveawayData.roleId == 0) activeGiveaways.setRoleIdLong(null);
+        else activeGiveaways.setRoleIdLong(this.giveawayData.roleId);
+
         activeGiveaways.setIsForSpecificRole(this.giveawayData.isForSpecificRole);
         activeGiveaways.setUrlImage(this.giveawayData.urlImage);
         activeGiveaways.setIdUserWhoCreateGiveaway(userIdLong);
         activeGiveaways.setDateEndGiveaway(this.giveawayData.endGiveawayDate == null ? null : this.giveawayData.endGiveawayDate);
 
-        activeGiveawayRepository.saveAndFlush(activeGiveaways);
-        try {
-            Thread.sleep(2000);
-        } catch (Exception ignored) {
-        }
+        activeGiveawayRepository.save(activeGiveaways);
     }
 
     public void addUser(final User user) {
@@ -242,49 +237,33 @@ public class Giveaway {
             count.incrementAndGet();
             listUsersHash.put(user.getId(), user.getId());
 
+            if (activeGiveaways == null) {
+                Optional<ActiveGiveaways> optionalActiveGiveaways = activeGiveawayRepository.findById(guildId);
+                if (optionalActiveGiveaways.isPresent()) activeGiveaways = optionalActiveGiveaways.get();
+                else return;
+            }
+
             //Add user to Collection
             Participants participants = new Participants();
             participants.setUserIdLong(user.getIdLong());
             participants.setNickName(user.getName());
-//            participants.setActiveGiveaways(activeGiveaways); //Can`t be null
+            participants.setActiveGiveaways(activeGiveaways);
             participantsList.add(participants);
         }
     }
 
-    private synchronized void multiInsert() {
+    private void multiInsert() {
         try {
             if (count.get() > localCountUsers && GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
                 localCountUsers = count.get();
                 if (!participantsList.isEmpty()) {
-                    StringBuilder stringBuilder = new StringBuilder();
-                    Connection connection = DriverManager.getConnection(
-                            Config.getDatabaseUrl(),
-                            Config.getDatabaseUser(),
-                            Config.getDatabasePass());
-                    Statement statement = connection.createStatement();
                     int size = participantsList.size();
+                    ArrayList<Participants> arrayList = new ArrayList<>(participantsList);
                     for (int i = 0; i < size; i++) {
                         Participants poll = participantsList.poll();
-                        if (poll != null) {
-                            stringBuilder
-                                    .append(stringBuilder.isEmpty() ? "(" : ", (")
-                                    .append("'").append(poll.getNickName()
-                                            .replaceAll("'", "")
-                                            .replaceAll("\"", "")
-                                            .replaceAll("`", ""))
-                                    .append("', ")
-                                    .append(poll.getUserIdLong()).append(", ")
-                                    .append(guildId)
-                                    .append(")");
-                        }
+                        arrayList.add(poll);
                     }
-
-                    if (!stringBuilder.isEmpty()) {
-                        String executeQuery = String.format("INSERT INTO participants (nick_name, user_long_id, guild_id) VALUES %s;", stringBuilder);
-                        statement.execute(executeQuery);
-                    }
-                    statement.close();
-                    connection.close();
+                    participantsRepository.saveAll(arrayList);
                 }
                 if (participantsList.isEmpty()) {
                     synchronized (this) {

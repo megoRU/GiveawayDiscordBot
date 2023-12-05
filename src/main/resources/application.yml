@@ -6,6 +6,11 @@ spring:
     password: ${DATABASE_PASS}
 
   jpa:
+    properties:
+      hibernate:
+        generate_statistics: false
+        order_inserts: true
+        jdbc.batch_size: 100
     show-sql: false
     hibernate:
       ddl-auto: validate
