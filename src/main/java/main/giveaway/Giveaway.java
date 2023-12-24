@@ -317,10 +317,8 @@ public class Giveaway {
             LOGGER.info(String.format("Завершаем Giveaway: %s, Участников: %s", guildId, participants.size()));
 
             Winners winners = new Winners(countWinner, 0, listUsersHash.size() - 1);
-            String[] strings = api.setWinners(winners);
-            for (String string : strings) {
-                uniqueWinners.add("<@" + participants.get(Integer.parseInt(string)).getUserIdLong() + ">");
-            }
+            List<String> strings = api.getWinners(winners);
+            strings.forEach(s -> uniqueWinners.add("<@" + participants.get(Integer.parseInt(s)).getUserIdLong() + ">"));
         } catch (Exception e) {
             GiveawayRegistry instance = GiveawayRegistry.getInstance();
             Future<?> future = instance.getFutureTasks(guildId);

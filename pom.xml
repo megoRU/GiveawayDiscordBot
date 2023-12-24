@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.0</version>
+        <version>3.2.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.giveaway.bot</groupId>
@@ -23,7 +23,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
-            <version>3.2.0</version>
+            <version>3.2.1</version>
         </dependency>
 
         <dependency>
@@ -63,14 +63,14 @@
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
-            <version>3.3.1</version>
+            <version>3.3.2</version>
         </dependency>
 
         <!-- https://github.com/megoRU/api.megoru.ru -->
         <dependency>
             <groupId>com.github.megoRU</groupId>
             <artifactId>api.megoru.ru</artifactId>
-            <version>v4.1.1</version>
+            <version>5.0.1</version>
         </dependency>
 
     </dependencies>

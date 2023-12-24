@@ -53,11 +53,9 @@ public class RerollCommand {
 
             try {
                 Winners winners = new Winners(1, 0, listUsers.size() - 1);
-                String[] setWinners = api.setWinners(winners);
+                List<String> setWinners = api.getWinners(winners);
                 final Set<String> uniqueWinners = new LinkedHashSet<>();
-                for (String setWinner : setWinners) {
-                    uniqueWinners.add("<@" + listUsers.get(Integer.parseInt(setWinner)).getUserIdLong() + ">");
-                }
+                setWinners.forEach(s -> uniqueWinners.add("<@" + listUsers.get(Integer.parseInt(s)).getUserIdLong() + ">"));
                 String winnerList = Arrays.toString(uniqueWinners.toArray())
                         .replaceAll("\\[", "")
                         .replaceAll("]", "");

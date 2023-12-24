@@ -1,6 +1,6 @@
 package main.giveaway;
 
-import api.megoru.ru.io.UnsuccessfulHttpException;
+import api.megoru.ru.entity.exceptions.UnsuccessfulHttpException;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
