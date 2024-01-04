@@ -23,20 +23,22 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
-            <version>3.2.1</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <optional>true</optional>
+            <version>1.18.30</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/net.dv8tion/JDA -->
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>5.0.0-beta.18</version>
+            <version>5.0.0-beta.19</version>
             <exclusions>
                 <exclusion>
                     <groupId>club.minnced</groupId>
@@ -69,7 +71,7 @@
         <!-- https://github.com/megoRU/api.megoru.ru -->
         <dependency>
             <groupId>com.github.megoRU</groupId>
-            <artifactId>api.megoru.ru</artifactId>
+            <artifactId>api.megoru.ru-wrapper</artifactId>
             <version>5.0.1</version>
         </dependency>
 
