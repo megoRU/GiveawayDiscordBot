@@ -79,6 +79,7 @@ public class BotStart {
     //API
     private final BotiCordAPI api = new BotiCordAPI.Builder()
             .token(Config.getBoticord())
+            .enableDevMode()
             .build();
 
     //REPOSITORY
