@@ -1,17 +1,27 @@
 package main.giveaway;
 
+import main.config.BotStart;
+import main.giveaway.utils.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.requests.RestAction;
 
 import java.awt.*;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.List;
 
 public class GiveawayEmbedUtils {
 
     private static final JSONParsers jsonParsers = new JSONParsers();
 
-    public static EmbedBuilder giveawayPattern(final long guildId) {
+    public static EmbedBuilder giveawayLayout(final long guildId) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
         Giveaway giveaway = instance.getGiveaway(guildId);
@@ -19,7 +29,7 @@ public class GiveawayEmbedUtils {
         if (giveaway != null) {
             String title = giveaway.getTitle();
             long createdUserId = giveaway.getUserIdLong();
-            String giftReaction = jsonParsers.getLocale("gift_reaction", String.valueOf(guildId));
+            String giftReaction = jsonParsers.getLocale("gift_reaction", guildId);
             int countWinners = giveaway.getCountWinners();
             String imageUrl = giveaway.getUrlImage();
             Long role = giveaway.getRoleId();
@@ -45,10 +55,10 @@ public class GiveawayEmbedUtils {
             if (isForSpecificRole) {
                 String giftOnlyFor;
                 if (role == guildId) {
-                    giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", String.valueOf(guildId)), role)
+                    giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", guildId), role)
                             .replace("<@&" + guildId + ">", "@everyone");
                 } else {
-                    giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", String.valueOf(guildId)), role);
+                    giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", guildId), role);
                 }
                 embedBuilder.appendDescription(giftOnlyFor);
             }
@@ -57,7 +67,7 @@ public class GiveawayEmbedUtils {
             if (endGiveaway != null) {
                 long endTime = endGiveaway.getTime() / 1000;
                 String endTimeFormat =
-                        String.format(jsonParsers.getLocale("gift_ends_giveaway", String.valueOf(guildId)), endTime, endTime);
+                        String.format(jsonParsers.getLocale("gift_ends_giveaway", guildId), endTime, endTime);
                 embedBuilder.appendDescription(endTimeFormat);
             }
             
@@ -85,16 +95,16 @@ public class GiveawayEmbedUtils {
             embedBuilder.setTitle(title);
 
             if (countWinners == 1) {
-                String giftWinner = String.format(jsonParsers.getLocale("gift_winner", String.valueOf(guildId)), winners);
+                String giftWinner = String.format(jsonParsers.getLocale("gift_winner", guildId), winners);
                 embedBuilder.appendDescription(giftWinner);
             } else {
-                String giftWinners = String.format(jsonParsers.getLocale("gift_winners", String.valueOf(guildId)), winners);
+                String giftWinners = String.format(jsonParsers.getLocale("gift_winners", guildId), winners);
                 embedBuilder.appendDescription(giftWinners);
             }
 
             String footer = countWinners + " " + GiveawayUtils.setEndingWord(countWinners, guildId);
             embedBuilder.setTimestamp(Instant.now());
-            String giftEnds = String.format(jsonParsers.getLocale("gift_ends", String.valueOf(guildId)), footer);
+            String giftEnds = String.format(jsonParsers.getLocale("gift_ends", guildId), footer);
             embedBuilder.setFooter(giftEnds);
 
             if (giveaway.isForSpecificRole()) {
@@ -102,10 +112,10 @@ public class GiveawayEmbedUtils {
                 String giftOnlyFor;
 
                 if (roleId == guildId) {
-                    giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", String.valueOf(guildId)), roleId)
+                    giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", guildId), roleId)
                             .replaceAll("<@&" + guildId + ">", "@everyone");
                 } else {
-                    giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", String.valueOf(guildId)), roleId);
+                    giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", guildId), roleId);
                 }
 
                 embedBuilder.appendDescription(giftOnlyFor);

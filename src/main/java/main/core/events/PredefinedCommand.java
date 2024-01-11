@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -42,11 +41,11 @@ public class PredefinedCommand {
     }
 
     public void predefined(@NotNull SlashCommandInteractionEvent event, UpdateController updateController) {
-        var guildIdLong = Objects.requireNonNull(event.getGuild()).getIdLong();
-        var guildId = Objects.requireNonNull(event.getGuild()).getId();
-        var userIdLong = event.getUser().getIdLong();
+        if (event.getGuild() == null) return;
+        var guildId = event.getGuild().getIdLong();
+        var userId = event.getUser().getIdLong();
 
-        if (GiveawayRegistry.getInstance().hasGiveaway(guildIdLong)) {
+        if (GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
             String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_stop_giveaway", guildId);
             EmbedBuilder errors = new EmbedBuilder();
             errors.setColor(Color.GREEN);
@@ -72,7 +71,7 @@ public class PredefinedCommand {
         String title = event.getOption("title", OptionMapping::getAsString);
 
         if (role != null) {
-            if (role.getId().equals(guildId)) {
+            if (role.getIdLong() == guildId) {
                 String notificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_everyone", guildId), "@everyone");
                 event.reply(notificationForThisRole).queue();
             }
@@ -91,15 +90,15 @@ public class PredefinedCommand {
             }
         }
 
-        Giveaway giveaway = new Giveaway(guildIdLong,
+        Giveaway giveaway = new Giveaway(guildId,
                 textChannel.getIdLong(),
-                userIdLong,
+                userId,
                 activeGiveawayRepository,
                 participantsRepository,
                 listUsersRepository,
                 updateController);
 
-        GiveawayRegistry.getInstance().putGift(guildIdLong, giveaway);
+        GiveawayRegistry.getInstance().putGift(guildId, giveaway);
 
         //TODO: Возможно будет проблема когда Guild слишком большая
         giveaway.startGiveaway(
@@ -126,7 +125,7 @@ public class PredefinedCommand {
                     } catch (Exception ignored) {
                     }
 
-                    if (role.getIdLong() == guildIdLong) {
+                    if (role.getIdLong() == guildId) {
                         members.stream()
                                 .map(Member::getUser)
                                 .filter(user -> !user.isBot())

@@ -161,24 +161,4 @@ public class UpdateController {
         ReactionEvent reactionEvent = new ReactionEvent();
         reactionEvent.reaction(event, this);
     }
-
-    public void setView(EmbedBuilder embedBuilder, final long guildId, final long textChannel) {
-        coreBot.editMessage(embedBuilder, guildId, textChannel);
-    }
-
-    public void setView(MessageEmbed messageEmbed, final long guildId, final long textChannel, long messageId) {
-        coreBot.editMessage(messageEmbed, guildId, textChannel, messageId);
-    }
-
-    public void setView(MessageEmbed embedBuilder, String messageContent, Long guildId, Long textChannel) {
-        coreBot.sendMessage(embedBuilder, messageContent, guildId, textChannel);
-    }
-
-    public void setView(MessageEmbed embedBuilder, Long guildId, Long textChannel, List<Button> buttons) {
-        coreBot.sendMessage(embedBuilder, guildId, textChannel, buttons);
-    }
-
-    public void setView(JDA jda, String userId, MessageEmbed messageEmbed) {
-        coreBot.sendMessage(jda, userId, messageEmbed);
-    }
 }

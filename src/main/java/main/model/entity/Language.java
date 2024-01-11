@@ -19,7 +19,7 @@ public class Language {
 
     @Id
     @Column(name = "server_id", nullable = false)
-    private String serverId;
+    private Long serverId;
 
     @Column(name = "language", nullable = false)
     private String language;

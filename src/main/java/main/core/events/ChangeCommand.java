@@ -4,7 +4,7 @@ import main.controller.UpdateController;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayEmbedUtils;
 import main.giveaway.GiveawayRegistry;
-import main.giveaway.GiveawayUtils;
+import main.giveaway.utils.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.model.repository.ActiveGiveawayRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.util.Objects;
 
 @Service
 public class ChangeCommand {
@@ -30,11 +29,10 @@ public class ChangeCommand {
     }
 
     public void change(@NotNull SlashCommandInteractionEvent event, UpdateController updateController) {
+        if (event.getGuild() == null) return;
+        var guildId = event.getGuild().getIdLong();
 
-        var guildIdLong = Objects.requireNonNull(event.getGuild()).getIdLong();
-        var guildId = Objects.requireNonNull(event.getGuild()).getId();
-
-        Giveaway giveaway = GiveawayRegistry.getInstance().getGiveaway(guildIdLong);
+        Giveaway giveaway = GiveawayRegistry.getInstance().getGiveaway(guildId);
         if (giveaway == null) {
             String slashStopNoHas = jsonParsers.getLocale("slash_stop_no_has", guildId);
             event.reply(slashStopNoHas).setEphemeral(true).queue();
@@ -53,10 +51,10 @@ public class ChangeCommand {
                 String changeDuration = jsonParsers.getLocale("change_duration", guildId);
                 event.reply(changeDuration).setEphemeral(true).queue();
 
-                activeGiveawayRepository.updateGiveawayTime(guildIdLong, timestamp);
-                EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayPattern(guildIdLong);
+                activeGiveawayRepository.updateGiveawayTime(guildId, timestamp);
+                EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayLayout(guildId);
 
-                updateController.setView(embedBuilder.build(), guildIdLong, channelId, messageId);
+                updateController.setView(embedBuilder.build(), guildId, channelId, messageId);
             }
         }
     }

@@ -1,4 +1,4 @@
-package main.giveaway;
+package main.giveaway.utils;
 
 import main.config.BotStart;
 import main.jsonparser.JSONParsers;
@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -35,7 +36,15 @@ public class GiveawayUtils {
         return seconds;
     }
 
-    public static boolean timeHandler(@NotNull SlashCommandInteractionEvent event, String guildId, String time) {
+    public static Timestamp timeProcessor(String time) {
+        if (time == null) return null;
+        ZoneOffset offset = ZoneOffset.UTC;
+        LocalDateTime localDateTime = LocalDateTime.parse(time, GiveawayUtils.FORMATTER);
+        long toEpochSecond = localDateTime.toEpochSecond(offset);
+        return new Timestamp(toEpochSecond * 1000);
+    }
+
+    public static boolean timeHandler(@NotNull SlashCommandInteractionEvent event, long guildId, String time) {
         LocalDateTime localDateTime = LocalDateTime.parse(time, FORMATTER);
         LocalDateTime now = Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime();
         if (localDateTime.isBefore(now)) {
@@ -57,7 +66,7 @@ public class GiveawayUtils {
         return false;
     }
 
-   public static String setEndingWord(int num, final long guildId) {
+    public static String setEndingWord(int num, final long guildId) {
         String language = "eng";
         String languageFrom = BotStart.getMapLanguages().get(String.valueOf(guildId));
         if (languageFrom != null) {

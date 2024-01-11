@@ -26,18 +26,21 @@ public class ButtonChangeLanguage {
     }
 
     public void change(@NotNull ButtonInteractionEvent event) {
+        if (event.getGuild() == null) return;
+        long guildId = event.getGuild().getIdLong();
+
         event.deferEdit().queue();
         if (event.getButton().getEmoji() != null) {
             String buttonName = event.getButton().getEmoji().getName().contains(FLAG_RUS) ? "rus" : "eng";
             event.editButton(event.getButton().asDisabled()).queue();
 
             Language language = new Language();
-            language.setServerId(Objects.requireNonNull(event.getGuild()).getId());
+            language.setServerId(guildId);
             language.setLanguage(buttonName);
             languageRepository.save(language);
 
-            BotStart.getMapLanguages().put(event.getGuild().getId(), buttonName);
-            String buttonLanguage = String.format(jsonParsers.getLocale("button_language", event.getGuild().getId()), buttonName);
+            BotStart.getMapLanguages().put(guildId, buttonName);
+            String buttonLanguage = String.format(jsonParsers.getLocale("button_language", guildId), buttonName);
 
             event.getHook().sendMessage(buttonLanguage).setEphemeral(true).queue();
         }

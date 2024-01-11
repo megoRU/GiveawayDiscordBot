@@ -26,7 +26,8 @@ public class LanguageCommand {
     }
 
     public void language(@NotNull SlashCommandInteractionEvent event) {
-        var guildId = Objects.requireNonNull(event.getGuild()).getId();
+        if (event.getGuild() == null) return;
+        var guildId = event.getGuild().getIdLong();
 
         BotStart.getMapLanguages().put(guildId, event.getOptions().get(0).getAsString());
 

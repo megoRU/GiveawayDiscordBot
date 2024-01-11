@@ -20,10 +20,11 @@ public class LeaveEvent {
     }
 
     public void leave(@NotNull GuildLeaveEvent event) {
+        var guildId = event.getGuild().getIdLong();
         try {
             System.out.println("Удаляем данные после удаления бота из Guild");
-            languageRepository.deleteById(event.getGuild().getId());
-            activeGiveawayRepository.deleteById(event.getGuild().getIdLong());
+            languageRepository.deleteById(guildId);
+            activeGiveawayRepository.deleteById(guildId);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -12,17 +12,16 @@ import org.jetbrains.annotations.NotNull;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class StopCommand {
 
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     public void stop(@NotNull SlashCommandInteractionEvent event) {
-        var guildId = Objects.requireNonNull(event.getGuild()).getId();
-        var guildIdLong = event.getGuild().getIdLong();
+        if (event.getGuild() == null) return;
+        var guildId = event.getGuild().getIdLong();
 
-        Giveaway giveaway = GiveawayRegistry.getInstance().getGiveaway(guildIdLong);
+        Giveaway giveaway = GiveawayRegistry.getInstance().getGiveaway(guildId);
         if (giveaway == null) {
             String slashStopNoHas = jsonParsers.getLocale("slash_stop_no_has", guildId);
             EmbedBuilder notHas = new EmbedBuilder();

@@ -3,7 +3,7 @@ package main.core.events;
 import main.controller.UpdateController;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
-import main.giveaway.GiveawayUtils;
+import main.giveaway.utils.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
@@ -25,6 +25,7 @@ public class ReactionEvent {
         try {
             User user = event.retrieveUser().complete();
             Member member = event.getMember();
+            long guildId = event.getGuild().getIdLong();
 
             if (member == null || user.isBot()) return;
 
@@ -46,22 +47,22 @@ public class ReactionEvent {
                         Role roleById = event.getGuild().getRoleById(roleId);
                         boolean isForSpecificRole = giveaway.isForSpecificRole();
 
-                        if (isForSpecificRole && !event.getMember().getRoles().contains(roleById)) {
+                        if (isForSpecificRole && !member.getRoles().contains(roleById)) {
                             String url = GiveawayUtils.getDiscordUrlMessage(guildIdLong, event.getGuildChannel().getIdLong(), messageIdWithReactionCurrent);
                             LOGGER.info(String.format("\nНажал на эмодзи, но у него нет доступа к розыгрышу: %s", user.getId()));
                             //Получаем ссылку на Giveaway
 
-                            String buttonGiveawayNotAccess = String.format(jsonParsers.getLocale("button_giveaway_not_access", event.getGuild().getId()), url);
+                            String buttonGiveawayNotAccess = String.format(jsonParsers.getLocale("button_giveaway_not_access", guildId), url);
                             EmbedBuilder embedBuilder = new EmbedBuilder();
                             embedBuilder.setColor(Color.RED);
                             embedBuilder.setDescription(buttonGiveawayNotAccess);
 
-                            updateController.setView(event.getJDA(), user.getId(), embedBuilder.build());
+                            updateController.setView(event.getJDA(), user.getIdLong(), embedBuilder.build());
                             return;
                         }
                     }
 
-                    if (!giveaway.isUsercontainsInGiveaway(user.getId())) {
+                    if (!giveaway.isUserContains(user.getId())) {
                         LOGGER.info(String.format("\nНовый участник: %s\nСервер: %s", user.getId(), event.getGuild().getId()));
                         giveaway.addUser(user);
                     }

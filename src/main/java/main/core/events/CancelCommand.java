@@ -25,7 +25,8 @@ public class CancelCommand {
     }
 
     public void cancel(@NotNull SlashCommandInteractionEvent event) {
-        long guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
+        if (event.getGuild() == null) return;
+        long guildId = event.getGuild().getIdLong();
 
         schedulingRepository.deleteById(guildId);
         activeGiveawayRepository.deleteById(guildId);

@@ -1,10 +1,10 @@
 package main.core.events;
 
 import main.controller.UpdateController;
-import main.giveaway.ChecksClass;
+import main.giveaway.utils.ChecksClass;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
-import main.giveaway.GiveawayUtils;
+import main.giveaway.utils.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.model.entity.Scheduling;
 import main.model.repository.ActiveGiveawayRepository;
@@ -49,7 +49,7 @@ public class StartCommand {
         if (!canSendGiveaway) return; //Сообщение уже отправлено
 
         var guildIdLong = Objects.requireNonNull(event.getGuild()).getIdLong();
-        var guildId = Objects.requireNonNull(event.getGuild()).getId();
+        var guildId = event.getGuild().getIdLong();
         var userIdLong = event.getUser().getIdLong();
         String title = event.getOption("title", OptionMapping::getAsString);
         String countString = event.getOption("count", OptionMapping::getAsString);

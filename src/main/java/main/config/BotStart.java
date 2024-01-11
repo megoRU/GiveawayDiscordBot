@@ -7,7 +7,7 @@ import main.core.CoreBot;
 import main.core.events.ReactionEvent;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
-import main.giveaway.GiveawayUtils;
+import main.giveaway.utils.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.jsonparser.ParserClass;
 import main.model.entity.ActiveGiveaways;
@@ -70,7 +70,7 @@ public class BotStart {
     private static final JSONParsers jsonParsers = new JSONParsers();
     public static final String activity = "/help | ";
     //String - guildLongId
-    private static final ConcurrentMap<String, String> mapLanguages = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Long, String> mapLanguages = new ConcurrentHashMap<>();
 
     @Getter
     private static JDA jda;
@@ -366,8 +366,6 @@ public class BotStart {
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Отменить Giveaway"));
 
             commands.queue();
-
-            System.out.println("Готово");
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }
@@ -408,8 +406,7 @@ public class BotStart {
                         if (textChannelById != null) {
                             Long role = scheduling.getRoleIdLong();
                             Boolean isOnlyForSpecificRole = scheduling.getIsForSpecificRole();
-                            Long guildIdLong = scheduling.getGuildLongId();
-                            String guildId = String.valueOf(scheduling.getGuildLongId());
+                            Long guildId = scheduling.getGuildLongId();
 
                             Giveaway giveaway = new Giveaway(
                                     scheduling.getGuildLongId(),
@@ -431,7 +428,7 @@ public class BotStart {
 
                             if (role != null && isOnlyForSpecificRole) {
                                 String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guildId), role);
-                                if (Objects.equals(role, guildIdLong)) {
+                                if (Objects.equals(role, guildId)) {
                                     giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_everyone", guildId), "@everyone");
                                     textChannelById.sendMessage(giftNotificationForThisRole).queue();
                                 } else {
@@ -612,7 +609,7 @@ public class BotStart {
                                         .complete()
                                         .stream()
                                         .filter(user -> !user.isBot())
-                                        .filter(user -> !giveawayData.isUsercontainsInGiveaway(user.getId()))
+                                        .filter(user -> !giveawayData.isUserContains(user.getId()))
                                         .collect(Collectors.toMap(User::getId, user -> user));
 
                                 if (isForSpecificRole) {
@@ -678,7 +675,7 @@ public class BotStart {
             ResultSet rs = statement.executeQuery(sql);
 
             while (rs.next()) {
-                mapLanguages.put(rs.getString("server_id"), rs.getString("language"));
+                mapLanguages.put(rs.getLong("server_id"), rs.getString("language"));
             }
 
             rs.close();
@@ -694,7 +691,7 @@ public class BotStart {
         return GiveawayRegistry.getInstance().hasGiveaway(guildIdLong);
     }
 
-    public static Map<String, String> getMapLanguages() {
+    public static Map<Long, String> getMapLanguages() {
         return mapLanguages;
     }
 }

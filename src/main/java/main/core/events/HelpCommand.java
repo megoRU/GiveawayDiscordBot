@@ -20,7 +20,8 @@ public class HelpCommand {
     private final static JSONParsers jsonParsers = new JSONParsers();
 
     public void help(@NotNull SlashCommandInteractionEvent event) {
-        var guildId = Objects.requireNonNull(event.getGuild()).getId();
+        if (event.getGuild() == null) return;
+        var guildId = event.getGuild().getIdLong();
 
         EmbedBuilder info = new EmbedBuilder();
         info.setColor(Color.GREEN);
