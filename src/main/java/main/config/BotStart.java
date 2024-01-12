@@ -7,12 +7,14 @@ import main.controller.UpdateController;
 import main.core.CoreBot;
 import main.core.events.ReactionEvent;
 import main.giveaway.*;
-import main.jsonparser.JSONParsers;
 import main.jsonparser.ParserClass;
 import main.model.entity.ActiveGiveaways;
 import main.model.entity.Language;
 import main.model.entity.Participants;
-import main.model.repository.*;
+import main.model.repository.ActiveGiveawayRepository;
+import main.model.repository.LanguageRepository;
+import main.model.repository.ListUsersRepository;
+import main.model.repository.ParticipantsRepository;
 import main.service.SavingParticipantsService;
 import main.service.ScheduleStartService;
 import main.service.StopGiveawayService;
@@ -36,8 +38,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.Async;
@@ -47,7 +47,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.sql.*;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -63,7 +63,6 @@ import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
 public class BotStart {
     private final static Logger LOGGER = LoggerFactory.getLogger(BotStart.class.getName());
 
-    private static final JSONParsers jsonParsers = new JSONParsers();
     public static final String activity = "/help | ";
     //String - guildLongId
     private static final ConcurrentMap<Long, String> mapLanguages = new ConcurrentHashMap<>();
@@ -378,7 +377,7 @@ public class BotStart {
         scheduleStartService.start(jda);
     }
 
-    @Scheduled(fixedDelay = 5, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = 2, initialDelay = 2, timeUnit = TimeUnit.SECONDS)
     private void stopGiveaway() {
         stopGiveawayService.stop();
     }

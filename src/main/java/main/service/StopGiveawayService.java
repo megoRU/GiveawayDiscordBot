@@ -5,6 +5,9 @@ import main.giveaway.GiveawayRegistry;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,11 +35,12 @@ public final class StopGiveawayService {
 
                 try {
                     //TODO завершать если прошёл месяц?
+                    Timestamp now = Timestamp.from(Instant.now());
                     Timestamp endGiveawayDate = giveaway.getEndGiveawayDate();
                     boolean finishGiveaway = giveaway.isFinishGiveaway();
                     boolean lockEnd = giveaway.isLockEnd();
                     if (endGiveawayDate != null || finishGiveaway) {
-                        if (!lockEnd) {
+                        if (!lockEnd && now.after(endGiveawayDate)) {
                             if (countWinners <= listUsersSize) {
                                 LOGGER.info(logMessage);
                                 giveaway.stopGiveaway(countWinners);

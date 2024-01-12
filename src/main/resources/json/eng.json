@@ -63,5 +63,6 @@
   "errors_descriptions_again": "Don't worry, the task is already running.\nWe will complete your Giveaway as soon as we can.",
   "you_wrote_date": "You wrote the date: `%s`\nNow (UTC±0): ⠀⠀⠀⠀`%s`",
   "schedule_start": "Launch date and time: <t:%s:R> (<t:%s:f>)\nEnd date and time: %s\nIn the channel: <#%s>",
-  "schedule_end": "Not set"
+  "schedule_end": "Not set",
+  "gift_hosted": "\nCreator: <@%s>"
 }
