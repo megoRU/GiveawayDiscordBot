@@ -26,7 +26,7 @@ public class JoinEvent {
             EmbedBuilder welcome = new EmbedBuilder();
             welcome.setColor(Color.GREEN);
             welcome.addField("Giveaway", "Thanks for adding " + "**" + "Giveaway" + "** " + "bot to " + event.getGuild().getName() + "!\n", false);
-            welcome.addField("Setup Bot Language", "Use: </language:941286272390037534>", false);
+            welcome.addField("Setup Bot Language", "Use: </settings:1195489935407468555>", false);
             welcome.addField("Create Giveaway", "Use: </start:941286272390037535>", false);
             welcome.addField("Create predefined Giveaway", "Use: </predefined:1049647289779630080> (Only Administrators)", false);
             welcome.addField("Reroll Winner", "Use: </reroll:957624805446799452>", false);
