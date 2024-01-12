@@ -1,34 +1,27 @@
 package main.giveaway;
 
-import api.megoru.ru.entity.Winners;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import main.core.events.ReactionEvent;
-import main.giveaway.utils.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.model.entity.ActiveGiveaways;
 import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.ListUsersRepository;
 import main.model.repository.ParticipantsRepository;
-import main.threads.StopGiveawayByTimer;
-import main.threads.StopGiveawayThread;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
 
 @Service
@@ -59,9 +52,6 @@ public class Giveaway {
     private long textChannelId;
     private long userIdLong;
 
-    private final AtomicInteger count = new AtomicInteger(0);
-    private int localCountUsers;
-
     //DTO
     @Getter(AccessLevel.NONE)
     private final ConcurrentLinkedQueue<Participants> participantsList = new ConcurrentLinkedQueue<>();
@@ -74,19 +64,24 @@ public class Giveaway {
     //Service
     private final GiveawayMessageHandler giveawayMessageHandler;
     private final GiveawaySaving giveawaySaving;
-
+    private final GiveawayEnd giveawayEnd;
+    private final GiveawayTimeHandler giveawayTimeHandler;
 
     @Autowired
     public Giveaway(ActiveGiveawayRepository activeGiveawayRepository,
                     ParticipantsRepository participantsRepository,
                     ListUsersRepository listUsersRepository,
                     GiveawayMessageHandler giveawayMessageHandler,
-                    GiveawaySaving giveawaySaving) {
+                    GiveawaySaving giveawaySaving,
+                    GiveawayEnd giveawayEnd) {
         this.activeGiveawayRepository = activeGiveawayRepository;
         this.participantsRepository = participantsRepository;
         this.listUsersRepository = listUsersRepository;
         this.giveawayMessageHandler = giveawayMessageHandler;
         this.giveawaySaving = giveawaySaving;
+        this.giveawayEnd = giveawayEnd;
+
+        this.giveawayTimeHandler = new GiveawayTimeHandler();
         this.listUsersHash = new ConcurrentHashMap<>();
     }
 
@@ -115,11 +110,6 @@ public class Giveaway {
         this.listUsersHash = new ConcurrentHashMap<>(listUsersHash);
     }
 
-    public Timestamp updateTime(final String time) {
-        GiveawayTimeHandler giveawayTimeHandler = new GiveawayTimeHandler();
-        return giveawayTimeHandler.updateTime(this, time);
-    }
-
     public void startGiveaway(GuildMessageChannel textChannel, boolean predefined) {
         //Отправка сообщения
         if (predefined) {
@@ -134,6 +124,10 @@ public class Giveaway {
         }
     }
 
+    public Timestamp updateTime(final String time) {
+        return giveawayTimeHandler.updateTime(this, time);
+    }
+
     private void create(Message message) {
         giveawaySaving.create(this, message);
     }
@@ -142,56 +136,12 @@ public class Giveaway {
         giveawaySaving.addUser(this, user);
     }
 
-//    private void multiInsert() {
-//        try {
-//            if (count.get() > localCountUsers && GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
-//                localCountUsers = count.get();
-//                if (!participantsList.isEmpty()) {
-//                    int size = participantsList.size();
-//                    ArrayList<Participants> arrayList = new ArrayList<>(participantsList);
-//                    for (int i = 0; i < size; i++) {
-//                        Participants poll = participantsList.poll();
-//                        arrayList.add(poll);
-//                    }
-//                    participantsRepository.saveAll(arrayList);
-//                }
-//                if (participantsList.isEmpty()) {
-//                    synchronized (this) {
-//                        notifyAll();
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            String format = String.format("Таблица: %s больше не существует, скорее всего Giveaway завершился!", guildId);
-//            LOGGER.info(format);
-//            LOGGER.log(Level.WARNING, e.getMessage(), e);
-//        }
-//    }
-
     public void stopGiveaway(final int countWinner) {
-
+        giveawayEnd.stop(this, countWinner);
     }
 
-    //TODO: Не завершается после завершения
-    //Автоматически отправляет в БД данные которые в буфере StringBuilder
-    private void autoInsert() {
-        new Timer().scheduleAtFixedRate(new TimerTask() {
-            public void run() throws NullPointerException {
-                try {
-                    if (GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
-                        multiInsert();
-                    } else {
-                        Thread.currentThread().interrupt();
-                    }
-                } catch (Exception e) {
-                    LOGGER.log(Level.WARNING, e.getMessage(), e);
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }, 2000, 5000);
-    }
-
-    public record GiveawayTimerStorage(StopGiveawayByTimer stopGiveawayByTimer, Timer timer) {
+    public void saveParticipants() {
+        giveawaySaving.saveParticipants(guildId, participantsList);
     }
 
     public boolean isUserContains(String userId) {
@@ -214,19 +164,8 @@ public class Giveaway {
         return listUsersHash.size();
     }
 
-    public void setCount(int count) {
-        this.count.set(count);
-        this.localCountUsers = count;
-    }
-
     @Nullable
     public Timestamp getEndGiveawayDate() {
         return this.endGiveawayDate;
-    }
-
-    public boolean isHasFutureTasks() {
-        GiveawayRegistry instance = GiveawayRegistry.getInstance();
-        Future<?> futureTasks = instance.getFutureTasks(guildId);
-        return futureTasks == null;
     }
 }

@@ -3,14 +3,18 @@ package main.giveaway;
 import main.model.entity.ActiveGiveaways;
 import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
+import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Service
@@ -19,11 +23,14 @@ public class GiveawaySaving {
     private static final Logger LOGGER = Logger.getLogger(GiveawaySaving.class.getName());
 
     private final ActiveGiveawayRepository activeGiveawayRepository;
+    private final ParticipantsRepository participantsRepository;
     private ActiveGiveaways activeGiveaways;
 
     @Autowired
-    public GiveawaySaving(ActiveGiveawayRepository activeGiveawayRepository) {
+    public GiveawaySaving(ActiveGiveawayRepository activeGiveawayRepository,
+                          ParticipantsRepository participantsRepository) {
         this.activeGiveawayRepository = activeGiveawayRepository;
+        this.participantsRepository = participantsRepository;
     }
 
     public void create(Giveaway giveaway, Message message) {
@@ -85,6 +92,34 @@ public class GiveawaySaving {
             participants.setActiveGiveaways(activeGiveaways);
 
             giveaway.addParticipantToList(participants);
+        }
+    }
+
+    public void saveParticipants(long guildId, ConcurrentLinkedQueue<Participants> participantsList) {
+        GiveawayRegistry giveawayRegistry = GiveawayRegistry.getInstance();
+        Giveaway giveaway = giveawayRegistry.getGiveaway(guildId);
+        if (giveaway == null) return;
+
+        if (!participantsList.isEmpty()) {
+            int size = participantsList.size();
+            List<Participants> arrayList = new ArrayList<>(participantsList);
+            for (int i = 0; i < size; i++) {
+                Participants poll = participantsList.poll();
+                arrayList.add(poll);
+            }
+
+            try {
+                boolean hasGiveaway = giveawayRegistry.hasGiveaway(guildId);
+                if (hasGiveaway) participantsRepository.saveAll(arrayList);
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, e.getMessage(), e);
+            }
+        }
+
+        if (participantsList.isEmpty()) {
+            synchronized (giveaway) {
+                notifyAll();
+            }
         }
     }
 }

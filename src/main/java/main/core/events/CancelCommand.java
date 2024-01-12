@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
-import java.util.Objects;
 
 @Service
 public class CancelCommand {
@@ -33,7 +32,7 @@ public class CancelCommand {
 
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
         instance.cancelGiveawayTimer(guildId);
-        instance.removeGuildFromGiveaway(guildId);
+        instance.removeGiveaway(guildId);
 
         EmbedBuilder cancel = new EmbedBuilder();
         cancel.setColor(Color.GREEN);

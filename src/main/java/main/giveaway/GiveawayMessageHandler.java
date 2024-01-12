@@ -48,7 +48,7 @@ public class GiveawayMessageHandler {
                     || e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
                 System.out.println(e.getMessage() + " удаляем!");
                 activeGiveawayRepository.deleteById(guildId);
-                GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildId);
+                GiveawayRegistry.getInstance().removeGiveaway(guildId);
             } else {
                 LOGGER.log(Level.SEVERE, e.getMessage());
             }

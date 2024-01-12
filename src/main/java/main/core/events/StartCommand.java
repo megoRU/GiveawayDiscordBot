@@ -171,7 +171,7 @@ public class StartCommand {
                 errors.setDescription(slashErrors);
                 if (event.isAcknowledged()) event.getHook().editOriginalEmbeds(errors.build()).queue();
                 else event.getChannel().sendMessageEmbeds(errors.build()).queue();
-                GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
+                GiveawayRegistry.getInstance().removeGiveaway(guildIdLong);
                 activeGiveawayRepository.deleteById(guildIdLong);
             }
         }

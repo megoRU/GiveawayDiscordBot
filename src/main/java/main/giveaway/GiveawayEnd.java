@@ -1,11 +1,14 @@
 package main.giveaway;
 
 import api.megoru.ru.entity.Winners;
+import main.giveaway.api.GiveawayAPI;
 import main.giveaway.utils.GiveawayUtils;
 import main.jsonparser.JSONParsers;
+import main.model.entity.ActiveGiveaways;
 import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
-import main.threads.StopGiveawayThread;
+import main.model.repository.ListUsersRepository;
+import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +17,6 @@ import org.springframework.stereotype.Service;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,19 +24,27 @@ import java.util.logging.Logger;
 
 public class GiveawayEnd {
 
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
-
     private static final Logger LOGGER = Logger.getLogger(GiveawayEnd.class.getName());
 
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     private final GiveawayMessageHandler giveawayMessageHandler;
     private final ActiveGiveawayRepository activeGiveawayRepository;
+    private final ListUsersRepository listUsersRepository;
+    private final ParticipantsRepository participantsRepository;
+
+    private final GiveawayAPI giveawayAPI;
 
     @Autowired
-    public GiveawayEnd(GiveawayMessageHandler giveawayMessageHandler, ActiveGiveawayRepository activeGiveawayRepository) {
+    public GiveawayEnd(GiveawayMessageHandler giveawayMessageHandler,
+                       ActiveGiveawayRepository activeGiveawayRepository,
+                       ListUsersRepository listUsersRepository,
+                       ParticipantsRepository participantsRepository) {
         this.giveawayMessageHandler = giveawayMessageHandler;
         this.activeGiveawayRepository = activeGiveawayRepository;
+        this.listUsersRepository = listUsersRepository;
+        this.participantsRepository = participantsRepository;
+        this.giveawayAPI = new GiveawayAPI();
     }
 
     public void stop(Giveaway giveaway, int countWinner) {
@@ -65,14 +73,13 @@ public class GiveawayEnd {
                 activeGiveawayRepository.deleteById(guildId);
                 //Удаляет данные из коллекций
                 GiveawayRegistry instance = GiveawayRegistry.getInstance();
-                instance.clearingCollections(guildId);
+                instance.removeGiveaway(guildId);
                 return;
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
-        final Set<String> uniqueWinners = new LinkedHashSet<>();
-
+        Set<String> uniqueWinners = new LinkedHashSet<>();
 
         try {
             //выбираем победителей
@@ -87,29 +94,26 @@ public class GiveawayEnd {
             LOGGER.info(String.format("Завершаем Giveaway: %s, Участников: %s", guildId, participants.size()));
 
             Winners winners = new Winners(countWinner, 0, listUsersSize - 1);
-            List<String> strings = api.getWinners(winners);
+            List<String> strings = giveawayAPI.getWinners(winners);
             strings.forEach(s -> uniqueWinners.add("<@" + participants.get(Integer.parseInt(s)).getUserIdLong() + ">"));
         } catch (Exception e) {
-            GiveawayRegistry instance = GiveawayRegistry.getInstance();
-            Future<?> future = instance.getFutureTasks(guildId);
+            Optional<ActiveGiveaways> optionalActiveGiveaways = activeGiveawayRepository.findById(guildId);
+            if (optionalActiveGiveaways.isPresent()) {
+                ActiveGiveaways activeGiveaways = optionalActiveGiveaways.get();
+                if (!activeGiveaways.isFinishGiveaway()) {
+                    String errorsWithApi = jsonParsers.getLocale("errors_with_api", guildId);
+                    String errorsDescriptions = jsonParsers.getLocale("errors_descriptions", guildId);
+                    EmbedBuilder errors = new EmbedBuilder();
+                    errors.setColor(Color.RED);
+                    errors.setTitle(errorsWithApi);
+                    errors.setDescription(errorsDescriptions);
+                    List<net.dv8tion.jda.api.interactions.components.buttons.Button> buttons = new ArrayList<>();
+                    buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
+                    giveawayMessageHandler.sendMessage(errors.build(), guildId, textChannelId, buttons);
 
-            if (future == null) {
-                String errorsWithApi = jsonParsers.getLocale("errors_with_api", guildId);
-                String errorsDescriptions = jsonParsers.getLocale("errors_descriptions", guildId);
-                EmbedBuilder errors = new EmbedBuilder();
-                errors.setColor(Color.RED);
-                errors.setTitle(errorsWithApi);
-                errors.setDescription(errorsDescriptions);
-                List<net.dv8tion.jda.api.interactions.components.buttons.Button> buttons = new ArrayList<>();
-                buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
-                updateController.setView(errors.build(), guildId, textChannelId, buttons);
-
-                //Создаем задачу убрать под переменную в бд
-
-                StopGiveawayThread stopGiveawayThread = new StopGiveawayThread(this);
-                Future<?> submit = executorService.submit(stopGiveawayThread);
-                executorService.shutdown();
-                instance.putFutureTasks(guildId, submit);
+                    activeGiveaways.setFinishGiveaway(true);
+                    activeGiveawayRepository.save(activeGiveaways);
+                }
                 LOGGER.log(Level.WARNING, e.getMessage(), e);
             }
             return;
@@ -144,12 +148,6 @@ public class GiveawayEnd {
 
         //Удаляет данные из коллекций
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
-        instance.clearingCollections(guildId);
-
-        Future<?> future = instance.getFutureTasks(guildId);
-        if (future != null) {
-            future.cancel(true);
-            instance.removeFutureTasks(guildId);
-        }
+        instance.removeGiveaway(guildId);
     }
 }
