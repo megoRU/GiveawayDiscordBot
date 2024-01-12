@@ -6,8 +6,6 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,10 +39,8 @@ public final class StopGiveawayService {
                     boolean lockEnd = giveaway.isLockEnd();
                     if (endGiveawayDate != null || finishGiveaway) {
                         if (!lockEnd && now.after(endGiveawayDate)) {
-                            if (countWinners <= listUsersSize) {
-                                LOGGER.info(logMessage);
-                                giveaway.stopGiveaway(countWinners);
-                            }
+                            LOGGER.info(logMessage);
+                            giveaway.stopGiveaway(countWinners);
                         }
                     }
                 } catch (Exception e) {
