@@ -18,14 +18,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
 
 @Service
 @Getter
-@Setter
 public class Giveaway {
 
     private static final Logger LOGGER = Logger.getLogger(Giveaway.class.getName());
@@ -33,7 +32,7 @@ public class Giveaway {
 
     //User LIST
     @Getter(AccessLevel.NONE)
-    private ConcurrentHashMap<String, String> listUsersHash;
+    private Set<String> listUsersHash;
 
     //GiveawayData
     private long messageId;
@@ -43,12 +42,14 @@ public class Giveaway {
     private String urlImage;
     private String title;
     @Nullable
+    @Setter
     private Timestamp endGiveawayDate;
     private int minParticipants = 2;
     private long guildId;
     private long textChannelId;
     private long userIdLong;
     private boolean finishGiveaway;
+    @Setter
     private boolean lockEnd;
 
     //DTO
@@ -82,22 +83,23 @@ public class Giveaway {
         this.giveawayEnd = giveawayEnd;
 
         this.giveawayTimeHandler = new GiveawayTimeHandler();
-        this.listUsersHash = new ConcurrentHashMap<>();
+        this.listUsersHash = new HashSet<>();
     }
 
     public Giveaway update(long guildId,
-                       long textChannelId,
-                       long userIdLong,
-                       long messageId,
-                       String title,
-                       int countWinners,
-                       String time,
-                       Long role,
-                       boolean isOnlyForSpecificRole,
-                       String urlImage,
-                       int minParticipants,
-                       boolean finishGiveaway,
-                       Map<String, String> listUsersHash) {
+                           long textChannelId,
+                           long userIdLong,
+                           long messageId,
+                           String title,
+                           int countWinners,
+                           String time,
+                           Long role,
+                           boolean isOnlyForSpecificRole,
+                           String urlImage,
+                           int minParticipants,
+                           boolean finishGiveaway,
+                           Timestamp endGiveawayDate,
+                           Set<String> listUsersHash) {
         this.guildId = guildId;
         this.textChannelId = textChannelId;
         this.userIdLong = userIdLong;
@@ -109,10 +111,11 @@ public class Giveaway {
         this.isForSpecificRole = isOnlyForSpecificRole;
         this.minParticipants = minParticipants == 0 ? 2 : minParticipants;
         this.finishGiveaway = finishGiveaway;
+        this.endGiveawayDate = endGiveawayDate;
         updateTime(time); //Обновляем время
 
-        if (listUsersHash == null) this.listUsersHash = new ConcurrentHashMap<>();
-        else this.listUsersHash = new ConcurrentHashMap<>(listUsersHash);
+        if (listUsersHash == null) this.listUsersHash = new HashSet<>();
+        else this.listUsersHash = listUsersHash;
         return this;
     }
 
@@ -135,7 +138,7 @@ public class Giveaway {
     }
 
     private void create(Message message) {
-        setMessageId(message.getIdLong());
+        this.messageId = message.getIdLong();
         giveawaySaving.create(this, message);
     }
 
@@ -152,23 +155,23 @@ public class Giveaway {
     }
 
     public boolean isUserContains(String userId) {
-        return listUsersHash.containsKey(userId);
+        return listUsersHash.contains(userId);
     }
 
     public void addUserToList(String userId) {
-        listUsersHash.put(userId, userId);
+        listUsersHash.add(userId);
     }
 
     public void addParticipantToList(Participants participants) {
         participantsList.add(participants);
     }
 
-    public int getParticipantListSize() {
-        return participantsList.size();
-    }
-
     public int getListUsersSize() {
         return listUsersHash.size();
+    }
+
+    public Set<String> getListUsers() {
+        return new HashSet<>(listUsersHash);
     }
 
     @Nullable

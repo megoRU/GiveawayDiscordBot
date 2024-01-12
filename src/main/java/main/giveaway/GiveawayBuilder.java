@@ -6,6 +6,7 @@ import main.model.repository.ParticipantsRepository;
 
 import java.sql.Timestamp;
 import java.util.Map;
+import java.util.Set;
 
 public interface GiveawayBuilder {
 
@@ -32,9 +33,9 @@ public interface GiveawayBuilder {
         private long textChannelId;
         private long userIdLong;
         private boolean finishGiveaway;
-        private Map<String, String> listUsersHash;
+        private Set<String> listUsersHash;
 
-        public Builder setListUsersHash(Map<String, String> listUsersHash) {
+        public Builder setListUsersHash(Set<String> listUsersHash) {
             this.listUsersHash = listUsersHash;
             return this;
         }
@@ -167,6 +168,7 @@ public interface GiveawayBuilder {
                     urlImage,
                     minParticipants,
                     finishGiveaway,
+                    endGiveawayDate,
                     listUsersHash);
         }
     }

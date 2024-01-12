@@ -1,6 +1,7 @@
 package main.core.events;
 
 import main.config.BotStart;
+import main.model.entity.Settings;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
@@ -39,9 +40,10 @@ public class JoinEvent {
             List<Button> buttons = new ArrayList<>();
             buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
             buttons.add(Button.link("https://patreon.com/ghbots", "Patreon"));
+            Settings settings = BotStart.getMapLanguages().get(guildId);
 
-            if (BotStart.getMapLanguages().get(guildId) != null) {
-                if (BotStart.getMapLanguages().get(guildId).equals("eng")) {
+            if (settings != null) {
+                if (settings.getLanguage().equals("eng")) {
                     buttons.add(Button.secondary(event.getGuild().getId() + ":" + ButtonChangeLanguage.CHANGE_LANGUAGE, "Сменить язык ")
                             .withEmoji(Emoji.fromUnicode("U+1F1F7U+1F1FA")));
                 } else {

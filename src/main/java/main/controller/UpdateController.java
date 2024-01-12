@@ -1,7 +1,5 @@
 package main.controller;
 
-import lombok.Getter;
-import main.core.CoreBot;
 import main.core.events.*;
 import main.giveaway.GiveawayEnd;
 import main.giveaway.GiveawayMessageHandler;
@@ -14,18 +12,16 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.Objects;
-import java.util.logging.Logger;
 
-@Getter
-@Component
+@Service
 public class UpdateController {
 
     //REPO
     private final ActiveGiveawayRepository activeGiveawayRepository;
-    private final LanguageRepository languageRepository;
+    private final SettingsRepository settingsRepository;
     private final ParticipantsRepository participantsRepository;
     private final ListUsersRepository listUsersRepository;
     private final SchedulingRepository schedulingRepository;
@@ -35,15 +31,10 @@ public class UpdateController {
     private final GiveawaySaving giveawaySaving;
     private final GiveawayEnd giveawayEnd;
 
-    //LOGGER
-    private final static Logger LOGGER = Logger.getLogger(UpdateController.class.getName());
-
-    //CORE
-    private CoreBot coreBot;
 
     @Autowired
     public UpdateController(ActiveGiveawayRepository activeGiveawayRepository,
-                            LanguageRepository languageRepository,
+                            SettingsRepository settingsRepository,
                             ParticipantsRepository participantsRepository,
                             ListUsersRepository listUsersRepository,
                             SchedulingRepository schedulingRepository,
@@ -51,17 +42,13 @@ public class UpdateController {
                             GiveawaySaving giveawaySaving,
                             GiveawayEnd giveawayEnd) {
         this.activeGiveawayRepository = activeGiveawayRepository;
-        this.languageRepository = languageRepository;
+        this.settingsRepository = settingsRepository;
         this.participantsRepository = participantsRepository;
         this.listUsersRepository = listUsersRepository;
         this.schedulingRepository = schedulingRepository;
         this.giveawayMessageHandler = giveawayMessageHandler;
         this.giveawaySaving = giveawaySaving;
         this.giveawayEnd = giveawayEnd;
-    }
-
-    public void registerBot(CoreBot coreBot) {
-        this.coreBot = coreBot;
     }
 
     public void processEvent(Object event) {
@@ -109,9 +96,9 @@ public class UpdateController {
                 predefinedCommand.predefined(event);
             }
 
-            case "language" -> {
-                LanguageCommand languageCommand = new LanguageCommand(languageRepository);
-                languageCommand.language(event);
+            case "settings" -> {
+                SettingsCommand settingsCommand = new SettingsCommand(settingsRepository);
+                settingsCommand.language(event);
             }
             case "list" -> {
                 ListCommand listCommand = new ListCommand(participantsRepository);
@@ -151,7 +138,7 @@ public class UpdateController {
     private void buttonEvent(@NotNull ButtonInteractionEvent event) {
         if (event.getGuild() == null) return;
         if (Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + ButtonChangeLanguage.CHANGE_LANGUAGE)) {
-            ButtonChangeLanguage buttonChangeLanguage = new ButtonChangeLanguage(languageRepository);
+            ButtonChangeLanguage buttonChangeLanguage = new ButtonChangeLanguage(settingsRepository);
             buttonChangeLanguage.change(event);
         }
     }
@@ -162,7 +149,7 @@ public class UpdateController {
     }
 
     private void leaveEvent(@NotNull GuildLeaveEvent event) {
-        LeaveEvent leaveEvent = new LeaveEvent(activeGiveawayRepository, languageRepository);
+        LeaveEvent leaveEvent = new LeaveEvent(activeGiveawayRepository, settingsRepository);
         leaveEvent.leave(event);
     }
 

@@ -59,6 +59,7 @@ public class ScheduleStartService {
                             int countWinners = scheduling.getCountWinners();
                             String urlImage = scheduling.getUrlImage();
                             Integer minParticipants = scheduling.getMinParticipants();
+                            Timestamp dateEndGiveaway = scheduling.getDateEndGiveaway();
 
                             GiveawayBuilder.Builder giveawayBuilder = new GiveawayBuilder.Builder();
                             giveawayBuilder.setGiveawayEnd(giveawayEnd);
@@ -73,7 +74,7 @@ public class ScheduleStartService {
                             giveawayBuilder.setGuildId(guildId);
                             giveawayBuilder.setTitle(title);
                             giveawayBuilder.setCountWinners(countWinners);
-                            giveawayBuilder.setEndGiveawayDate(dateCreateGiveaway);
+                            giveawayBuilder.setEndGiveawayDate(dateEndGiveaway);
                             giveawayBuilder.setRoleId(role);
                             giveawayBuilder.setForSpecificRole(isOnlyForSpecificRole);
                             giveawayBuilder.setUrlImage(urlImage);

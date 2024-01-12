@@ -30,7 +30,8 @@ public class GiveawayEmbedUtils {
             //Title
             embedBuilder.setTitle(title);
             //Color
-            embedBuilder.setColor(Color.GREEN);
+            Color userColor = GiveawayUtils.getUserColor(guildId);
+            embedBuilder.setColor(userColor);
 
             String footer;
             if (countWinners == 1) {
@@ -82,7 +83,8 @@ public class GiveawayEmbedUtils {
             String title = giveaway.getTitle();
             long createdUserId = giveaway.getUserIdLong();
 
-            embedBuilder.setColor(Color.GREEN);
+            Color userColor = GiveawayUtils.getUserColor(guildId);
+            embedBuilder.setColor(userColor);
             embedBuilder.setTitle(title);
 
             if (countWinners == 1) {

@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @Service
 
@@ -54,7 +55,6 @@ public class GiveawayEnd {
         int minParticipants = giveaway.getMinParticipants();
         long messageId = giveaway.getMessageId();
         int listUsersSize = giveaway.getListUsersSize();
-        int participantListSize = giveaway.getParticipantListSize();
 
         try {
             if (listUsersSize < minParticipants) {
@@ -80,20 +80,28 @@ public class GiveawayEnd {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
         Set<String> uniqueWinners = new LinkedHashSet<>();
+        Set<String> listUsers = giveaway.getListUsers();
 
         try {
-            //выбираем победителей
-            if (participantListSize > 0) {
-                //TODO: Сделать корреляцию между двумя данными
+            Set<String> participants = participantsRepository
+                    .findAllByActiveGiveaways_GuildLongId(guildId)
+                    .stream()
+                    .map(Participants::getUserIdLong)
+                    .map(String::valueOf)
+                    .collect(Collectors.toSet());
+
+            if (listUsers.size() != participants.size()) {
+                listUsers.addAll(participants);
             }
-            List<Participants> participants = participantsRepository.findAllByActiveGiveaways_GuildLongId(guildId); //TODO: Native use may be
-            if (participants.isEmpty()) throw new Exception("participants is Empty");
+
+            List<String> stringList = new ArrayList<>(listUsers);
+            if (stringList.isEmpty()) throw new Exception("participants is Empty");
 
             LOGGER.info(String.format("Завершаем Giveaway: %s, Участников: %s", guildId, participants.size()));
 
-            Winners winners = new Winners(countWinner, 0, listUsersSize - 1);
+            Winners winners = new Winners(countWinner, 0, stringList.size() - 1);
             List<String> strings = giveawayAPI.getWinners(winners);
-            strings.forEach(s -> uniqueWinners.add("<@" + participants.get(Integer.parseInt(s)).getUserIdLong() + ">"));
+            strings.forEach(s -> uniqueWinners.add("<@" + stringList.get(Integer.parseInt(s)) + ">"));
         } catch (Exception e) {
             Optional<ActiveGiveaways> optionalActiveGiveaways = activeGiveawayRepository.findById(guildId);
             if (optionalActiveGiveaways.isPresent()) {
@@ -139,13 +147,13 @@ public class GiveawayEnd {
             giveawayMessageHandler.editMessage(embedBuilder, guildId, textChannelId);
         }
 
+        //Удаляет данные из коллекций
+        GiveawayRegistry instance = GiveawayRegistry.getInstance();
+        instance.removeGiveaway(guildId);
+
         giveawayMessageHandler.sendMessage(urlEmbedded.build(), winnersContent, guildId, textChannelId);
 
         listUsersRepository.saveAllParticipantsToUserList(guildId);
         activeGiveawayRepository.deleteById(guildId);
-
-        //Удаляет данные из коллекций
-        GiveawayRegistry instance = GiveawayRegistry.getInstance();
-        instance.removeGiveaway(guildId);
     }
 }

@@ -2,7 +2,6 @@ package main.giveaway;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,7 +10,6 @@ public class GiveawayRegistry {
 
     //GuildId Giveaway
     private static final Map<Long, Giveaway> giveawayMap = new ConcurrentHashMap<>();
-    private static final Map<Long, LocalDateTime> giveawayLocalDateTime = new ConcurrentHashMap<>();
     private static volatile GiveawayRegistry giveawayRegistry;
 
     private GiveawayRegistry() {

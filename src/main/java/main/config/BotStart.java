@@ -9,12 +9,12 @@ import main.core.events.ReactionEvent;
 import main.giveaway.*;
 import main.jsonparser.ParserClass;
 import main.model.entity.ActiveGiveaways;
-import main.model.entity.Language;
 import main.model.entity.Participants;
+import main.model.entity.Settings;
 import main.model.repository.ActiveGiveawayRepository;
-import main.model.repository.LanguageRepository;
 import main.model.repository.ListUsersRepository;
 import main.model.repository.ParticipantsRepository;
+import main.model.repository.SettingsRepository;
 import main.service.SavingParticipantsService;
 import main.service.ScheduleStartService;
 import main.service.StopGiveawayService;
@@ -65,7 +65,7 @@ public class BotStart {
 
     public static final String activity = "/help | ";
     //String - guildLongId
-    private static final ConcurrentMap<Long, String> mapLanguages = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Long, Settings> mapLanguages = new ConcurrentHashMap<>();
 
     @Getter
     private static JDA jda;
@@ -82,7 +82,7 @@ public class BotStart {
     private final ParticipantsRepository participantsRepository;
     private final ListUsersRepository listUsersRepository;
     private final UpdateController updateController;
-    private final LanguageRepository languageRepository;
+    private final SettingsRepository settingsRepository;
 
     //Service
     private final ScheduleStartService scheduleStartService;
@@ -162,12 +162,16 @@ public class BotStart {
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: 1, 2... Если не указано -> стандартное значение при запуске"));
 
             //Set language
-            List<OptionData> optionsLanguage = new ArrayList<>();
-            optionsLanguage.add(new OptionData(STRING, "bot", "Setting the bot language")
+            List<OptionData> optionsSettings = new ArrayList<>();
+            optionsSettings.add(new OptionData(STRING, "language", "Setting the bot language")
                     .addChoice("\uD83C\uDDEC\uD83C\uDDE7 English Language", "eng")
                     .addChoice("\uD83C\uDDF7\uD83C\uDDFA Russian Language", "rus")
                     .setRequired(true)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Настройка языка бота"));
+
+            optionsSettings.add(new OptionData(STRING, "color", "Embed color: #00FF00")
+                    .setName("color")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Embed цвет: #00FF00"));
 
             //Scheduling Giveaway
             List<OptionData> optionsScheduling = new ArrayList<>();
@@ -287,10 +291,10 @@ public class BotStart {
                     .setGuildOnly(true)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Проверка разрешений бота"));
 
-            commands.addCommands(Commands.slash("language", "Setting language")
-                    .addOptions(optionsLanguage)
+            commands.addCommands(Commands.slash("settings", "Bot settings")
+                    .addOptions(optionsSettings)
                     .setGuildOnly(true)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Настройка языка")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Настройки бота")
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER)));
 
             commands.addCommands(Commands.slash("start", "Create Giveaway")
@@ -372,7 +376,7 @@ public class BotStart {
         }
     }
 
-    @Scheduled(fixedDelay = 5, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = 2, initialDelay = 2, timeUnit = TimeUnit.SECONDS)
     private void scheduleStartGiveaway() {
         scheduleStartService.start(jda);
     }
@@ -435,14 +439,11 @@ public class BotStart {
                 long idUserWhoCreateGiveaway = activeGiveaways.getIdUserWhoCreateGiveaway();
                 Integer minParticipants = activeGiveaways.getMinParticipants();
 
-                Map<String, String> participantsMap = new HashMap<>();
-                Set<Participants> participantsList = activeGiveaways.getParticipants();
-
-                participantsList.forEach(participants -> {
-                            String userIdAsString = participants.getUserIdAsString();
-                            participantsMap.put(userIdAsString, userIdAsString);
-                        }
-                );
+                Set<String> participantsMap = activeGiveaways.getParticipants()
+                        .stream()
+                        .map(Participants::getUserIdLong)
+                        .map(String::valueOf)
+                        .collect(Collectors.toSet());
 
                 GiveawayBuilder.Builder giveawayBuilder = new GiveawayBuilder.Builder();
                 giveawayBuilder.setGiveawayEnd(giveawayEnd);
@@ -592,8 +593,8 @@ public class BotStart {
 
     private void getLocalizationFromDB() {
         try {
-            List<Language> languageList = languageRepository.findAll();
-            languageList.forEach(language -> mapLanguages.put(language.getServerId(), language.getLanguage()));
+            List<Settings> settingsList = settingsRepository.findAll();
+            settingsList.forEach(settings -> mapLanguages.put(settings.getServerId(), settings));
             System.out.println("getLocalizationFromDB()");
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
@@ -604,7 +605,7 @@ public class BotStart {
         return GiveawayRegistry.getInstance().hasGiveaway(guildIdLong);
     }
 
-    public static Map<Long, String> getMapLanguages() {
+    public static Map<Long, Settings> getMapLanguages() {
         return mapLanguages;
     }
 }
