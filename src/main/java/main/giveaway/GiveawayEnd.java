@@ -84,9 +84,7 @@ public class GiveawayEnd {
         try {
             //выбираем победителей
             if (participantListSize > 0) {
-                synchronized (this) {
-                    wait(10000L);
-                }
+                //TODO: Сделать корреляцию между двумя данными
             }
             List<Participants> participants = participantsRepository.findAllByActiveGiveaways_GuildLongId(guildId); //TODO: Native use may be
             if (participants.isEmpty()) throw new Exception("participants is Empty");

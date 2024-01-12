@@ -97,6 +97,7 @@ public class PredefinedCommand {
 
         giveawayBuilder.setTextChannelId(textChannel.getIdLong());
         giveawayBuilder.setUserIdLong(userId);
+        giveawayBuilder.setGuildId(guildId);
         giveawayBuilder.setTitle(title);
         giveawayBuilder.setCountWinners(Integer.parseInt(countString));
         giveawayBuilder.setTime("20s");

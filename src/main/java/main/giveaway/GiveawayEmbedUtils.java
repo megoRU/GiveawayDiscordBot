@@ -1,21 +1,12 @@
 package main.giveaway;
 
-import main.config.BotStart;
 import main.giveaway.utils.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.requests.RestAction;
 
 import java.awt.*;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.List;
 
 public class GiveawayEmbedUtils {
 
@@ -62,15 +53,14 @@ public class GiveawayEmbedUtils {
                 }
                 embedBuilder.appendDescription(giftOnlyFor);
             }
-            
+
             //EndGiveaway
             if (endGiveaway != null) {
                 long endTime = endGiveaway.getTime() / 1000;
-                String endTimeFormat =
-                        String.format(jsonParsers.getLocale("gift_ends_giveaway", guildId), endTime, endTime);
+                String endTimeFormat = String.format(jsonParsers.getLocale("gift_ends_giveaway", guildId), endTime, endTime);
                 embedBuilder.appendDescription(endTimeFormat);
             }
-            
+
             //Hosted By
             String hostedBy = String.format("\nHosted by: <@%s>", createdUserId);
             embedBuilder.appendDescription(hostedBy);

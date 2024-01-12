@@ -117,11 +117,5 @@ public class GiveawaySaving {
                 LOGGER.log(Level.WARNING, e.getMessage(), e);
             }
         }
-
-        if (participantsList.isEmpty()) {
-            synchronized (giveaway) {
-                notifyAll();
-            }
-        }
     }
 }

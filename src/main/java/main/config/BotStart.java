@@ -1,18 +1,19 @@
 package main.config;
 
 import jakarta.annotation.PostConstruct;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import main.controller.UpdateController;
 import main.core.CoreBot;
 import main.core.events.ReactionEvent;
-import main.giveaway.Giveaway;
-import main.giveaway.GiveawayRegistry;
+import main.giveaway.*;
 import main.jsonparser.JSONParsers;
 import main.jsonparser.ParserClass;
-import main.model.repository.ActiveGiveawayRepository;
-import main.model.repository.ListUsersRepository;
-import main.model.repository.ParticipantsRepository;
-import main.model.repository.SchedulingRepository;
+import main.model.entity.ActiveGiveaways;
+import main.model.entity.Language;
+import main.model.entity.Participants;
+import main.model.repository.*;
+import main.service.SavingParticipantsService;
 import main.service.ScheduleStartService;
 import main.service.StopGiveawayService;
 import net.dv8tion.jda.api.JDA;
@@ -58,6 +59,7 @@ import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
 
 @Configuration
 @EnableScheduling
+@AllArgsConstructor
 public class BotStart {
     private final static Logger LOGGER = LoggerFactory.getLogger(BotStart.class.getName());
 
@@ -81,36 +83,15 @@ public class BotStart {
     private final ParticipantsRepository participantsRepository;
     private final ListUsersRepository listUsersRepository;
     private final UpdateController updateController;
-    private final SchedulingRepository schedulingRepository;
+    private final LanguageRepository languageRepository;
 
     //Service
     private final ScheduleStartService scheduleStartService;
     private final StopGiveawayService stopGiveawayService;
-
-    //DataBase
-    @Value("${spring.datasource.url}")
-    private String URL_CONNECTION;
-    @Value("${spring.datasource.username}")
-    private String USER_CONNECTION;
-    @Value("${spring.datasource.password}")
-    private String PASSWORD_CONNECTION;
-
-    @Autowired
-    public BotStart(ActiveGiveawayRepository activeGiveawayRepository,
-                    ParticipantsRepository participantsRepository,
-                    ListUsersRepository listUsersRepository,
-                    UpdateController updateController,
-                    SchedulingRepository schedulingRepository,
-                    ScheduleStartService scheduleStartService,
-                    StopGiveawayService stopGiveawayService) {
-        this.activeGiveawayRepository = activeGiveawayRepository;
-        this.participantsRepository = participantsRepository;
-        this.listUsersRepository = listUsersRepository;
-        this.updateController = updateController;
-        this.schedulingRepository = schedulingRepository;
-        this.scheduleStartService = scheduleStartService;
-        this.stopGiveawayService = stopGiveawayService;
-    }
+    private final SavingParticipantsService savingParticipantsService;
+    private final GiveawayEnd giveawayEnd;
+    private final GiveawaySaving giveawaySaving;
+    private final GiveawayMessageHandler giveawayMessageHandler;
 
     @PostConstruct
     public synchronized void startBot() {
@@ -121,7 +102,7 @@ public class BotStart {
             setLanguages();
             getLocalizationFromDB();
             //Получаем Giveaway и пользователей. Устанавливаем данные
-//            setGiveawayAndUsersInGift();
+            setGiveawayAndUsersInGift();
 
             List<GatewayIntent> intents = new ArrayList<>(
                     Arrays.asList(
@@ -402,6 +383,11 @@ public class BotStart {
         stopGiveawayService.stop();
     }
 
+    @Scheduled(fixedDelay = 5, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
+    private void savingParticipants() {
+        savingParticipantsService.save();
+    }
+
     private void setLanguages() {
         try {
             List<String> listLanguages = new ArrayList<>();
@@ -433,73 +419,67 @@ public class BotStart {
         }
     }
 
-//    public void setGiveawayAndUsersInGift() {
-//        List<ActiveGiveaways> activeGiveawaysList = activeGiveawayRepository.findAll();
-//
-//        for (ActiveGiveaways activeGiveaways : activeGiveawaysList) {
-//            try {
-//                long guild_long_id = activeGiveaways.getGuildLongId();
-//                long channel_long_id = activeGiveaways.getChannelIdLong();
-//                int count_winners = activeGiveaways.getCountWinners();
-//                long message_id_long = activeGiveaways.getMessageIdLong();
-//                String giveaway_title = activeGiveaways.getGiveawayTitle();
-//                Timestamp date_end_giveaway = activeGiveaways.getDateEndGiveaway();
-//                Long role_id_long = activeGiveaways.getRoleIdLong(); // null -> 0
-//                boolean is_for_specific_role = activeGiveaways.getIsForSpecificRole();
-//                String url_image = activeGiveaways.getUrlImage();
-//                long id_user_who_create_giveaway = activeGiveaways.getIdUserWhoCreateGiveaway();
-//                Integer min_participants = activeGiveaways.getMinParticipants();
-//
-//                Map<String, String> participantsMap = new HashMap<>();
-//                Set<Participants> participantsList = activeGiveaways.getParticipants();
-//
-//                participantsList.forEach(participants -> {
-//                            String userIdAsString = participants.getUserIdAsString();
-//                            participantsMap.put(userIdAsString, userIdAsString);
-//                        }
-//                );
-//
-//                Giveaway.GiveawayData giveawayData = new Giveaway.GiveawayData(
-//                        message_id_long,
-//                        count_winners,
-//                        role_id_long,
-//                        is_for_specific_role,
-//                        url_image,
-//                        giveaway_title == null ? "Giveaway" : giveaway_title,
-//                        date_end_giveaway,
-//                        min_participants == null ? 2 : min_participants);
-//
-//                Giveaway giveaway = new Giveaway(guild_long_id,
-//                        channel_long_id,
-//                        id_user_who_create_giveaway,
-//                        //Добавляем пользователей в hashmap
-//                        participantsMap,
-//                        activeGiveawayRepository,
-//                        participantsRepository,
-//                        listUsersRepository,
-//                        giveawayData,
-//                        updateController);
-//
-//                GiveawayRegistry instance = GiveawayRegistry.getInstance();
-//                instance.putGift(guild_long_id, giveaway);
-//
-//
-//                if (date_end_giveaway != null) {
-//                    updateGiveawayByGuild(giveaway);
-//
-//                    Timer timer = new Timer();
-//                    StopGiveawayByTimer stopGiveawayByTimer = new StopGiveawayByTimer(guild_long_id);
-//                    Date date = new Date(date_end_giveaway.getTime());
-//                    timer.schedule(stopGiveawayByTimer, date);
-//
-////                    instance.putGiveawayTimer(guild_long_id, stopGiveawayByTimer, timer);
-//                }
-//            } catch (Exception e) {
-//                LOGGER.error(e.getMessage(), e);
-//            }
-//            System.out.println("getMessageIdFromDB()");
-//        }
-//    }
+    public void setGiveawayAndUsersInGift() {
+        List<ActiveGiveaways> activeGiveawaysList = activeGiveawayRepository.findAll();
+
+        for (ActiveGiveaways activeGiveaways : activeGiveawaysList) {
+            try {
+                long guildId = activeGiveaways.getGuildLongId();
+                long channelIdLong = activeGiveaways.getChannelIdLong();
+                int countWinners = activeGiveaways.getCountWinners();
+                long messageIdLong = activeGiveaways.getMessageIdLong();
+                String title = activeGiveaways.getGiveawayTitle();
+                Timestamp dateEndGiveaway = activeGiveaways.getDateEndGiveaway();
+                Long role = activeGiveaways.getRoleIdLong(); // null -> 0
+                boolean isForSpecificRole = activeGiveaways.getIsForSpecificRole();
+                String urlImage = activeGiveaways.getUrlImage();
+                long idUserWhoCreateGiveaway = activeGiveaways.getIdUserWhoCreateGiveaway();
+                Integer minParticipants = activeGiveaways.getMinParticipants();
+
+                Map<String, String> participantsMap = new HashMap<>();
+                Set<Participants> participantsList = activeGiveaways.getParticipants();
+
+                participantsList.forEach(participants -> {
+                            String userIdAsString = participants.getUserIdAsString();
+                            participantsMap.put(userIdAsString, userIdAsString);
+                        }
+                );
+
+                GiveawayBuilder.Builder giveawayBuilder = new GiveawayBuilder.Builder();
+                giveawayBuilder.setGiveawayEnd(giveawayEnd);
+                giveawayBuilder.setActiveGiveawayRepository(activeGiveawayRepository);
+                giveawayBuilder.setGiveawaySaving(giveawaySaving);
+                giveawayBuilder.setParticipantsRepository(participantsRepository);
+                giveawayBuilder.setListUsersRepository(listUsersRepository);
+                giveawayBuilder.setGiveawayMessageHandler(giveawayMessageHandler);
+
+                giveawayBuilder.setTextChannelId(channelIdLong);
+                giveawayBuilder.setUserIdLong(idUserWhoCreateGiveaway);
+                giveawayBuilder.setMessageId(messageIdLong);
+                giveawayBuilder.setGuildId(guildId);
+                giveawayBuilder.setTitle(title);
+                giveawayBuilder.setCountWinners(countWinners);
+                giveawayBuilder.setRoleId(role);
+                giveawayBuilder.setEndGiveawayDate(dateEndGiveaway);
+                giveawayBuilder.setForSpecificRole(isForSpecificRole);
+                giveawayBuilder.setUrlImage(urlImage);
+                giveawayBuilder.setMinParticipants(minParticipants);
+                giveawayBuilder.setListUsersHash(participantsMap);
+
+                Giveaway giveaway = giveawayBuilder.build();
+                giveaway.setLockEnd(true);
+                GiveawayRegistry.getInstance().putGift(guildId, giveaway);
+
+                if (dateEndGiveaway != null) {
+                    updateGiveawayByGuild(giveaway);
+                    giveaway.setLockEnd(false);
+                }
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
+            }
+            System.out.println("getMessageIdFromDB()");
+        }
+    }
 
     @Scheduled(fixedDelay = 240000, initialDelay = 25000)
     public synchronized void updateUserList() {
@@ -613,20 +593,10 @@ public class BotStart {
 
     private void getLocalizationFromDB() {
         try {
-            Connection connection = DriverManager.getConnection(URL_CONNECTION, USER_CONNECTION, PASSWORD_CONNECTION);
-            Statement statement = connection.createStatement();
-            String sql = "SELECT * FROM language";
-            ResultSet rs = statement.executeQuery(sql);
-
-            while (rs.next()) {
-                mapLanguages.put(rs.getLong("server_id"), rs.getString("language"));
-            }
-
-            rs.close();
-            statement.close();
-            connection.close();
+            List<Language> languageList = languageRepository.findAll();
+            languageList.forEach(language -> mapLanguages.put(language.getServerId(), language.getLanguage()));
             System.out.println("getLocalizationFromDB()");
-        } catch (SQLException e) {
+        } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }
     }

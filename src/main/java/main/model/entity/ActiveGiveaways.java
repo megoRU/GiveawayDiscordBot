@@ -52,7 +52,7 @@ public class ActiveGiveaways {
     @Column(name = "min_participants")
     private Integer minParticipants;
 
-    @Column(name = "finish_giveaway")
+    @Column(name = "finish_giveaway", nullable = false)
     private boolean finishGiveaway;
 
     @OneToMany(mappedBy = "activeGiveaways", cascade = CascadeType.ALL)

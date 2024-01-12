@@ -49,6 +49,7 @@ public class Giveaway {
     private long textChannelId;
     private long userIdLong;
     private boolean finishGiveaway;
+    private boolean lockEnd;
 
     //DTO
     @Getter(AccessLevel.NONE)
@@ -134,6 +135,7 @@ public class Giveaway {
     }
 
     private void create(Message message) {
+        setMessageId(message.getIdLong());
         giveawaySaving.create(this, message);
     }
 

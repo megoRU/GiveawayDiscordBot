@@ -1,7 +1,6 @@
 package main.core.events;
 
 import lombok.AllArgsConstructor;
-import main.controller.UpdateController;
 import main.giveaway.*;
 import main.giveaway.utils.ChecksClass;
 import main.giveaway.utils.GiveawayUtils;
@@ -134,6 +133,7 @@ public class StartCommand {
 
                 giveawayBuilder.setTextChannelId(event.getChannel().getIdLong());
                 giveawayBuilder.setUserIdLong(userIdLong);
+                giveawayBuilder.setGuildId(guildId);
                 giveawayBuilder.setTitle(title);
                 giveawayBuilder.setCountWinners(count);
                 giveawayBuilder.setTime(time);

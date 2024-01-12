@@ -4,6 +4,7 @@ import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,11 +29,19 @@ public final class StopGiveawayService {
                                 ListUsersSize: %s
                                 CountWinners: %s
                                 """, guildId, listUsersSize, countWinners);
-                LOGGER.info(logMessage);
+
                 try {
                     //TODO завершать если прошёл месяц?
-                    if (countWinners <= listUsersSize) {
-                        giveaway.stopGiveaway(countWinners);
+                    Timestamp endGiveawayDate = giveaway.getEndGiveawayDate();
+                    boolean finishGiveaway = giveaway.isFinishGiveaway();
+                    boolean lockEnd = giveaway.isLockEnd();
+                    if (endGiveawayDate != null || finishGiveaway) {
+                        if (!lockEnd) {
+                            if (countWinners <= listUsersSize) {
+                                LOGGER.info(logMessage);
+                                giveaway.stopGiveaway(countWinners);
+                            }
+                        }
                     }
                 } catch (Exception e) {
                     LOGGER.log(Level.SEVERE, e.getMessage(), e);
