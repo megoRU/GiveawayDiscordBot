@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import main.core.events.ReactionEvent;
 import main.jsonparser.JSONParsers;
-import main.model.entity.ActiveGiveaways;
 import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.ListUsersRepository;
@@ -36,8 +35,6 @@ public class Giveaway {
     @Getter(AccessLevel.NONE)
     private ConcurrentHashMap<String, String> listUsersHash;
 
-    private ActiveGiveaways activeGiveaways;
-
     //GiveawayData
     private long messageId;
     private int countWinners;
@@ -51,6 +48,7 @@ public class Giveaway {
     private long guildId;
     private long textChannelId;
     private long userIdLong;
+    private boolean finishGiveaway;
 
     //DTO
     @Getter(AccessLevel.NONE)
@@ -65,6 +63,7 @@ public class Giveaway {
     private final GiveawayMessageHandler giveawayMessageHandler;
     private final GiveawaySaving giveawaySaving;
     private final GiveawayEnd giveawayEnd;
+
     private final GiveawayTimeHandler giveawayTimeHandler;
 
     @Autowired
@@ -85,9 +84,10 @@ public class Giveaway {
         this.listUsersHash = new ConcurrentHashMap<>();
     }
 
-    public void update(long guildId,
+    public Giveaway update(long guildId,
                        long textChannelId,
                        long userIdLong,
+                       long messageId,
                        String title,
                        int countWinners,
                        String time,
@@ -95,19 +95,24 @@ public class Giveaway {
                        boolean isOnlyForSpecificRole,
                        String urlImage,
                        int minParticipants,
+                       boolean finishGiveaway,
                        Map<String, String> listUsersHash) {
         this.guildId = guildId;
         this.textChannelId = textChannelId;
         this.userIdLong = userIdLong;
+        this.messageId = messageId;
         this.title = title == null ? "Giveaway" : title;
         this.countWinners = countWinners;
         this.roleId = role;
         this.urlImage = urlImage;
         this.isForSpecificRole = isOnlyForSpecificRole;
         this.minParticipants = minParticipants == 0 ? 2 : minParticipants;
+        this.finishGiveaway = finishGiveaway;
         updateTime(time); //Обновляем время
 
-        this.listUsersHash = new ConcurrentHashMap<>(listUsersHash);
+        if (listUsersHash == null) this.listUsersHash = new ConcurrentHashMap<>();
+        else this.listUsersHash = new ConcurrentHashMap<>(listUsersHash);
+        return this;
     }
 
     public void startGiveaway(GuildMessageChannel textChannel, boolean predefined) {

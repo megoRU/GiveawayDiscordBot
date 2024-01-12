@@ -31,7 +31,6 @@ public class CancelCommand {
         activeGiveawayRepository.deleteById(guildId);
 
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
-        instance.cancelGiveawayTimer(guildId);
         instance.removeGiveaway(guildId);
 
         EmbedBuilder cancel = new EmbedBuilder();

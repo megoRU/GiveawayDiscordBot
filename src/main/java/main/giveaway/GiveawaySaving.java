@@ -43,11 +43,13 @@ public class GiveawaySaving {
         long userIdLong = giveaway.getUserIdLong();
         String urlImage = giveaway.getUrlImage();
         Timestamp endGiveawayDate = giveaway.getEndGiveawayDate();
+        long messageId = message.getIdLong();
+        long channelId = message.getChannel().getIdLong();
 
         activeGiveaways = new ActiveGiveaways();
         activeGiveaways.setGuildLongId(guildId);
-        activeGiveaways.setMessageIdLong(message.getIdLong());
-        activeGiveaways.setChannelIdLong(message.getChannel().getIdLong());
+        activeGiveaways.setMessageIdLong(messageId);
+        activeGiveaways.setChannelIdLong(channelId);
         activeGiveaways.setCountWinners(countWinners);
         activeGiveaways.setGiveawayTitle(title);
         activeGiveaways.setMinParticipants(minParticipants);

@@ -1,8 +1,8 @@
 package main.core.events;
 
-import main.controller.UpdateController;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayEmbedUtils;
+import main.giveaway.GiveawayMessageHandler;
 import main.giveaway.GiveawayRegistry;
 import main.giveaway.utils.GiveawayUtils;
 import main.jsonparser.JSONParsers;
@@ -20,15 +20,18 @@ import java.sql.Timestamp;
 public class ChangeCommand {
 
     private final ActiveGiveawayRepository activeGiveawayRepository;
+    private final GiveawayMessageHandler giveawayMessageHandler;
 
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     @Autowired
-    public ChangeCommand(ActiveGiveawayRepository activeGiveawayRepository) {
+    public ChangeCommand(ActiveGiveawayRepository activeGiveawayRepository,
+                         GiveawayMessageHandler giveawayMessageHandler) {
         this.activeGiveawayRepository = activeGiveawayRepository;
+        this.giveawayMessageHandler = giveawayMessageHandler;
     }
 
-    public void change(@NotNull SlashCommandInteractionEvent event, UpdateController updateController) {
+    public void change(@NotNull SlashCommandInteractionEvent event) {
         if (event.getGuild() == null) return;
         var guildId = event.getGuild().getIdLong();
 
@@ -54,7 +57,7 @@ public class ChangeCommand {
                 activeGiveawayRepository.updateGiveawayTime(guildId, timestamp);
                 EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayLayout(guildId);
 
-                updateController.setView(embedBuilder.build(), guildId, channelId, messageId);
+                giveawayMessageHandler.editMessage(embedBuilder.build(), guildId, channelId, messageId);
             }
         }
     }

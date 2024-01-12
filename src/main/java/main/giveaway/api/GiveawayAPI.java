@@ -11,9 +11,7 @@ import java.util.List;
 @Service
 public class GiveawayAPI {
 
-    //API
     private final MegoruAPI api;
-
 
     public GiveawayAPI() {
         this.api = new MegoruAPI.Builder().build();;
@@ -22,5 +20,4 @@ public class GiveawayAPI {
     public List<String> getWinners(Winners winners) throws UnsuccessfulHttpException, IOException {
        return api.getWinners(winners);
     }
-
 }

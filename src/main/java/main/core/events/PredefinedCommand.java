@@ -1,8 +1,8 @@
 package main.core.events;
 
+import lombok.AllArgsConstructor;
 import main.controller.UpdateController;
-import main.giveaway.Giveaway;
-import main.giveaway.GiveawayRegistry;
+import main.giveaway.*;
 import main.jsonparser.JSONParsers;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.ListUsersRepository;
@@ -25,22 +25,19 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
+@AllArgsConstructor
 public class PredefinedCommand {
 
     private final ListUsersRepository listUsersRepository;
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final ParticipantsRepository participantsRepository;
+    private final GiveawayMessageHandler giveawayMessageHandler;
+    private final GiveawaySaving giveawaySaving;
+    private final GiveawayEnd giveawayEnd;
 
     private static final JSONParsers jsonParsers = new JSONParsers();
 
-    @Autowired
-    public PredefinedCommand(ListUsersRepository listUsersRepository, ActiveGiveawayRepository activeGiveawayRepository, ParticipantsRepository participantsRepository) {
-        this.listUsersRepository = listUsersRepository;
-        this.activeGiveawayRepository = activeGiveawayRepository;
-        this.participantsRepository = participantsRepository;
-    }
-
-    public void predefined(@NotNull SlashCommandInteractionEvent event, UpdateController updateController) {
+    public void predefined(@NotNull SlashCommandInteractionEvent event) {
         if (event.getGuild() == null) return;
         var guildId = event.getGuild().getIdLong();
         var userId = event.getUser().getIdLong();
@@ -90,27 +87,29 @@ public class PredefinedCommand {
             }
         }
 
-        Giveaway giveaway = new Giveaway(guildId,
-                textChannel.getIdLong(),
-                userId,
-                activeGiveawayRepository,
-                participantsRepository,
-                listUsersRepository,
-                updateController);
+        GiveawayBuilder.Builder giveawayBuilder = new GiveawayBuilder.Builder();
+        giveawayBuilder.setGiveawayEnd(giveawayEnd);
+        giveawayBuilder.setActiveGiveawayRepository(activeGiveawayRepository);
+        giveawayBuilder.setGiveawaySaving(giveawaySaving);
+        giveawayBuilder.setParticipantsRepository(participantsRepository);
+        giveawayBuilder.setListUsersRepository(listUsersRepository);
+        giveawayBuilder.setGiveawayMessageHandler(giveawayMessageHandler);
 
+        giveawayBuilder.setTextChannelId(textChannel.getIdLong());
+        giveawayBuilder.setUserIdLong(userId);
+        giveawayBuilder.setTitle(title);
+        giveawayBuilder.setCountWinners(Integer.parseInt(countString));
+        giveawayBuilder.setTime("20s");
+        giveawayBuilder.setRoleId(role.getIdLong());
+        giveawayBuilder.setForSpecificRole(true); //Тут все верно
+        giveawayBuilder.setUrlImage(null);
+        giveawayBuilder.setMinParticipants(2);
+
+        Giveaway giveaway = giveawayBuilder.build();
         GiveawayRegistry.getInstance().putGift(guildId, giveaway);
 
         //TODO: Возможно будет проблема когда Guild слишком большая
-        giveaway.startGiveaway(
-                textChannel,
-                title,
-                Integer.parseInt(countString),
-                "20s",
-                role.getIdLong(),
-                true,
-                null,
-                true,
-                2);
+        giveaway.startGiveaway(textChannel, true);
 
         Task<List<Member>> listTask = event.getGuild().loadMembers()
                 .onSuccess(members -> {
