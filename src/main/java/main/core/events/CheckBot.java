@@ -1,6 +1,6 @@
 package main.core.events;
 
-import main.giveaway.ChecksClass;
+import main.giveaway.utils.ChecksClass;
 import main.jsonparser.JSONParsers;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -8,15 +8,14 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
-
 @Service
 public class CheckBot {
 
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     public void check(@NotNull SlashCommandInteractionEvent event) {
-        var guildId = Objects.requireNonNull(event.getGuild()).getId();
+        if (event.getGuild() == null) return;
+        var guildId = event.getGuild().getIdLong();
 
         GuildChannel guildChannel = event.getOption("textchannel", OptionMapping::getAsChannel);
         if (guildChannel == null) {

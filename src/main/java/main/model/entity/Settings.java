@@ -14,13 +14,16 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "language")
-public class Language {
+@Table(name = "settings")
+public class Settings {
 
     @Id
     @Column(name = "server_id", nullable = false)
-    private String serverId;
+    private Long serverId;
 
     @Column(name = "language", nullable = false)
     private String language;
+
+    @Column(name = "color_hex")
+    private String colorHex;
 }

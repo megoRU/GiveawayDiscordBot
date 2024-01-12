@@ -1,15 +1,21 @@
 package main.jsonparser;
 
 import main.config.BotStart;
+import main.model.entity.Settings;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class JSONParsers {
 
-    public String getLocale(String key, String guildIdLong) {
+    private final static Logger LOGGER = Logger.getLogger(JSONParsers.class.getName());
+
+    public String getLocale(String key, long guildId) {
         try {
-            String language = BotStart.getMapLanguages().get(guildIdLong);
-            return ParserClass.getInstance().getTranslation(key, language != null ? language : "eng");
+            Settings settings = BotStart.getMapLanguages().get(guildId);
+            return ParserClass.getInstance().getTranslation(key, settings.getLanguage() != null ? settings.getLanguage() : "eng");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
         return "NO_FOUND_LOCALIZATION";
     }

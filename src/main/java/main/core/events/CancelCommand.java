@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
-import java.util.Objects;
 
 @Service
 public class CancelCommand {
@@ -25,14 +24,14 @@ public class CancelCommand {
     }
 
     public void cancel(@NotNull SlashCommandInteractionEvent event) {
-        long guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
+        if (event.getGuild() == null) return;
+        long guildId = event.getGuild().getIdLong();
 
         schedulingRepository.deleteById(guildId);
         activeGiveawayRepository.deleteById(guildId);
 
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
-        instance.cancelGiveawayTimer(guildId);
-        instance.removeGuildFromGiveaway(guildId);
+        instance.removeGiveaway(guildId);
 
         EmbedBuilder cancel = new EmbedBuilder();
         cancel.setColor(Color.GREEN);

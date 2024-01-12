@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class ParticipantsCommand {
@@ -31,8 +30,9 @@ public class ParticipantsCommand {
     }
 
     public void participants(@NotNull SlashCommandInteractionEvent event) {
-        var userIdLong = event.getUser().getIdLong();
-        var guildId = Objects.requireNonNull(event.getGuild()).getId();
+        if (event.getGuild() == null) return;
+        var userId = event.getUser().getIdLong();
+        var guildId = event.getGuild().getIdLong();
 
         event.deferReply().setEphemeral(true).queue();
         String id = event.getOption("giveaway_id", OptionMapping::getAsString);
@@ -40,7 +40,7 @@ public class ParticipantsCommand {
             if (id != null) {
                 File file = new File("participants.json");
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                List<ListUsers> listUsers = listUsersRepository.findAllByGiveawayIdAndCreatedUserId(Long.parseLong(id), userIdLong);
+                List<ListUsers> listUsers = listUsersRepository.findAllByGiveawayIdAndCreatedUserId(Long.parseLong(id), userId);
                 if (listUsers.isEmpty()) {
                     String noAccessReroll = jsonParsers.getLocale("no_access_reroll", guildId);
                     event.getHook().sendMessage(noAccessReroll).setEphemeral(true).queue();

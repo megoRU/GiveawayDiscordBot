@@ -1,16 +1,14 @@
 package main.core.events;
 
-import main.giveaway.ChecksClass;
 import main.giveaway.GiveawayRegistry;
-import main.giveaway.GiveawayUtils;
+import main.giveaway.utils.ChecksClass;
+import main.giveaway.utils.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.model.entity.Scheduling;
 import main.model.repository.SchedulingRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import net.dv8tion.jda.api.entities.channel.unions.GuildChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
@@ -18,9 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Objects;
 
 @Service
@@ -37,17 +32,17 @@ public class SchedulingCommand {
 
     public void scheduling(@NotNull SlashCommandInteractionEvent event) {
         var guildIdLong = Objects.requireNonNull(event.getGuild()).getIdLong();
-        var guildId = Objects.requireNonNull(event.getGuild()).getId();
+        var guildId = event.getGuild().getIdLong();
         var userIdLong = event.getUser().getIdLong();
-        Long role = event.getOption("mention", OptionMapping::getAsLong);
-        String countString = event.getOption("count", OptionMapping::getAsString);
-        String title = event.getOption("title", OptionMapping::getAsString);
-        GuildChannelUnion textChannel = event.getOption("textchannel", OptionMapping::getAsChannel);
-        Message.Attachment image = event.getOption("image", OptionMapping::getAsAttachment);
-        String urlImage = image != null ? image.getUrl() : null;
-        Integer minParticipants = event.getOption("min_participants", OptionMapping::getAsInt);
-        String startTime = event.getOption("start_time", OptionMapping::getAsString);
-        String endTime = event.getOption("end_time", OptionMapping::getAsString);
+        var role = event.getOption("mention", OptionMapping::getAsLong);
+        var countString = event.getOption("count", OptionMapping::getAsString);
+        var title = event.getOption("title", OptionMapping::getAsString);
+        var textChannel = event.getOption("textchannel", OptionMapping::getAsChannel);
+        var image = event.getOption("image", OptionMapping::getAsAttachment);
+        var urlImage = image != null ? image.getUrl() : null;
+        var minParticipants = event.getOption("min_participants", OptionMapping::getAsInt);
+        var startTime = event.getOption("start_time", OptionMapping::getAsString);
+        var endTime = event.getOption("end_time", OptionMapping::getAsString);
 
         if (textChannel == null) {
             event.reply("TextChannel is `Null`").queue();
@@ -110,8 +105,8 @@ public class SchedulingCommand {
             scheduling.setGuildLongId(guildIdLong);
             scheduling.setChannelIdLong(textChannel.getIdLong());
             scheduling.setCountWinners(count);
-            scheduling.setDateCreateGiveaway(timeProcessor(startTime));
-            scheduling.setDateEndGiveaway(timeProcessor(endTime) == null ? null : timeProcessor(endTime));
+            scheduling.setDateCreateGiveaway(GiveawayUtils.timeProcessor(startTime));
+            scheduling.setDateEndGiveaway(GiveawayUtils.timeProcessor(endTime) == null ? null : GiveawayUtils.timeProcessor(endTime));
             scheduling.setGiveawayTitle(title);
             scheduling.setRoleIdLong(role);
             scheduling.setIsForSpecificRole(isOnlyForSpecificRole);
@@ -122,9 +117,9 @@ public class SchedulingCommand {
             schedulingRepository.save(scheduling);
 
             String scheduleEnd = jsonParsers.getLocale("schedule_end", guildId);
-            long timeStart = Objects.requireNonNull(timeProcessor(startTime)).getTime() / 1000;
+            long timeStart = Objects.requireNonNull(GiveawayUtils.timeProcessor(startTime)).getTime() / 1000;
             if (endTime != null) {
-                long timeEnd = Objects.requireNonNull(timeProcessor(endTime)).getTime() / 1000;
+                long timeEnd = Objects.requireNonNull(GiveawayUtils.timeProcessor(endTime)).getTime() / 1000;
                 if (timeEnd != 0) {
                     scheduleEnd = String.format("<t:%s:R> (<t:%s:f>)", timeEnd, timeEnd);
                 }
@@ -144,13 +139,5 @@ public class SchedulingCommand {
             String startInNotTextChannels = jsonParsers.getLocale("start_in_not_text_channels", guildId);
             event.reply(startInNotTextChannels).queue();
         }
-    }
-
-    private Timestamp timeProcessor(String time) {
-        if (time == null) return null;
-        ZoneOffset offset = ZoneOffset.UTC;
-        LocalDateTime localDateTime = LocalDateTime.parse(time, GiveawayUtils.FORMATTER);
-        long toEpochSecond = localDateTime.toEpochSecond(offset);
-        return new Timestamp(toEpochSecond * 1000);
     }
 }

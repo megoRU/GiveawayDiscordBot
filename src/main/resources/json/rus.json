@@ -18,6 +18,7 @@
   "gift_giveaway_end": "Giveaway завершилась",
   "language_change_not_admin": "Вы не являетесь Админом или не можете управлять сервером!",
   "button_language": "Вы сменили язык на: `%s`",
+  "button_language_color": "Вы сменили язык на: `%s` и цвет на: `%s`",
   "slash_stop_no_has": "Сейчас нет активного Giveaway",
   "slash_stop": "Вы завершили Giveaway",
   "slash_stop_errors": "Вы не завершили Giveaway",
@@ -63,5 +64,7 @@
   "errors_descriptions_again": "Не волнуйтесь, задача уже запущена.\nМы завершим ваш Giveaway, как только сможем.",
   "you_wrote_date": "Вы написали дату: `%s`\nСейчас (UTC±0):⠀ ⠀`%s`",
   "schedule_start": "Дата и время запуска: <t:%s:R> (<t:%s:f>)\nДата и время завершения: %s\nВ канале: <#%s>",
-  "schedule_end": "Не задано"
+  "schedule_end": "Не задано",
+  "gift_hosted": "\nСоздатель: <@%s>",
+  "settings_color_error": "Цвет должен быть в таком формате: `#00FF00`"
 }
