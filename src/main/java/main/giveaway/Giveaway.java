@@ -54,7 +54,7 @@ public class Giveaway {
 
     //DTO
     @Getter(AccessLevel.NONE)
-    private final ConcurrentLinkedQueue<Participants> participantsList = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<Participants> participantsList;
 
     //REPO
     private final ActiveGiveawayRepository activeGiveawayRepository;
@@ -84,6 +84,7 @@ public class Giveaway {
 
         this.giveawayTimeHandler = new GiveawayTimeHandler();
         this.listUsersHash = new HashSet<>();
+        this.participantsList = new ConcurrentLinkedQueue<>();
     }
 
     public Giveaway update(long guildId,
@@ -114,8 +115,7 @@ public class Giveaway {
         this.endGiveawayDate = endGiveawayDate;
         updateTime(time); //Обновляем время
 
-        if (listUsersHash == null) this.listUsersHash = new HashSet<>();
-        else this.listUsersHash = listUsersHash;
+        if (listUsersHash != null) this.listUsersHash = listUsersHash;
         return this;
     }
 

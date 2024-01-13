@@ -62,7 +62,7 @@ public class GiveawaySaving {
         activeGiveaways.setIdUserWhoCreateGiveaway(userIdLong);
         activeGiveaways.setDateEndGiveaway(endGiveawayDate);
 
-        activeGiveawayRepository.save(activeGiveaways);
+        activeGiveaways = activeGiveawayRepository.save(activeGiveaways);
     }
 
     public void addUser(Giveaway giveaway, final User user) {

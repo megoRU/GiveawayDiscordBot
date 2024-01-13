@@ -70,11 +70,7 @@ public class ReactionEvent {
                             return;
                         }
                     }
-
-                    if (!giveaway.isUserContains(user.getId())) {
-                        LOGGER.info(String.format("\nНовый участник: %s\nСервер: %s", user.getId(), event.getGuild().getId()));
-                        giveaway.addUser(user);
-                    }
+                    giveaway.addUser(user);
                 }
             }
         } catch (Exception e) {

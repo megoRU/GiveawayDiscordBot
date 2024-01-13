@@ -1,7 +1,6 @@
 package main.core.events;
 
 import lombok.AllArgsConstructor;
-import main.controller.UpdateController;
 import main.giveaway.*;
 import main.jsonparser.JSONParsers;
 import main.model.repository.ActiveGiveawayRepository;
@@ -17,7 +16,6 @@ import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.utils.concurrent.Task;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
@@ -137,7 +135,8 @@ public class PredefinedCommand {
                                 .filter(user -> !user.isBot())
                                 .forEach(giveaway::addUser);
                     }
-                });
+                })
+                .onError(Throwable::printStackTrace);
         listTask.isStarted();
     }
 }
