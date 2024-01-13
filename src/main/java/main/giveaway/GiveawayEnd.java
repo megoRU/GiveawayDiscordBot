@@ -67,7 +67,6 @@ public class GiveawayEnd {
                 notEnoughUsers.setTitle(giftNotEnoughUsers);
                 notEnoughUsers.setDescription(giftGiveawayDeleted);
                 //Отправляет сообщение
-
                 giveawayMessageHandler.editMessage(notEnoughUsers, guildId, textChannelId);
 
                 activeGiveawayRepository.deleteById(guildId);
