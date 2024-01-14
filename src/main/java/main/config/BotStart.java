@@ -92,7 +92,7 @@ public class BotStart {
             List<Command> complete = jda.retrieveCommands().complete();
             complete.forEach(command -> System.out.println(command.toString()));
 
-            System.out.println("IsDevMode: " + Config.isIsDev());
+            System.out.println("Режим тестирования: " + Config.isIsDev());
 
             //Обновить команды
 //            updateSlashService.updateSlash(jda);
