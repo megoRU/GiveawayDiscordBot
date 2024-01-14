@@ -13,7 +13,7 @@ public class JSONParsers {
     public String getLocale(String key, long guildId) {
         try {
             Settings settings = BotStart.getMapLanguages().get(guildId);
-            return ParserClass.getInstance().getTranslation(key, settings.getLanguage() != null ? settings.getLanguage() : "eng");
+            return ParserClass.getInstance().getTranslation(key, settings != null ? settings.getLanguage() : "eng");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
