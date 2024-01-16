@@ -135,6 +135,11 @@ public class UpdateSlashService {
                     .setName("min_participants")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Удалить Giveaway если участников меньше этого числа"));
 
+            optionsStart.add(new OptionData(ROLE, "forbidden_role", "Prohibit participation for a specific @Role")
+                    .setName("forbidden_role")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Запретить участвовать для определенной @Роли"));
+
+
             List<OptionData> predefined = new ArrayList<>();
             predefined.add(new OptionData(STRING, "title", "Title for Giveaway")
                     .setName("title")
