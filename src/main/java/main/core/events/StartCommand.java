@@ -42,13 +42,16 @@ public class StartCommand {
 
         var guildId = event.getGuild().getIdLong();
         var userIdLong = event.getUser().getIdLong();
-        String title = event.getOption("title", OptionMapping::getAsString);
-        String countString = event.getOption("count", OptionMapping::getAsString);
-        String time = event.getOption("duration", OptionMapping::getAsString);
+        var title = event.getOption("title", OptionMapping::getAsString);
+        var countString = event.getOption("count", OptionMapping::getAsString);
+        var time = event.getOption("duration", OptionMapping::getAsString);
         if (time != null) time = time.replaceAll("-", ".");
-        Long role = event.getOption("mention", OptionMapping::getAsLong);
+        var role = event.getOption("mention", OptionMapping::getAsRole);
+        var isOnlyForSpecificRole = Objects.equals(event.getOption("role", OptionMapping::getAsString), "yes");
+
         Message.Attachment image = event.getOption("image", OptionMapping::getAsAttachment);
         Integer minParticipants = event.getOption("min_participants", OptionMapping::getAsInt);
+        var forbiddenRole = event.getOption("forbidden_role", OptionMapping::getAsRole);
 
         Scheduling schedulingByGuildLongId = schedulingRepository.findByGuildLongId(guildId);
         if (GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
@@ -69,15 +72,13 @@ public class StartCommand {
                 int count = 1;
                 if (countString != null) count = Integer.parseInt(countString);
 
-                if (minParticipants == null || minParticipants == 0 || minParticipants == 1) {
+                if (minParticipants == null || minParticipants < 2) {
                     minParticipants = 2;
                 }
 
                 if (image != null && image.isImage()) {
                     urlImage = image.getUrl();
                 }
-
-                boolean isOnlyForSpecificRole = Objects.equals(event.getOption("role", OptionMapping::getAsString), "yes");
 
                 EmbedBuilder embedBuilder = new EmbedBuilder();
                 embedBuilder.setColor(Color.BLACK);
@@ -106,13 +107,13 @@ public class StartCommand {
                     String slashErrorOnlyForThisRole = jsonParsers.getLocale("slash_error_only_for_this_role", guildId);
                     event.reply(slashErrorOnlyForThisRole).setEphemeral(true).queue();
                     return;
-                } else if (role != null && role == guildId && isOnlyForSpecificRole) {
+                } else if (role != null && role.getIdLong() == guildId && isOnlyForSpecificRole) {
                     String slashErrorRoleCanNotBeEveryone = jsonParsers.getLocale("slash_error_role_can_not_be_everyone", guildId);
                     event.reply(slashErrorRoleCanNotBeEveryone).setEphemeral(true).queue();
                     return;
                 } else if (role != null && !isOnlyForSpecificRole) {
                     String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guildId), role);
-                    if (role == guildId) {
+                    if (role.getIdLong() == guildId) {
                         giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_everyone", guildId), "@everyone");
                         event.reply(giftNotificationForThisRole).queue();
                     } else {
@@ -137,10 +138,11 @@ public class StartCommand {
                 giveawayBuilder.setTitle(title);
                 giveawayBuilder.setCountWinners(count);
                 giveawayBuilder.setTime(time);
-                giveawayBuilder.setRoleId(role);
+                giveawayBuilder.setRoleId(role != null ? role.getIdLong() : null);
                 giveawayBuilder.setForSpecificRole(isOnlyForSpecificRole);
                 giveawayBuilder.setUrlImage(urlImage);
                 giveawayBuilder.setMinParticipants(minParticipants);
+                giveawayBuilder.setForbiddenRole(forbiddenRole != null ? forbiddenRole.getIdLong() : null);
 
                 Giveaway giveaway = giveawayBuilder.build();
                 GiveawayRegistry.getInstance().putGift(guildId, giveaway);

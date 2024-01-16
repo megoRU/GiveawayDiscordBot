@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +57,7 @@ public class BotStart {
     private final BotStatisticsService botStatisticsService;
     private final ParticipantsUpdaterService participantsUpdaterService;
     private final GiveawayUpdaterService giveawayUpdaterService;
+    private final UpdateSlashService updateSlashService;
 
     @PostConstruct
     private void startBot() {
@@ -76,6 +78,7 @@ public class BotStart {
                             CacheFlag.MEMBER_OVERRIDES));
 
             jdaBuilder.disableCache(cacheFlags);
+            jdaBuilder.setMemberCachePolicy(MemberCachePolicy.ALL);
             jdaBuilder.enableIntents(intents);
             jdaBuilder.setAutoReconnect(true);
             jdaBuilder.setStatus(OnlineStatus.ONLINE);
@@ -95,7 +98,7 @@ public class BotStart {
             System.out.println("Режим тестирования: " + Config.isIsDev());
 
             //Обновить команды
-//            updateSlashService.updateSlash(jda);
+            updateSlashService.updateSlash(jda);
             System.out.println("15:31");
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
@@ -138,7 +141,7 @@ public class BotStart {
         savingParticipantsService.save();
     }
 
-    @Scheduled(fixedDelay = (60 * 4), initialDelay = 60, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = (60 * 2), initialDelay = 30, timeUnit = TimeUnit.SECONDS)
     public void updateUserList() {
         participantsUpdaterService.update(jda);
     }

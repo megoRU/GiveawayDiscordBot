@@ -47,6 +47,7 @@ public class GiveawayUpdaterService {
                 String urlImage = activeGiveaways.getUrlImage();
                 long idUserWhoCreateGiveaway = activeGiveaways.getIdUserWhoCreateGiveaway();
                 Integer minParticipants = activeGiveaways.getMinParticipants();
+                Long forbiddenRole = activeGiveaways.getForbiddenRole();
 
                 Set<String> participantsMap = activeGiveaways.getParticipants()
                         .stream()
@@ -74,6 +75,7 @@ public class GiveawayUpdaterService {
                 giveawayBuilder.setUrlImage(urlImage);
                 giveawayBuilder.setMinParticipants(minParticipants);
                 giveawayBuilder.setListUsersHash(participantsMap);
+                giveawayBuilder.setForbiddenRole(forbiddenRole);
 
                 Giveaway giveaway = giveawayBuilder.build();
                 giveaway.setLockEnd(true);

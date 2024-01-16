@@ -49,6 +49,7 @@ public class Giveaway {
     private long textChannelId;
     private long userIdLong;
     private boolean finishGiveaway;
+    private Long forbiddenRole;
     @Setter
     private boolean lockEnd;
 
@@ -100,7 +101,8 @@ public class Giveaway {
                            int minParticipants,
                            boolean finishGiveaway,
                            Timestamp endGiveawayDate,
-                           Set<String> listUsersHash) {
+                           Set<String> listUsersHash,
+                           Long forbiddenRole) {
         this.guildId = guildId;
         this.textChannelId = textChannelId;
         this.userIdLong = userIdLong;
@@ -113,6 +115,7 @@ public class Giveaway {
         this.minParticipants = minParticipants == 0 ? 2 : minParticipants;
         this.finishGiveaway = finishGiveaway;
         this.endGiveawayDate = endGiveawayDate;
+        this.forbiddenRole = forbiddenRole;
         updateTime(time); //Обновляем время
 
         if (listUsersHash != null) this.listUsersHash = listUsersHash;

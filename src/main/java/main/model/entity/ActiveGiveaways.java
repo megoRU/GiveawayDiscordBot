@@ -43,6 +43,9 @@ public class ActiveGiveaways {
     @Column(name = "role_id_long")
     private Long roleIdLong;
 
+    @Column(name = "forbidden_role")
+    private Long forbiddenRole;
+
     @Column(name = "id_user_who_create_giveaway", nullable = false)
     private Long idUserWhoCreateGiveaway;
 

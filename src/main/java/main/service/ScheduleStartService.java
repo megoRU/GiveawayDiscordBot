@@ -60,6 +60,7 @@ public class ScheduleStartService {
                             String urlImage = scheduling.getUrlImage();
                             Integer minParticipants = scheduling.getMinParticipants();
                             Timestamp dateEndGiveaway = scheduling.getDateEndGiveaway();
+                            Long forbiddenRole = scheduling.getForbiddenRole();
 
                             GiveawayBuilder.Builder giveawayBuilder = new GiveawayBuilder.Builder();
                             giveawayBuilder.setGiveawayEnd(giveawayEnd);
@@ -79,17 +80,12 @@ public class ScheduleStartService {
                             giveawayBuilder.setForSpecificRole(isOnlyForSpecificRole);
                             giveawayBuilder.setUrlImage(urlImage);
                             giveawayBuilder.setMinParticipants(minParticipants);
+                            giveawayBuilder.setForbiddenRole(forbiddenRole);
 
                             Giveaway giveaway = giveawayBuilder.build();
 
                             GiveawayRegistry instance = GiveawayRegistry.getInstance();
                             instance.putGift(guildId, giveaway);
-
-//                            String formattedDate = null;
-//                            if (scheduling.getDateEndGiveaway() != null) {
-//                                LocalDateTime dateEndGiveaway = LocalDateTime.ofInstant(scheduling.getDateEndGiveaway().toInstant(), ZoneOffset.UTC);
-//                                formattedDate = dateEndGiveaway.format(GiveawayUtils.FORMATTER);
-//                            }
 
                             if (role != null && isOnlyForSpecificRole) {
                                 String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guildId), role);
