@@ -98,7 +98,7 @@ public class BotStart {
             System.out.println("Режим тестирования: " + Config.isIsDev());
 
             //Обновить команды
-            updateSlashService.updateSlash(jda);
+//            updateSlashService.updateSlash(jda);
             System.out.println("15:31");
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
