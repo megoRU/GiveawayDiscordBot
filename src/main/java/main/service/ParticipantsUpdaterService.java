@@ -86,7 +86,7 @@ public class ParticipantsUpdaterService {
                                             List<Member> membersWithRoles = guild.getMembersWithRoles(roleGiveaway);
                                             for (Member member : membersWithRoles) {
                                                 boolean contains = member.getRoles().contains(roleGiveaway);
-                                                if (!contains) {
+                                                if (contains) {
                                                     userList.remove(member.getId());
                                                 }
                                             }
