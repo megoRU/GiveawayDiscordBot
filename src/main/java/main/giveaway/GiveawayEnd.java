@@ -125,7 +125,8 @@ public class GiveawayEnd {
         }
 
         EmbedBuilder urlEmbedded = new EmbedBuilder();
-        urlEmbedded.setColor(Color.GREEN);
+        Color userColor = GiveawayUtils.getUserColor(guildId);
+        urlEmbedded.setColor(userColor);
         String url = GiveawayUtils.getDiscordUrlMessage(guildId, textChannelId, messageId);
         String winnerArray = Arrays.toString(uniqueWinners.toArray())
                 .replaceAll("\\[", "")
