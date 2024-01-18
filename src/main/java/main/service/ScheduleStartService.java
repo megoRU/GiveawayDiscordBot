@@ -87,7 +87,7 @@ public class ScheduleStartService {
                             GiveawayRegistry instance = GiveawayRegistry.getInstance();
                             instance.putGift(guildId, giveaway);
 
-                            if (role != null && isOnlyForSpecificRole) {
+                            if (role != null) {
                                 String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guildId), role);
                                 if (Objects.equals(role, guildId)) {
                                     giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_everyone", guildId), "@everyone");

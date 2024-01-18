@@ -60,6 +60,22 @@ public class BotStart {
     private final UpdateSlashService updateSlashService;
 
     @PostConstruct
+    private void setLanguages() {
+        languageService.languageParse();
+    }
+
+    @PostConstruct
+    private void getLocalizationFromDB() {
+        try {
+            List<Settings> settingsList = settingsRepository.findAll();
+            settingsList.forEach(settings -> mapLanguages.put(settings.getServerId(), settings));
+            System.out.println("getLocalizationFromDB()");
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+    }
+
+    @PostConstruct
     private void startBot() {
         try {
             List<GatewayIntent> intents = new ArrayList<>(
@@ -100,22 +116,6 @@ public class BotStart {
             //Обновить команды
 //            updateSlashService.updateSlash(jda);
             System.out.println("15:31");
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-    }
-
-    @PostConstruct
-    private void setLanguages() {
-        languageService.languageParse();
-    }
-
-    @PostConstruct
-    private void getLocalizationFromDB() {
-        try {
-            List<Settings> settingsList = settingsRepository.findAll();
-            settingsList.forEach(settings -> mapLanguages.put(settings.getServerId(), settings));
-            System.out.println("getLocalizationFromDB()");
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }

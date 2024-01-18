@@ -45,6 +45,7 @@ public class GiveawaySaving {
         Timestamp endGiveawayDate = giveaway.getEndGiveawayDate();
         long messageId = message.getIdLong();
         long channelId = message.getChannel().getIdLong();
+        Long forbiddenRole = giveaway.getForbiddenRole();
 
         activeGiveaways = new ActiveGiveaways();
         activeGiveaways.setGuildLongId(guildId);
@@ -53,9 +54,8 @@ public class GiveawaySaving {
         activeGiveaways.setCountWinners(countWinners);
         activeGiveaways.setGiveawayTitle(title);
         activeGiveaways.setMinParticipants(minParticipants);
-
-        if (roleId == null || roleId == 0) activeGiveaways.setRoleIdLong(null);
-        else activeGiveaways.setRoleIdLong(roleId);
+        activeGiveaways.setRoleIdLong(roleId);
+        activeGiveaways.setForbiddenRole(forbiddenRole);
 
         activeGiveaways.setIsForSpecificRole(isForSpecificRole);
         activeGiveaways.setUrlImage(urlImage);
@@ -67,18 +67,18 @@ public class GiveawaySaving {
 
     public void addUser(Giveaway giveaway, final User user) {
         long guildId = giveaway.getGuildId();
-        LOGGER.info(String.format(
-                """
-                        \nНовый участник
-                        Nick: %s
-                        UserID: %s
-                        Guild: %s
-                        """,
-                user.getName(),
-                user.getId(),
-                guildId));
 
         if (!giveaway.isUserContains(user.getId())) {
+            LOGGER.info(String.format(
+                    """
+                            \nНовый участник
+                            Nick: %s
+                            UserID: %s
+                            Guild: %s
+                            """,
+                    user.getName(),
+                    user.getId(),
+                    guildId));
             giveaway.addUserToList(user.getId());
 
             if (activeGiveaways == null) {

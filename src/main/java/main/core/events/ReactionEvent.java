@@ -52,29 +52,45 @@ public class ReactionEvent {
 
                     if (messageIdWithReactionCurrent != messageIdWithReaction) return;
                     Long roleId = giveaway.getRoleId(); // null -> 0
+                    Long forbiddenRole = giveaway.getForbiddenRole();
 
-                    if (roleId != null && roleId != 0L) {
+                    if (roleId != null) {
                         Role roleById = event.getGuild().getRoleById(roleId);
                         boolean isForSpecificRole = giveaway.isForSpecificRole();
 
                         if (isForSpecificRole && !member.getRoles().contains(roleById)) {
-                            String url = GiveawayUtils.getDiscordUrlMessage(guildIdLong, event.getGuildChannel().getIdLong(), messageIdWithReactionCurrent);
-                            LOGGER.info(String.format("\nНажал на эмодзи, но у него нет доступа к розыгрышу: %s", user.getId()));
-                            //Получаем ссылку на Giveaway
-                            String buttonGiveawayNotAccess = String.format(jsonParsers.getLocale("button_giveaway_not_access", guildId), url);
-                            EmbedBuilder embedBuilder = new EmbedBuilder();
-                            embedBuilder.setColor(Color.RED);
-                            embedBuilder.setDescription(buttonGiveawayNotAccess);
-
-                            giveawayMessageHandler.sendMessage(event.getJDA(), user.getIdLong(), embedBuilder.build());
-                            return;
+                            userDontHaveRestrictions(event, guildId, user);
+                        } else {
+                            giveaway.addUser(user);
                         }
+                    } else if (forbiddenRole != null) {
+                        Role roleById = event.getGuild().getRoleById(forbiddenRole);
+                        if (!member.getRoles().contains(roleById)) {
+                            userDontHaveRestrictions(event, guildId, user);
+                        } else {
+                            giveaway.addUser(user);
+                        }
+                    } else {
+                        giveaway.addUser(user);
                     }
-                    giveaway.addUser(user);
                 }
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
+    }
+
+    private void userDontHaveRestrictions(@NotNull MessageReactionAddEvent event, long guildId, User user) {
+        long messageIdWithReactionCurrent = event.getMessageIdLong();
+        String url = GiveawayUtils.getDiscordUrlMessage(guildId, event.getGuildChannel().getIdLong(), messageIdWithReactionCurrent);
+
+        LOGGER.info(String.format("\nНажал на эмодзи, но у него нет доступа к розыгрышу: %s", user.getId()));
+        //Получаем ссылку на Giveaway
+        String buttonGiveawayNotAccess = String.format(jsonParsers.getLocale("button_giveaway_not_access", guildId), url);
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setColor(Color.RED);
+        embedBuilder.setDescription(buttonGiveawayNotAccess);
+
+        giveawayMessageHandler.sendMessage(event.getJDA(), user.getIdLong(), embedBuilder.build());
     }
 }

@@ -112,7 +112,7 @@ public class StartCommand {
                     event.reply(slashErrorRoleCanNotBeEveryone).setEphemeral(true).queue();
                     return;
                 } else if (role != null && !isOnlyForSpecificRole) {
-                    String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guildId), role);
+                    String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guildId), role.getIdLong());
                     if (role.getIdLong() == guildId) {
                         giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_everyone", guildId), "@everyone");
                         event.reply(giftNotificationForThisRole).queue();
@@ -120,7 +120,7 @@ public class StartCommand {
                         event.reply(giftNotificationForThisRole).queue();
                     }
                 } else if (role != null) {
-                    String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guildId), role);
+                    String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guildId), role.getIdLong());
                     event.reply(giftNotificationForThisRole).queue();
                 }
 
