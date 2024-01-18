@@ -65,7 +65,7 @@ public class ReactionEvent {
                         }
                     } else if (forbiddenRole != null) {
                         Role roleById = event.getGuild().getRoleById(forbiddenRole);
-                        if (!member.getRoles().contains(roleById)) {
+                        if (member.getRoles().contains(roleById)) {
                             userDontHaveRestrictions(event, guildId, user);
                         } else {
                             giveaway.addUser(user);
