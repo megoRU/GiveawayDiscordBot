@@ -90,15 +90,11 @@ public class BotStart {
 
             List<CacheFlag> cacheFlags = new ArrayList<>(
                     Arrays.asList(
-                            CacheFlag.ONLINE_STATUS,
-                            CacheFlag.VOICE_STATE,
                             CacheFlag.ROLE_TAGS,
                             CacheFlag.ACTIVITY,
                             CacheFlag.MEMBER_OVERRIDES));
 
             jdaBuilder.disableCache(cacheFlags);
-            jdaBuilder.setMemberCachePolicy(MemberCachePolicy.ALL);
-            jdaBuilder.setChunkingFilter(ChunkingFilter.ALL);
             jdaBuilder.enableIntents(intents);
             jdaBuilder.setAutoReconnect(true);
             jdaBuilder.setStatus(OnlineStatus.ONLINE);
