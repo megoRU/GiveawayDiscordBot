@@ -72,35 +72,24 @@ public class ParticipantsUpdaterService {
 
                                         if (isForSpecificRole) {
                                             Role roleGiveaway = jda.getRoleById(giveaway.getRoleId());
-                                            long startTime = System.currentTimeMillis();
                                             List<Member> members = guild.loadMembers().get();
-                                            long endTime = System.currentTimeMillis();
-                                            long timeElapsed = endTime - startTime;
-                                            System.out.printf("\nЗамер выполнение метода: Guild_ID: %s, Size: %s, Время: %s ms",
-                                                    guildIdLong,
-                                                    members.size(),
-                                                    timeElapsed);
                                             for (Member member : members) {
                                                 boolean contains = member.getRoles().contains(roleGiveaway);
+                                                String memberId = member.getId();
                                                 if (!contains) {
-                                                    userList.remove(member.getId());
+                                                    userList.remove(memberId);
                                                 }
                                             }
                                         }
 
                                         if (forbiddenRole != null) {
                                             Role roleGiveaway = jda.getRoleById(giveaway.getForbiddenRole());
-                                            long startTime = System.currentTimeMillis();
                                             List<Member> members = guild.loadMembers().get();
-                                            long endTime = System.currentTimeMillis();
-                                            long timeElapsed = endTime - startTime;
-                                            System.out.printf("\nЗамер выполнение метода: Guild_ID: %s, Size: %s, Время: %s ms",
-                                                    guildIdLong,
-                                                    members.size(),
-                                                    timeElapsed);                                            for (Member member : members) {
+                                            for (Member member : members) {
                                                 boolean contains = member.getRoles().contains(roleGiveaway);
+                                                String memberId = member.getId();
                                                 if (contains) {
-                                                    userList.remove(member.getId());
+                                                    userList.remove(memberId);
                                                 }
                                             }
                                         }
