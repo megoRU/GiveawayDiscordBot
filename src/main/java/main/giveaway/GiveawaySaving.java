@@ -62,7 +62,7 @@ public class GiveawaySaving {
         activeGiveaways.setIdUserWhoCreateGiveaway(userIdLong);
         activeGiveaways.setDateEndGiveaway(endGiveawayDate);
 
-        activeGiveaways = activeGiveawayRepository.save(activeGiveaways);
+        activeGiveaways = activeGiveawayRepository.saveAndFlush(activeGiveaways);
     }
 
     public void addUser(Giveaway giveaway, final User user) {
@@ -99,20 +99,22 @@ public class GiveawaySaving {
 
     public void saveParticipants(long guildId, ConcurrentLinkedQueue<Participants> participantsList) {
         GiveawayRegistry giveawayRegistry = GiveawayRegistry.getInstance();
-        Giveaway giveaway = giveawayRegistry.getGiveaway(guildId);
-        if (giveaway == null) return;
+        boolean hasGiveaway = giveawayRegistry.hasGiveaway(guildId);
+        if (!hasGiveaway) return;
 
         if (!participantsList.isEmpty()) {
-            int size = participantsList.size();
-            List<Participants> arrayList = new ArrayList<>(participantsList);
-            for (int i = 0; i < size; i++) {
+            List<Participants> arrayList = new ArrayList<>(150);
+            while (!participantsList.isEmpty()) {
                 Participants poll = participantsList.poll();
-                arrayList.add(poll);
+                if (poll != null) {
+                    arrayList.add(poll);
+                }
             }
-
             try {
-                boolean hasGiveaway = giveawayRegistry.hasGiveaway(guildId);
-                if (hasGiveaway) participantsRepository.saveAll(arrayList);
+                hasGiveaway = giveawayRegistry.hasGiveaway(guildId);
+                if (hasGiveaway) {
+                    participantsRepository.saveAll(arrayList);
+                }
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, e.getMessage(), e);
             }

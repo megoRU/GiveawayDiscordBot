@@ -143,7 +143,7 @@ public class BotStart {
 
     @Scheduled(fixedDelay = (60 * 2), initialDelay = 30, timeUnit = TimeUnit.SECONDS)
     public void updateUserList() {
-        participantsUpdaterService.update(jda);
+//        participantsUpdaterService.update(jda);
     }
 
     public static Map<Long, Settings> getMapLanguages() {

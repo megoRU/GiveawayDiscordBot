@@ -40,38 +40,40 @@ public class ReactionEvent {
             if (member == null || user.isBot()) return;
 
             String emoji = event.getEmoji().getName();
-            long guildIdLong = event.getGuild().getIdLong();
             GiveawayRegistry instance = GiveawayRegistry.getInstance();
-            Giveaway giveaway = instance.getGiveaway(guildIdLong);
+            boolean hasGiveaway = instance.hasGiveaway(guildId);
 
-            if (giveaway != null) {
-                if (emoji.equals(TADA)) {
-                    //Проверяем event id message с Giveaway message id
-                    long messageIdWithReactionCurrent = event.getMessageIdLong();
-                    long messageIdWithReaction = giveaway.getMessageId();
+            if (hasGiveaway) {
+                Giveaway giveaway = instance.getGiveaway(guildId);
+                if (giveaway != null) {
+                    if (emoji.equals(TADA)) {
+                        //Проверяем event id message с Giveaway message id
+                        long messageIdWithReactionCurrent = event.getMessageIdLong();
+                        long messageIdWithReaction = giveaway.getMessageId();
 
-                    if (messageIdWithReactionCurrent != messageIdWithReaction) return;
-                    Long roleId = giveaway.getRoleId(); // null -> 0
-                    Long forbiddenRole = giveaway.getForbiddenRole();
+                        if (messageIdWithReactionCurrent != messageIdWithReaction) return;
+                        Long roleId = giveaway.getRoleId(); // null -> 0
+                        Long forbiddenRole = giveaway.getForbiddenRole();
 
-                    if (roleId != null) {
-                        Role roleById = event.getGuild().getRoleById(roleId);
-                        boolean isForSpecificRole = giveaway.isForSpecificRole();
+                        if (roleId != null) {
+                            Role roleById = event.getGuild().getRoleById(roleId);
+                            boolean isForSpecificRole = giveaway.isForSpecificRole();
 
-                        if (isForSpecificRole && !member.getRoles().contains(roleById)) {
-                            userDontHaveRestrictions(event, guildId, user);
+                            if (isForSpecificRole && !member.getRoles().contains(roleById)) {
+                                userDontHaveRestrictions(event, guildId, user);
+                            } else {
+                                giveaway.addUser(user);
+                            }
+                        } else if (forbiddenRole != null) {
+                            Role roleById = event.getGuild().getRoleById(forbiddenRole);
+                            if (member.getRoles().contains(roleById)) {
+                                userDontHaveRestrictions(event, guildId, user);
+                            } else {
+                                giveaway.addUser(user);
+                            }
                         } else {
                             giveaway.addUser(user);
                         }
-                    } else if (forbiddenRole != null) {
-                        Role roleById = event.getGuild().getRoleById(forbiddenRole);
-                        if (member.getRoles().contains(roleById)) {
-                            userDontHaveRestrictions(event, guildId, user);
-                        } else {
-                            giveaway.addUser(user);
-                        }
-                    } else {
-                        giveaway.addUser(user);
                     }
                 }
             }

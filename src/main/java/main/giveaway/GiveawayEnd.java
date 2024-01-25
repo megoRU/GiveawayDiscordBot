@@ -8,7 +8,6 @@ import main.model.entity.ActiveGiveaways;
 import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.ListUsersRepository;
-import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,19 +31,16 @@ public class GiveawayEnd {
     private final GiveawayMessageHandler giveawayMessageHandler;
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final ListUsersRepository listUsersRepository;
-    private final ParticipantsRepository participantsRepository;
 
     private final GiveawayAPI giveawayAPI;
 
     @Autowired
     public GiveawayEnd(GiveawayMessageHandler giveawayMessageHandler,
                        ActiveGiveawayRepository activeGiveawayRepository,
-                       ListUsersRepository listUsersRepository,
-                       ParticipantsRepository participantsRepository) {
+                       ListUsersRepository listUsersRepository) {
         this.giveawayMessageHandler = giveawayMessageHandler;
         this.activeGiveawayRepository = activeGiveawayRepository;
         this.listUsersRepository = listUsersRepository;
-        this.participantsRepository = participantsRepository;
         this.giveawayAPI = new GiveawayAPI();
     }
 
@@ -81,26 +77,53 @@ public class GiveawayEnd {
         Set<String> uniqueWinners = new LinkedHashSet<>();
         Set<String> listUsers = giveaway.getListUsers();
 
+        LOGGER.info(String.format("""
+                \n
+                Guild_ID %s
+                USERS_listUsers: %s
+                \n
+                """, guildId, Arrays.toString(listUsers.toArray())));
+
         try {
-            Set<String> participants = participantsRepository
-                    .findAllByActiveGiveaways_GuildLongId(guildId)
-                    .stream()
-                    .map(Participants::getUserIdLong)
-                    .map(String::valueOf)
-                    .collect(Collectors.toSet());
+            Optional<ActiveGiveaways> optionalActiveGiveaways = activeGiveawayRepository.findById(guildId);
+            if (optionalActiveGiveaways.isPresent()) {
+                Set<String> participants = optionalActiveGiveaways
+                        .get()
+                        .getParticipants()
+                        .stream()
+                        .map(Participants::getUserIdLong)
+                        .map(String::valueOf)
+                        .collect(Collectors.toSet());
 
-            if (listUsers.size() != participants.size()) {
-                listUsers.addAll(participants);
+                LOGGER.info(String.format("""
+                \n
+                Guild_ID %s
+                USERS_participants: %s
+                \n
+                """, guildId, Arrays.toString(participants.toArray())));
+
+                if (listUsers.size() != participants.size()) {
+                    listUsers.addAll(participants);
+                }
+
+                LOGGER.info(String.format("""
+                \n
+                Guild_ID %s
+                USERS_listUsers: %s
+                \n
+                """, guildId, Arrays.toString(listUsers.toArray())));
+
+                List<String> stringList = new ArrayList<>(listUsers);
+                if (stringList.isEmpty()) throw new Exception("participants is Empty");
+
+                LOGGER.info(String.format("Завершаем Giveaway: %s, Участников: %s", guildId, participants.size()));
+
+                Winners winners = new Winners(countWinner, 0, stringList.size() - 1);
+                List<String> strings = giveawayAPI.getWinners(winners);
+                strings.forEach(s -> uniqueWinners.add("<@" + stringList.get(Integer.parseInt(s)) + ">"));
+            } else {
+                return;
             }
-
-            List<String> stringList = new ArrayList<>(listUsers);
-            if (stringList.isEmpty()) throw new Exception("participants is Empty");
-
-            LOGGER.info(String.format("Завершаем Giveaway: %s, Участников: %s", guildId, participants.size()));
-
-            Winners winners = new Winners(countWinner, 0, stringList.size() - 1);
-            List<String> strings = giveawayAPI.getWinners(winners);
-            strings.forEach(s -> uniqueWinners.add("<@" + stringList.get(Integer.parseInt(s)) + ">"));
         } catch (Exception e) {
             Optional<ActiveGiveaways> optionalActiveGiveaways = activeGiveawayRepository.findById(guildId);
             if (optionalActiveGiveaways.isPresent()) {

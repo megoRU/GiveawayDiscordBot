@@ -14,12 +14,10 @@ import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.utils.concurrent.Task;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -110,7 +108,7 @@ public class PredefinedCommand {
         //TODO: Возможно будет проблема когда Guild слишком большая
         giveaway.startGiveaway(textChannel, true);
 
-        Task<List<Member>> listTask = event.getGuild().loadMembers()
+        event.getGuild().loadMembers()
                 .onSuccess(members -> {
                     try {
                         if (!event.isAcknowledged()) {
@@ -137,6 +135,5 @@ public class PredefinedCommand {
                     }
                 })
                 .onError(Throwable::printStackTrace);
-        listTask.isStarted();
     }
 }

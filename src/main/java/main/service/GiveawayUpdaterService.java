@@ -82,7 +82,8 @@ public class GiveawayUpdaterService {
                 GiveawayRegistry.getInstance().putGift(guildId, giveaway);
 
                 if (dateEndGiveaway != null) {
-                    participantsUpdaterService.update(jda);
+                    //TODO: Потом включить
+//                    participantsUpdaterService.update(jda);
                     giveaway.setLockEnd(false);
                 }
             } catch (Exception e) {
