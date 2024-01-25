@@ -41,6 +41,9 @@ public final class StopGiveawayService {
                         if (!lockEnd && now.after(endGiveawayDate)) {
                             LOGGER.info(logMessage);
                             giveaway.stopGiveaway(countWinners);
+                        } else if (finishGiveaway) {
+                            LOGGER.info(logMessage);
+                            giveaway.stopGiveaway(countWinners);
                         }
                     }
                 } catch (Exception e) {
