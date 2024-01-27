@@ -99,8 +99,8 @@ public class GiveawaySaving {
 
     public void saveParticipants(long guildId, ConcurrentLinkedQueue<Participants> participantsList) {
         GiveawayRegistry giveawayRegistry = GiveawayRegistry.getInstance();
-        boolean hasGiveaway = giveawayRegistry.hasGiveaway(guildId);
-        if (!hasGiveaway) return;
+        Giveaway giveaway = giveawayRegistry.getGiveaway(guildId);
+        if (giveaway == null) return;
 
         if (!participantsList.isEmpty()) {
             List<Participants> arrayList = new ArrayList<>(150);
@@ -111,10 +111,7 @@ public class GiveawaySaving {
                 }
             }
             try {
-                hasGiveaway = giveawayRegistry.hasGiveaway(guildId);
-                if (hasGiveaway) {
-                    participantsRepository.saveAll(arrayList);
-                }
+                participantsRepository.saveAll(arrayList);
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, e.getMessage(), e);
             }

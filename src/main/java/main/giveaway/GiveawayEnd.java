@@ -62,6 +62,7 @@ public class GiveawayEnd {
                 notEnoughUsers.setColor(Color.GREEN);
                 notEnoughUsers.setTitle(giftNotEnoughUsers);
                 notEnoughUsers.setDescription(giftGiveawayDeleted);
+                giveaway.clearParticipant();
                 //Отправляет сообщение
                 giveawayMessageHandler.editMessage(notEnoughUsers, guildId, textChannelId);
 
@@ -170,6 +171,7 @@ public class GiveawayEnd {
             giveawayMessageHandler.editMessage(embedBuilder, guildId, textChannelId);
         }
 
+        giveaway.clearParticipant();
         //Удаляет данные из коллекций
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
         instance.removeGiveaway(guildId);

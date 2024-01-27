@@ -43,7 +43,7 @@ public class GiveawayRegistry {
         giveawayMap.put(guildId, giveaway);
     }
 
-    public void removeGiveaway(long guildId) {
+    public void removeGiveaway(Long guildId) {
         giveawayMap.remove(guildId);
     }
 }

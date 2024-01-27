@@ -58,15 +58,21 @@ public class Giveaway {
     private final ConcurrentLinkedQueue<Participants> participantsList;
 
     //REPO
+    @Getter(AccessLevel.NONE)
     private final ActiveGiveawayRepository activeGiveawayRepository;
+    @Getter(AccessLevel.NONE)
     private final ParticipantsRepository participantsRepository;
+    @Getter(AccessLevel.NONE)
     private final ListUsersRepository listUsersRepository;
 
     //Service
+    @Getter(AccessLevel.NONE)
     private final GiveawayMessageHandler giveawayMessageHandler;
+    @Getter(AccessLevel.NONE)
     private final GiveawaySaving giveawaySaving;
+    @Getter(AccessLevel.NONE)
     private final GiveawayEnd giveawayEnd;
-
+    @Getter(AccessLevel.NONE)
     private final GiveawayTimeHandler giveawayTimeHandler;
 
     @Autowired
@@ -167,6 +173,10 @@ public class Giveaway {
 
     public void addParticipantToList(Participants participants) {
         participantsList.add(participants);
+    }
+
+    public void clearParticipant() {
+        participantsList.clear();
     }
 
     public int getListUsersSize() {
