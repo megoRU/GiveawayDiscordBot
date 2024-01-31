@@ -96,7 +96,7 @@ public class BotStart {
 
             jdaBuilder.disableCache(cacheFlags);
             jdaBuilder.enableIntents(intents);
-            jdaBuilder.setChunkingFilter(ChunkingFilter.ALL);
+            jdaBuilder.setChunkingFilter(ChunkingFilter.NONE);
             jdaBuilder.setAutoReconnect(true);
             jdaBuilder.setStatus(OnlineStatus.ONLINE);
             jdaBuilder.setActivity(Activity.playing("Starting..."));
