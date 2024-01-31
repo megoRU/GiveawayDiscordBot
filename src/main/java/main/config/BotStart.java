@@ -96,6 +96,7 @@ public class BotStart {
 
             jdaBuilder.disableCache(cacheFlags);
             jdaBuilder.enableIntents(intents);
+            jdaBuilder.setChunkingFilter(ChunkingFilter.ALL);
             jdaBuilder.setAutoReconnect(true);
             jdaBuilder.setStatus(OnlineStatus.ONLINE);
             jdaBuilder.setActivity(Activity.playing("Starting..."));
@@ -143,7 +144,7 @@ public class BotStart {
 
     @Scheduled(fixedDelay = (60 * 2), initialDelay = 30, timeUnit = TimeUnit.SECONDS)
     public void updateUserList() {
-//        participantsUpdaterService.update(jda);
+        participantsUpdaterService.update(jda);
     }
 
     public static Map<Long, Settings> getMapLanguages() {

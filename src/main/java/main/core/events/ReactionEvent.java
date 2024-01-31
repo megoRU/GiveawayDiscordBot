@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -55,25 +56,30 @@ public class ReactionEvent {
                         Long roleId = giveaway.getRoleId(); // null -> 0
                         Long forbiddenRole = giveaway.getForbiddenRole();
 
-                        if (roleId != null) {
-                            Role roleById = event.getGuild().getRoleById(roleId);
-                            boolean isForSpecificRole = giveaway.isForSpecificRole();
+                        if (forbiddenRole != null) {
+                            Role guildRole = event.getGuild().getRoleById(forbiddenRole);
+                            if (guildRole == null) return;
+                            List<Long> memberRolesLost = member.getRoles().stream().map(Role::getIdLong).toList();
 
-                            if (isForSpecificRole && !member.getRoles().contains(roleById)) {
+                            if (memberRolesLost.contains(guildRole.getIdLong())) {
                                 userDontHaveRestrictions(event, guildId, user);
-                            } else {
-                                giveaway.addUser(user);
+                                return;
                             }
-                        } else if (forbiddenRole != null) {
-                            Role roleById = event.getGuild().getRoleById(forbiddenRole);
-                            if (member.getRoles().contains(roleById)) {
-                                userDontHaveRestrictions(event, guildId, user);
-                            } else {
-                                giveaway.addUser(user);
-                            }
-                        } else {
-                            giveaway.addUser(user);
                         }
+
+                        if (roleId != null) {
+                            Role role = event.getGuild().getRoleById(roleId);
+                            if (role == null) return;
+                            boolean isForSpecificRole = giveaway.isForSpecificRole();
+                            List<Long> userRolesList = member.getRoles().stream().map(Role::getIdLong).toList();
+
+                            if (isForSpecificRole && !userRolesList.contains(role.getIdLong())) {
+                                userDontHaveRestrictions(event, guildId, user);
+                                return;
+                            }
+                        }
+
+                        giveaway.addUser(user);
                     }
                 }
             }
