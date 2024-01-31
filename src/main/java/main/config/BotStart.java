@@ -135,7 +135,7 @@ public class BotStart {
             System.out.println("IsDevMode: " + Config.isIsDev());
 
             //Обновить команды
-//            updateSlashCommands();
+            updateSlashCommands();
             System.out.println("20:22");
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
@@ -161,13 +161,16 @@ public class BotStart {
                     .setMaxValue(30)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: 1, 2... Если не указано -> стандартное значение при запуске"));
 
-            //Set language
-            List<OptionData> optionsLanguage = new ArrayList<>();
-            optionsLanguage.add(new OptionData(STRING, "bot", "Setting the bot language")
+            List<OptionData> optionsSettings = new ArrayList<>();
+            optionsSettings.add(new OptionData(STRING, "language", "Setting the bot language")
                     .addChoice("\uD83C\uDDEC\uD83C\uDDE7 English Language", "eng")
                     .addChoice("\uD83C\uDDF7\uD83C\uDDFA Russian Language", "rus")
                     .setRequired(true)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Настройка языка бота"));
+
+            optionsSettings.add(new OptionData(STRING, "color", "Embed color: #00FF00")
+                    .setName("color")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Embed цвет: #00FF00"));
 
             //Scheduling Giveaway
             List<OptionData> optionsScheduling = new ArrayList<>();
@@ -287,10 +290,10 @@ public class BotStart {
                     .setGuildOnly(true)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Проверка разрешений бота"));
 
-            commands.addCommands(Commands.slash("language", "Setting language")
-                    .addOptions(optionsLanguage)
+            commands.addCommands(Commands.slash("settings", "Bot settings")
+                    .addOptions(optionsSettings)
                     .setGuildOnly(true)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Настройка языка")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Настройки бота")
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER)));
 
             commands.addCommands(Commands.slash("start", "Create Giveaway")
