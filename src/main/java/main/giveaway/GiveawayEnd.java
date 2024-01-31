@@ -52,29 +52,26 @@ public class GiveawayEnd {
         long messageId = giveaway.getMessageId();
         int listUsersSize = giveaway.getListUsersSize();
 
-        try {
-            if (listUsersSize < minParticipants) {
+        if (listUsersSize < minParticipants) {
 
-                String giftNotEnoughUsers = jsonParsers.getLocale("gift_not_enough_users", guildId);
-                String giftGiveawayDeleted = jsonParsers.getLocale("gift_giveaway_deleted", guildId);
+            String giftNotEnoughUsers = jsonParsers.getLocale("gift_not_enough_users", guildId);
+            String giftGiveawayDeleted = jsonParsers.getLocale("gift_giveaway_deleted", guildId);
 
-                EmbedBuilder notEnoughUsers = new EmbedBuilder();
-                notEnoughUsers.setColor(Color.GREEN);
-                notEnoughUsers.setTitle(giftNotEnoughUsers);
-                notEnoughUsers.setDescription(giftGiveawayDeleted);
-                giveaway.clearParticipant();
-                //Отправляет сообщение
-                giveawayMessageHandler.editMessage(notEnoughUsers, guildId, textChannelId);
+            EmbedBuilder notEnoughUsers = new EmbedBuilder();
+            notEnoughUsers.setColor(Color.GREEN);
+            notEnoughUsers.setTitle(giftNotEnoughUsers);
+            notEnoughUsers.setDescription(giftGiveawayDeleted);
+            giveaway.clearParticipant();
+            //Отправляет сообщение
+            giveawayMessageHandler.editMessage(notEnoughUsers, guildId, textChannelId);
 
-                activeGiveawayRepository.deleteById(guildId);
-                //Удаляет данные из коллекций
-                GiveawayRegistry instance = GiveawayRegistry.getInstance();
-                instance.removeGiveaway(guildId);
-                return;
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            activeGiveawayRepository.deleteById(guildId);
+            //Удаляет данные из коллекций
+            GiveawayRegistry instance = GiveawayRegistry.getInstance();
+            instance.removeGiveaway(guildId);
+            return;
         }
+
         Set<String> uniqueWinners = new LinkedHashSet<>();
         Set<String> listUsers = giveaway.getListUsers();
 
@@ -97,22 +94,22 @@ public class GiveawayEnd {
                         .collect(Collectors.toSet());
 
                 LOGGER.info(String.format("""
-                \n
-                Guild_ID %s
-                USERS_participants: %s
-                \n
-                """, guildId, Arrays.toString(participants.toArray())));
+                        \n
+                        Guild_ID %s
+                        USERS_participants: %s
+                        \n
+                        """, guildId, Arrays.toString(participants.toArray())));
 
                 if (listUsers.size() != participants.size()) {
                     listUsers.addAll(participants);
                 }
 
                 LOGGER.info(String.format("""
-                \n
-                Guild_ID %s
-                USERS_listUsers: %s
-                \n
-                """, guildId, Arrays.toString(listUsers.toArray())));
+                        \n
+                        Guild_ID %s
+                        USERS_listUsers: %s
+                        \n
+                        """, guildId, Arrays.toString(listUsers.toArray())));
 
                 List<String> stringList = new ArrayList<>(listUsers);
                 if (stringList.isEmpty()) throw new Exception("participants is Empty");
@@ -136,7 +133,7 @@ public class GiveawayEnd {
                     errors.setColor(Color.RED);
                     errors.setTitle(errorsWithApi);
                     errors.setDescription(errorsDescriptions);
-                    List<net.dv8tion.jda.api.interactions.components.buttons.Button> buttons = new ArrayList<>();
+                    List<Button> buttons = new ArrayList<>();
                     buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
                     giveawayMessageHandler.sendMessage(errors.build(), guildId, textChannelId, buttons);
 
