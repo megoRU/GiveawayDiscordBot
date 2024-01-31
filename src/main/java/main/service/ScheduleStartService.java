@@ -59,8 +59,6 @@ public class ScheduleStartService {
                             int countWinners = scheduling.getCountWinners();
                             String urlImage = scheduling.getUrlImage();
                             Integer minParticipants = scheduling.getMinParticipants();
-                            Timestamp dateEndGiveaway = scheduling.getDateEndGiveaway();
-                            Long forbiddenRole = scheduling.getForbiddenRole();
 
                             GiveawayBuilder.Builder giveawayBuilder = new GiveawayBuilder.Builder();
                             giveawayBuilder.setGiveawayEnd(giveawayEnd);
@@ -75,19 +73,24 @@ public class ScheduleStartService {
                             giveawayBuilder.setGuildId(guildId);
                             giveawayBuilder.setTitle(title);
                             giveawayBuilder.setCountWinners(countWinners);
-                            giveawayBuilder.setEndGiveawayDate(dateEndGiveaway);
+                            giveawayBuilder.setEndGiveawayDate(dateCreateGiveaway);
                             giveawayBuilder.setRoleId(role);
                             giveawayBuilder.setForSpecificRole(isOnlyForSpecificRole);
                             giveawayBuilder.setUrlImage(urlImage);
                             giveawayBuilder.setMinParticipants(minParticipants);
-                            giveawayBuilder.setForbiddenRole(forbiddenRole);
 
                             Giveaway giveaway = giveawayBuilder.build();
 
                             GiveawayRegistry instance = GiveawayRegistry.getInstance();
                             instance.putGift(guildId, giveaway);
 
-                            if (role != null) {
+//                            String formattedDate = null;
+//                            if (scheduling.getDateEndGiveaway() != null) {
+//                                LocalDateTime dateEndGiveaway = LocalDateTime.ofInstant(scheduling.getDateEndGiveaway().toInstant(), ZoneOffset.UTC);
+//                                formattedDate = dateEndGiveaway.format(GiveawayUtils.FORMATTER);
+//                            }
+
+                            if (role != null && isOnlyForSpecificRole) {
                                 String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guildId), role);
                                 if (Objects.equals(role, guildId)) {
                                     giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_everyone", guildId), "@everyone");

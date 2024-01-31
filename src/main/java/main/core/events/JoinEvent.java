@@ -1,7 +1,6 @@
 package main.core.events;
 
 import main.config.BotStart;
-import main.model.entity.Settings;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
@@ -26,7 +25,7 @@ public class JoinEvent {
             EmbedBuilder welcome = new EmbedBuilder();
             welcome.setColor(Color.GREEN);
             welcome.addField("Giveaway", "Thanks for adding " + "**" + "Giveaway" + "** " + "bot to " + event.getGuild().getName() + "!\n", false);
-            welcome.addField("Setup Bot Language", "Use: </settings:1195489935407468555>", false);
+            welcome.addField("Setup Bot Language", "Use: </language:941286272390037534>", false);
             welcome.addField("Create Giveaway", "Use: </start:941286272390037535>", false);
             welcome.addField("Create predefined Giveaway", "Use: </predefined:1049647289779630080> (Only Administrators)", false);
             welcome.addField("Reroll Winner", "Use: </reroll:957624805446799452>", false);
@@ -40,10 +39,9 @@ public class JoinEvent {
             List<Button> buttons = new ArrayList<>();
             buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
             buttons.add(Button.link("https://patreon.com/ghbots", "Patreon"));
-            Settings settings = BotStart.getMapLanguages().get(guildId);
 
-            if (settings != null) {
-                if (settings.getLanguage().equals("eng")) {
+            if (BotStart.getMapLanguages().get(guildId) != null) {
+                if (BotStart.getMapLanguages().get(guildId).equals("eng")) {
                     buttons.add(Button.secondary(event.getGuild().getId() + ":" + ButtonChangeLanguage.CHANGE_LANGUAGE, "Сменить язык ")
                             .withEmoji(Emoji.fromUnicode("U+1F1F7U+1F1FA")));
                 } else {

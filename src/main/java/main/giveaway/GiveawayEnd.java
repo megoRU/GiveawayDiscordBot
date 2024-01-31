@@ -8,6 +8,7 @@ import main.model.entity.ActiveGiveaways;
 import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.ListUsersRepository;
+import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,6 @@ import java.util.List;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 @Service
 
@@ -31,16 +31,19 @@ public class GiveawayEnd {
     private final GiveawayMessageHandler giveawayMessageHandler;
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final ListUsersRepository listUsersRepository;
+    private final ParticipantsRepository participantsRepository;
 
     private final GiveawayAPI giveawayAPI;
 
     @Autowired
     public GiveawayEnd(GiveawayMessageHandler giveawayMessageHandler,
                        ActiveGiveawayRepository activeGiveawayRepository,
-                       ListUsersRepository listUsersRepository) {
+                       ListUsersRepository listUsersRepository,
+                       ParticipantsRepository participantsRepository) {
         this.giveawayMessageHandler = giveawayMessageHandler;
         this.activeGiveawayRepository = activeGiveawayRepository;
         this.listUsersRepository = listUsersRepository;
+        this.participantsRepository = participantsRepository;
         this.giveawayAPI = new GiveawayAPI();
     }
 
@@ -51,77 +54,46 @@ public class GiveawayEnd {
         int minParticipants = giveaway.getMinParticipants();
         long messageId = giveaway.getMessageId();
         int listUsersSize = giveaway.getListUsersSize();
-
-        if (listUsersSize < minParticipants) {
-
-            String giftNotEnoughUsers = jsonParsers.getLocale("gift_not_enough_users", guildId);
-            String giftGiveawayDeleted = jsonParsers.getLocale("gift_giveaway_deleted", guildId);
-
-            EmbedBuilder notEnoughUsers = new EmbedBuilder();
-            notEnoughUsers.setColor(Color.GREEN);
-            notEnoughUsers.setTitle(giftNotEnoughUsers);
-            notEnoughUsers.setDescription(giftGiveawayDeleted);
-            giveaway.clearParticipant();
-            //Отправляет сообщение
-            giveawayMessageHandler.editMessage(notEnoughUsers, guildId, textChannelId);
-
-            activeGiveawayRepository.deleteById(guildId);
-            //Удаляет данные из коллекций
-            GiveawayRegistry instance = GiveawayRegistry.getInstance();
-            instance.removeGiveaway(guildId);
-            return;
-        }
-
-        Set<String> uniqueWinners = new LinkedHashSet<>();
-        Set<String> listUsers = giveaway.getListUsers();
-
-        LOGGER.info(String.format("""
-                \n
-                Guild_ID %s
-                USERS_listUsers: %s
-                \n
-                """, guildId, Arrays.toString(listUsers.toArray())));
+        int participantListSize = giveaway.getParticipantListSize();
 
         try {
-            Optional<ActiveGiveaways> optionalActiveGiveaways = activeGiveawayRepository.findById(guildId);
-            if (optionalActiveGiveaways.isPresent()) {
-                Set<String> participants = optionalActiveGiveaways
-                        .get()
-                        .getParticipants()
-                        .stream()
-                        .map(Participants::getUserIdLong)
-                        .map(String::valueOf)
-                        .collect(Collectors.toSet());
+            if (listUsersSize < minParticipants) {
 
-                LOGGER.info(String.format("""
-                        \n
-                        Guild_ID %s
-                        USERS_participants: %s
-                        \n
-                        """, guildId, Arrays.toString(participants.toArray())));
+                String giftNotEnoughUsers = jsonParsers.getLocale("gift_not_enough_users", guildId);
+                String giftGiveawayDeleted = jsonParsers.getLocale("gift_giveaway_deleted", guildId);
 
-                if (listUsers.size() != participants.size()) {
-                    listUsers.addAll(participants);
-                }
+                EmbedBuilder notEnoughUsers = new EmbedBuilder();
+                notEnoughUsers.setColor(Color.GREEN);
+                notEnoughUsers.setTitle(giftNotEnoughUsers);
+                notEnoughUsers.setDescription(giftGiveawayDeleted);
+                //Отправляет сообщение
 
-                LOGGER.info(String.format("""
-                        \n
-                        Guild_ID %s
-                        USERS_listUsers: %s
-                        \n
-                        """, guildId, Arrays.toString(listUsers.toArray())));
+                giveawayMessageHandler.editMessage(notEnoughUsers, guildId, textChannelId);
 
-                List<String> stringList = new ArrayList<>(listUsers);
-                if (stringList.isEmpty()) throw new Exception("participants is Empty");
-
-                LOGGER.info(String.format("Завершаем Giveaway: %s, Участников: %s", guildId, participants.size()));
-
-                Winners winners = new Winners(countWinner, 0, stringList.size() - 1);
-                List<String> strings = giveawayAPI.getWinners(winners);
-                strings.forEach(s -> uniqueWinners.add("<@" + stringList.get(Integer.parseInt(s)) + ">"));
-            } else {
+                activeGiveawayRepository.deleteById(guildId);
+                //Удаляет данные из коллекций
+                GiveawayRegistry instance = GiveawayRegistry.getInstance();
+                instance.removeGiveaway(guildId);
                 return;
             }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+        }
+        Set<String> uniqueWinners = new LinkedHashSet<>();
+
+        try {
+            //выбираем победителей
+            if (participantListSize > 0) {
+                //TODO: Сделать корреляцию между двумя данными
+            }
+            List<Participants> participants = participantsRepository.findAllByActiveGiveaways_GuildLongId(guildId); //TODO: Native use may be
+            if (participants.isEmpty()) throw new Exception("participants is Empty");
+
+            LOGGER.info(String.format("Завершаем Giveaway: %s, Участников: %s", guildId, participants.size()));
+
+            Winners winners = new Winners(countWinner, 0, listUsersSize - 1);
+            List<String> strings = giveawayAPI.getWinners(winners);
+            strings.forEach(s -> uniqueWinners.add("<@" + participants.get(Integer.parseInt(s)).getUserIdLong() + ">"));
         } catch (Exception e) {
             Optional<ActiveGiveaways> optionalActiveGiveaways = activeGiveawayRepository.findById(guildId);
             if (optionalActiveGiveaways.isPresent()) {
@@ -133,7 +105,7 @@ public class GiveawayEnd {
                     errors.setColor(Color.RED);
                     errors.setTitle(errorsWithApi);
                     errors.setDescription(errorsDescriptions);
-                    List<Button> buttons = new ArrayList<>();
+                    List<net.dv8tion.jda.api.interactions.components.buttons.Button> buttons = new ArrayList<>();
                     buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
                     giveawayMessageHandler.sendMessage(errors.build(), guildId, textChannelId, buttons);
 
@@ -146,8 +118,7 @@ public class GiveawayEnd {
         }
 
         EmbedBuilder urlEmbedded = new EmbedBuilder();
-        Color userColor = GiveawayUtils.getUserColor(guildId);
-        urlEmbedded.setColor(userColor);
+        urlEmbedded.setColor(Color.GREEN);
         String url = GiveawayUtils.getDiscordUrlMessage(guildId, textChannelId, messageId);
         String winnerArray = Arrays.toString(uniqueWinners.toArray())
                 .replaceAll("\\[", "")
@@ -168,14 +139,13 @@ public class GiveawayEnd {
             giveawayMessageHandler.editMessage(embedBuilder, guildId, textChannelId);
         }
 
-        giveaway.clearParticipant();
-        //Удаляет данные из коллекций
-        GiveawayRegistry instance = GiveawayRegistry.getInstance();
-        instance.removeGiveaway(guildId);
-
         giveawayMessageHandler.sendMessage(urlEmbedded.build(), winnersContent, guildId, textChannelId);
 
         listUsersRepository.saveAllParticipantsToUserList(guildId);
         activeGiveawayRepository.deleteById(guildId);
+
+        //Удаляет данные из коллекций
+        GiveawayRegistry instance = GiveawayRegistry.getInstance();
+        instance.removeGiveaway(guildId);
     }
 }

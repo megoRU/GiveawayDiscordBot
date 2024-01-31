@@ -37,6 +37,21 @@ public class GiveawayUtils {
         return seconds;
     }
 
+    public static Color getUserColor(long guildId) {
+        Settings settings = BotStart.getMapLanguages().get(guildId);
+        if (settings != null) {
+            String colorHex = settings.getColorHex();
+            if (colorHex != null) {
+                return Color.decode(colorHex);
+            } else {
+                return Color.GREEN;
+            }
+        } else {
+            return Color.GREEN;
+        }
+    }
+
+
     public static Timestamp timeProcessor(String time) {
         if (time == null) return null;
         ZoneOffset offset = ZoneOffset.UTC;
@@ -67,26 +82,11 @@ public class GiveawayUtils {
         return false;
     }
 
-    public static Color getUserColor(long guildId) {
-        Settings settings = BotStart.getMapLanguages().get(guildId);
-        if (settings != null) {
-            String colorHex = settings.getColorHex();
-            if (colorHex != null) {
-                return Color.decode(colorHex);
-            } else {
-                return Color.GREEN;
-            }
-        } else {
-            return Color.GREEN;
-        }
-    }
-
-    public static String setEndingWord(int num, long guildId) {
+    public static String setEndingWord(int num, final long guildId) {
         String language = "eng";
-
-        Settings settings = BotStart.getMapLanguages().get(guildId);
-        if (settings != null) {
-            language = settings.getLanguage();
+        Settings languageFrom = BotStart.getMapLanguages().get(guildId);
+        if (languageFrom != null) {
+            language = languageFrom.getLanguage();
         }
         return switch (num % 10) {
             case 1 -> language.equals("eng") ? "Winner" : "Победитель";

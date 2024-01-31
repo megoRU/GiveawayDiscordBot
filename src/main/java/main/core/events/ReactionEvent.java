@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,44 +40,39 @@ public class ReactionEvent {
             if (member == null || user.isBot()) return;
 
             String emoji = event.getEmoji().getName();
+            long guildIdLong = event.getGuild().getIdLong();
             GiveawayRegistry instance = GiveawayRegistry.getInstance();
-            boolean hasGiveaway = instance.hasGiveaway(guildId);
+            Giveaway giveaway = instance.getGiveaway(guildIdLong);
 
-            if (hasGiveaway) {
-                Giveaway giveaway = instance.getGiveaway(guildId);
-                if (giveaway != null) {
-                    if (emoji.equals(TADA)) {
-                        //Проверяем event id message с Giveaway message id
-                        long messageIdWithReactionCurrent = event.getMessageIdLong();
-                        long messageIdWithReaction = giveaway.getMessageId();
+            if (giveaway != null) {
+                if (emoji.equals(TADA)) {
+                    //Проверяем event id message с Giveaway message id
+                    long messageIdWithReactionCurrent = event.getMessageIdLong();
+                    long messageIdWithReaction = giveaway.getMessageId();
 
-                        if (messageIdWithReactionCurrent != messageIdWithReaction) return;
-                        Long roleId = giveaway.getRoleId(); // null -> 0
-                        Long forbiddenRole = giveaway.getForbiddenRole();
+                    if (messageIdWithReactionCurrent != messageIdWithReaction) return;
+                    Long roleId = giveaway.getRoleId(); // null -> 0
 
-                        if (forbiddenRole != null) {
-                            Role guildRole = event.getGuild().getRoleById(forbiddenRole);
-                            if (guildRole == null) return;
-                            List<Long> memberRolesLost = member.getRoles().stream().map(Role::getIdLong).toList();
+                    if (roleId != null && roleId != 0L) {
+                        Role roleById = event.getGuild().getRoleById(roleId);
+                        boolean isForSpecificRole = giveaway.isForSpecificRole();
 
-                            if (memberRolesLost.contains(guildRole.getIdLong())) {
-                                userDontHaveRestrictions(event, guildId, user);
-                                return;
-                            }
+                        if (isForSpecificRole && !member.getRoles().contains(roleById)) {
+                            String url = GiveawayUtils.getDiscordUrlMessage(guildIdLong, event.getGuildChannel().getIdLong(), messageIdWithReactionCurrent);
+                            LOGGER.info(String.format("\nНажал на эмодзи, но у него нет доступа к розыгрышу: %s", user.getId()));
+                            //Получаем ссылку на Giveaway
+                            String buttonGiveawayNotAccess = String.format(jsonParsers.getLocale("button_giveaway_not_access", guildId), url);
+                            EmbedBuilder embedBuilder = new EmbedBuilder();
+                            embedBuilder.setColor(Color.RED);
+                            embedBuilder.setDescription(buttonGiveawayNotAccess);
+
+                            giveawayMessageHandler.sendMessage(event.getJDA(), user.getIdLong(), embedBuilder.build());
+                            return;
                         }
+                    }
 
-                        if (roleId != null) {
-                            Role role = event.getGuild().getRoleById(roleId);
-                            if (role == null) return;
-                            boolean isForSpecificRole = giveaway.isForSpecificRole();
-                            List<Long> userRolesList = member.getRoles().stream().map(Role::getIdLong).toList();
-
-                            if (isForSpecificRole && !userRolesList.contains(role.getIdLong())) {
-                                userDontHaveRestrictions(event, guildId, user);
-                                return;
-                            }
-                        }
-
+                    if (!giveaway.isUserContains(user.getId())) {
+                        LOGGER.info(String.format("\nНовый участник: %s\nСервер: %s", user.getId(), event.getGuild().getId()));
                         giveaway.addUser(user);
                     }
                 }
@@ -86,19 +80,5 @@ public class ReactionEvent {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
-    }
-
-    private void userDontHaveRestrictions(@NotNull MessageReactionAddEvent event, long guildId, User user) {
-        long messageIdWithReactionCurrent = event.getMessageIdLong();
-        String url = GiveawayUtils.getDiscordUrlMessage(guildId, event.getGuildChannel().getIdLong(), messageIdWithReactionCurrent);
-
-        LOGGER.info(String.format("\nНажал на эмодзи, но у него нет доступа к розыгрышу: %s", user.getId()));
-        //Получаем ссылку на Giveaway
-        String buttonGiveawayNotAccess = String.format(jsonParsers.getLocale("button_giveaway_not_access", guildId), url);
-        EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setColor(Color.RED);
-        embedBuilder.setDescription(buttonGiveawayNotAccess);
-
-        giveawayMessageHandler.sendMessage(event.getJDA(), user.getIdLong(), embedBuilder.build());
     }
 }

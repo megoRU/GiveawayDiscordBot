@@ -1,5 +1,7 @@
 package main.controller;
 
+import lombok.Getter;
+import main.core.CoreBot;
 import main.core.events.*;
 import main.giveaway.GiveawayEnd;
 import main.giveaway.GiveawayMessageHandler;
@@ -12,11 +14,13 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.Objects;
+import java.util.logging.Logger;
 
-@Service
+@Getter
+@Component
 public class UpdateController {
 
     //REPO
@@ -31,6 +35,8 @@ public class UpdateController {
     private final GiveawaySaving giveawaySaving;
     private final GiveawayEnd giveawayEnd;
 
+    //LOGGER
+    private final static Logger LOGGER = Logger.getLogger(UpdateController.class.getName());
 
     @Autowired
     public UpdateController(ActiveGiveawayRepository activeGiveawayRepository,
@@ -95,7 +101,6 @@ public class UpdateController {
                 PredefinedCommand predefinedCommand = new PredefinedCommand(listUsersRepository, activeGiveawayRepository, participantsRepository, giveawayMessageHandler, giveawaySaving, giveawayEnd);
                 predefinedCommand.predefined(event);
             }
-
             case "settings" -> {
                 SettingsCommand settingsCommand = new SettingsCommand(settingsRepository);
                 settingsCommand.language(event);
@@ -149,7 +154,7 @@ public class UpdateController {
     }
 
     private void leaveEvent(@NotNull GuildLeaveEvent event) {
-        LeaveEvent leaveEvent = new LeaveEvent(activeGiveawayRepository, settingsRepository);
+        LeaveEvent leaveEvent = new LeaveEvent(activeGiveawayRepository);
         leaveEvent.leave(event);
     }
 

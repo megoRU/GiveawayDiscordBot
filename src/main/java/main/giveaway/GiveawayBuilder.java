@@ -5,7 +5,7 @@ import main.model.repository.ListUsersRepository;
 import main.model.repository.ParticipantsRepository;
 
 import java.sql.Timestamp;
-import java.util.Set;
+import java.util.Map;
 
 public interface GiveawayBuilder {
 
@@ -32,15 +32,9 @@ public interface GiveawayBuilder {
         private long textChannelId;
         private long userIdLong;
         private boolean finishGiveaway;
-        private Set<String> listUsersHash;
-        private Long forbiddenRole;
+        private Map<String, String> listUsersHash;
 
-        public Builder setForbiddenRole(Long forbiddenRole) {
-            this.forbiddenRole = forbiddenRole;
-            return this;
-        }
-
-        public Builder setListUsersHash(Set<String> listUsersHash) {
+        public Builder setListUsersHash(Map<String, String> listUsersHash) {
             this.listUsersHash = listUsersHash;
             return this;
         }
@@ -173,9 +167,7 @@ public interface GiveawayBuilder {
                     urlImage,
                     minParticipants,
                     finishGiveaway,
-                    endGiveawayDate,
-                    listUsersHash,
-                    forbiddenRole);
+                    listUsersHash);
         }
     }
 }

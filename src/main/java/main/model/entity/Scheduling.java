@@ -52,8 +52,4 @@ public class Scheduling {
 
     @Column(name = "min_participants")
     private Integer minParticipants;
-
-    @Column(name = "forbidden_role")
-    private Long forbiddenRole;
-
 }

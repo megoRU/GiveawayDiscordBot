@@ -2,12 +2,8 @@ package main.jsonparser;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class ParserClass {
-
-    private final static Logger LOGGER = Logger.getLogger(ParserClass.class.getName());
 
     public static final ConcurrentMap<String, String> russian = new ConcurrentHashMap<>();
     public static final ConcurrentMap<String, String> english = new ConcurrentHashMap<>();
@@ -35,7 +31,7 @@ public class ParserClass {
                 return russian.get(key);
             }
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            e.printStackTrace();
         }
         return "NO_FOUND_LOCALIZATION";
     }

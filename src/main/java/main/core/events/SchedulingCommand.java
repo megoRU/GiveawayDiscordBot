@@ -43,8 +43,6 @@ public class SchedulingCommand {
         var minParticipants = event.getOption("min_participants", OptionMapping::getAsInt);
         var startTime = event.getOption("start_time", OptionMapping::getAsString);
         var endTime = event.getOption("end_time", OptionMapping::getAsString);
-        var forbiddenRole = event.getOption("forbidden_role", OptionMapping::getAsRole);
-        boolean isOnlyForSpecificRole = Objects.equals(event.getOption("role", OptionMapping::getAsString), "yes");
 
         if (textChannel == null) {
             event.reply("TextChannel is `Null`").queue();
@@ -83,13 +81,15 @@ public class SchedulingCommand {
             int count = 1;
             if (countString != null) count = Integer.parseInt(countString);
 
-            if (minParticipants == null || minParticipants < 2) {
+            if (minParticipants == null || minParticipants == 0 || minParticipants == 1) {
                 minParticipants = 2;
             }
 
             if (image != null && image.isImage()) {
                 urlImage = image.getUrl();
             }
+
+            boolean isOnlyForSpecificRole = Objects.equals(event.getOption("role", OptionMapping::getAsString), "yes");
 
             if (role == null && isOnlyForSpecificRole) {
                 String slashErrorOnlyForThisRole = jsonParsers.getLocale("slash_error_only_for_this_role", guildId);
@@ -113,7 +113,6 @@ public class SchedulingCommand {
             scheduling.setIdUserWhoCreateGiveaway(userIdLong);
             scheduling.setUrlImage(urlImage);
             scheduling.setMinParticipants(minParticipants);
-            scheduling.setForbiddenRole(forbiddenRole != null ? forbiddenRole.getIdLong() : null);
 
             schedulingRepository.save(scheduling);
 

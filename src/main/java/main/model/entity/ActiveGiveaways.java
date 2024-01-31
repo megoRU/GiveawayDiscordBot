@@ -8,7 +8,6 @@ import lombok.Setter;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -44,9 +43,6 @@ public class ActiveGiveaways {
     @Column(name = "role_id_long")
     private Long roleIdLong;
 
-    @Column(name = "forbidden_role")
-    private Long forbiddenRole;
-
     @Column(name = "id_user_who_create_giveaway", nullable = false)
     private Long idUserWhoCreateGiveaway;
 
@@ -59,6 +55,6 @@ public class ActiveGiveaways {
     @Column(name = "finish_giveaway", nullable = false)
     private boolean finishGiveaway;
 
-    @OneToMany(mappedBy = "activeGiveaways", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "activeGiveaways", cascade = CascadeType.ALL)
     private Set<Participants> participants = new HashSet<>();
 }

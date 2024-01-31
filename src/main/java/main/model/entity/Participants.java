@@ -28,4 +28,8 @@ public class Participants {
 
     @Column(name = "nick_name", nullable = false)
     private String nickName;
+
+    public String getUserIdAsString() {
+        return String.valueOf(userIdLong);
+    }
 }
