@@ -98,7 +98,7 @@ public class BotStart {
             jdaBuilder.setChunkingFilter(ChunkingFilter.NONE);
             jdaBuilder.setAutoReconnect(true);
             jdaBuilder.setStatus(OnlineStatus.ONLINE);
-            jdaBuilder.setActivity(Activity.playing("Starting..."));
+            jdaBuilder.setActivity(Activity.playing("Not for consumer"));
             jdaBuilder.setBulkDeleteSplittingEnabled(false);
             jdaBuilder.addEventListeners(new CoreBot(updateController));
 
