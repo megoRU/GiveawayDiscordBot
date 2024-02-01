@@ -61,6 +61,7 @@ import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
 @EnableScheduling
 @AllArgsConstructor
 public class BotStart {
+
     private final static Logger LOGGER = LoggerFactory.getLogger(BotStart.class.getName());
 
     public static final String activity = "/help | ";
@@ -72,10 +73,7 @@ public class BotStart {
     private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
 
     //API
-    private final BotiCordAPI api = new BotiCordAPI.Builder()
-            .token(Config.getBoticord())
-            .enableDevMode()
-            .build();
+    private final BotiCordAPI api = new BotiCordAPI.Builder().token(Config.getBoticord()).build();
 
     //REPOSITORY
     private final ActiveGiveawayRepository activeGiveawayRepository;
