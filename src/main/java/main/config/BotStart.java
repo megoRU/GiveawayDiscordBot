@@ -361,12 +361,12 @@ public class BotStart {
                 int serverCount = BotStart.jda.getGuilds().size();
                 BotStart.jda.getPresence().setActivity(Activity.playing(BotStart.activity + serverCount + " guilds"));
 
-                //BOTICORD API
-                AtomicInteger usersCount = new AtomicInteger();
-                BotStart.jda.getGuilds().forEach(g -> usersCount.addAndGet(g.getMembers().size()));
-
-                BotStats botStats = new BotStats(usersCount.get(), serverCount, 1);
-                api.setBotStats(Config.getBotId(), botStats);
+//                //BOTICORD API
+//                AtomicInteger usersCount = new AtomicInteger();
+//                BotStart.jda.getGuilds().forEach(g -> usersCount.addAndGet(g.getMembers().size()));
+//
+//                BotStats botStats = new BotStats(usersCount.get(), serverCount, 1);
+//                api.setBotStats(Config.getBotId(), botStats);
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
             }
