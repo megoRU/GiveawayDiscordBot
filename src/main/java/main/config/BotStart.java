@@ -121,10 +121,10 @@ public class BotStart {
         }
     }
 
-    @Scheduled(fixedDelay = 120, initialDelay = 8, timeUnit = TimeUnit.SECONDS)
-    private void updateStatistics() {
-        botStatisticsService.updateStatistics(Config.isIsDev(), jda);
-    }
+//    @Scheduled(fixedDelay = 120, initialDelay = 8, timeUnit = TimeUnit.SECONDS)
+//    private void updateStatistics() {
+//        botStatisticsService.updateStatistics(Config.isIsDev(), jda);
+//    }
 
     @Scheduled(fixedDelay = 2, initialDelay = 2, timeUnit = TimeUnit.SECONDS)
     private void scheduleStartGiveaway() {
