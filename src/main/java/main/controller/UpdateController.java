@@ -113,7 +113,7 @@ public class UpdateController {
                 changeCommand.change(event);
             }
             case "scheduling" -> {
-                SchedulingCommand schedulingCommand = new SchedulingCommand(schedulingRepository);
+                SchedulingCommand schedulingCommand = new SchedulingCommand(schedulingRepository, activeGiveawayRepository);
                 schedulingCommand.scheduling(event);
             }
             case "participants" -> {

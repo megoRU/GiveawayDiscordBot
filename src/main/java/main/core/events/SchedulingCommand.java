@@ -1,10 +1,11 @@
 package main.core.events;
 
-import main.giveaway.GiveawayRegistry;
 import main.giveaway.utils.ChecksClass;
 import main.giveaway.utils.GiveawayUtils;
 import main.jsonparser.JSONParsers;
+import main.model.entity.ActiveGiveaways;
 import main.model.entity.Scheduling;
+import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.SchedulingRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
@@ -17,17 +18,21 @@ import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class SchedulingCommand {
 
     private final SchedulingRepository schedulingRepository;
+    private final ActiveGiveawayRepository activeGiveawayRepository;
 
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     @Autowired
-    public SchedulingCommand(SchedulingRepository schedulingRepository) {
+    public SchedulingCommand(SchedulingRepository schedulingRepository,
+                             ActiveGiveawayRepository activeGiveawayRepository) {
         this.schedulingRepository = schedulingRepository;
+        this.activeGiveawayRepository = activeGiveawayRepository;
     }
 
     public void scheduling(@NotNull SlashCommandInteractionEvent event) {
@@ -54,28 +59,32 @@ public class SchedulingCommand {
         boolean canSendGiveaway = ChecksClass.canSendGiveaway(textChannel, event);
         if (!canSendGiveaway) return; //Сообщение уже отправлено
 
-        Scheduling scheduling = schedulingRepository.findByGuildLongId(guildIdLong);
+        //Обработать уведомление
+        event.deferReply().setEphemeral(true).queue();
 
-        if (GiveawayRegistry.getInstance().hasGiveaway(guildIdLong)) {
+        Scheduling scheduling = schedulingRepository.findByGuildLongId(guildIdLong);
+        ActiveGiveaways activeGiveaways = activeGiveawayRepository.findByGuildLongId(guildIdLong);
+
+        if (activeGiveaways != null) {
             String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_stop_giveaway", guildId);
             EmbedBuilder errors = new EmbedBuilder();
             errors.setColor(Color.GREEN);
             errors.setDescription(messageGiftNeedStopGiveaway);
-            event.replyEmbeds(errors.build()).queue();
+            event.getHook().sendMessageEmbeds(errors.build()).queue();
             return;
         } else if (scheduling != null) {
             String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_cancel_giveaway", guildId);
             EmbedBuilder errors = new EmbedBuilder();
             errors.setColor(Color.GREEN);
             errors.setDescription(messageGiftNeedStopGiveaway);
-            event.replyEmbeds(errors.build()).queue();
+            event.getHook().sendMessageEmbeds(errors.build()).queue();
             return;
         }
 
         if ((startTime != null && !startTime.matches(GiveawayUtils.ISO_TIME_REGEX)
                 || (endTime != null && !endTime.matches(GiveawayUtils.ISO_TIME_REGEX)))) {
             String wrongDate = jsonParsers.getLocale("wrong_date", guildId);
-            event.reply(wrongDate).queue();
+            event.getHook().sendMessage(wrongDate).queue();
             return;
         }
 
@@ -93,11 +102,11 @@ public class SchedulingCommand {
 
             if (role == null && isOnlyForSpecificRole) {
                 String slashErrorOnlyForThisRole = jsonParsers.getLocale("slash_error_only_for_this_role", guildId);
-                event.reply(slashErrorOnlyForThisRole).setEphemeral(true).queue();
+                event.getHook().sendMessage(slashErrorOnlyForThisRole).setEphemeral(true).queue();
                 return;
             } else if (role != null && role == guildIdLong && isOnlyForSpecificRole) {
                 String slashErrorRoleCanNotBeEveryone = jsonParsers.getLocale("slash_error_role_can_not_be_everyone", guildId);
-                event.reply(slashErrorRoleCanNotBeEveryone).setEphemeral(true).queue();
+                event.getHook().sendMessage(slashErrorRoleCanNotBeEveryone).setEphemeral(true).queue();
                 return;
             }
 
@@ -135,10 +144,10 @@ public class SchedulingCommand {
             start.setColor(Color.GREEN);
             start.setDescription(scheduleStart);
 
-            event.replyEmbeds(start.build()).setEphemeral(true).queue();
+            event.getHook().sendMessageEmbeds(start.build()).setEphemeral(true).queue();
         } else {
             String startInNotTextChannels = jsonParsers.getLocale("start_in_not_text_channels", guildId);
-            event.reply(startInNotTextChannels).queue();
+            event.getHook().sendMessage(startInNotTextChannels).queue();
         }
     }
 }

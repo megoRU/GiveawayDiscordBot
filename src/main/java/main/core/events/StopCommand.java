@@ -55,7 +55,6 @@ public class StopCommand {
             return;
         }
 
-
         if (!event.getOptions().get(0).getAsString().matches("\\d{1,2}")) {
             String slashErrors = jsonParsers.getLocale("slash_errors", guildId);
             EmbedBuilder errors = new EmbedBuilder();
@@ -64,7 +63,6 @@ public class StopCommand {
             event.replyEmbeds(errors.build()).queue();
             return;
         }
-
 
         //TODO: Что это)
         EmbedBuilder stop = new EmbedBuilder();
@@ -88,6 +86,7 @@ public class StopCommand {
             stop.setDescription(slashStopErrors);
             event.replyEmbeds(stop.build()).queue();
         }
+
         giveaway.stopGiveaway(Integer.parseInt(event.getOptions().get(0).getAsString()));
     }
 }

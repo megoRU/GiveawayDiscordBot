@@ -5,6 +5,7 @@ import main.giveaway.*;
 import main.giveaway.utils.ChecksClass;
 import main.giveaway.utils.GiveawayUtils;
 import main.jsonparser.JSONParsers;
+import main.model.entity.ActiveGiveaways;
 import main.model.entity.Scheduling;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.ListUsersRepository;
@@ -20,11 +21,15 @@ import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Service
 @AllArgsConstructor
 public class StartCommand {
+
     private static final JSONParsers jsonParsers = new JSONParsers();
+    private final static Logger LOGGER = Logger.getLogger(StartCommand.class.getName());
 
     private final ListUsersRepository listUsersRepository;
     private final ActiveGiveawayRepository activeGiveawayRepository;
@@ -40,6 +45,8 @@ public class StartCommand {
 
         if (event.getGuild() == null) return;
 
+        event.deferReply().queue();
+
         var guildId = event.getGuild().getIdLong();
         var userIdLong = event.getUser().getIdLong();
         var title = event.getOption("title", OptionMapping::getAsString);
@@ -53,19 +60,21 @@ public class StartCommand {
         Integer minParticipants = event.getOption("min_participants", OptionMapping::getAsInt);
         var forbiddenRole = event.getOption("forbidden_role", OptionMapping::getAsRole);
 
-        Scheduling schedulingByGuildLongId = schedulingRepository.findByGuildLongId(guildId);
-        if (GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
+        Scheduling scheduling = schedulingRepository.findByGuildLongId(guildId);
+        ActiveGiveaways activeGiveaways = activeGiveawayRepository.findByGuildLongId(guildId);
+
+        if (activeGiveaways != null) {
             String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_stop_giveaway", guildId);
             EmbedBuilder errors = new EmbedBuilder();
             errors.setColor(Color.GREEN);
             errors.setDescription(messageGiftNeedStopGiveaway);
-            event.replyEmbeds(errors.build()).queue();
-        } else if (schedulingByGuildLongId != null) {
+            event.getHook().sendMessageEmbeds(errors.build()).queue();
+        } else if (scheduling != null) {
             String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_cancel_giveaway", guildId);
             EmbedBuilder errors = new EmbedBuilder();
             errors.setColor(Color.GREEN);
             errors.setDescription(messageGiftNeedStopGiveaway);
-            event.replyEmbeds(errors.build()).queue();
+            event.getHook().sendMessageEmbeds(errors.build()).queue();
         } else {
             try {
                 String urlImage = null;
@@ -88,14 +97,14 @@ public class StartCommand {
                     String startWrongTime = String.format(jsonParsers.getLocale("start_wrong_time", guildId), time, startExamples);
 
                     embedBuilder.setDescription(startWrongTime);
-                    event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
+                    event.getHook().sendMessageEmbeds(embedBuilder.build()).setEphemeral(true).queue();
                     return;
                 }
 
                 if (title != null && title.length() >= MessageEmbed.TITLE_MAX_LENGTH) {
                     String slashError256 = jsonParsers.getLocale("slash_error_256", guildId);
                     embedBuilder.setDescription(slashError256);
-                    event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
+                    event.getHook().sendMessageEmbeds(embedBuilder.build()).setEphemeral(true).queue();
                     return;
                 }
 
@@ -105,23 +114,23 @@ public class StartCommand {
 
                 if (role == null && isOnlyForSpecificRole) {
                     String slashErrorOnlyForThisRole = jsonParsers.getLocale("slash_error_only_for_this_role", guildId);
-                    event.reply(slashErrorOnlyForThisRole).setEphemeral(true).queue();
+                    event.getHook().sendMessage(slashErrorOnlyForThisRole).setEphemeral(true).queue();
                     return;
                 } else if (role != null && role.getIdLong() == guildId && isOnlyForSpecificRole) {
                     String slashErrorRoleCanNotBeEveryone = jsonParsers.getLocale("slash_error_role_can_not_be_everyone", guildId);
-                    event.reply(slashErrorRoleCanNotBeEveryone).setEphemeral(true).queue();
+                    event.getHook().sendMessage(slashErrorRoleCanNotBeEveryone).setEphemeral(true).queue();
                     return;
                 } else if (role != null && !isOnlyForSpecificRole) {
                     String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guildId), role.getIdLong());
                     if (role.getIdLong() == guildId) {
                         giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_everyone", guildId), "@everyone");
-                        event.reply(giftNotificationForThisRole).queue();
+                        event.getHook().sendMessage(giftNotificationForThisRole).queue();
                     } else {
-                        event.reply(giftNotificationForThisRole).queue();
+                        event.getHook().sendMessage(giftNotificationForThisRole).queue();
                     }
                 } else if (role != null) {
                     String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guildId), role.getIdLong());
-                    event.reply(giftNotificationForThisRole).queue();
+                    event.getHook().sendMessage(giftNotificationForThisRole).queue();
                 }
 
                 GiveawayBuilder.Builder giveawayBuilder = new GiveawayBuilder.Builder();
@@ -150,16 +159,15 @@ public class StartCommand {
                 if (!event.isAcknowledged()) {
                     try {
                         String sendSlashMessage = String.format(jsonParsers.getLocale("send_slash_message", guildId), event.getChannel().getId());
-                        event.reply(sendSlashMessage).setEphemeral(true).queue();
+                        event.getHook().sendMessage(sendSlashMessage).setEphemeral(true).queue();
                     } catch (Exception ignored) {
                     }
                 }
 
                 giveaway.startGiveaway(event.getChannel().asGuildMessageChannel(), false);
-
             } catch (Exception e) {
                 if (!e.getMessage().contains("Time in the past")) {
-                    e.printStackTrace();
+                    LOGGER.log(Level.SEVERE, e.getMessage(), e);
                 }
                 String slashErrors = jsonParsers.getLocale("slash_errors", guildId);
                 EmbedBuilder errors = new EmbedBuilder();
