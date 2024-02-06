@@ -133,7 +133,7 @@ public class BotStart {
             System.out.println("IsDevMode: " + Config.isIsDev());
 
             //Обновить команды
-//            updateSlashCommands();
+            updateSlashCommands();
             System.out.println("20:22");
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
