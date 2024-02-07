@@ -1,9 +1,8 @@
 package main.controller;
 
 import main.core.events.*;
-import main.giveaway.GiveawayEnd;
+import main.giveaway.GiveawayBuilder;
 import main.giveaway.GiveawayMessageHandler;
-import main.giveaway.GiveawaySaving;
 import main.model.repository.*;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
@@ -28,9 +27,7 @@ public class UpdateController {
 
     //Service
     private final GiveawayMessageHandler giveawayMessageHandler;
-    private final GiveawaySaving giveawaySaving;
-    private final GiveawayEnd giveawayEnd;
-
+    private final GiveawayBuilder.Builder giveawayBuilder;
 
     @Autowired
     public UpdateController(ActiveGiveawayRepository activeGiveawayRepository,
@@ -39,16 +36,14 @@ public class UpdateController {
                             ListUsersRepository listUsersRepository,
                             SchedulingRepository schedulingRepository,
                             GiveawayMessageHandler giveawayMessageHandler,
-                            GiveawaySaving giveawaySaving,
-                            GiveawayEnd giveawayEnd) {
+                            GiveawayBuilder.Builder giveawayBuilder) {
         this.activeGiveawayRepository = activeGiveawayRepository;
         this.settingsRepository = settingsRepository;
         this.participantsRepository = participantsRepository;
         this.listUsersRepository = listUsersRepository;
         this.schedulingRepository = schedulingRepository;
         this.giveawayMessageHandler = giveawayMessageHandler;
-        this.giveawaySaving = giveawaySaving;
-        this.giveawayEnd = giveawayEnd;
+        this.giveawayBuilder = giveawayBuilder;
     }
 
     public void processEvent(Object event) {
@@ -84,7 +79,7 @@ public class UpdateController {
                 helpCommand.help(event);
             }
             case "start" -> {
-                StartCommand startCommand = new StartCommand(listUsersRepository, activeGiveawayRepository, participantsRepository, schedulingRepository, giveawayMessageHandler, giveawaySaving, giveawayEnd);
+                StartCommand startCommand = new StartCommand(activeGiveawayRepository, schedulingRepository, giveawayBuilder);
                 startCommand.start(event);
             }
             case "stop" -> {
@@ -92,7 +87,7 @@ public class UpdateController {
                 stopCommand.stop(event);
             }
             case "predefined" -> {
-                PredefinedCommand predefinedCommand = new PredefinedCommand(listUsersRepository, activeGiveawayRepository, participantsRepository, giveawayMessageHandler, giveawaySaving, giveawayEnd);
+                PredefinedCommand predefinedCommand = new PredefinedCommand(giveawayBuilder);
                 predefinedCommand.predefined(event);
             }
 

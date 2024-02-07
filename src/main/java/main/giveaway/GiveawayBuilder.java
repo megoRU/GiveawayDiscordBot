@@ -3,21 +3,38 @@ package main.giveaway;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.ListUsersRepository;
 import main.model.repository.ParticipantsRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.Set;
 
 public interface GiveawayBuilder {
 
+    @Service
     class Builder {
 
-        //Service
-        private ActiveGiveawayRepository activeGiveawayRepository;
-        private ParticipantsRepository participantsRepository;
-        private ListUsersRepository listUsersRepository;
-        private GiveawayMessageHandler giveawayMessageHandler;
-        private GiveawaySaving giveawaySaving;
-        private GiveawayEnd giveawayEnd;
+        private final ActiveGiveawayRepository activeGiveawayRepository;
+        private final ParticipantsRepository participantsRepository;
+        private final ListUsersRepository listUsersRepository;
+        private final GiveawayMessageHandler giveawayMessageHandler;
+        private final GiveawaySaving giveawaySaving;
+        private final GiveawayEnd giveawayEnd;
+
+        @Autowired
+        public Builder(ActiveGiveawayRepository activeGiveawayRepository,
+                       ParticipantsRepository participantsRepository,
+                       ListUsersRepository listUsersRepository,
+                       GiveawayMessageHandler giveawayMessageHandler,
+                       GiveawaySaving giveawaySaving,
+                       GiveawayEnd giveawayEnd) {
+            this.activeGiveawayRepository = activeGiveawayRepository;
+            this.participantsRepository = participantsRepository;
+            this.listUsersRepository = listUsersRepository;
+            this.giveawayMessageHandler = giveawayMessageHandler;
+            this.giveawaySaving = giveawaySaving;
+            this.giveawayEnd = giveawayEnd;
+        }
 
         private long messageId;
         private int countWinners;
@@ -45,38 +62,8 @@ public interface GiveawayBuilder {
             return this;
         }
 
-        public Builder setGiveawayEnd(GiveawayEnd giveawayEnd) {
-            this.giveawayEnd = giveawayEnd;
-            return this;
-        }
-
         public Builder setTime(String time) {
             this.time = time;
-            return this;
-        }
-
-        public Builder setActiveGiveawayRepository(ActiveGiveawayRepository activeGiveawayRepository) {
-            this.activeGiveawayRepository = activeGiveawayRepository;
-            return this;
-        }
-
-        public Builder setListUsersRepository(ListUsersRepository listUsersRepository) {
-            this.listUsersRepository = listUsersRepository;
-            return this;
-        }
-
-        public Builder setParticipantsRepository(ParticipantsRepository participantsRepository) {
-            this.participantsRepository = participantsRepository;
-            return this;
-        }
-
-        public Builder setGiveawayMessageHandler(GiveawayMessageHandler giveawayMessageHandler) {
-            this.giveawayMessageHandler = giveawayMessageHandler;
-            return this;
-        }
-
-        public Builder setGiveawaySaving(GiveawaySaving giveawaySaving) {
-            this.giveawaySaving = giveawaySaving;
             return this;
         }
 
@@ -144,15 +131,6 @@ public interface GiveawayBuilder {
          * @throws IllegalArgumentException activeGiveawayRepository == null и так далее
          */
         public Giveaway build() {
-            if (activeGiveawayRepository == null)
-                throw new IllegalArgumentException("The provided activeGiveawayRepository cannot be null!");
-            else if (participantsRepository == null)
-                throw new IllegalArgumentException("The provided participantsRepository cannot be null!");
-            else if (giveawaySaving == null)
-                throw new IllegalArgumentException("The provided giveawaySaving cannot be null!");
-            else if (listUsersRepository == null)
-                throw new IllegalArgumentException("The provided listUsersRepository cannot be null!");
-
             Giveaway giveaway = new Giveaway(activeGiveawayRepository,
                     participantsRepository,
                     listUsersRepository,

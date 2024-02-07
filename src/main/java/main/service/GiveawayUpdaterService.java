@@ -24,12 +24,8 @@ public class GiveawayUpdaterService {
     private final static Logger LOGGER = LoggerFactory.getLogger(GiveawayUpdaterService.class.getName());
 
     private final ActiveGiveawayRepository activeGiveawayRepository;
-    private final GiveawayEnd giveawayEnd;
-    private final GiveawaySaving giveawaySaving;
-    private final GiveawayMessageHandler giveawayMessageHandler;
-    private final ParticipantsRepository participantsRepository;
-    private final ListUsersRepository listUsersRepository;
     private final ParticipantsUpdaterService participantsUpdaterService;
+    private final GiveawayBuilder.Builder giveawayBuilder;
 
     public void updateGiveaway(JDA jda) {
         List<ActiveGiveaways> activeGiveawaysList = activeGiveawayRepository.findAll();
@@ -48,20 +44,13 @@ public class GiveawayUpdaterService {
                 long idUserWhoCreateGiveaway = activeGiveaways.getIdUserWhoCreateGiveaway();
                 Integer minParticipants = activeGiveaways.getMinParticipants();
                 Long forbiddenRole = activeGiveaways.getForbiddenRole();
+                boolean finishGiveaway = activeGiveaways.isFinishGiveaway();
 
                 Set<String> participantsMap = activeGiveaways.getParticipants()
                         .stream()
                         .map(Participants::getUserIdLong)
                         .map(String::valueOf)
                         .collect(Collectors.toSet());
-
-                GiveawayBuilder.Builder giveawayBuilder = new GiveawayBuilder.Builder();
-                giveawayBuilder.setGiveawayEnd(giveawayEnd);
-                giveawayBuilder.setActiveGiveawayRepository(activeGiveawayRepository);
-                giveawayBuilder.setGiveawaySaving(giveawaySaving);
-                giveawayBuilder.setParticipantsRepository(participantsRepository);
-                giveawayBuilder.setListUsersRepository(listUsersRepository);
-                giveawayBuilder.setGiveawayMessageHandler(giveawayMessageHandler);
 
                 giveawayBuilder.setTextChannelId(channelIdLong);
                 giveawayBuilder.setUserIdLong(idUserWhoCreateGiveaway);
@@ -76,6 +65,7 @@ public class GiveawayUpdaterService {
                 giveawayBuilder.setMinParticipants(minParticipants);
                 giveawayBuilder.setListUsersHash(participantsMap);
                 giveawayBuilder.setForbiddenRole(forbiddenRole);
+                giveawayBuilder.setFinishGiveaway(finishGiveaway);
 
                 Giveaway giveaway = giveawayBuilder.build();
                 giveaway.setLockEnd(true);

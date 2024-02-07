@@ -1,15 +1,15 @@
 package main.core.events;
 
 import lombok.AllArgsConstructor;
-import main.giveaway.*;
+import main.giveaway.Giveaway;
+import main.giveaway.GiveawayBuilder;
+import main.giveaway.GiveawayRegistry;
 import main.giveaway.utils.ChecksClass;
 import main.giveaway.utils.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.model.entity.ActiveGiveaways;
 import main.model.entity.Scheduling;
 import main.model.repository.ActiveGiveawayRepository;
-import main.model.repository.ListUsersRepository;
-import main.model.repository.ParticipantsRepository;
 import main.model.repository.SchedulingRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -31,13 +31,9 @@ public class StartCommand {
     private static final JSONParsers jsonParsers = new JSONParsers();
     private final static Logger LOGGER = Logger.getLogger(StartCommand.class.getName());
 
-    private final ListUsersRepository listUsersRepository;
     private final ActiveGiveawayRepository activeGiveawayRepository;
-    private final ParticipantsRepository participantsRepository;
     private final SchedulingRepository schedulingRepository;
-    private final GiveawayMessageHandler giveawayMessageHandler;
-    private final GiveawaySaving giveawaySaving;
-    private final GiveawayEnd giveawayEnd;
+    private final GiveawayBuilder.Builder giveawayBuilder;
 
     public void start(@NotNull SlashCommandInteractionEvent event) {
         boolean canSendGiveaway = ChecksClass.canSendGiveaway(event.getGuildChannel(), event);
@@ -131,15 +127,10 @@ public class StartCommand {
                 } else if (role != null) {
                     String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guildId), role.getIdLong());
                     event.getHook().sendMessage(giftNotificationForThisRole).queue();
+                } else {
+                    String sendSlashMessage = String.format(jsonParsers.getLocale("send_slash_message", guildId), event.getChannel().getId());
+                    event.getHook().sendMessage(sendSlashMessage).setEphemeral(true).queue();
                 }
-
-                GiveawayBuilder.Builder giveawayBuilder = new GiveawayBuilder.Builder();
-                giveawayBuilder.setGiveawayEnd(giveawayEnd);
-                giveawayBuilder.setActiveGiveawayRepository(activeGiveawayRepository);
-                giveawayBuilder.setGiveawaySaving(giveawaySaving);
-                giveawayBuilder.setParticipantsRepository(participantsRepository);
-                giveawayBuilder.setListUsersRepository(listUsersRepository);
-                giveawayBuilder.setGiveawayMessageHandler(giveawayMessageHandler);
 
                 giveawayBuilder.setTextChannelId(event.getChannel().getIdLong());
                 giveawayBuilder.setUserIdLong(userIdLong);
@@ -155,14 +146,6 @@ public class StartCommand {
 
                 Giveaway giveaway = giveawayBuilder.build();
                 GiveawayRegistry.getInstance().putGift(guildId, giveaway);
-
-                if (!event.isAcknowledged()) {
-                    try {
-                        String sendSlashMessage = String.format(jsonParsers.getLocale("send_slash_message", guildId), event.getChannel().getId());
-                        event.getHook().sendMessage(sendSlashMessage).setEphemeral(true).queue();
-                    } catch (Exception ignored) {
-                    }
-                }
 
                 giveaway.startGiveaway(event.getChannel().asGuildMessageChannel(), false);
             } catch (Exception e) {

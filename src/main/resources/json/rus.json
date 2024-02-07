@@ -23,7 +23,7 @@
   "slash_stop": "Вы завершили Giveaway",
   "slash_stop_errors": "Вы не завершили Giveaway",
   "slash_errors": "Вы допустили ошибку, посмотрите документацию",
-  "send_slash_message": "Создал Giveaway в текстовом канале: <#%s>",
+  "send_slash_message": "Создаю Giveaway в текстовом канале: <#%s>",
   "slash_list_users": "Список участников",
   "slash_list_users_empty": "Ещё нет участников",
   "gift_notification": "Уведомление",

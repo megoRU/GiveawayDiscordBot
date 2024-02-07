@@ -24,12 +24,7 @@ import java.util.concurrent.TimeUnit;
 @AllArgsConstructor
 public class PredefinedCommand {
 
-    private final ListUsersRepository listUsersRepository;
-    private final ActiveGiveawayRepository activeGiveawayRepository;
-    private final ParticipantsRepository participantsRepository;
-    private final GiveawayMessageHandler giveawayMessageHandler;
-    private final GiveawaySaving giveawaySaving;
-    private final GiveawayEnd giveawayEnd;
+    private final GiveawayBuilder.Builder giveawayBuilder;
 
     private static final JSONParsers jsonParsers = new JSONParsers();
 
@@ -82,14 +77,6 @@ public class PredefinedCommand {
                 return;
             }
         }
-
-        GiveawayBuilder.Builder giveawayBuilder = new GiveawayBuilder.Builder();
-        giveawayBuilder.setGiveawayEnd(giveawayEnd);
-        giveawayBuilder.setActiveGiveawayRepository(activeGiveawayRepository);
-        giveawayBuilder.setGiveawaySaving(giveawaySaving);
-        giveawayBuilder.setParticipantsRepository(participantsRepository);
-        giveawayBuilder.setListUsersRepository(listUsersRepository);
-        giveawayBuilder.setGiveawayMessageHandler(giveawayMessageHandler);
 
         giveawayBuilder.setTextChannelId(textChannel.getIdLong());
         giveawayBuilder.setUserIdLong(userId);

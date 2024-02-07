@@ -1,13 +1,11 @@
 package main.service;
 
 import lombok.AllArgsConstructor;
-import main.giveaway.*;
-import main.giveaway.utils.GiveawayUtils;
+import main.giveaway.Giveaway;
+import main.giveaway.GiveawayBuilder;
+import main.giveaway.GiveawayRegistry;
 import main.jsonparser.JSONParsers;
 import main.model.entity.Scheduling;
-import main.model.repository.ActiveGiveawayRepository;
-import main.model.repository.ListUsersRepository;
-import main.model.repository.ParticipantsRepository;
 import main.model.repository.SchedulingRepository;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
@@ -17,8 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,12 +26,7 @@ public class ScheduleStartService {
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     private final SchedulingRepository schedulingRepository;
-    private final ListUsersRepository listUsersRepository;
-    private final ActiveGiveawayRepository activeGiveawayRepository;
-    private final ParticipantsRepository participantsRepository;
-    private final GiveawayMessageHandler giveawayMessageHandler;
-    private final GiveawaySaving giveawaySaving;
-    private final GiveawayEnd giveawayEnd;
+    private final GiveawayBuilder.Builder giveawayBuilder;
 
     public void start(JDA jda) {
         List<Scheduling> allScheduling = schedulingRepository.findAll();
@@ -61,14 +52,6 @@ public class ScheduleStartService {
                             Integer minParticipants = scheduling.getMinParticipants();
                             Timestamp dateEndGiveaway = scheduling.getDateEndGiveaway();
                             Long forbiddenRole = scheduling.getForbiddenRole();
-
-                            GiveawayBuilder.Builder giveawayBuilder = new GiveawayBuilder.Builder();
-                            giveawayBuilder.setGiveawayEnd(giveawayEnd);
-                            giveawayBuilder.setActiveGiveawayRepository(activeGiveawayRepository);
-                            giveawayBuilder.setGiveawaySaving(giveawaySaving);
-                            giveawayBuilder.setParticipantsRepository(participantsRepository);
-                            giveawayBuilder.setListUsersRepository(listUsersRepository);
-                            giveawayBuilder.setGiveawayMessageHandler(giveawayMessageHandler);
 
                             giveawayBuilder.setTextChannelId(channelIdLong);
                             giveawayBuilder.setUserIdLong(userIdLong);
