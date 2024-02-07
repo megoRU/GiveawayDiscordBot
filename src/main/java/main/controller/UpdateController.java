@@ -55,6 +55,7 @@ public class UpdateController {
         this.giveawayMessageHandler = giveawayMessageHandler;
         this.giveawaySaving = giveawaySaving;
         this.giveawayEnd = giveawayEnd;
+
     }
 
     public void processEvent(Object event) {
