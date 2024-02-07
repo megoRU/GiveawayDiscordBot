@@ -49,6 +49,9 @@ public class ActiveGiveaways {
     @Column(name = "url_image")
     private String urlImage;
 
+    @Column(name = "finish_giveaway", nullable = false)
+    private boolean finishGiveaway;
+
     @Column(name = "min_participants")
     private Integer minParticipants;
 

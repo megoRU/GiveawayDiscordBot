@@ -1,7 +1,7 @@
 package main.core.events;
 
 import main.model.repository.ActiveGiveawayRepository;
-import main.model.repository.LanguageRepository;
+import main.model.repository.SchedulingRepository;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,19 +11,20 @@ import org.springframework.stereotype.Service;
 public class LeaveEvent {
 
     private final ActiveGiveawayRepository activeGiveawayRepository;
-    private final LanguageRepository languageRepository;
+    private final SchedulingRepository schedulingRepository;
 
     @Autowired
-    public LeaveEvent(ActiveGiveawayRepository activeGiveawayRepository, LanguageRepository languageRepository) {
+    public LeaveEvent(ActiveGiveawayRepository activeGiveawayRepository,
+                      SchedulingRepository schedulingRepository) {
         this.activeGiveawayRepository = activeGiveawayRepository;
-        this.languageRepository = languageRepository;
+        this.schedulingRepository = schedulingRepository;
     }
 
     public void leave(@NotNull GuildLeaveEvent event) {
         try {
             System.out.println("Удаляем данные после удаления бота из Guild");
-            languageRepository.deleteById(event.getGuild().getId());
             activeGiveawayRepository.deleteById(event.getGuild().getIdLong());
+            schedulingRepository.deleteById(event.getGuild().getIdLong());
         } catch (Exception e) {
             e.printStackTrace();
         }

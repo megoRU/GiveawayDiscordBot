@@ -27,10 +27,10 @@ public class UpdateController {
 
     //REPO
     private final ActiveGiveawayRepository activeGiveawayRepository;
-    private final LanguageRepository languageRepository;
     private final ParticipantsRepository participantsRepository;
     private final ListUsersRepository listUsersRepository;
     private final SchedulingRepository schedulingRepository;
+    private final SettingsRepository settingsRepository;
 
     //LOGGER
     private final static Logger LOGGER = Logger.getLogger(UpdateController.class.getName());
@@ -40,15 +40,15 @@ public class UpdateController {
 
     @Autowired
     public UpdateController(ActiveGiveawayRepository activeGiveawayRepository,
-                            LanguageRepository languageRepository,
                             ParticipantsRepository participantsRepository,
                             ListUsersRepository listUsersRepository,
-                            SchedulingRepository schedulingRepository) {
+                            SchedulingRepository schedulingRepository,
+                            SettingsRepository settingsRepository) {
         this.activeGiveawayRepository = activeGiveawayRepository;
-        this.languageRepository = languageRepository;
         this.participantsRepository = participantsRepository;
         this.listUsersRepository = listUsersRepository;
         this.schedulingRepository = schedulingRepository;
+        this.settingsRepository = settingsRepository;
     }
 
     public void registerBot(CoreBot coreBot) {
@@ -99,10 +99,9 @@ public class UpdateController {
                 PredefinedCommand predefinedCommand = new PredefinedCommand(listUsersRepository, activeGiveawayRepository, participantsRepository);
                 predefinedCommand.predefined(event, this);
             }
-
-            case "language" -> {
-                LanguageCommand languageCommand = new LanguageCommand(languageRepository);
-                languageCommand.language(event);
+            case "settings" -> {
+                SettingsCommand settingsCommand = new SettingsCommand(settingsRepository);
+                settingsCommand.language(event);
             }
             case "list" -> {
                 ListCommand listCommand = new ListCommand(participantsRepository);
@@ -117,7 +116,7 @@ public class UpdateController {
                 changeCommand.change(event, this);
             }
             case "scheduling" -> {
-                SchedulingCommand schedulingCommand = new SchedulingCommand(schedulingRepository);
+                SchedulingCommand schedulingCommand = new SchedulingCommand(schedulingRepository, activeGiveawayRepository);
                 schedulingCommand.scheduling(event);
             }
             case "participants" -> {
@@ -142,7 +141,7 @@ public class UpdateController {
     private void buttonEvent(@NotNull ButtonInteractionEvent event) {
         if (event.getGuild() == null) return;
         if (Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + ButtonChangeLanguage.CHANGE_LANGUAGE)) {
-            ButtonChangeLanguage buttonChangeLanguage = new ButtonChangeLanguage(languageRepository);
+            ButtonChangeLanguage buttonChangeLanguage = new ButtonChangeLanguage(settingsRepository);
             buttonChangeLanguage.change(event);
         }
     }
@@ -153,7 +152,7 @@ public class UpdateController {
     }
 
     private void leaveEvent(@NotNull GuildLeaveEvent event) {
-        LeaveEvent leaveEvent = new LeaveEvent(activeGiveawayRepository, languageRepository);
+        LeaveEvent leaveEvent = new LeaveEvent(activeGiveawayRepository, schedulingRepository);
         leaveEvent.leave(event);
     }
 

@@ -49,7 +49,7 @@ public class StartCommand {
         if (!canSendGiveaway) return; //Сообщение уже отправлено
 
         var guildIdLong = Objects.requireNonNull(event.getGuild()).getIdLong();
-        var guildId = Objects.requireNonNull(event.getGuild()).getId();
+        var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
         var userIdLong = event.getUser().getIdLong();
         String title = event.getOption("title", OptionMapping::getAsString);
         String countString = event.getOption("count", OptionMapping::getAsString);

@@ -43,7 +43,7 @@ public class PredefinedCommand {
 
     public void predefined(@NotNull SlashCommandInteractionEvent event, UpdateController updateController) {
         var guildIdLong = Objects.requireNonNull(event.getGuild()).getIdLong();
-        var guildId = Objects.requireNonNull(event.getGuild()).getId();
+        var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
         var userIdLong = event.getUser().getIdLong();
 
         if (GiveawayRegistry.getInstance().hasGiveaway(guildIdLong)) {
@@ -72,7 +72,7 @@ public class PredefinedCommand {
         String title = event.getOption("title", OptionMapping::getAsString);
 
         if (role != null) {
-            if (role.getId().equals(guildId)) {
+            if (role.getIdLong() == guildId) {
                 String notificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_everyone", guildId), "@everyone");
                 event.reply(notificationForThisRole).queue();
             }

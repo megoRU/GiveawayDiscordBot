@@ -51,7 +51,7 @@ public class ReactionEvent {
                             LOGGER.info(String.format("\nНажал на эмодзи, но у него нет доступа к розыгрышу: %s", user.getId()));
                             //Получаем ссылку на Giveaway
 
-                            String buttonGiveawayNotAccess = String.format(jsonParsers.getLocale("button_giveaway_not_access", event.getGuild().getId()), url);
+                            String buttonGiveawayNotAccess = String.format(jsonParsers.getLocale("button_giveaway_not_access", event.getGuild().getIdLong()), url);
                             EmbedBuilder embedBuilder = new EmbedBuilder();
                             embedBuilder.setColor(Color.RED);
                             embedBuilder.setDescription(buttonGiveawayNotAccess);

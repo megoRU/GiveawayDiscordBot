@@ -32,7 +32,7 @@ public class RerollCommand {
     }
 
     public void reroll(@NotNull SlashCommandInteractionEvent event) {
-        var guildId = Objects.requireNonNull(event.getGuild()).getId();
+        var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
 
         event.deferReply().queue();
         String id = event.getOption("giveaway_id", OptionMapping::getAsString);

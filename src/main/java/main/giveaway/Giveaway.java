@@ -66,6 +66,8 @@ public class Giveaway {
 
     private final AtomicInteger count = new AtomicInteger(0);
     private int localCountUsers;
+    @Getter
+    private boolean finishGiveaway;
 
     //DTO
     private final ConcurrentLinkedQueue<Participants> participantsList = new ConcurrentLinkedQueue<>();
@@ -87,7 +89,14 @@ public class Giveaway {
         private Timestamp endGiveawayDate;
         private int minParticipants = 2;
 
-        public GiveawayData(long messageId, int countWinners, Long roleId, boolean isForSpecificRole, String urlImage, String title, Timestamp endGiveawayDate, int minParticipants) {
+        public GiveawayData(long messageId,
+                            int countWinners,
+                            Long roleId,
+                            boolean isForSpecificRole,
+                            String urlImage,
+                            String title,
+                            Timestamp endGiveawayDate,
+                            int minParticipants) {
             this.messageId = messageId;
             this.countWinners = countWinners;
             this.roleId = roleId;
@@ -120,7 +129,9 @@ public class Giveaway {
                     ActiveGiveawayRepository activeGiveawayRepository,
                     ParticipantsRepository participantsRepository,
                     ListUsersRepository listUsersRepository,
-                    GiveawayData giveawayData, UpdateController updateController) {
+                    GiveawayData giveawayData,
+                    boolean finishGiveaway,
+                    UpdateController updateController) {
         this.guildId = guildId;
         this.textChannelId = textChannelId;
         this.userIdLong = userIdLong;
@@ -129,6 +140,7 @@ public class Giveaway {
         this.listUsersRepository = listUsersRepository;
         this.listUsersHash = new ConcurrentHashMap<>(listUsersHash);
         this.giveawayData = giveawayData;
+        this.finishGiveaway = finishGiveaway;
 
         this.updateController = updateController;
 
@@ -304,8 +316,8 @@ public class Giveaway {
         try {
             if (listUsersHash.size() < this.giveawayData.minParticipants) {
 
-                String giftNotEnoughUsers = jsonParsers.getLocale("gift_not_enough_users", String.valueOf(guildId));
-                String giftGiveawayDeleted = jsonParsers.getLocale("gift_giveaway_deleted", String.valueOf(guildId));
+                String giftNotEnoughUsers = jsonParsers.getLocale("gift_not_enough_users", guildId);
+                String giftGiveawayDeleted = jsonParsers.getLocale("gift_giveaway_deleted", guildId);
 
                 EmbedBuilder notEnoughUsers = new EmbedBuilder();
                 notEnoughUsers.setColor(Color.GREEN);
@@ -343,12 +355,10 @@ public class Giveaway {
                 uniqueWinners.add("<@" + participants.get(Integer.parseInt(string)).getUserIdLong() + ">");
             }
         } catch (Exception e) {
-            GiveawayRegistry instance = GiveawayRegistry.getInstance();
-            Future<?> future = instance.getFutureTasks(guildId);
-
-            if (future == null) {
-                String errorsWithApi = jsonParsers.getLocale("errors_with_api", String.valueOf(guildId));
-                String errorsDescriptions = jsonParsers.getLocale("errors_descriptions", String.valueOf(guildId));
+            if (!finishGiveaway) {
+                finishGiveaway = true;
+                String errorsWithApi = jsonParsers.getLocale("errors_with_api", guildId);
+                String errorsDescriptions = jsonParsers.getLocale("errors_descriptions", guildId);
                 EmbedBuilder errors = new EmbedBuilder();
                 errors.setColor(Color.RED);
                 errors.setTitle(errorsWithApi);
@@ -357,11 +367,6 @@ public class Giveaway {
                 buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
                 updateController.setView(errors.build(), guildId, textChannelId, buttons);
 
-                //Создаем задачу
-                StopGiveawayThread stopGiveawayThread = new StopGiveawayThread(this);
-                Future<?> submit = executorService.submit(stopGiveawayThread);
-                executorService.shutdown();
-                instance.putFutureTasks(guildId, submit);
                 LOGGER.log(Level.WARNING, e.getMessage(), e);
             }
             return;
@@ -376,14 +381,14 @@ public class Giveaway {
 
         String winnersContent;
         if (uniqueWinners.size() == 1) {
-            winnersContent = String.format(jsonParsers.getLocale("gift_congratulations", String.valueOf(guildId)), winnerArray);
-            String giftUrl = String.format(jsonParsers.getLocale("gift_url", String.valueOf(guildId)), url);
+            winnersContent = String.format(jsonParsers.getLocale("gift_congratulations", guildId), winnerArray);
+            String giftUrl = String.format(jsonParsers.getLocale("gift_url", guildId), url);
             urlEmbedded.setDescription(giftUrl);
             EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId);
             updateController.setView(embedBuilder, guildId, textChannelId);
         } else {
-            winnersContent = String.format(jsonParsers.getLocale("gift_congratulations_many", String.valueOf(guildId)), winnerArray);
-            String giftUrl = String.format(jsonParsers.getLocale("gift_url", String.valueOf(guildId)), url);
+            winnersContent = String.format(jsonParsers.getLocale("gift_congratulations_many", guildId), winnerArray);
+            String giftUrl = String.format(jsonParsers.getLocale("gift_url", guildId), url);
             urlEmbedded.setDescription(giftUrl);
             EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId);
             updateController.setView(embedBuilder, guildId, textChannelId);

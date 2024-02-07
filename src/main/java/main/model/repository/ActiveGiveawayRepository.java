@@ -2,6 +2,7 @@ package main.model.repository;
 
 import main.model.entity.ActiveGiveaways;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -25,4 +26,10 @@ public interface ActiveGiveawayRepository extends JpaRepository<ActiveGiveaways,
     @NotNull
     @EntityGraph(attributePaths = {"participants"})
     List<ActiveGiveaways> findAll();
+
+    @Nullable
+    ActiveGiveaways findByGuildLongId(Long guildLongId);
+
+    @Nullable
+    ActiveGiveaways findByIdUserWhoCreateGiveawayAndGuildLongId(Long idUserWhoCreateGiveaway, Long guildLongId);
 }

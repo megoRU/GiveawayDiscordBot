@@ -1,16 +1,15 @@
 package main.core.events;
 
 import main.giveaway.ChecksClass;
-import main.giveaway.GiveawayRegistry;
 import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
+import main.model.entity.ActiveGiveaways;
 import main.model.entity.Scheduling;
+import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.SchedulingRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import net.dv8tion.jda.api.entities.channel.unions.GuildChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
@@ -18,36 +17,40 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Objects;
+
+import static main.giveaway.GiveawayUtils.timeProcessor;
 
 @Service
 public class SchedulingCommand {
 
     private final SchedulingRepository schedulingRepository;
+    private final ActiveGiveawayRepository activeGiveawayRepository;
 
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     @Autowired
-    public SchedulingCommand(SchedulingRepository schedulingRepository) {
+    public SchedulingCommand(SchedulingRepository schedulingRepository,
+                             ActiveGiveawayRepository activeGiveawayRepository) {
         this.schedulingRepository = schedulingRepository;
+        this.activeGiveawayRepository = activeGiveawayRepository;
     }
 
     public void scheduling(@NotNull SlashCommandInteractionEvent event) {
         var guildIdLong = Objects.requireNonNull(event.getGuild()).getIdLong();
-        var guildId = Objects.requireNonNull(event.getGuild()).getId();
+        var guildId = event.getGuild().getIdLong();
         var userIdLong = event.getUser().getIdLong();
-        Long role = event.getOption("mention", OptionMapping::getAsLong);
-        String countString = event.getOption("count", OptionMapping::getAsString);
-        String title = event.getOption("title", OptionMapping::getAsString);
-        GuildChannelUnion textChannel = event.getOption("textchannel", OptionMapping::getAsChannel);
-        Message.Attachment image = event.getOption("image", OptionMapping::getAsAttachment);
-        String urlImage = image != null ? image.getUrl() : null;
-        Integer minParticipants = event.getOption("min_participants", OptionMapping::getAsInt);
-        String startTime = event.getOption("start_time", OptionMapping::getAsString);
-        String endTime = event.getOption("end_time", OptionMapping::getAsString);
+        var role = event.getOption("mention", OptionMapping::getAsLong);
+        var countString = event.getOption("count", OptionMapping::getAsString);
+        var title = event.getOption("title", OptionMapping::getAsString);
+        var textChannel = event.getOption("textchannel", OptionMapping::getAsChannel);
+        var image = event.getOption("image", OptionMapping::getAsAttachment);
+        var urlImage = image != null ? image.getUrl() : null;
+        var minParticipants = event.getOption("min_participants", OptionMapping::getAsInt);
+        var startTime = event.getOption("start_time", OptionMapping::getAsString);
+        var endTime = event.getOption("end_time", OptionMapping::getAsString);
+        var forbiddenRole = event.getOption("forbidden_role", OptionMapping::getAsRole);
+        boolean isOnlyForSpecificRole = Objects.equals(event.getOption("role", OptionMapping::getAsString), "yes");
 
         if (textChannel == null) {
             event.reply("TextChannel is `Null`").queue();
@@ -57,28 +60,32 @@ public class SchedulingCommand {
         boolean canSendGiveaway = ChecksClass.canSendGiveaway(textChannel, event);
         if (!canSendGiveaway) return; //Сообщение уже отправлено
 
-        Scheduling scheduling = schedulingRepository.findByGuildLongId(guildIdLong);
+        //Обработать уведомление
+        event.deferReply().setEphemeral(true).queue();
 
-        if (GiveawayRegistry.getInstance().hasGiveaway(guildIdLong)) {
+        Scheduling scheduling = schedulingRepository.findByGuildLongId(guildIdLong);
+        ActiveGiveaways activeGiveaways = activeGiveawayRepository.findByGuildLongId(guildIdLong);
+
+        if (activeGiveaways != null) {
             String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_stop_giveaway", guildId);
             EmbedBuilder errors = new EmbedBuilder();
             errors.setColor(Color.GREEN);
             errors.setDescription(messageGiftNeedStopGiveaway);
-            event.replyEmbeds(errors.build()).queue();
+            event.getHook().sendMessageEmbeds(errors.build()).queue();
             return;
         } else if (scheduling != null) {
             String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_cancel_giveaway", guildId);
             EmbedBuilder errors = new EmbedBuilder();
             errors.setColor(Color.GREEN);
             errors.setDescription(messageGiftNeedStopGiveaway);
-            event.replyEmbeds(errors.build()).queue();
+            event.getHook().sendMessageEmbeds(errors.build()).queue();
             return;
         }
 
         if ((startTime != null && !startTime.matches(GiveawayUtils.ISO_TIME_REGEX)
                 || (endTime != null && !endTime.matches(GiveawayUtils.ISO_TIME_REGEX)))) {
             String wrongDate = jsonParsers.getLocale("wrong_date", guildId);
-            event.reply(wrongDate).queue();
+            event.getHook().sendMessage(wrongDate).queue();
             return;
         }
 
@@ -86,7 +93,7 @@ public class SchedulingCommand {
             int count = 1;
             if (countString != null) count = Integer.parseInt(countString);
 
-            if (minParticipants == null || minParticipants == 0 || minParticipants == 1) {
+            if (minParticipants == null || minParticipants < 2) {
                 minParticipants = 2;
             }
 
@@ -94,15 +101,13 @@ public class SchedulingCommand {
                 urlImage = image.getUrl();
             }
 
-            boolean isOnlyForSpecificRole = Objects.equals(event.getOption("role", OptionMapping::getAsString), "yes");
-
             if (role == null && isOnlyForSpecificRole) {
                 String slashErrorOnlyForThisRole = jsonParsers.getLocale("slash_error_only_for_this_role", guildId);
-                event.reply(slashErrorOnlyForThisRole).setEphemeral(true).queue();
+                event.getHook().sendMessage(slashErrorOnlyForThisRole).setEphemeral(true).queue();
                 return;
             } else if (role != null && role == guildIdLong && isOnlyForSpecificRole) {
                 String slashErrorRoleCanNotBeEveryone = jsonParsers.getLocale("slash_error_role_can_not_be_everyone", guildId);
-                event.reply(slashErrorRoleCanNotBeEveryone).setEphemeral(true).queue();
+                event.getHook().sendMessage(slashErrorRoleCanNotBeEveryone).setEphemeral(true).queue();
                 return;
             }
 
@@ -139,18 +144,10 @@ public class SchedulingCommand {
             start.setColor(Color.GREEN);
             start.setDescription(scheduleStart);
 
-            event.replyEmbeds(start.build()).setEphemeral(true).queue();
+            event.getHook().sendMessageEmbeds(start.build()).setEphemeral(true).queue();
         } else {
             String startInNotTextChannels = jsonParsers.getLocale("start_in_not_text_channels", guildId);
-            event.reply(startInNotTextChannels).queue();
+            event.getHook().sendMessage(startInNotTextChannels).queue();
         }
-    }
-
-    private Timestamp timeProcessor(String time) {
-        if (time == null) return null;
-        ZoneOffset offset = ZoneOffset.UTC;
-        LocalDateTime localDateTime = LocalDateTime.parse(time, GiveawayUtils.FORMATTER);
-        long toEpochSecond = localDateTime.toEpochSecond(offset);
-        return new Timestamp(toEpochSecond * 1000);
     }
 }

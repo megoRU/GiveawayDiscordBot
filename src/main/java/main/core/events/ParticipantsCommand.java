@@ -32,7 +32,7 @@ public class ParticipantsCommand {
 
     public void participants(@NotNull SlashCommandInteractionEvent event) {
         var userIdLong = event.getUser().getIdLong();
-        var guildId = Objects.requireNonNull(event.getGuild()).getId();
+        var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
 
         event.deferReply().setEphemeral(true).queue();
         String id = event.getOption("giveaway_id", OptionMapping::getAsString);

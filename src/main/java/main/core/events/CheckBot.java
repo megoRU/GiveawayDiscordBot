@@ -17,7 +17,7 @@ public class CheckBot {
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     public void check(@NotNull SlashCommandInteractionEvent event) {
-        var guildId = Objects.requireNonNull(event.getGuild()).getId();
+        var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
 
         GuildChannelUnion textChannel = event.getOption("textchannel", OptionMapping::getAsChannel);
         GuildChannel guildChannel = textChannel != null ? textChannel : event.getGuildChannel().asTextChannel();

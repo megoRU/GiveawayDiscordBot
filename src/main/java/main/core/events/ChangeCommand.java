@@ -30,9 +30,8 @@ public class ChangeCommand {
     }
 
     public void change(@NotNull SlashCommandInteractionEvent event, UpdateController updateController) {
-
         var guildIdLong = Objects.requireNonNull(event.getGuild()).getIdLong();
-        var guildId = Objects.requireNonNull(event.getGuild()).getId();
+        var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
 
         Giveaway giveaway = GiveawayRegistry.getInstance().getGiveaway(guildIdLong);
         if (giveaway == null) {

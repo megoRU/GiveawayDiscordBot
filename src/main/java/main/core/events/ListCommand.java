@@ -28,7 +28,7 @@ public class ListCommand {
 
     public void list(@NotNull SlashCommandInteractionEvent event) {
         var guildIdLong = Objects.requireNonNull(event.getGuild()).getIdLong();
-        var guildId = Objects.requireNonNull(event.getGuild()).getId();
+        var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
 
         event.deferReply().setEphemeral(true).queue();
         if (GiveawayRegistry.getInstance().hasGiveaway(guildIdLong)) {

@@ -22,14 +22,6 @@ public class StopGiveawayThread implements Runnable {
             while (true) {
                 long guildId = giveaway.getGuildId();
 
-                if (!GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
-                    Future<?> future = instance.getFutureTasks(guildId);
-                    if (future != null) {
-                        future.cancel(true);
-                        instance.removeFutureTasks(guildId);
-                    }
-                    return;
-                }
                 giveaway.stopGiveaway(giveaway.getCountWinners());
                 Thread.sleep(10000);
             }
