@@ -15,8 +15,8 @@ import lombok.Setter;
 public class Participants {
 
     @Id
-    @SequenceGenerator(name = "sequence_id_auto_gen", allocationSize = 100)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequence_id_auto_gen")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
 
     @ManyToOne

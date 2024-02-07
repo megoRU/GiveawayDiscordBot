@@ -1,8 +1,6 @@
 package main.core.events;
 
 import main.giveaway.GiveawayRegistry;
-import main.model.entity.ActiveGiveaways;
-import main.model.entity.Scheduling;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.SchedulingRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -12,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
+import java.util.Objects;
 
 @Service
 public class CancelCommand {
@@ -26,29 +25,18 @@ public class CancelCommand {
     }
 
     public void cancel(@NotNull SlashCommandInteractionEvent event) {
-        if (event.getGuild() == null) return;
-        long guildId = event.getGuild().getIdLong();
-        long userId = event.getUser().getIdLong();
+        long guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
 
-        Scheduling scheduling = schedulingRepository.findByIdUserWhoCreateGiveawayAndGuildLongId(userId, guildId);
-        ActiveGiveaways activeGiveaways = activeGiveawayRepository.findByIdUserWhoCreateGiveawayAndGuildLongId(userId, guildId);
+        schedulingRepository.deleteById(guildId);
+        activeGiveawayRepository.deleteById(guildId);
 
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
+        instance.cancelGiveawayTimer(guildId);
+        instance.removeGuildFromGiveaway(guildId);
 
         EmbedBuilder cancel = new EmbedBuilder();
         cancel.setColor(Color.GREEN);
-
-        if (scheduling != null) {
-            schedulingRepository.deleteById(guildId);
-            instance.removeGiveaway(guildId);
-            cancel.setDescription("Успешно отменили запланированный Giveaway!");
-        } else if (activeGiveaways != null) {
-            activeGiveawayRepository.deleteById(guildId);
-            instance.removeGiveaway(guildId);
-            cancel.setDescription("Успешно отменили Giveaway!");
-        } else {
-            cancel.setDescription("Нет доступа или нет активных Giveaway!");
-        }
+        cancel.setDescription("Успешно отменили Giveaway!");
 
         event.replyEmbeds(cancel.build())
                 .setEphemeral(true)

@@ -20,7 +20,6 @@ import java.util.List;
 public class JoinEvent {
 
     public void join(@NotNull GuildJoinEvent event) {
-        var guildId = event.getGuild().getIdLong();
         try {
             EmbedBuilder welcome = new EmbedBuilder();
             welcome.setColor(Color.GREEN);
@@ -40,8 +39,8 @@ public class JoinEvent {
             buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
             buttons.add(Button.link("https://patreon.com/ghbots", "Patreon"));
 
-            if (BotStart.getMapLanguages().get(guildId) != null) {
-                if (BotStart.getMapLanguages().get(guildId).equals("eng")) {
+            if (BotStart.getMapLanguages().get(event.getGuild().getId()) != null) {
+                if (BotStart.getMapLanguages().get(event.getGuild().getId()).equals("eng")) {
                     buttons.add(Button.secondary(event.getGuild().getId() + ":" + ButtonChangeLanguage.CHANGE_LANGUAGE, "Сменить язык ")
                             .withEmoji(Emoji.fromUnicode("U+1F1F7U+1F1FA")));
                 } else {

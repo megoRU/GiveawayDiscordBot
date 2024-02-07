@@ -15,10 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class RerollCommand {
@@ -34,8 +32,7 @@ public class RerollCommand {
     }
 
     public void reroll(@NotNull SlashCommandInteractionEvent event) {
-        if (event.getGuild() == null) return;
-        var guildId = event.getGuild().getIdLong();
+        var guildId = Objects.requireNonNull(event.getGuild()).getId();
 
         event.deferReply().queue();
         String id = event.getOption("giveaway_id", OptionMapping::getAsString);
@@ -58,7 +55,9 @@ public class RerollCommand {
                 Winners winners = new Winners(1, 0, listUsers.size() - 1);
                 List<String> setWinners = api.getWinners(winners);
                 final Set<String> uniqueWinners = new LinkedHashSet<>();
-                setWinners.forEach(s -> uniqueWinners.add("<@" + listUsers.get(Integer.parseInt(s)).getUserIdLong() + ">"));
+                for (String setWinner : setWinners) {
+                    uniqueWinners.add("<@" + listUsers.get(Integer.parseInt(setWinner)).getUserIdLong() + ">");
+                }
                 String winnerList = Arrays.toString(uniqueWinners.toArray())
                         .replaceAll("\\[", "")
                         .replaceAll("]", "");

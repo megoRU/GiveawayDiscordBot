@@ -3,19 +3,21 @@ package main.controller;
 import lombok.Getter;
 import main.core.CoreBot;
 import main.core.events.*;
-import main.giveaway.GiveawayEnd;
-import main.giveaway.GiveawayMessageHandler;
-import main.giveaway.GiveawaySaving;
 import main.model.repository.*;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.logging.Logger;
 
@@ -25,37 +27,32 @@ public class UpdateController {
 
     //REPO
     private final ActiveGiveawayRepository activeGiveawayRepository;
-    private final SettingsRepository settingsRepository;
+    private final LanguageRepository languageRepository;
     private final ParticipantsRepository participantsRepository;
     private final ListUsersRepository listUsersRepository;
     private final SchedulingRepository schedulingRepository;
 
-    //Service
-    private final GiveawayMessageHandler giveawayMessageHandler;
-    private final GiveawaySaving giveawaySaving;
-    private final GiveawayEnd giveawayEnd;
-
     //LOGGER
     private final static Logger LOGGER = Logger.getLogger(UpdateController.class.getName());
 
+    //CORE
+    private CoreBot coreBot;
+
     @Autowired
     public UpdateController(ActiveGiveawayRepository activeGiveawayRepository,
-                            SettingsRepository settingsRepository,
+                            LanguageRepository languageRepository,
                             ParticipantsRepository participantsRepository,
                             ListUsersRepository listUsersRepository,
-                            SchedulingRepository schedulingRepository,
-                            GiveawayMessageHandler giveawayMessageHandler,
-                            GiveawaySaving giveawaySaving,
-                            GiveawayEnd giveawayEnd) {
+                            SchedulingRepository schedulingRepository) {
         this.activeGiveawayRepository = activeGiveawayRepository;
-        this.settingsRepository = settingsRepository;
+        this.languageRepository = languageRepository;
         this.participantsRepository = participantsRepository;
         this.listUsersRepository = listUsersRepository;
         this.schedulingRepository = schedulingRepository;
-        this.giveawayMessageHandler = giveawayMessageHandler;
-        this.giveawaySaving = giveawaySaving;
-        this.giveawayEnd = giveawayEnd;
+    }
 
+    public void registerBot(CoreBot coreBot) {
+        this.coreBot = coreBot;
     }
 
     public void processEvent(Object event) {
@@ -91,20 +88,21 @@ public class UpdateController {
                 helpCommand.help(event);
             }
             case "start" -> {
-                StartCommand startCommand = new StartCommand(listUsersRepository, activeGiveawayRepository, participantsRepository, schedulingRepository, giveawayMessageHandler, giveawaySaving, giveawayEnd);
-                startCommand.start(event);
+                StartCommand startCommand = new StartCommand(listUsersRepository, activeGiveawayRepository, participantsRepository, schedulingRepository);
+                startCommand.start(event, this);
             }
             case "stop" -> {
                 StopCommand stopCommand = new StopCommand();
                 stopCommand.stop(event);
             }
             case "predefined" -> {
-                PredefinedCommand predefinedCommand = new PredefinedCommand(listUsersRepository, activeGiveawayRepository, participantsRepository, giveawayMessageHandler, giveawaySaving, giveawayEnd);
-                predefinedCommand.predefined(event);
+                PredefinedCommand predefinedCommand = new PredefinedCommand(listUsersRepository, activeGiveawayRepository, participantsRepository);
+                predefinedCommand.predefined(event, this);
             }
-            case "settings" -> {
-                SettingsCommand settingsCommand = new SettingsCommand(settingsRepository);
-                settingsCommand.language(event);
+
+            case "language" -> {
+                LanguageCommand languageCommand = new LanguageCommand(languageRepository);
+                languageCommand.language(event);
             }
             case "list" -> {
                 ListCommand listCommand = new ListCommand(participantsRepository);
@@ -115,8 +113,8 @@ public class UpdateController {
                 rerollCommand.reroll(event);
             }
             case "change" -> {
-                ChangeCommand changeCommand = new ChangeCommand(activeGiveawayRepository, giveawayMessageHandler);
-                changeCommand.change(event);
+                ChangeCommand changeCommand = new ChangeCommand(activeGiveawayRepository);
+                changeCommand.change(event, this);
             }
             case "scheduling" -> {
                 SchedulingCommand schedulingCommand = new SchedulingCommand(schedulingRepository);
@@ -144,7 +142,7 @@ public class UpdateController {
     private void buttonEvent(@NotNull ButtonInteractionEvent event) {
         if (event.getGuild() == null) return;
         if (Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + ButtonChangeLanguage.CHANGE_LANGUAGE)) {
-            ButtonChangeLanguage buttonChangeLanguage = new ButtonChangeLanguage(settingsRepository);
+            ButtonChangeLanguage buttonChangeLanguage = new ButtonChangeLanguage(languageRepository);
             buttonChangeLanguage.change(event);
         }
     }
@@ -155,12 +153,32 @@ public class UpdateController {
     }
 
     private void leaveEvent(@NotNull GuildLeaveEvent event) {
-        LeaveEvent leaveEvent = new LeaveEvent(activeGiveawayRepository);
+        LeaveEvent leaveEvent = new LeaveEvent(activeGiveawayRepository, languageRepository);
         leaveEvent.leave(event);
     }
 
     private void reactionEvent(@NotNull MessageReactionAddEvent event) {
-        ReactionEvent reactionEvent = new ReactionEvent(giveawayMessageHandler);
-        reactionEvent.reaction(event);
+        ReactionEvent reactionEvent = new ReactionEvent();
+        reactionEvent.reaction(event, this);
+    }
+
+    public void setView(EmbedBuilder embedBuilder, final long guildId, final long textChannel) {
+        coreBot.editMessage(embedBuilder, guildId, textChannel);
+    }
+
+    public void setView(MessageEmbed messageEmbed, final long guildId, final long textChannel, long messageId) {
+        coreBot.editMessage(messageEmbed, guildId, textChannel, messageId);
+    }
+
+    public void setView(MessageEmbed embedBuilder, String messageContent, Long guildId, Long textChannel) {
+        coreBot.sendMessage(embedBuilder, messageContent, guildId, textChannel);
+    }
+
+    public void setView(MessageEmbed embedBuilder, Long guildId, Long textChannel, List<Button> buttons) {
+        coreBot.sendMessage(embedBuilder, guildId, textChannel, buttons);
+    }
+
+    public void setView(JDA jda, String userId, MessageEmbed messageEmbed) {
+        coreBot.sendMessage(jda, userId, messageEmbed);
     }
 }

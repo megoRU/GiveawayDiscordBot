@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class HelpCommand {
@@ -19,8 +20,7 @@ public class HelpCommand {
     private final static JSONParsers jsonParsers = new JSONParsers();
 
     public void help(@NotNull SlashCommandInteractionEvent event) {
-        if (event.getGuild() == null) return;
-        var guildId = event.getGuild().getIdLong();
+        var guildId = Objects.requireNonNull(event.getGuild()).getId();
 
         EmbedBuilder info = new EmbedBuilder();
         info.setColor(Color.GREEN);

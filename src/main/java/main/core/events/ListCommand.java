@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ListCommand {
@@ -26,13 +27,13 @@ public class ListCommand {
     }
 
     public void list(@NotNull SlashCommandInteractionEvent event) {
-        if (event.getGuild() == null) return;
-        var guildId = event.getGuild().getIdLong();
+        var guildIdLong = Objects.requireNonNull(event.getGuild()).getIdLong();
+        var guildId = Objects.requireNonNull(event.getGuild()).getId();
 
         event.deferReply().setEphemeral(true).queue();
-        if (GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
+        if (GiveawayRegistry.getInstance().hasGiveaway(guildIdLong)) {
             StringBuilder stringBuilder = new StringBuilder();
-            List<Participants> participantsList = participantsRepository.findAllByActiveGiveaways_GuildLongId(guildId);
+            List<Participants> participantsList = participantsRepository.findAllByActiveGiveaways_GuildLongId(guildIdLong);
 
             if (participantsList.isEmpty()) {
                 String slashListUsersEmpty = jsonParsers.getLocale("slash_list_users_empty", guildId);

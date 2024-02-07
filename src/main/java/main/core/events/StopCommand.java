@@ -12,16 +12,17 @@ import org.jetbrains.annotations.NotNull;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class StopCommand {
 
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     public void stop(@NotNull SlashCommandInteractionEvent event) {
-        if (event.getGuild() == null) return;
-        var guildId = event.getGuild().getIdLong();
+        var guildId = Objects.requireNonNull(event.getGuild()).getId();
+        var guildIdLong = event.getGuild().getIdLong();
 
-        Giveaway giveaway = GiveawayRegistry.getInstance().getGiveaway(guildId);
+        Giveaway giveaway = GiveawayRegistry.getInstance().getGiveaway(guildIdLong);
         if (giveaway == null) {
             String slashStopNoHas = jsonParsers.getLocale("slash_stop_no_has", guildId);
             EmbedBuilder notHas = new EmbedBuilder();
@@ -32,20 +33,19 @@ public class StopCommand {
         }
 
         //Это для того чтобы когда мы останавливаем Giveaway повторно
-        if (giveaway.isFinishGiveaway()) {
-            EmbedBuilder errorsAgain = new EmbedBuilder();
-            String errorsWithApi = jsonParsers.getLocale("errors_with_api", guildId);
-            String errorsDescriptionsAgain = jsonParsers.getLocale("errors_descriptions_again", guildId);
-            errorsAgain.setColor(Color.RED);
-            errorsAgain.setTitle(errorsWithApi);
-            errorsAgain.setDescription(errorsDescriptionsAgain);
-            List<Button> buttons = new ArrayList<>();
-            buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
-            event.replyEmbeds(errorsAgain.build()).setActionRow(buttons).queue();
-            return;
-        }
-
         if (event.getOptions().isEmpty()) {
+            if (!giveaway.isHasFutureTasks()) {
+                EmbedBuilder errorsAgain = new EmbedBuilder();
+                String errorsWithApi = jsonParsers.getLocale("errors_with_api", guildId);
+                String errorsDescriptionsAgain = jsonParsers.getLocale("errors_descriptions_again", guildId);
+                errorsAgain.setColor(Color.RED);
+                errorsAgain.setTitle(errorsWithApi);
+                errorsAgain.setDescription(errorsDescriptionsAgain);
+                List<Button> buttons = new ArrayList<>();
+                buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
+                event.replyEmbeds(errorsAgain.build()).setActionRow(buttons).queue();
+                return;
+            }
             String slashStop = jsonParsers.getLocale("slash_stop", guildId);
             EmbedBuilder stop = new EmbedBuilder();
             stop.setColor(Color.GREEN);
@@ -54,7 +54,6 @@ public class StopCommand {
             giveaway.stopGiveaway(giveaway.getCountWinners());
             return;
         }
-
 
         if (!event.getOptions().get(0).getAsString().matches("\\d{1,2}")) {
             String slashErrors = jsonParsers.getLocale("slash_errors", guildId);
@@ -65,8 +64,6 @@ public class StopCommand {
             return;
         }
 
-
-        //TODO: Что это)
         EmbedBuilder stop = new EmbedBuilder();
         Long count = event.getOption("count", OptionMapping::getAsLong);
         boolean isHasErrors = false;

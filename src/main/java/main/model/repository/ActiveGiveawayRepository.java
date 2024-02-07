@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface ActiveGiveawayRepository extends JpaRepository<ActiveGiveaways, Long> {
@@ -26,6 +25,4 @@ public interface ActiveGiveawayRepository extends JpaRepository<ActiveGiveaways,
     @NotNull
     @EntityGraph(attributePaths = {"participants"})
     List<ActiveGiveaways> findAll();
-
-    ActiveGiveaways findByIdUserWhoCreateGiveawayAndGuildLongId(Long idUserWhoCreateGiveaway, Long guildLongId);
 }

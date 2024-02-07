@@ -1,4 +1,4 @@
-package main.giveaway.utils;
+package main.giveaway;
 
 import main.jsonparser.JSONParsers;
 import net.dv8tion.jda.api.Permission;
@@ -43,7 +43,7 @@ public class ChecksClass {
 
         if (!bool && event != null && event.getGuild() != null) {
             String checkPermissions = String.format(
-                    jsonParsers.getLocale("check_permissions", event.getGuild().getIdLong()),
+                    jsonParsers.getLocale("check_permissions", event.getGuild().getId()),
                     dstChannel.getId(),
                     stringBuilder);
 
