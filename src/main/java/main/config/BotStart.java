@@ -107,15 +107,13 @@ public class BotStart {
     }
 
     @PostConstruct
-    public void startBot() {
+    public synchronized void startBot() {
         try {
             //Загружаем GiveawayRegistry
             GiveawayRegistry.getInstance();
             //Устанавливаем языки
             setLanguages();
             getLocalizationFromDB();
-            //Получаем Giveaway и пользователей. Устанавливаем данные
-            setGiveawayAndUsersInGift();
 
             List<GatewayIntent> intents = new ArrayList<>(
                     Arrays.asList(
@@ -143,13 +141,16 @@ public class BotStart {
             jda = jdaBuilder.build();
             jda.awaitReady();
 
+            //Получаем Giveaway и пользователей. Устанавливаем данные
+            setGiveawayAndUsersInGift();
+
             List<Command> complete = jda.retrieveCommands().complete();
             complete.forEach(command -> System.out.println(command.toString()));
 
             System.out.println("IsDevMode: " + Config.isIsDev());
 
             //Обновить команды
-            updateSlashCommands();
+//            updateSlashCommands();
             System.out.println("20:22");
         } catch (Exception e) {
             e.printStackTrace();
