@@ -65,6 +65,8 @@ public class ParticipantsUpdaterService {
                                             if (!user.isBot()) userList.put(user.getId(), user);
                                         });
 
+                                        //TODO: По идеи можно как то переписать получать и фильтровать только нужных?
+
                                         if (isForSpecificRole) {
                                             Role roleGiveaway = guild.getRoleById(giveaway.getRoleId());
                                             if (roleGiveaway == null) continue;

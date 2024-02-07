@@ -42,45 +42,42 @@ public class ReactionEvent {
 
             String emoji = event.getEmoji().getName();
             GiveawayRegistry instance = GiveawayRegistry.getInstance();
-            boolean hasGiveaway = instance.hasGiveaway(guildId);
 
-            if (hasGiveaway) {
-                Giveaway giveaway = instance.getGiveaway(guildId);
-                if (giveaway != null) {
-                    if (emoji.equals(TADA)) {
-                        //Проверяем event id message с Giveaway message id
-                        long messageIdWithReactionCurrent = event.getMessageIdLong();
-                        long messageIdWithReaction = giveaway.getMessageId();
+            Giveaway giveaway = instance.getGiveaway(guildId);
+            if (giveaway != null) {
+                if (emoji.equals(TADA)) {
+                    //Проверяем event id message с Giveaway message id
+                    long messageIdWithReactionCurrent = event.getMessageIdLong();
+                    long messageIdWithReaction = giveaway.getMessageId();
 
-                        if (messageIdWithReactionCurrent != messageIdWithReaction) return;
-                        Long roleId = giveaway.getRoleId(); // null -> 0
-                        Long forbiddenRole = giveaway.getForbiddenRole();
+                    if (messageIdWithReactionCurrent != messageIdWithReaction) return;
+                    Long roleId = giveaway.getRoleId(); // null -> 0
+                    Long forbiddenRole = giveaway.getForbiddenRole();
 
-                        if (forbiddenRole != null) {
-                            Role guildRole = event.getGuild().getRoleById(forbiddenRole);
-                            if (guildRole == null) return;
-                            List<Long> memberRolesLost = member.getRoles().stream().map(Role::getIdLong).toList();
+                    if (forbiddenRole != null) {
+                        Role guildRole = event.getGuild().getRoleById(forbiddenRole);
+                        if (guildRole == null) return;
+                        List<Long> memberRolesList = member.getRoles().stream().map(Role::getIdLong).toList();
 
-                            if (memberRolesLost.contains(guildRole.getIdLong())) {
-                                userDontHaveRestrictions(event, guildId, user);
-                                return;
-                            }
+                        if (memberRolesList.contains(guildRole.getIdLong())) {
+                            userDontHaveRestrictions(event, guildId, user);
+                            return;
                         }
-
-                        if (roleId != null) {
-                            Role role = event.getGuild().getRoleById(roleId);
-                            if (role == null) return;
-                            boolean isForSpecificRole = giveaway.isForSpecificRole();
-                            List<Long> userRolesList = member.getRoles().stream().map(Role::getIdLong).toList();
-
-                            if (isForSpecificRole && !userRolesList.contains(role.getIdLong())) {
-                                userDontHaveRestrictions(event, guildId, user);
-                                return;
-                            }
-                        }
-
-                        giveaway.addUser(user);
                     }
+
+                    if (roleId != null) {
+                        Role role = event.getGuild().getRoleById(roleId);
+                        if (role == null) return;
+                        boolean isForSpecificRole = giveaway.isForSpecificRole();
+                        List<Long> userRolesList = member.getRoles().stream().map(Role::getIdLong).toList();
+
+                        if (isForSpecificRole && !userRolesList.contains(role.getIdLong())) {
+                            userDontHaveRestrictions(event, guildId, user);
+                            return;
+                        }
+                    }
+
+                    giveaway.addUser(user);
                 }
             }
         } catch (Exception e) {
