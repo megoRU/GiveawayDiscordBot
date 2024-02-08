@@ -15,6 +15,7 @@ public class GiveawayEmbedUtils {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
         Giveaway giveaway = instance.getGiveaway(guildId);
+        Color userColor = GiveawayUtils.getUserColor(guildId);
 
         if (giveaway != null) {
             String title = giveaway.getTitle();
@@ -29,7 +30,7 @@ public class GiveawayEmbedUtils {
             //Title
             embedBuilder.setTitle(title);
             //Color
-            embedBuilder.setColor(Color.GREEN);
+            embedBuilder.setColor(userColor);
 
             String footer;
             if (countWinners == 1) {
@@ -76,12 +77,13 @@ public class GiveawayEmbedUtils {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
         Giveaway giveaway = instance.getGiveaway(guildId);
+        Color userColor = GiveawayUtils.getUserColor(guildId);
 
         if (giveaway != null) {
             String title = giveaway.getTitle();
             long createdUserId = giveaway.getUserIdLong();
 
-            embedBuilder.setColor(Color.GREEN);
+            embedBuilder.setColor(userColor);
             embedBuilder.setTitle(title);
 
             if (countWinners == 1) {

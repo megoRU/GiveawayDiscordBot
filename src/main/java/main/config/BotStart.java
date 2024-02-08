@@ -15,7 +15,7 @@ import main.model.entity.Participants;
 import main.model.entity.Scheduling;
 import main.model.entity.Settings;
 import main.model.repository.*;
-import main.threads.StopGiveawayByTimer;
+import main.threads.StopGiveawayHandler;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -150,7 +150,7 @@ public class BotStart {
             System.out.println("IsDevMode: " + Config.isIsDev());
 
             //Обновить команды
-            updateSlashCommands();
+//            updateSlashCommands();
             System.out.println("20:22");
         } catch (Exception e) {
             e.printStackTrace();
@@ -541,6 +541,7 @@ public class BotStart {
                         listUsersRepository,
                         giveawayData,
                         finishGiveaway,
+                        true,
                         updateController);
 
                 GiveawayRegistry instance = GiveawayRegistry.getInstance();
@@ -551,13 +552,7 @@ public class BotStart {
 
                 if (date_end_giveaway != null) {
                     updateGiveawayByGuild(giveaway);
-
-                    Timer timer = new Timer();
-                    StopGiveawayByTimer stopGiveawayByTimer = new StopGiveawayByTimer(guild_long_id);
-                    Date date = new Date(date_end_giveaway.getTime());
-                    timer.schedule(stopGiveawayByTimer, date);
-
-                    instance.putGiveawayTimer(guild_long_id, stopGiveawayByTimer, timer);
+                    giveaway.setLocked(false);
                 }
 
                 if (finishGiveaway) {
@@ -570,9 +565,24 @@ public class BotStart {
         }
     }
 
+    @Scheduled(fixedDelay = 1, initialDelay = 1, timeUnit = TimeUnit.SECONDS)
+    public void stopGiveawayTimer() {
+        GiveawayRegistry instance = GiveawayRegistry.getInstance();
+        List<Giveaway> giveawayDataList = new LinkedList<>(instance.getAllGiveaway());
+        for (Giveaway giveaway : giveawayDataList) {
+            try {
+                StopGiveawayHandler stopGiveawayHandler = new StopGiveawayHandler();
+                stopGiveawayHandler.handlerGiveaway(giveaway);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     @Scheduled(fixedDelay = 150, initialDelay = 25, timeUnit = TimeUnit.SECONDS)
     public void updateUserList() {
-        List<Giveaway> giveawayDataList = new LinkedList<>(GiveawayRegistry.getAllGiveaway());
+        GiveawayRegistry instance = GiveawayRegistry.getInstance();
+        List<Giveaway> giveawayDataList = new LinkedList<>(instance.getAllGiveaway());
         for (Giveaway giveaway : giveawayDataList) {
             try {
                 updateGiveawayByGuild(giveaway);
