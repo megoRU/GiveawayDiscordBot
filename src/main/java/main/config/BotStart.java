@@ -572,7 +572,7 @@ public class BotStart {
         for (Giveaway giveaway : giveawayDataList) {
             try {
                 StopGiveawayHandler stopGiveawayHandler = new StopGiveawayHandler();
-                stopGiveawayHandler.handlerGiveaway(giveaway);
+                stopGiveawayHandler.handleGiveaway(giveaway);
             } catch (Exception e) {
                 e.printStackTrace();
             }
