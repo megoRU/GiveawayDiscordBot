@@ -61,10 +61,11 @@ public class GiveawayEmbedUtils {
                         String.format(jsonParsers.getLocale("gift_ends_giveaway", guildId), endTime, endTime);
                 embedBuilder.appendDescription(endTimeFormat);
             }
-            
+
+            String giftHosted = String.format(jsonParsers.getLocale("gift_hosted", guildId), createdUserId);
+
             //Hosted By
-            String hostedBy = String.format("\nHosted by: <@%s>", createdUserId);
-            embedBuilder.appendDescription(hostedBy);
+            embedBuilder.appendDescription(giftHosted);
             //Image
             embedBuilder.setImage(imageUrl);
             //Footer
@@ -114,10 +115,12 @@ public class GiveawayEmbedUtils {
             }
             long giveawayIdLong = giveaway.getMessageId();
 
-            String hostedBy = String.format("\nHosted by: <@%s>", createdUserId);
+            String giftHosted = String.format(jsonParsers.getLocale("gift_hosted", guildId), createdUserId);
+
             String giveawayIdDescription = String.format("\n\nGiveaway ID: `%s`", giveawayIdLong);
 
-            embedBuilder.appendDescription(hostedBy);
+            //Hosted By
+            embedBuilder.appendDescription(giftHosted);
             embedBuilder.appendDescription(giveawayIdDescription);
 
             if (giveaway.getUrlImage() != null) {
