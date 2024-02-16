@@ -4,7 +4,6 @@ import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import main.controller.UpdateController;
 import main.core.CoreBot;
-import main.core.events.ReactionEvent;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
 import main.giveaway.GiveawayUtils;
@@ -18,12 +17,14 @@ import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.SchedulingRepository;
 import main.model.repository.SettingsRepository;
 import main.service.GiveawayRepositoryService;
+import main.service.GiveawayUpdateListUser;
 import main.threads.StopGiveawayHandler;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.interactions.DiscordLocale;
 import net.dv8tion.jda.api.interactions.commands.Command;
@@ -54,7 +55,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
 
@@ -83,18 +83,21 @@ public class BotStart {
     private final SettingsRepository settingsRepository;
 
     private final GiveawayRepositoryService giveawayRepositoryService;
+    private final GiveawayUpdateListUser updateGiveawayByGuild;
 
     @Autowired
     public BotStart(ActiveGiveawayRepository activeGiveawayRepository,
                     UpdateController updateController,
                     SchedulingRepository schedulingRepository,
                     SettingsRepository settingsRepository,
-                    GiveawayRepositoryService giveawayRepositoryService) {
+                    GiveawayRepositoryService giveawayRepositoryService,
+                    GiveawayUpdateListUser updateGiveawayByGuild) {
         this.activeGiveawayRepository = activeGiveawayRepository;
         this.updateController = updateController;
         this.schedulingRepository = schedulingRepository;
         this.settingsRepository = settingsRepository;
         this.giveawayRepositoryService = giveawayRepositoryService;
+        this.updateGiveawayByGuild = updateGiveawayByGuild;
     }
 
     @PostConstruct
@@ -534,11 +537,8 @@ public class BotStart {
                 GiveawayRegistry instance = GiveawayRegistry.getInstance();
                 instance.putGift(guild_long_id, giveaway);
 
-                //Устанавливаем счетчик на верное число
-                giveaway.setCount(participantsList.size());
-
                 if (date_end_giveaway != null) {
-                    updateGiveawayByGuild(giveaway);
+                    updateGiveawayByGuild.updateGiveawayByGuild(giveaway);
                     giveaway.setLocked(false);
                 }
 
@@ -572,105 +572,10 @@ public class BotStart {
         List<Giveaway> giveawayDataList = new LinkedList<>(instance.getAllGiveaway());
         for (Giveaway giveaway : giveawayDataList) {
             try {
-                updateGiveawayByGuild(giveaway);
+                updateGiveawayByGuild.updateGiveawayByGuild(giveaway);
                 Thread.sleep(2000L);
             } catch (Exception e) {
                 e.printStackTrace();
-            }
-        }
-    }
-
-    public void updateGiveawayByGuild(Giveaway giveawayData) {
-        long guildIdLong = giveawayData.getGuildId();
-        boolean isForSpecificRole = giveawayData.isForSpecificRole();
-        long messageId = giveawayData.getMessageId();
-
-        if (jda != null) {
-            if (hasGift(guildIdLong)) {
-                long channelId = giveawayData.getTextChannelId();
-                //System.out.println("Guild ID: " + guildIdLong);
-
-                List<MessageReaction> reactions = null;
-                TextChannel textChannelById;
-                try {
-                    Guild guildById = jda.getGuildById(guildIdLong);
-                    if (guildById != null) {
-                        textChannelById = guildById.getTextChannelById(channelId);
-                        if (textChannelById != null) {
-                            reactions = textChannelById
-                                    .retrieveMessageById(messageId)
-                                    .complete()
-                                    .getReactions()
-                                    .stream()
-                                    .filter(messageReaction -> messageReaction.getEmoji().getName().equals(ReactionEvent.TADA))
-                                    .toList();
-                        }
-
-                        //-1 because one Bot
-                        if (hasGift(guildIdLong) &&
-                                reactions != null &&
-                                !reactions.isEmpty() &&
-                                reactions.get(0).getCount() - 1 != giveawayData.getListUsersSize()) {
-                            for (MessageReaction reaction : reactions) {
-                                Map<String, User> userList = reaction
-                                        .retrieveUsers()
-                                        .complete()
-                                        .stream()
-                                        .filter(user -> !user.isBot())
-                                        .filter(user -> !giveawayData.isUsercontainsInGiveaway(user.getId()))
-                                        .collect(Collectors.toMap(User::getId, user -> user));
-
-                                if (isForSpecificRole) {
-                                    try {
-                                        Map<String, User> localUserMap = new HashMap<>(userList); //bad practice but it`s work
-                                        Role roleGiveaway = jda.getRoleById(giveawayData.getRoleId());
-                                        for (Map.Entry<String, User> entry : localUserMap.entrySet()) {
-                                            Guild guild = jda.getGuildById(guildIdLong);
-                                            if (guild != null) {
-                                                try {
-                                                    Member member = guild.retrieveMemberById(entry.getKey()).complete();
-                                                    if (member != null) {
-                                                        boolean contains = member.getRoles().contains(roleGiveaway);
-                                                        if (!contains) {
-                                                            userList.remove(entry.getKey());
-                                                        }
-                                                    }
-                                                } catch (Exception e) {
-                                                    //Если пользователя нет в Гильдии удаляем из списка
-                                                    if (e.getMessage().contains("10007: Unknown Member")) {
-                                                        userList.remove(entry.getKey());
-                                                    } else {
-                                                        e.printStackTrace();
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-
-                                //System.out.println("UserList count: " + userList);
-                                //Перебираем Users в реакциях
-                                for (Map.Entry<String, User> entry : userList.entrySet()) {
-                                    if (!hasGift(guildIdLong)) return;
-                                    giveawayData.addUser(entry.getValue());
-                                    //System.out.println("User id: " + user.getIdLong());
-                                }
-                            }
-                        }
-                    }
-
-                } catch (Exception e) {
-                    if (e.getMessage() != null && e.getMessage().contains("10008: Unknown Message")
-                            || e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
-                        System.out.println("updateUserList() " + e.getMessage() + " удаляем!");
-                        activeGiveawayRepository.deleteById(guildIdLong);
-                        GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
-                    } else {
-                        e.printStackTrace();
-                    }
-                }
             }
         }
     }
