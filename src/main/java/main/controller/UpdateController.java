@@ -4,6 +4,7 @@ import lombok.Getter;
 import main.core.CoreBot;
 import main.core.events.*;
 import main.model.repository.*;
+import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -31,6 +32,7 @@ public class UpdateController {
     private final ListUsersRepository listUsersRepository;
     private final SchedulingRepository schedulingRepository;
     private final SettingsRepository settingsRepository;
+    private final GiveawayRepositoryService giveawayRepositoryService;
 
     //LOGGER
     private final static Logger LOGGER = Logger.getLogger(UpdateController.class.getName());
@@ -43,12 +45,14 @@ public class UpdateController {
                             ParticipantsRepository participantsRepository,
                             ListUsersRepository listUsersRepository,
                             SchedulingRepository schedulingRepository,
-                            SettingsRepository settingsRepository) {
+                            SettingsRepository settingsRepository,
+                            GiveawayRepositoryService giveawayRepositoryService) {
         this.activeGiveawayRepository = activeGiveawayRepository;
         this.participantsRepository = participantsRepository;
         this.listUsersRepository = listUsersRepository;
         this.schedulingRepository = schedulingRepository;
         this.settingsRepository = settingsRepository;
+        this.giveawayRepositoryService = giveawayRepositoryService;
     }
 
     public void registerBot(CoreBot coreBot) {
@@ -88,7 +92,7 @@ public class UpdateController {
                 helpCommand.help(event);
             }
             case "start" -> {
-                StartCommand startCommand = new StartCommand(listUsersRepository, activeGiveawayRepository, participantsRepository, schedulingRepository);
+                StartCommand startCommand = new StartCommand(activeGiveawayRepository, schedulingRepository, giveawayRepositoryService);
                 startCommand.start(event, this);
             }
             case "stop" -> {
@@ -96,7 +100,7 @@ public class UpdateController {
                 stopCommand.stop(event);
             }
             case "predefined" -> {
-                PredefinedCommand predefinedCommand = new PredefinedCommand(listUsersRepository, activeGiveawayRepository, participantsRepository);
+                PredefinedCommand predefinedCommand = new PredefinedCommand(giveawayRepositoryService);
                 predefinedCommand.predefined(event, this);
             }
             case "settings" -> {

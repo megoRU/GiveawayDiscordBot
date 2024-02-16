@@ -5,15 +5,12 @@ import api.megoru.ru.impl.MegoruAPI;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import main.config.Config;
 import main.controller.UpdateController;
 import main.core.events.ReactionEvent;
 import main.jsonparser.JSONParsers;
 import main.model.entity.ActiveGiveaways;
 import main.model.entity.Participants;
-import main.model.repository.ActiveGiveawayRepository;
-import main.model.repository.ListUsersRepository;
-import main.model.repository.ParticipantsRepository;
+import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
@@ -22,9 +19,6 @@ import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import java.awt.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -32,7 +26,6 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -64,20 +57,19 @@ public class Giveaway {
     private final UpdateController updateController;
 
     private final AtomicInteger count = new AtomicInteger(0);
-    private int localCountUsers;
+
     @Getter
-    private boolean finishGiveaway;
+    private volatile boolean finishGiveaway;
+
     @Getter
     @Setter
-    private boolean isLocked;
+    private volatile boolean isLocked;
 
-    //DTO
-    private final ConcurrentLinkedQueue<Participants> participantsList = new ConcurrentLinkedQueue<>();
+    @Getter
+    private volatile boolean isRemoved;
 
     //REPO
-    private final ActiveGiveawayRepository activeGiveawayRepository;
-    private final ParticipantsRepository participantsRepository;
-    private final ListUsersRepository listUsersRepository;
+    private final GiveawayRepositoryService giveawayRepositoryService;
 
     @Getter
     @NoArgsConstructor
@@ -110,44 +102,36 @@ public class Giveaway {
         }
     }
 
-    public Giveaway(long guildId, long textChannelId, long userIdLong,
-                    ActiveGiveawayRepository activeGiveawayRepository,
-                    ParticipantsRepository participantsRepository,
-                    ListUsersRepository listUsersRepository, UpdateController updateController) {
-        this.guildId = guildId;
-        this.textChannelId = textChannelId;
-        this.userIdLong = userIdLong;
-        this.activeGiveawayRepository = activeGiveawayRepository;
-        this.participantsRepository = participantsRepository;
-        this.listUsersRepository = listUsersRepository;
-        this.listUsersHash = new ConcurrentHashMap<>();
-        this.giveawayData = new GiveawayData();
-        this.updateController = updateController;
-        autoInsert();
-    }
-
-    public Giveaway(long guildId, long textChannelId, long userIdLong,
-                    Map<String, String> listUsersHash,
-                    ActiveGiveawayRepository activeGiveawayRepository,
-                    ParticipantsRepository participantsRepository,
-                    ListUsersRepository listUsersRepository,
-                    GiveawayData giveawayData,
-                    boolean finishGiveaway,
-                    boolean isLocked,
+    public Giveaway(long guildId,
+                    long textChannelId,
+                    long userIdLong,
+                    GiveawayRepositoryService giveawayRepositoryService,
                     UpdateController updateController) {
         this.guildId = guildId;
         this.textChannelId = textChannelId;
         this.userIdLong = userIdLong;
-        this.activeGiveawayRepository = activeGiveawayRepository;
-        this.participantsRepository = participantsRepository;
-        this.listUsersRepository = listUsersRepository;
+        this.listUsersHash = new ConcurrentHashMap<>();
+        this.giveawayData = new GiveawayData();
+        this.updateController = updateController;
+        this.giveawayRepositoryService = giveawayRepositoryService;
+    }
+
+    public Giveaway(long guildId, long textChannelId, long userIdLong,
+                    Map<String, String> listUsersHash,
+                    GiveawayData giveawayData,
+                    boolean finishGiveaway,
+                    boolean isLocked,
+                    GiveawayRepositoryService giveawayRepositoryService,
+                    UpdateController updateController) {
+        this.guildId = guildId;
+        this.textChannelId = textChannelId;
+        this.userIdLong = userIdLong;
         this.listUsersHash = new ConcurrentHashMap<>(listUsersHash);
         this.giveawayData = giveawayData;
         this.finishGiveaway = finishGiveaway;
         this.isLocked = isLocked;
         this.updateController = updateController;
-
-        autoInsert();
+        this.giveawayRepositoryService = giveawayRepositoryService;
     }
 
     public Timestamp updateTime(final String time) {
@@ -201,8 +185,6 @@ public class Giveaway {
                         updateCollections(message);
                     });
         }
-        //Вот мы запускаем бесконечный поток.
-        autoInsert();
     }
 
     private void updateCollections(Message message) {
@@ -226,78 +208,59 @@ public class Giveaway {
         activeGiveaways.setIdUserWhoCreateGiveaway(userIdLong);
         activeGiveaways.setDateEndGiveaway(this.giveawayData.endGiveawayDate == null ? null : this.giveawayData.endGiveawayDate);
 
-        activeGiveawayRepository.saveAndFlush(activeGiveaways);
+        giveawayRepositoryService.saveGiveaway(activeGiveaways);
     }
 
-    public void addUser(final User user) {
-        LOGGER.info(String.format(
-                """
-                        \nНовый участник
-                        Nick: %s
-                        UserID: %s
-                        Guild: %s
-                        """,
-                user.getName(),
-                user.getId(),
-                guildId));
-        if (!listUsersHash.containsKey(user.getId())) {
-            count.incrementAndGet();
-            listUsersHash.put(user.getId(), user.getId());
+    public void addUser(User... user) {
+        if (user.length == 1) {
+            User userLocal = user[0];
+            if (!listUsersHash.containsKey(userLocal.getId())) {
+                LOGGER.info(String.format(
+                        """
+                                \nНовый участник
+                                Nick: %s
+                                UserID: %s
+                                Guild: %s
+                                """,
+                        userLocal.getName(),
+                        userLocal.getId(),
+                        guildId));
+                count.incrementAndGet();
 
-            //Add user to Collection
-            Participants participants = new Participants();
-            participants.setUserIdLong(user.getIdLong());
-            participants.setNickName(user.getName());
-//            participants.setActiveGiveaways(activeGiveaways); //Can`t be null
-            participantsList.add(participants);
-        }
-    }
+                listUsersHash.put(userLocal.getId(), userLocal.getId());
 
-    private synchronized void multiInsert() {
-        try {
-            if (count.get() > localCountUsers && GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
-                localCountUsers = count.get();
-                if (!participantsList.isEmpty()) {
-                    StringBuilder stringBuilder = new StringBuilder();
-                    Connection connection = DriverManager.getConnection(
-                            Config.getDatabaseUrl(),
-                            Config.getDatabaseUser(),
-                            Config.getDatabasePass());
-                    Statement statement = connection.createStatement();
-                    int size = participantsList.size();
-                    for (int i = 0; i < size; i++) {
-                        Participants poll = participantsList.poll();
-                        if (poll != null) {
-                            stringBuilder
-                                    .append(stringBuilder.isEmpty() ? "(" : ", (")
-                                    .append("'").append(poll.getNickName()
-                                            .replaceAll("'", "")
-                                            .replaceAll("\"", "")
-                                            .replaceAll("`", ""))
-                                    .append("', ")
-                                    .append(poll.getUserIdLong()).append(", ")
-                                    .append(guildId)
-                                    .append(")");
-                        }
-                    }
+                if (!isRemoved) {
+                    ActiveGiveaways giveaway = giveawayRepositoryService.getGiveaway(guildId);
 
-                    if (!stringBuilder.isEmpty()) {
-                        String executeQuery = String.format("INSERT INTO participants (nick_name, user_long_id, guild_id) VALUES %s;", stringBuilder);
-                        statement.execute(executeQuery);
-                    }
-                    statement.close();
-                    connection.close();
-                }
-                if (participantsList.isEmpty()) {
-                    synchronized (this) {
-                        notifyAll();
-                    }
+                    Participants participants = new Participants();
+                    participants.setUserIdLong(userLocal.getIdLong());
+                    participants.setNickName(userLocal.getName());
+                    participants.setActiveGiveaways(giveaway);
+
+                    giveawayRepositoryService.saveParticipants(participants);
                 }
             }
-        } catch (Exception e) {
-            String format = String.format("Таблица: %s больше не существует, скорее всего Giveaway завершился!", guildId);
-            LOGGER.info(format);
-            LOGGER.log(Level.WARNING, e.getMessage(), e);
+        } else {
+            List<User> userList = Arrays.stream(user)
+                    .filter(users -> listUsersHash.containsKey(users.getId()))
+                    .toList();
+
+            if (!isRemoved) {
+                ActiveGiveaways giveaway = giveawayRepositoryService.getGiveaway(guildId);
+
+                Participants[] participantsList = new Participants[userList.size()];
+                for (int i = 0; i < userList.size(); i++) {
+                    User users = userList.get(i);
+
+                    Participants participants = new Participants();
+                    participants.setUserIdLong(users.getIdLong());
+                    participants.setNickName(users.getName());
+                    participants.setActiveGiveaways(giveaway);
+
+                    participantsList[i] = participants;
+                }
+                giveawayRepositoryService.saveParticipants(participantsList);
+            }
         }
     }
 
@@ -306,7 +269,7 @@ public class Giveaway {
                 """
                         \n
                         stopGift method:
-                        
+                                                
                         Guild ID: %s
                         ListUsersSize: %s
                         CountWinners: %s
@@ -327,7 +290,7 @@ public class Giveaway {
 
                 updateController.setView(notEnoughUsers, guildId, textChannelId);
 
-                activeGiveawayRepository.deleteById(guildId);
+                giveawayRepositoryService.deleteGiveaway(guildId);
                 GiveawayRegistry instance = GiveawayRegistry.getInstance();
                 instance.removeGuildFromGiveaway(guildId);
                 return;
@@ -337,13 +300,7 @@ public class Giveaway {
         }
 
         try {
-            //выбираем победителей
-            if (!participantsList.isEmpty()) {
-                synchronized (this) {
-                    wait(10000L);
-                }
-            }
-            List<Participants> participants = participantsRepository.findAllByActiveGiveaways_GuildLongId(guildId); //TODO: Native use may be
+            List<Participants> participants = giveawayRepositoryService.findAllParticipants(guildId); //TODO: Native use may be
             if (participants.isEmpty()) throw new Exception("participants is Empty");
 
             LOGGER.info(String.format("Завершаем Giveaway: %s, Участников: %s", guildId, participants.size()));
@@ -395,31 +352,13 @@ public class Giveaway {
 
         updateController.setView(urlEmbedded.build(), winnersContent, this.guildId, textChannelId);
 
-        listUsersRepository.saveAllParticipantsToUserList(guildId);
-        activeGiveawayRepository.deleteById(guildId);
-
+        isRemoved = true;
         //Удаляет данные из коллекций
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
         instance.removeGuildFromGiveaway(guildId);
-    }
 
-    //TODO: Не завершается после завершения
-    //Автоматически отправляет в БД данные которые в буфере StringBuilder
-    private void autoInsert() {
-        new Timer().scheduleAtFixedRate(new TimerTask() {
-            public void run() throws NullPointerException {
-                try {
-                    if (GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
-                        multiInsert();
-                    } else {
-                        Thread.currentThread().interrupt();
-                    }
-                } catch (Exception e) {
-                    LOGGER.log(Level.WARNING, e.getMessage(), e);
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }, 2000, 5000);
+        giveawayRepositoryService.backupAllParticipants(guildId);
+        giveawayRepositoryService.deleteGiveaway(guildId);
     }
 
     public boolean isUsercontainsInGiveaway(String user) {
@@ -432,7 +371,6 @@ public class Giveaway {
 
     public void setCount(int count) {
         this.count.set(count);
-        this.localCountUsers = count;
     }
 
     public long getMessageId() {
@@ -462,5 +400,4 @@ public class Giveaway {
     public String getUrlImage() {
         return this.giveawayData.urlImage;
     }
-
 }

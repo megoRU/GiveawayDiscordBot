@@ -14,7 +14,10 @@ import main.model.entity.ActiveGiveaways;
 import main.model.entity.Participants;
 import main.model.entity.Scheduling;
 import main.model.entity.Settings;
-import main.model.repository.*;
+import main.model.repository.ActiveGiveawayRepository;
+import main.model.repository.SchedulingRepository;
+import main.model.repository.SettingsRepository;
+import main.service.GiveawayRepositoryService;
 import main.threads.StopGiveawayHandler;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -35,7 +38,6 @@ import org.boticordjava.api.impl.BotiCordAPI;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -44,10 +46,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.sql.*;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Date;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -77,33 +78,23 @@ public class BotStart {
 
     //REPOSITORY
     private final ActiveGiveawayRepository activeGiveawayRepository;
-    private final ParticipantsRepository participantsRepository;
-    private final ListUsersRepository listUsersRepository;
     private final UpdateController updateController;
     private final SchedulingRepository schedulingRepository;
     private final SettingsRepository settingsRepository;
 
-    //DataBase
-    @Value("${spring.datasource.url}")
-    private String URL_CONNECTION;
-    @Value("${spring.datasource.username}")
-    private String USER_CONNECTION;
-    @Value("${spring.datasource.password}")
-    private String PASSWORD_CONNECTION;
+    private final GiveawayRepositoryService giveawayRepositoryService;
 
     @Autowired
     public BotStart(ActiveGiveawayRepository activeGiveawayRepository,
-                    ParticipantsRepository participantsRepository,
-                    ListUsersRepository listUsersRepository,
                     UpdateController updateController,
                     SchedulingRepository schedulingRepository,
-                    SettingsRepository settingsRepository) {
+                    SettingsRepository settingsRepository,
+                    GiveawayRepositoryService giveawayRepositoryService) {
         this.activeGiveawayRepository = activeGiveawayRepository;
-        this.participantsRepository = participantsRepository;
-        this.listUsersRepository = listUsersRepository;
         this.updateController = updateController;
         this.schedulingRepository = schedulingRepository;
         this.settingsRepository = settingsRepository;
+        this.giveawayRepositoryService = giveawayRepositoryService;
     }
 
     @PostConstruct
@@ -418,9 +409,7 @@ public class BotStart {
                                     scheduling.getGuildLongId(),
                                     textChannelById.getIdLong(),
                                     scheduling.getIdUserWhoCreateGiveaway(),
-                                    activeGiveawayRepository,
-                                    participantsRepository,
-                                    listUsersRepository,
+                                    giveawayRepositoryService,
                                     updateController);
 
                             GiveawayRegistry instance = GiveawayRegistry.getInstance();
@@ -536,12 +525,10 @@ public class BotStart {
                         id_user_who_create_giveaway,
                         //Добавляем пользователей в hashmap
                         participantsMap,
-                        activeGiveawayRepository,
-                        participantsRepository,
-                        listUsersRepository,
                         giveawayData,
                         finishGiveaway,
                         true,
+                        giveawayRepositoryService,
                         updateController);
 
                 GiveawayRegistry instance = GiveawayRegistry.getInstance();

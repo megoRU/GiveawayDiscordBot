@@ -11,6 +11,7 @@ import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.ListUsersRepository;
 import main.model.repository.ParticipantsRepository;
 import main.model.repository.SchedulingRepository;
+import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -26,22 +27,19 @@ import java.util.Objects;
 @Service
 public class StartCommand {
 
-    private final ListUsersRepository listUsersRepository;
     private final ActiveGiveawayRepository activeGiveawayRepository;
-    private final ParticipantsRepository participantsRepository;
     private final SchedulingRepository schedulingRepository;
+    private final GiveawayRepositoryService giveawayRepositoryService;
 
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     @Autowired
-    public StartCommand(ListUsersRepository listUsersRepository,
-                        ActiveGiveawayRepository activeGiveawayRepository,
-                        ParticipantsRepository participantsRepository,
-                        SchedulingRepository schedulingRepository) {
-        this.listUsersRepository = listUsersRepository;
+    public StartCommand(ActiveGiveawayRepository activeGiveawayRepository,
+                        SchedulingRepository schedulingRepository,
+                        GiveawayRepositoryService giveawayRepositoryService) {
         this.activeGiveawayRepository = activeGiveawayRepository;
-        this.participantsRepository = participantsRepository;
         this.schedulingRepository = schedulingRepository;
+        this.giveawayRepositoryService = giveawayRepositoryService;
     }
 
     public void start(@NotNull SlashCommandInteractionEvent event, UpdateController updateController) {
@@ -135,9 +133,7 @@ public class StartCommand {
                 Giveaway giveaway = new Giveaway(guildIdLong,
                         event.getChannel().getIdLong(),
                         userIdLong,
-                        activeGiveawayRepository,
-                        participantsRepository,
-                        listUsersRepository,
+                        giveawayRepositoryService,
                         updateController);
 
                 GiveawayRegistry.getInstance().putGift(guildIdLong, giveaway);
