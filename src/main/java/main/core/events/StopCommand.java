@@ -12,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class StopCommand {
 
@@ -52,7 +51,10 @@ public class StopCommand {
             stop.setColor(Color.GREEN);
             stop.setDescription(slashStop);
             event.replyEmbeds(stop.build()).queue();
-            giveaway.stopGiveaway(giveaway.getCountWinners());
+
+            int countWinners = giveaway.getGiveawayData().getCountWinners();
+
+            giveaway.stopGiveaway(countWinners);
             return;
         }
 

@@ -14,8 +14,9 @@ public final class StopGiveawayHandler {
     public void handleGiveaway(Giveaway giveaway) {
         try {
             if (giveaway == null) return;
+            Giveaway.GiveawayData giveawayData = giveaway.getGiveawayData();
+            int countWinners = giveawayData.getCountWinners();
 
-            int countWinners = giveaway.getCountWinners();
             Timestamp localTime = Timestamp.from(Instant.now());
 
             if (shouldFinishGiveaway(giveaway, localTime)) {
@@ -27,7 +28,9 @@ public final class StopGiveawayHandler {
     }
 
     private boolean shouldFinishGiveaway(Giveaway giveaway, Timestamp localTime) {
-        Timestamp endGiveawayDate = giveaway.getEndGiveawayDate();
+        Giveaway.GiveawayData giveawayData = giveaway.getGiveawayData();
+
+        Timestamp endGiveawayDate = giveawayData.getEndGiveawayDate();
         if (giveaway.isLocked()) {
             return false;
         } else if (giveaway.isFinishGiveaway()) {

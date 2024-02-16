@@ -43,9 +43,9 @@ public class ChangeCommand {
         if (time != null) {
             if (time.matches(GiveawayUtils.ISO_TIME_REGEX)) {
                 if (GiveawayUtils.timeHandler(event, guildId, time)) return;
-
+                Giveaway.GiveawayData giveawayData = giveaway.getGiveawayData();
                 long channelId = giveaway.getTextChannelId();
-                long messageId = giveaway.getMessageId();
+                long messageId = giveawayData.getMessageId();
 
                 Timestamp timestamp = giveaway.updateTime(time);
 

@@ -8,21 +8,28 @@ import main.giveaway.GiveawayRegistry;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class GiveawayUpdateListUser {
 
+    private static final Logger LOGGER = Logger.getLogger(GiveawayUpdateListUser.class.getName());
+
     private final GiveawayRepositoryService giveawayRepositoryService;
 
-    public void updateGiveawayByGuild(Giveaway giveawayData) {
-        long guildIdLong = giveawayData.getGuildId();
+    public void updateGiveawayByGuild(@NotNull Giveaway giveaway) {
+        Giveaway.GiveawayData giveawayData = giveaway.getGiveawayData();
+
+        long guildIdLong = giveaway.getGuildId();
         boolean isForSpecificRole = giveawayData.isForSpecificRole();
         long messageId = giveawayData.getMessageId();
 
@@ -33,7 +40,7 @@ public class GiveawayUpdateListUser {
 
         if (jda != null) {
             if (hasGiveaway) {
-                long channelId = giveawayData.getTextChannelId();
+                long channelId = giveaway.getTextChannelId();
                 //System.out.println("Guild ID: " + guildIdLong);
 
                 List<MessageReaction> reactions = null;
@@ -57,14 +64,14 @@ public class GiveawayUpdateListUser {
                         if (hasGiveaway &&
                                 reactions != null &&
                                 !reactions.isEmpty() &&
-                                reactions.get(0).getCount() - 1 != giveawayData.getListUsersSize()) {
+                                reactions.get(0).getCount() - 1 != giveaway.getListUsersSize()) {
                             for (MessageReaction reaction : reactions) {
                                 Map<String, User> userList = reaction
                                         .retrieveUsers()
                                         .complete()
                                         .stream()
                                         .filter(user -> !user.isBot())
-                                        .filter(user -> !giveawayData.isUsercontainsInGiveaway(user.getId()))
+                                        .filter(user -> !giveaway.isUserContainsInGiveaway(user.getId()))
                                         .collect(Collectors.toMap(User::getId, user -> user));
 
                                 if (isForSpecificRole) {
@@ -87,13 +94,13 @@ public class GiveawayUpdateListUser {
                                                     if (e.getMessage().contains("10007: Unknown Member")) {
                                                         userList.remove(entry.getKey());
                                                     } else {
-                                                        e.printStackTrace();
+                                                        LOGGER.log(Level.SEVERE, e.getMessage(), e);
                                                     }
                                                 }
                                             }
                                         }
                                     } catch (Exception e) {
-                                        e.printStackTrace();
+                                        LOGGER.log(Level.SEVERE, e.getMessage(), e);
                                     }
                                 }
 
@@ -103,7 +110,7 @@ public class GiveawayUpdateListUser {
                                 //Перебираем Users в реакциях
                                 for (Map.Entry<String, User> entry : userList.entrySet()) {
                                     if (!hasGiveaway) return;
-                                    giveawayData.addUser(entry.getValue());
+                                    giveaway.addUser(entry.getValue());
                                     //System.out.println("User id: " + user.getIdLong());
                                 }
                             }
@@ -117,7 +124,7 @@ public class GiveawayUpdateListUser {
                         giveawayRepositoryService.deleteGiveaway(guildIdLong);
                         GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
                     } else {
-                        e.printStackTrace();
+                        LOGGER.log(Level.SEVERE, e.getMessage(), e);
                     }
                 }
             }

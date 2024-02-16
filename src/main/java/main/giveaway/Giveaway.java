@@ -43,7 +43,7 @@ public class Giveaway {
 
     @Getter
     @Setter
-    private volatile boolean finishGiveaway;
+    private volatile boolean isFinishGiveaway;
 
     @Getter
     @Setter
@@ -104,7 +104,7 @@ public class Giveaway {
     public Giveaway(long guildId, long textChannelId, long userIdLong,
                     Map<String, String> listUsersHash,
                     GiveawayData giveawayData,
-                    boolean finishGiveaway,
+                    boolean isFinishGiveaway,
                     boolean isLocked,
                     GiveawayRepositoryService giveawayRepositoryService,
                     UpdateController updateController) {
@@ -113,7 +113,7 @@ public class Giveaway {
         this.userIdLong = userIdLong;
         this.listUsersHash = new ConcurrentHashMap<>(listUsersHash);
         this.giveawayData = giveawayData;
-        this.finishGiveaway = finishGiveaway;
+        this.isFinishGiveaway = isFinishGiveaway;
         this.isLocked = isLocked;
         this.updateController = updateController;
         this.giveawayRepositoryService = giveawayRepositoryService;
@@ -201,7 +201,7 @@ public class Giveaway {
         giveawayUserHandler.saveUser(this, user);
     }
 
-    public void stopGiveaway(final int countWinner) {
+    public synchronized void stopGiveaway(final int countWinner) {
         String logMessage = String.format(
                 """
                         \n
@@ -217,7 +217,7 @@ public class Giveaway {
         giveawayEnds.stop(this, countWinner, updateController);
     }
 
-    public boolean isUsercontainsInGiveaway(String user) {
+    public boolean isUserContainsInGiveaway(String user) {
         return listUsersHash.containsKey(user);
     }
 
@@ -227,33 +227,5 @@ public class Giveaway {
 
     public void addUserToList(String userId) {
         listUsersHash.put(userId, userId);
-    }
-
-    public long getMessageId() {
-        return this.giveawayData.messageId;
-    }
-
-    public int getCountWinners() {
-        return this.giveawayData.countWinners;
-    }
-
-    public String getTitle() {
-        return this.giveawayData.title;
-    }
-
-    public Timestamp getEndGiveawayDate() {
-        return this.giveawayData.endGiveawayDate;
-    }
-
-    public Long getRoleId() {
-        return this.giveawayData.roleId;
-    }
-
-    public boolean isForSpecificRole() {
-        return this.giveawayData.isForSpecificRole;
-    }
-
-    public String getUrlImage() {
-        return this.giveawayData.urlImage;
     }
 }

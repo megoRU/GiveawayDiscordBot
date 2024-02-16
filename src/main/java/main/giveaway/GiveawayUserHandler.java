@@ -22,7 +22,7 @@ public class GiveawayUserHandler {
         boolean removed = giveaway.isRemoved();
 
         List<User> userList = Arrays.stream(user)
-                .filter(users -> !giveaway.isUsercontainsInGiveaway(users.getId()))
+                .filter(users -> !giveaway.isUserContainsInGiveaway(users.getId()))
                 .toList();
 
         if (!removed) {
