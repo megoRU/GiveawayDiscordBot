@@ -23,8 +23,8 @@ public class Scheduling {
     @Column(name = "guild_long_id", nullable = false)
     private Long guildLongId;
 
-    @Column(name = "channel_id_long", nullable = false)
-    private Long channelIdLong;
+    @Column(name = "channel_id", nullable = false)
+    private Long channelId;
 
     @Column(name = "count_winners")
     private int countWinners;
@@ -41,11 +41,11 @@ public class Scheduling {
     @Column(name = "is_for_specific_role")
     private Boolean isForSpecificRole;
 
-    @Column(name = "role_id_long")
-    private Long roleIdLong;
+    @Column(name = "role_id")
+    private Long roleId;
 
-    @Column(name = "id_user_who_create_giveaway", nullable = false)
-    private Long idUserWhoCreateGiveaway;
+    @Column(name = "created_user_id", nullable = false)
+    private Long createdUserId;
 
     @Column(name = "url_image")
     private String urlImage;

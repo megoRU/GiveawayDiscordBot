@@ -69,7 +69,7 @@ public class GiveawayEnds {
             Winners winners = new Winners(countWinner, 0, participants.size() - 1);
             List<String> strings = api.getWinners(winners);
             for (String string : strings) {
-                uniqueWinners.add("<@" + participants.get(Integer.parseInt(string)).getUserIdLong() + ">");
+                uniqueWinners.add("<@" + participants.get(Integer.parseInt(string)).getUserId() + ">");
             }
         } catch (Exception e) {
             if (!finishGiveaway) {

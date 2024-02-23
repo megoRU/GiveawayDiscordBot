@@ -26,10 +26,10 @@ public class ListUsers {
     private Long giveawayId;
 
     @Column(name = "guild_id", nullable = false)
-    private Long guildIdLong;
+    private Long guildId;
 
     @Column(name = "user_id", nullable = false)
-    private Long userIdLong;
+    private Long userId;
 
     @Column(name = "nick_name", nullable = false)
     private String nickName;

@@ -29,7 +29,7 @@ public class GiveawayRepositoryService {
     @Transactional
     @Nullable
     public ActiveGiveaways getGiveaway(long guildId) {
-        return activeGiveawayRepository.findByGuildLongId(guildId);
+        return activeGiveawayRepository.findByGuildId(guildId);
     }
 
     @Transactional
@@ -43,7 +43,7 @@ public class GiveawayRepositoryService {
     }
 
     public List<Participants> findAllParticipants(long guildId) {
-        return participantsRepository.findAllByActiveGiveaways_GuildLongId(guildId);
+        return participantsRepository.findParticipantsByActiveGiveaways(guildId);
     }
 
     @Transactional

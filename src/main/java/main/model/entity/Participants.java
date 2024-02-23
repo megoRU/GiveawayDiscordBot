@@ -20,16 +20,16 @@ public class Participants {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "guild_id", referencedColumnName = "guild_long_id", nullable = false)
+    @JoinColumn(name = "guild_id", referencedColumnName = "guild_id", nullable = false)
     private ActiveGiveaways activeGiveaways;
 
-    @Column(name = "user_long_id", nullable = false)
-    private Long userIdLong;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @Column(name = "nick_name", nullable = false)
     private String nickName;
 
     public String getUserIdAsString() {
-        return String.valueOf(userIdLong);
+        return String.valueOf(userId);
     }
 }

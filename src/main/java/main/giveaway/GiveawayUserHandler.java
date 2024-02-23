@@ -5,6 +5,7 @@ import main.model.entity.ActiveGiveaways;
 import main.model.entity.Participants;
 import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.entities.User;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,6 +18,7 @@ public class GiveawayUserHandler {
 
     private final GiveawayRepositoryService giveawayRepositoryService;
 
+    @Transactional
     public void saveUser(Giveaway giveaway, User... user) {
         long guildId = giveaway.getGuildId();
         boolean removed = giveaway.isRemoved();
@@ -27,6 +29,7 @@ public class GiveawayUserHandler {
 
         if (!removed) {
             ActiveGiveaways activeGiveaways = giveawayRepositoryService.getGiveaway(guildId);
+            if (activeGiveaways == null) return;
 
             Participants[] participantsList = new Participants[userList.size()];
             for (int i = 0; i < userList.size(); i++) {
@@ -46,7 +49,7 @@ public class GiveawayUserHandler {
                         guildId));
 
                 Participants participants = new Participants();
-                participants.setUserIdLong(users.getIdLong());
+                participants.setUserId(users.getIdLong());
                 participants.setNickName(users.getName());
                 participants.setActiveGiveaways(activeGiveaways);
 

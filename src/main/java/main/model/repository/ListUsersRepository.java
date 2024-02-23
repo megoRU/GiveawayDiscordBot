@@ -16,7 +16,7 @@ public interface ListUsersRepository extends JpaRepository<ListUsers, Long> {
     @Transactional
     @Modifying
     @Query(value = "INSERT INTO list_users(giveaway_id, guild_id, created_user_id, nick_name, user_id) " +
-            "SELECT ag.message_id_long, ag.guild_long_id, ag.id_user_who_create_giveaway, p.nick_name, p.user_long_id " +
+            "SELECT ag.message_id, ag.guild_long_id, ag.created_user_id, p.nick_name, p.user_id " +
             "FROM active_giveaways ag, participants p " +
             "WHERE ag.guild_long_id = :guildId AND p.guild_id = :guildId", nativeQuery = true)
     void saveAllParticipantsToUserList(@Param("guildId") Long guildId);

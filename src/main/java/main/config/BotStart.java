@@ -397,13 +397,13 @@ public class BotStart {
 
             if (localTime.after(scheduling.getDateCreateGiveaway())) {
                 try {
-                    Long channelIdLong = scheduling.getChannelIdLong();
+                    Long channelIdLong = scheduling.getChannelId();
                     Guild guildById = jda.getGuildById(scheduling.getGuildLongId());
 
                     if (guildById != null) {
                         TextChannel textChannelById = guildById.getTextChannelById(channelIdLong);
                         if (textChannelById != null) {
-                            Long role = scheduling.getRoleIdLong();
+                            Long role = scheduling.getRoleId();
                             Boolean isOnlyForSpecificRole = scheduling.getIsForSpecificRole();
                             Long guildIdLong = scheduling.getGuildLongId();
                             Long guildId = scheduling.getGuildLongId();
@@ -411,7 +411,7 @@ public class BotStart {
                             Giveaway giveaway = new Giveaway(
                                     scheduling.getGuildLongId(),
                                     textChannelById.getIdLong(),
-                                    scheduling.getIdUserWhoCreateGiveaway(),
+                                    scheduling.getCreatedUserId(),
                                     giveawayRepositoryService,
                                     updateController);
 
@@ -439,7 +439,7 @@ public class BotStart {
                                     scheduling.getGiveawayTitle(),
                                     scheduling.getCountWinners(),
                                     formattedDate,
-                                    scheduling.getRoleIdLong(),
+                                    scheduling.getRoleId(),
                                     scheduling.getIsForSpecificRole(),
                                     scheduling.getUrlImage(),
                                     false,
@@ -491,18 +491,18 @@ public class BotStart {
 
         for (ActiveGiveaways activeGiveaways : activeGiveawaysList) {
             try {
-                long guild_long_id = activeGiveaways.getGuildLongId();
-                long channel_long_id = activeGiveaways.getChannelIdLong();
+                long guild_long_id = activeGiveaways.getGuildId();
+                long channel_long_id = activeGiveaways.getChannelId();
                 int count_winners = activeGiveaways.getCountWinners();
-                long message_id_long = activeGiveaways.getMessageIdLong();
-                String giveaway_title = activeGiveaways.getGiveawayTitle();
-                Timestamp date_end_giveaway = activeGiveaways.getDateEndGiveaway();
-                Long role_id_long = activeGiveaways.getRoleIdLong(); // null -> 0
+                long message_id_long = activeGiveaways.getMessageId();
+                String giveaway_title = activeGiveaways.getTitle();
+                Timestamp date_end_giveaway = activeGiveaways.getDateEnd();
+                Long role_id_long = activeGiveaways.getRoleId(); // null -> 0
                 boolean is_for_specific_role = activeGiveaways.getIsForSpecificRole();
                 String url_image = activeGiveaways.getUrlImage();
-                long id_user_who_create_giveaway = activeGiveaways.getIdUserWhoCreateGiveaway();
+                long id_user_who_create_giveaway = activeGiveaways.getCreatedUserId();
                 Integer min_participants = activeGiveaways.getMinParticipants();
-                boolean finishGiveaway = activeGiveaways.isFinishGiveaway();
+                boolean finishGiveaway = activeGiveaways.isFinish();
 
                 Map<String, String> participantsMap = new HashMap<>();
                 Set<Participants> participantsList = activeGiveaways.getParticipants();

@@ -176,22 +176,22 @@ public class Giveaway {
         this.giveawayData.messageId = message.getIdLong();
 
         ActiveGiveaways activeGiveaways = new ActiveGiveaways();
-        activeGiveaways.setGuildLongId(guildId);
-        activeGiveaways.setMessageIdLong(message.getIdLong());
-        activeGiveaways.setChannelIdLong(message.getChannel().getIdLong());
+        activeGiveaways.setGuildId(guildId);
+        activeGiveaways.setMessageId(message.getIdLong());
+        activeGiveaways.setChannelId(message.getChannel().getIdLong());
         activeGiveaways.setCountWinners(this.giveawayData.countWinners);
-        activeGiveaways.setGiveawayTitle(this.giveawayData.title);
+        activeGiveaways.setTitle(this.giveawayData.title);
         activeGiveaways.setMinParticipants(this.giveawayData.minParticipants);
 
         if (this.giveawayData.roleId == null || this.giveawayData.roleId == 0) {
-            activeGiveaways.setRoleIdLong(null);
+            activeGiveaways.setRoleId(null);
         } else {
-            activeGiveaways.setRoleIdLong(this.giveawayData.roleId);
+            activeGiveaways.setRoleId(this.giveawayData.roleId);
         }
         activeGiveaways.setIsForSpecificRole(this.giveawayData.isForSpecificRole);
         activeGiveaways.setUrlImage(this.giveawayData.urlImage);
-        activeGiveaways.setIdUserWhoCreateGiveaway(userIdLong);
-        activeGiveaways.setDateEndGiveaway(this.giveawayData.endGiveawayDate == null ? null : this.giveawayData.endGiveawayDate);
+        activeGiveaways.setCreatedUserId(userIdLong);
+        activeGiveaways.setDateEnd(this.giveawayData.endGiveawayDate == null ? null : this.giveawayData.endGiveawayDate);
 
         giveawayRepositoryService.saveGiveaway(activeGiveaways);
     }
