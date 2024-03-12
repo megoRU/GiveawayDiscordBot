@@ -2,6 +2,7 @@ package main.core.events;
 
 import main.controller.UpdateController;
 import main.giveaway.Giveaway;
+import main.giveaway.GiveawayData;
 import main.giveaway.GiveawayRegistry;
 import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
@@ -35,7 +36,7 @@ public class ReactionEvent {
             Giveaway giveaway = instance.getGiveaway(guildIdLong);
 
             if (giveaway != null) {
-                Giveaway.GiveawayData giveawayData = giveaway.getGiveawayData();
+                GiveawayData giveawayData = giveaway.getGiveawayData();
                 if (emoji.equals(TADA)) {
                     //Проверяем event id message с Giveaway message id
                     long messageIdWithReactionCurrent = event.getMessageIdLong();

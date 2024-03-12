@@ -1,7 +1,6 @@
 package main.giveaway;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import main.controller.UpdateController;
 import main.core.events.ReactionEvent;
@@ -56,37 +55,6 @@ public class Giveaway {
     //REPO
     private final GiveawayRepositoryService giveawayRepositoryService;
 
-    @Getter
-    @NoArgsConstructor
-    public static class GiveawayData {
-        private long messageId;
-        private int countWinners;
-        private Long roleId;
-        private boolean isForSpecificRole;
-        private String urlImage;
-        private String title;
-        private Timestamp endGiveawayDate;
-        private int minParticipants = 2;
-
-        public GiveawayData(long messageId,
-                            int countWinners,
-                            Long roleId,
-                            boolean isForSpecificRole,
-                            String urlImage,
-                            String title,
-                            Timestamp endGiveawayDate,
-                            int minParticipants) {
-            this.messageId = messageId;
-            this.countWinners = countWinners;
-            this.roleId = roleId;
-            this.isForSpecificRole = isForSpecificRole;
-            this.urlImage = urlImage;
-            this.title = title;
-            this.endGiveawayDate = endGiveawayDate;
-            this.minParticipants = minParticipants;
-        }
-    }
-
     public Giveaway(long guildId,
                     long textChannelId,
                     long userIdLong,
@@ -101,7 +69,9 @@ public class Giveaway {
         this.giveawayRepositoryService = giveawayRepositoryService;
     }
 
-    public Giveaway(long guildId, long textChannelId, long userIdLong,
+    public Giveaway(long guildId,
+                    long textChannelId,
+                    long userIdLong,
                     Map<String, String> listUsersHash,
                     GiveawayData giveawayData,
                     boolean isFinishGiveaway,
@@ -120,7 +90,7 @@ public class Giveaway {
     }
 
     public Timestamp updateTime(final String time) {
-        if (time == null) return this.giveawayData.endGiveawayDate;
+        if (time == null) return giveawayData.getEndGiveawayDate();
         ZoneOffset offset = ZoneOffset.UTC;
         LocalDateTime localDateTime;
 
@@ -132,14 +102,20 @@ public class Giveaway {
         }
 
         long toEpochSecond = localDateTime.toEpochSecond(offset);
-        this.giveawayData.endGiveawayDate = new Timestamp(toEpochSecond * 1000);
+        giveawayData.setEndGiveawayDate(new Timestamp(toEpochSecond * 1000));
 
-        return this.giveawayData.endGiveawayDate;
+        return giveawayData.getEndGiveawayDate();
     }
 
-    public void startGiveaway(GuildMessageChannel textChannel, String title, int countWinners,
-                              String time, Long role, boolean isOnlyForSpecificRole,
-                              String urlImage, boolean predefined, int minParticipants) {
+    public void startGiveaway(GuildMessageChannel textChannel,
+                              String title,
+                              int countWinners,
+                              String time,
+                              Long role,
+                              boolean isOnlyForSpecificRole,
+                              String urlImage,
+                              boolean predefined,
+                              int minParticipants) {
         //Записываем данные:
         LOGGER.info("\nGuild id: " + guildId
                 + "\nTextChannel: " + textChannel.getName() + " " + textChannel.getId()
@@ -151,12 +127,12 @@ public class Giveaway {
                 + "\nurlImage: " + urlImage
                 + "\npredefined: " + predefined);
 
-        this.giveawayData.title = title == null ? "Giveaway" : title;
-        this.giveawayData.countWinners = countWinners;
-        this.giveawayData.roleId = role;
-        this.giveawayData.urlImage = urlImage;
-        this.giveawayData.isForSpecificRole = isOnlyForSpecificRole;
-        this.giveawayData.minParticipants = minParticipants == 0 ? 2 : minParticipants;
+        giveawayData.setTitle(title);
+        giveawayData.setCountWinners(countWinners);
+        giveawayData.setRoleId(role);
+        giveawayData.setUrlImage(urlImage);
+        giveawayData.setForSpecificRole(isOnlyForSpecificRole);
+        giveawayData.setMinParticipants(minParticipants);
         updateTime(time); //Обновляем время
 
         //Отправка сообщения
@@ -173,25 +149,25 @@ public class Giveaway {
     }
 
     private void updateCollections(Message message) {
-        this.giveawayData.messageId = message.getIdLong();
+        giveawayData.setMessageId(message.getIdLong());
 
         ActiveGiveaways activeGiveaways = new ActiveGiveaways();
         activeGiveaways.setGuildId(guildId);
         activeGiveaways.setMessageId(message.getIdLong());
         activeGiveaways.setChannelId(message.getChannel().getIdLong());
-        activeGiveaways.setCountWinners(this.giveawayData.countWinners);
-        activeGiveaways.setTitle(this.giveawayData.title);
-        activeGiveaways.setMinParticipants(this.giveawayData.minParticipants);
+        activeGiveaways.setCountWinners(giveawayData.getCountWinners());
+        activeGiveaways.setTitle(giveawayData.getTitle());
+        activeGiveaways.setMinParticipants(giveawayData.getMinParticipants());
 
-        if (this.giveawayData.roleId == null || this.giveawayData.roleId == 0) {
+        if (giveawayData.getRoleId() == null || giveawayData.getRoleId() == 0) {
             activeGiveaways.setRoleId(null);
         } else {
-            activeGiveaways.setRoleId(this.giveawayData.roleId);
+            activeGiveaways.setRoleId(giveawayData.getRoleId());
         }
-        activeGiveaways.setIsForSpecificRole(this.giveawayData.isForSpecificRole);
-        activeGiveaways.setUrlImage(this.giveawayData.urlImage);
+        activeGiveaways.setIsForSpecificRole(giveawayData.isForSpecificRole());
+        activeGiveaways.setUrlImage(giveawayData.getUrlImage());
         activeGiveaways.setCreatedUserId(userIdLong);
-        activeGiveaways.setDateEnd(this.giveawayData.endGiveawayDate == null ? null : this.giveawayData.endGiveawayDate);
+        activeGiveaways.setDateEnd(giveawayData.getEndGiveawayDate());
 
         giveawayRepositoryService.saveGiveaway(activeGiveaways);
     }

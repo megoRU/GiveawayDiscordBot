@@ -1,6 +1,7 @@
 package main.threads;
 
 import main.giveaway.Giveaway;
+import main.giveaway.GiveawayData;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -14,7 +15,7 @@ public final class StopGiveawayHandler {
     public void handleGiveaway(Giveaway giveaway) {
         try {
             if (giveaway == null) return;
-            Giveaway.GiveawayData giveawayData = giveaway.getGiveawayData();
+            GiveawayData giveawayData = giveaway.getGiveawayData();
             int countWinners = giveawayData.getCountWinners();
 
             Timestamp localTime = Timestamp.from(Instant.now());
@@ -28,7 +29,7 @@ public final class StopGiveawayHandler {
     }
 
     private boolean shouldFinishGiveaway(Giveaway giveaway, Timestamp localTime) {
-        Giveaway.GiveawayData giveawayData = giveaway.getGiveawayData();
+        GiveawayData giveawayData = giveaway.getGiveawayData();
 
         Timestamp endGiveawayDate = giveawayData.getEndGiveawayDate();
         if (giveaway.isLocked()) {

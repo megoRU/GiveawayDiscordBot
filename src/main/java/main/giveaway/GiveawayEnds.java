@@ -32,7 +32,7 @@ public class GiveawayEnds {
         long guildId = giveaway.getGuildId();
         long textChannelId = giveaway.getTextChannelId();
         boolean finishGiveaway = giveaway.isFinishGiveaway();
-        Giveaway.GiveawayData giveawayData = giveaway.getGiveawayData();
+        GiveawayData giveawayData = giveaway.getGiveawayData();
 
         GiveawayUpdateListUser giveawayUpdateListUser = new GiveawayUpdateListUser(giveawayRepositoryService);
         giveawayUpdateListUser.updateGiveawayByGuild(giveaway);

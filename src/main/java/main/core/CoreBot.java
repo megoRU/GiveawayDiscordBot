@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import main.config.BotStart;
 import main.controller.UpdateController;
 import main.giveaway.Giveaway;
+import main.giveaway.GiveawayData;
 import main.giveaway.GiveawayRegistry;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -79,7 +80,7 @@ public class CoreBot extends ListenerAdapter {
                     GiveawayRegistry instance = GiveawayRegistry.getInstance();
                     Giveaway giveaway = instance.getGiveaway(guildId);
                     if (giveaway != null) {
-                        Giveaway.GiveawayData giveawayData = giveaway.getGiveawayData();
+                        GiveawayData giveawayData = giveaway.getGiveawayData();
                         textChannelById
                                 .retrieveMessageById(giveawayData.getMessageId())
                                 .complete()

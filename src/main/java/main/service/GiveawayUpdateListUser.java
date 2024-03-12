@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import main.config.BotStart;
 import main.core.events.ReactionEvent;
 import main.giveaway.Giveaway;
+import main.giveaway.GiveawayData;
 import main.giveaway.GiveawayRegistry;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
@@ -27,7 +28,7 @@ public class GiveawayUpdateListUser {
     private final GiveawayRepositoryService giveawayRepositoryService;
 
     public void updateGiveawayByGuild(@NotNull Giveaway giveaway) {
-        Giveaway.GiveawayData giveawayData = giveaway.getGiveawayData();
+        GiveawayData giveawayData = giveaway.getGiveawayData();
 
         long guildIdLong = giveaway.getGuildId();
         boolean isForSpecificRole = giveawayData.isForSpecificRole();

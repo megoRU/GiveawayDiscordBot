@@ -18,7 +18,7 @@ public class GiveawayEmbedUtils {
         Color userColor = GiveawayUtils.getUserColor(guildId);
 
         if (giveaway != null) {
-            Giveaway.GiveawayData giveawayData = giveaway.getGiveawayData();
+            GiveawayData giveawayData = giveaway.getGiveawayData();
             String title = giveawayData.getTitle();
             long createdUserId = giveaway.getUserIdLong();
             String giftReaction = jsonParsers.getLocale("gift_reaction", guildId);
@@ -82,7 +82,7 @@ public class GiveawayEmbedUtils {
         Color userColor = GiveawayUtils.getUserColor(guildId);
 
         if (giveaway != null) {
-            Giveaway.GiveawayData giveawayData = giveaway.getGiveawayData();
+            GiveawayData giveawayData = giveaway.getGiveawayData();
             String title = giveawayData.getTitle();
             long createdUserId = giveaway.getUserIdLong();
 

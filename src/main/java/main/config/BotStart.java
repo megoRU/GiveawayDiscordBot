@@ -5,6 +5,7 @@ import lombok.Getter;
 import main.controller.UpdateController;
 import main.core.CoreBot;
 import main.giveaway.Giveaway;
+import main.giveaway.GiveawayData;
 import main.giveaway.GiveawayRegistry;
 import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
@@ -513,7 +514,7 @@ public class BotStart {
                         }
                 );
 
-                Giveaway.GiveawayData giveawayData = new Giveaway.GiveawayData(
+                GiveawayData giveawayData = new GiveawayData(
                         message_id_long,
                         count_winners,
                         role_id_long,
