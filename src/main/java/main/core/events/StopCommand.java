@@ -1,6 +1,7 @@
 package main.core.events;
 
 import main.giveaway.Giveaway;
+import main.giveaway.GiveawayData;
 import main.giveaway.GiveawayRegistry;
 import main.jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -67,12 +68,14 @@ public class StopCommand {
             return;
         }
 
+        GiveawayData giveawayData = giveaway.getGiveawayData();
+
         //TODO: Что это)
         EmbedBuilder stop = new EmbedBuilder();
         Long count = event.getOption("count", OptionMapping::getAsLong);
         boolean isHasErrors = false;
         if (count == null) return;
-        int listUsersSize = giveaway.getListUsersSize();
+        int listUsersSize = giveawayData.getParticipantSize();
 
         if (listUsersSize != 0 && listUsersSize <= count) {
             isHasErrors = true;

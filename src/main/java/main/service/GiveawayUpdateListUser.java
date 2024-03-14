@@ -65,14 +65,13 @@ public class GiveawayUpdateListUser {
                         if (hasGiveaway &&
                                 reactions != null &&
                                 !reactions.isEmpty() &&
-                                reactions.get(0).getCount() - 1 != giveaway.getListUsersSize()) {
+                                reactions.get(0).getCount() - 1 != giveawayData.getParticipantSize()) {
                             for (MessageReaction reaction : reactions) {
                                 Map<String, User> userList = reaction
                                         .retrieveUsers()
                                         .complete()
                                         .stream()
                                         .filter(user -> !user.isBot())
-                                        .filter(user -> !giveaway.isUserContainsInGiveaway(user.getId()))
                                         .collect(Collectors.toMap(User::getId, user -> user));
 
                                 if (isForSpecificRole) {

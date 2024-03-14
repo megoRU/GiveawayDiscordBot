@@ -56,12 +56,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
 
 @Configuration
 @EnableScheduling
 public class BotStart {
+
+    private final static Logger LOGGER = Logger.getLogger(BotStart.class.getName());
 
     private static final JSONParsers jsonParsers = new JSONParsers();
     public static final String activity = "/help | ";
@@ -148,7 +152,7 @@ public class BotStart {
 //            updateSlashCommands();
             System.out.println("20:22");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
     }
 
@@ -366,7 +370,7 @@ public class BotStart {
 
             System.out.println("Готово");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
     }
 
@@ -385,7 +389,7 @@ public class BotStart {
                 BotStats botStats = new BotStats(usersCount.get(), serverCount, 1);
                 api.setBotStats(Config.getBotId(), botStats);
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.log(Level.SEVERE, e.getMessage(), e);
             }
         }
     }
@@ -450,7 +454,7 @@ public class BotStart {
                         }
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LOGGER.log(Level.SEVERE, e.getMessage(), e);
                 }
             }
         }
@@ -483,7 +487,7 @@ public class BotStart {
             }
             System.out.println("setLanguages()");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
     }
 
@@ -524,14 +528,14 @@ public class BotStart {
                         date_end_giveaway,
                         min_participants == null ? 2 : min_participants);
 
+                giveawayData.setParticipantsList(participantsMap);
+
                 Giveaway giveaway = new Giveaway(guild_long_id,
                         channel_long_id,
                         id_user_who_create_giveaway,
-                        //Добавляем пользователей в hashmap
-                        participantsMap,
-                        giveawayData,
                         finishGiveaway,
                         true,
+                        giveawayData,
                         giveawayRepositoryService,
                         updateController);
 
@@ -547,7 +551,7 @@ public class BotStart {
                     giveaway.stopGiveaway(count_winners);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.log(Level.SEVERE, e.getMessage(), e);
             }
             System.out.println("getMessageIdFromDB()");
         }
@@ -562,7 +566,7 @@ public class BotStart {
                 StopGiveawayHandler stopGiveawayHandler = new StopGiveawayHandler();
                 stopGiveawayHandler.handleGiveaway(giveaway);
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.log(Level.SEVERE, e.getMessage(), e);
             }
         }
     }
@@ -576,7 +580,7 @@ public class BotStart {
                 updateGiveawayByGuild.updateGiveawayByGuild(giveaway);
                 Thread.sleep(2000L);
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.log(Level.SEVERE, e.getMessage(), e);
             }
         }
     }
@@ -588,12 +592,8 @@ public class BotStart {
                 mapLanguages.put(settings.getServerId(), settings);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
-    }
-
-    private boolean hasGift(long guildIdLong) {
-        return GiveawayRegistry.getInstance().hasGiveaway(guildIdLong);
     }
 
     public static Map<Long, Settings> getMapLanguages() {

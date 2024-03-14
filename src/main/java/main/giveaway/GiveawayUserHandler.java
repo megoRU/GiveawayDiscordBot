@@ -23,8 +23,10 @@ public class GiveawayUserHandler {
         long guildId = giveaway.getGuildId();
         boolean removed = giveaway.isRemoved();
 
+        GiveawayData giveawayData = giveaway.getGiveawayData();
+
         List<User> userList = Arrays.stream(user)
-                .filter(users -> !giveaway.isUserContainsInGiveaway(users.getId()))
+                .filter(users -> !giveawayData.participantContains(users.getId()))
                 .toList();
 
         if (!removed) {
@@ -54,7 +56,7 @@ public class GiveawayUserHandler {
                 participants.setActiveGiveaways(activeGiveaways);
 
                 participantsList[i] = participants;
-                giveaway.addUserToList(users.getId());
+                giveawayData.addParticipant(users.getId());
             }
             giveawayRepositoryService.saveParticipants(participantsList);
         }

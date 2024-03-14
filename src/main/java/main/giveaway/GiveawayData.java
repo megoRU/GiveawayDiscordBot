@@ -5,12 +5,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Timestamp;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 @Setter
 @NoArgsConstructor
 public class GiveawayData {
 
+    private final ConcurrentHashMap<String, String> participantsList = new ConcurrentHashMap<>();
     private long messageId;
     private int countWinners;
     private Long roleId;
@@ -36,6 +39,22 @@ public class GiveawayData {
         this.title = title;
         this.endGiveawayDate = endGiveawayDate;
         this.minParticipants = minParticipants;
+    }
+
+    public boolean participantContains(String user) {
+        return participantsList.containsKey(user);
+    }
+
+    public int getParticipantSize() {
+        return participantsList.size();
+    }
+
+    public void addParticipant(String userId) {
+        participantsList.put(userId, userId);
+    }
+
+    public void setParticipantsList(Map<String, String> participantsMap) {
+        participantsMap.forEach((userId, user) -> participantsList.put(userId, userId));
     }
 
     public void setMinParticipants(int minParticipants) {

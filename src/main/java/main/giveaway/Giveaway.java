@@ -15,16 +15,11 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 public class Giveaway {
 
     private static final Logger LOGGER = Logger.getLogger(Giveaway.class.getName());
-
-    //User LIST
-    private final ConcurrentHashMap<String, String> listUsersHash;
 
     //USER DATA
     @Getter
@@ -63,7 +58,6 @@ public class Giveaway {
         this.guildId = guildId;
         this.textChannelId = textChannelId;
         this.userIdLong = userIdLong;
-        this.listUsersHash = new ConcurrentHashMap<>();
         this.giveawayData = new GiveawayData();
         this.updateController = updateController;
         this.giveawayRepositoryService = giveawayRepositoryService;
@@ -72,16 +66,14 @@ public class Giveaway {
     public Giveaway(long guildId,
                     long textChannelId,
                     long userIdLong,
-                    Map<String, String> listUsersHash,
-                    GiveawayData giveawayData,
                     boolean isFinishGiveaway,
                     boolean isLocked,
+                    GiveawayData giveawayData,
                     GiveawayRepositoryService giveawayRepositoryService,
                     UpdateController updateController) {
         this.guildId = guildId;
         this.textChannelId = textChannelId;
         this.userIdLong = userIdLong;
-        this.listUsersHash = new ConcurrentHashMap<>(listUsersHash);
         this.giveawayData = giveawayData;
         this.isFinishGiveaway = isFinishGiveaway;
         this.isLocked = isLocked;
@@ -186,22 +178,10 @@ public class Giveaway {
                         Guild ID: %s
                         ListUsersSize: %s
                         CountWinners: %s
-                        """, guildId, listUsersHash.size(), countWinner);
+                        """, guildId, giveawayData.getParticipantSize(), countWinner);
         LOGGER.info(logMessage);
 
         GiveawayEnds giveawayEnds = new GiveawayEnds(giveawayRepositoryService);
         giveawayEnds.stop(this, countWinner, updateController);
-    }
-
-    public boolean isUserContainsInGiveaway(String user) {
-        return listUsersHash.containsKey(user);
-    }
-
-    public int getListUsersSize() {
-        return listUsersHash.size();
-    }
-
-    public void addUserToList(String userId) {
-        listUsersHash.put(userId, userId);
     }
 }

@@ -35,8 +35,10 @@ public class ReactionEvent {
             GiveawayRegistry instance = GiveawayRegistry.getInstance();
             Giveaway giveaway = instance.getGiveaway(guildIdLong);
 
+
             if (giveaway != null) {
                 GiveawayData giveawayData = giveaway.getGiveawayData();
+                if (giveawayData.participantContains(user.getId())) return;
                 if (emoji.equals(TADA)) {
                     //Проверяем event id message с Giveaway message id
                     long messageIdWithReactionCurrent = event.getMessageIdLong();
@@ -64,10 +66,8 @@ public class ReactionEvent {
                         }
                     }
 
-                    if (!giveaway.isUserContainsInGiveaway(user.getId())) {
-                        LOGGER.info(String.format("\nНовый участник: %s\nСервер: %s", user.getId(), event.getGuild().getId()));
-                        giveaway.addUser(user);
-                    }
+                    LOGGER.info(String.format("\nНовый участник: %s\nСервер: %s", user.getId(), event.getGuild().getId()));
+                    giveaway.addUser(user);
                 }
             }
         } catch (Exception e) {
