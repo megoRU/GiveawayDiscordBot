@@ -15,6 +15,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class Giveaway {
@@ -164,9 +165,14 @@ public class Giveaway {
         giveawayRepositoryService.saveGiveaway(activeGiveaways);
     }
 
-    public synchronized void addUser(User... user) {
+    public synchronized void addUser(List<User> user) {
         GiveawayUserHandler giveawayUserHandler = new GiveawayUserHandler(giveawayRepositoryService);
         giveawayUserHandler.saveUser(this, user);
+    }
+
+    public synchronized void addUser(User user) {
+        GiveawayUserHandler giveawayUserHandler = new GiveawayUserHandler(giveawayRepositoryService);
+        giveawayUserHandler.saveUser(this, List.of(user));
     }
 
     public synchronized void stopGiveaway(final int countWinner) {

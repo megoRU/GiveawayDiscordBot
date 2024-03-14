@@ -11,6 +11,7 @@ import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -122,16 +123,25 @@ public class PredefinedCommand {
                     }
 
                     if (role.getIdLong() == guildIdLong) {
-                        members.stream()
+                        List<User> userList = members.stream()
                                 .map(Member::getUser)
-                                .filter(user -> !user.isBot())
-                                .forEach(giveaway::addUser);
+                                .filter(user -> !user.isBot()).toList();
+
+                        giveaway.addUser(userList);
                     } else {
-                        members.stream()
+                        long startTime = System.currentTimeMillis();
+
+                        List<User> userList = members.stream()
                                 .filter(member -> member.getRoles().contains(role))
                                 .map(Member::getUser)
-                                .filter(user -> !user.isBot())
-                                .forEach(giveaway::addUser);
+                                .filter(user -> !user.isBot()).toList();
+
+                        giveaway.addUser(userList);
+
+                        long endTime = System.currentTimeMillis();
+
+                        long timeElapsed = endTime - startTime;
+                        System.out.println("Время работы метода: " + timeElapsed);
                     }
                 });
         listTask.isStarted();

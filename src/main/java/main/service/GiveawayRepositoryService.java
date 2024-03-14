@@ -38,8 +38,8 @@ public class GiveawayRepositoryService {
     }
 
     @Transactional
-    public void saveParticipants(Participants... participants) {
-        participantsRepository.saveAll(Arrays.stream(participants).toList());
+    public void saveParticipants(List<Participants> participants) {
+        participantsRepository.saveAll(participants);
     }
 
     public List<Participants> findAllParticipants(long guildId) {

@@ -7,7 +7,7 @@ import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.entities.User;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -19,24 +19,22 @@ public class GiveawayUserHandler {
     private final GiveawayRepositoryService giveawayRepositoryService;
 
     @Transactional
-    public void saveUser(Giveaway giveaway, User... user) {
+    public void saveUser(Giveaway giveaway, List<User> user) {
         long guildId = giveaway.getGuildId();
         boolean removed = giveaway.isRemoved();
 
         GiveawayData giveawayData = giveaway.getGiveawayData();
 
-        List<User> userList = Arrays.stream(user)
+        List<User> userList = user.stream()
                 .filter(users -> !giveawayData.participantContains(users.getId()))
                 .toList();
 
-        if (!removed) {
+        if (!removed && !userList.isEmpty()) {
             ActiveGiveaways activeGiveaways = giveawayRepositoryService.getGiveaway(guildId);
             if (activeGiveaways == null) return;
 
-            Participants[] participantsList = new Participants[userList.size()];
-            for (int i = 0; i < userList.size(); i++) {
-                User users = userList.get(i);
-
+            List<Participants> participantsList = new ArrayList<>(userList.size() + 1);
+            for (User users : userList) {
                 LOGGER.info(String.format("""
                                                                 
                                                                 
@@ -55,7 +53,7 @@ public class GiveawayUserHandler {
                 participants.setNickName(users.getName());
                 participants.setActiveGiveaways(activeGiveaways);
 
-                participantsList[i] = participants;
+                participantsList.add(participants);
                 giveawayData.addParticipant(users.getId());
             }
             giveawayRepositoryService.saveParticipants(participantsList);
