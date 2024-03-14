@@ -129,19 +129,12 @@ public class PredefinedCommand {
 
                         giveaway.addUser(userList);
                     } else {
-                        long startTime = System.currentTimeMillis();
-
                         List<User> userList = members.stream()
                                 .filter(member -> member.getRoles().contains(role))
                                 .map(Member::getUser)
                                 .filter(user -> !user.isBot()).toList();
 
                         giveaway.addUser(userList);
-
-                        long endTime = System.currentTimeMillis();
-
-                        long timeElapsed = endTime - startTime;
-                        System.out.println("Время работы метода: " + timeElapsed);
                     }
                 });
         listTask.isStarted();
