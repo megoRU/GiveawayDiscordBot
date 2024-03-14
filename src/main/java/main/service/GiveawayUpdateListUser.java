@@ -30,24 +30,22 @@ public class GiveawayUpdateListUser {
     public void updateGiveawayByGuild(@NotNull Giveaway giveaway) {
         GiveawayData giveawayData = giveaway.getGiveawayData();
 
-        long guildIdLong = giveaway.getGuildId();
+        long guildId = giveaway.getGuildId();
         boolean isForSpecificRole = giveawayData.isForSpecificRole();
         long messageId = giveawayData.getMessageId();
 
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
-        boolean hasGiveaway = instance.hasGiveaway(guildIdLong);
-
         JDA jda = BotStart.getJda();
 
         if (jda != null) {
-            if (hasGiveaway) {
+            if (instance.hasGiveaway(guildId)) {
                 long channelId = giveaway.getTextChannelId();
                 //System.out.println("Guild ID: " + guildIdLong);
 
                 List<MessageReaction> reactions = null;
                 TextChannel textChannelById;
                 try {
-                    Guild guildById = jda.getGuildById(guildIdLong);
+                    Guild guildById = jda.getGuildById(guildId);
                     if (guildById != null) {
                         textChannelById = guildById.getTextChannelById(channelId);
                         if (textChannelById != null) {
@@ -59,10 +57,9 @@ public class GiveawayUpdateListUser {
                                     .filter(messageReaction -> messageReaction.getEmoji().getName().equals(ReactionEvent.TADA))
                                     .toList();
                         }
-                        hasGiveaway = instance.hasGiveaway(guildIdLong);
 
                         //-1 because one Bot
-                        if (hasGiveaway &&
+                        if (instance.hasGiveaway(guildId) &&
                                 reactions != null &&
                                 !reactions.isEmpty() &&
                                 reactions.get(0).getCount() - 1 != giveawayData.getParticipantSize()) {
@@ -79,7 +76,7 @@ public class GiveawayUpdateListUser {
                                         Map<String, User> localUserMap = new HashMap<>(userList); //bad practice but it`s work
                                         Role roleGiveaway = jda.getRoleById(giveawayData.getRoleId());
                                         for (Map.Entry<String, User> entry : localUserMap.entrySet()) {
-                                            Guild guild = jda.getGuildById(guildIdLong);
+                                            Guild guild = jda.getGuildById(guildId);
                                             if (guild != null) {
                                                 try {
                                                     Member member = guild.retrieveMemberById(entry.getKey()).complete();
@@ -104,14 +101,10 @@ public class GiveawayUpdateListUser {
                                     }
                                 }
 
-                                hasGiveaway = instance.hasGiveaway(guildIdLong);
-
                                 //System.out.println("UserList count: " + userList);
                                 //Перебираем Users в реакциях
-                                for (Map.Entry<String, User> entry : userList.entrySet()) {
-                                    if (!hasGiveaway) return;
-                                    giveaway.addUser(entry.getValue());
-                                    //System.out.println("User id: " + user.getIdLong());
+                                if (instance.hasGiveaway(guildId)) {
+                                    giveaway.addUser(userList.values().stream().toList());
                                 }
                             }
                         }
@@ -121,8 +114,8 @@ public class GiveawayUpdateListUser {
                     if (e.getMessage() != null && e.getMessage().contains("10008: Unknown Message")
                             || e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
                         System.out.println("updateUserList() " + e.getMessage() + " удаляем!");
-                        giveawayRepositoryService.deleteGiveaway(guildIdLong);
-                        GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
+                        giveawayRepositoryService.deleteGiveaway(guildId);
+                        GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildId);
                     } else {
                         LOGGER.log(Level.SEVERE, e.getMessage(), e);
                     }
