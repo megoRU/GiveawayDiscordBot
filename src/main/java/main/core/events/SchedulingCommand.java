@@ -62,7 +62,7 @@ public class SchedulingCommand {
         //Обработать уведомление
         event.deferReply().setEphemeral(true).queue();
 
-        Scheduling scheduling = schedulingRepository.findByGuildLongId(guildId);
+        Scheduling scheduling = schedulingRepository.findByGuildId(guildId);
         ActiveGiveaways activeGiveaways = activeGiveawayRepository.findByGuildId(guildId);
 
         if (activeGiveaways != null) {
@@ -111,12 +111,12 @@ public class SchedulingCommand {
             }
 
             scheduling = new Scheduling();
-            scheduling.setGuildLongId(guildId);
+            scheduling.setGuildId(guildId);
             scheduling.setChannelId(textChannel.getIdLong());
             scheduling.setCountWinners(count);
             scheduling.setDateCreateGiveaway(timeProcessor(startTime));
-            scheduling.setDateEndGiveaway(timeProcessor(endTime) == null ? null : timeProcessor(endTime));
-            scheduling.setGiveawayTitle(title);
+            scheduling.setDateEnd(timeProcessor(endTime) == null ? null : timeProcessor(endTime));
+            scheduling.setTitle(title);
             scheduling.setRoleId(role);
             scheduling.setIsForSpecificRole(isOnlyForSpecificRole);
             scheduling.setCreatedUserId(userId);

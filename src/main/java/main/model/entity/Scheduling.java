@@ -20,8 +20,8 @@ import java.sql.Timestamp;
 public class Scheduling {
 
     @Id
-    @Column(name = "guild_long_id", nullable = false)
-    private Long guildLongId;
+    @Column(name = "guild_id", nullable = false)
+    private Long guildId;
 
     @Column(name = "channel_id", nullable = false)
     private Long channelId;
@@ -32,11 +32,11 @@ public class Scheduling {
     @Column(name = "create_giveaway", nullable = false)
     private Timestamp dateCreateGiveaway;
 
-    @Column(name = "date_end_giveaway")
-    private Timestamp dateEndGiveaway;
+    @Column(name = "date_end")
+    private Timestamp dateEnd;
 
-    @Column(name = "giveaway_title")
-    private String giveawayTitle;
+    @Column(name = "title")
+    private String title;
 
     @Column(name = "is_for_specific_role")
     private Boolean isForSpecificRole;

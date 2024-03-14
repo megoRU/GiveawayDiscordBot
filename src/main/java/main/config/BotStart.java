@@ -403,29 +403,29 @@ public class BotStart {
             if (localTime.after(scheduling.getDateCreateGiveaway())) {
                 try {
                     Long channelIdLong = scheduling.getChannelId();
-                    Guild guildById = jda.getGuildById(scheduling.getGuildLongId());
+                    Guild guildById = jda.getGuildById(scheduling.getGuildId());
 
                     if (guildById != null) {
                         TextChannel textChannelById = guildById.getTextChannelById(channelIdLong);
                         if (textChannelById != null) {
                             Long role = scheduling.getRoleId();
                             Boolean isOnlyForSpecificRole = scheduling.getIsForSpecificRole();
-                            Long guildIdLong = scheduling.getGuildLongId();
-                            Long guildId = scheduling.getGuildLongId();
+                            Long guildIdLong = scheduling.getGuildId();
+                            Long guildId = scheduling.getGuildId();
 
                             Giveaway giveaway = new Giveaway(
-                                    scheduling.getGuildLongId(),
+                                    scheduling.getGuildId(),
                                     textChannelById.getIdLong(),
                                     scheduling.getCreatedUserId(),
                                     giveawayRepositoryService,
                                     updateController);
 
                             GiveawayRegistry instance = GiveawayRegistry.getInstance();
-                            instance.putGift(scheduling.getGuildLongId(), giveaway);
+                            instance.putGift(scheduling.getGuildId(), giveaway);
 
                             String formattedDate = null;
-                            if (scheduling.getDateEndGiveaway() != null) {
-                                LocalDateTime dateEndGiveaway = LocalDateTime.ofInstant(scheduling.getDateEndGiveaway().toInstant(), ZoneOffset.UTC);
+                            if (scheduling.getDateEnd() != null) {
+                                LocalDateTime dateEndGiveaway = LocalDateTime.ofInstant(scheduling.getDateEnd().toInstant(), ZoneOffset.UTC);
                                 formattedDate = dateEndGiveaway.format(GiveawayUtils.FORMATTER);
                             }
 
@@ -441,7 +441,7 @@ public class BotStart {
 
                             giveaway.startGiveaway(
                                     textChannelById,
-                                    scheduling.getGiveawayTitle(),
+                                    scheduling.getTitle(),
                                     scheduling.getCountWinners(),
                                     formattedDate,
                                     scheduling.getRoleId(),
@@ -450,7 +450,7 @@ public class BotStart {
                                     false,
                                     scheduling.getMinParticipants());
 
-                            schedulingRepository.deleteById(scheduling.getGuildLongId());
+                            schedulingRepository.deleteById(scheduling.getGuildId());
                         }
                     }
                 } catch (Exception e) {
