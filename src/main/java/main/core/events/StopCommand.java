@@ -1,6 +1,7 @@
 package main.core.events;
 
 import main.giveaway.Giveaway;
+import main.giveaway.GiveawayData;
 import main.giveaway.GiveawayRegistry;
 import main.jsonparser.JSONParsers;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -12,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class StopCommand {
 
@@ -52,7 +52,10 @@ public class StopCommand {
             stop.setColor(Color.GREEN);
             stop.setDescription(slashStop);
             event.replyEmbeds(stop.build()).queue();
-            giveaway.stopGiveaway(giveaway.getCountWinners());
+
+            int countWinners = giveaway.getGiveawayData().getCountWinners();
+
+            giveaway.stopGiveaway(countWinners);
             return;
         }
 
@@ -65,12 +68,14 @@ public class StopCommand {
             return;
         }
 
+        GiveawayData giveawayData = giveaway.getGiveawayData();
+
         //TODO: Что это)
         EmbedBuilder stop = new EmbedBuilder();
         Long count = event.getOption("count", OptionMapping::getAsLong);
         boolean isHasErrors = false;
         if (count == null) return;
-        int listUsersSize = giveaway.getListUsersSize();
+        int listUsersSize = giveawayData.getParticipantSize();
 
         if (listUsersSize != 0 && listUsersSize <= count) {
             isHasErrors = true;

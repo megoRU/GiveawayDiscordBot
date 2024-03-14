@@ -15,10 +15,14 @@
 .idea
 trash
 .target/
+.logs/
+
+participants.json
 
 # Package Files #
 *.jar
 *.war
+*.gz
 *.nar
 *.ear
 *.zip

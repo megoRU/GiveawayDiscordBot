@@ -19,38 +19,38 @@ import java.util.Set;
 public class ActiveGiveaways {
 
     @Id
-    @Column(name = "guild_long_id", nullable = false)
-    private Long guildLongId;
+    @Column(name = "guild_id", nullable = false)
+    private Long guildId;
 
-    @Column(name = "channel_id_long", nullable = false)
-    private Long channelIdLong;
+    @Column(name = "channel_id", nullable = false)
+    private Long channelId;
 
     @Column(name = "count_winners")
     private int countWinners;
 
-    @Column(name = "date_end_giveaway")
-    private Timestamp dateEndGiveaway;
+    @Column(name = "date_end")
+    private Timestamp dateEnd;
 
-    @Column(name = "giveaway_title")
-    private String giveawayTitle;
+    @Column(name = "title")
+    private String title;
 
-    @Column(name = "message_id_long", nullable = false)
-    private Long messageIdLong;
+    @Column(name = "message_id", nullable = false)
+    private Long messageId;
 
     @Column(name = "is_for_specific_role")
     private Boolean isForSpecificRole;
 
-    @Column(name = "role_id_long")
-    private Long roleIdLong;
+    @Column(name = "role_id")
+    private Long roleId;
 
-    @Column(name = "id_user_who_create_giveaway", nullable = false)
-    private Long idUserWhoCreateGiveaway;
+    @Column(name = "created_user_id", nullable = false)
+    private Long createdUserId;
 
     @Column(name = "url_image")
     private String urlImage;
 
-    @Column(name = "finish_giveaway", nullable = false)
-    private boolean finishGiveaway;
+    @Column(name = "finish", nullable = false)
+    private boolean finish;
 
     @Column(name = "min_participants")
     private Integer minParticipants;

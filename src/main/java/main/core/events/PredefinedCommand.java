@@ -7,9 +7,11 @@ import main.jsonparser.JSONParsers;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.ListUsersRepository;
 import main.model.repository.ParticipantsRepository;
+import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -28,17 +30,13 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class PredefinedCommand {
 
-    private final ListUsersRepository listUsersRepository;
-    private final ActiveGiveawayRepository activeGiveawayRepository;
-    private final ParticipantsRepository participantsRepository;
+    private final GiveawayRepositoryService giveawayRepositoryService;
 
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     @Autowired
-    public PredefinedCommand(ListUsersRepository listUsersRepository, ActiveGiveawayRepository activeGiveawayRepository, ParticipantsRepository participantsRepository) {
-        this.listUsersRepository = listUsersRepository;
-        this.activeGiveawayRepository = activeGiveawayRepository;
-        this.participantsRepository = participantsRepository;
+    public PredefinedCommand(GiveawayRepositoryService giveawayRepositoryService) {
+        this.giveawayRepositoryService = giveawayRepositoryService;
     }
 
     public void predefined(@NotNull SlashCommandInteractionEvent event, UpdateController updateController) {
@@ -94,9 +92,7 @@ public class PredefinedCommand {
         Giveaway giveaway = new Giveaway(guildIdLong,
                 textChannel.getIdLong(),
                 userIdLong,
-                activeGiveawayRepository,
-                participantsRepository,
-                listUsersRepository,
+                giveawayRepositoryService,
                 updateController);
 
         GiveawayRegistry.getInstance().putGift(guildIdLong, giveaway);
@@ -127,16 +123,18 @@ public class PredefinedCommand {
                     }
 
                     if (role.getIdLong() == guildIdLong) {
-                        members.stream()
+                        List<User> userList = members.stream()
                                 .map(Member::getUser)
-                                .filter(user -> !user.isBot())
-                                .forEach(giveaway::addUser);
+                                .filter(user -> !user.isBot()).toList();
+
+                        giveaway.addUser(userList);
                     } else {
-                        members.stream()
+                        List<User> userList = members.stream()
                                 .filter(member -> member.getRoles().contains(role))
                                 .map(Member::getUser)
-                                .filter(user -> !user.isBot())
-                                .forEach(giveaway::addUser);
+                                .filter(user -> !user.isBot()).toList();
+
+                        giveaway.addUser(userList);
                     }
                 });
         listTask.isStarted();

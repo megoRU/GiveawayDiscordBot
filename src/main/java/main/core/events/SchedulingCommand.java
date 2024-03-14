@@ -37,9 +37,8 @@ public class SchedulingCommand {
     }
 
     public void scheduling(@NotNull SlashCommandInteractionEvent event) {
-        var guildIdLong = Objects.requireNonNull(event.getGuild()).getIdLong();
-        var guildId = event.getGuild().getIdLong();
-        var userIdLong = event.getUser().getIdLong();
+        var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
+        var userId = event.getUser().getIdLong();
         var role = event.getOption("mention", OptionMapping::getAsLong);
         var countString = event.getOption("count", OptionMapping::getAsString);
         var title = event.getOption("title", OptionMapping::getAsString);
@@ -63,8 +62,8 @@ public class SchedulingCommand {
         //Обработать уведомление
         event.deferReply().setEphemeral(true).queue();
 
-        Scheduling scheduling = schedulingRepository.findByGuildLongId(guildIdLong);
-        ActiveGiveaways activeGiveaways = activeGiveawayRepository.findByGuildLongId(guildIdLong);
+        Scheduling scheduling = schedulingRepository.findByGuildLongId(guildId);
+        ActiveGiveaways activeGiveaways = activeGiveawayRepository.findByGuildId(guildId);
 
         if (activeGiveaways != null) {
             String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_stop_giveaway", guildId);
@@ -105,22 +104,22 @@ public class SchedulingCommand {
                 String slashErrorOnlyForThisRole = jsonParsers.getLocale("slash_error_only_for_this_role", guildId);
                 event.getHook().sendMessage(slashErrorOnlyForThisRole).setEphemeral(true).queue();
                 return;
-            } else if (role != null && role == guildIdLong && isOnlyForSpecificRole) {
+            } else if (role != null && role == guildId && isOnlyForSpecificRole) {
                 String slashErrorRoleCanNotBeEveryone = jsonParsers.getLocale("slash_error_role_can_not_be_everyone", guildId);
                 event.getHook().sendMessage(slashErrorRoleCanNotBeEveryone).setEphemeral(true).queue();
                 return;
             }
 
             scheduling = new Scheduling();
-            scheduling.setGuildLongId(guildIdLong);
-            scheduling.setChannelIdLong(textChannel.getIdLong());
+            scheduling.setGuildLongId(guildId);
+            scheduling.setChannelId(textChannel.getIdLong());
             scheduling.setCountWinners(count);
             scheduling.setDateCreateGiveaway(timeProcessor(startTime));
             scheduling.setDateEndGiveaway(timeProcessor(endTime) == null ? null : timeProcessor(endTime));
             scheduling.setGiveawayTitle(title);
-            scheduling.setRoleIdLong(role);
+            scheduling.setRoleId(role);
             scheduling.setIsForSpecificRole(isOnlyForSpecificRole);
-            scheduling.setIdUserWhoCreateGiveaway(userIdLong);
+            scheduling.setCreatedUserId(userId);
             scheduling.setUrlImage(urlImage);
             scheduling.setMinParticipants(minParticipants);
 

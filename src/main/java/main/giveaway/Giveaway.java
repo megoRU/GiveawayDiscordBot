@@ -1,53 +1,26 @@
 package main.giveaway;
 
-import api.megoru.ru.entity.Winners;
-import api.megoru.ru.impl.MegoruAPI;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import main.config.Config;
 import main.controller.UpdateController;
 import main.core.events.ReactionEvent;
-import main.jsonparser.JSONParsers;
 import main.model.entity.ActiveGiveaways;
-import main.model.entity.Participants;
-import main.model.repository.ActiveGiveawayRepository;
-import main.model.repository.ListUsersRepository;
-import main.model.repository.ParticipantsRepository;
-import net.dv8tion.jda.api.EmbedBuilder;
+import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
-import java.awt.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Giveaway {
 
     private static final Logger LOGGER = Logger.getLogger(Giveaway.class.getName());
-    private static final JSONParsers jsonParsers = new JSONParsers();
-
-    //API
-    private final MegoruAPI api = new MegoruAPI.Builder().build();
-
-    //User LIST
-    private final ConcurrentHashMap<String, String> listUsersHash;
-    private final Set<String> uniqueWinners = new LinkedHashSet<>();
 
     //USER DATA
     @Getter
@@ -63,95 +36,54 @@ public class Giveaway {
 
     private final UpdateController updateController;
 
-    private final AtomicInteger count = new AtomicInteger(0);
-    private int localCountUsers;
-    @Getter
-    private boolean finishGiveaway;
     @Getter
     @Setter
-    private boolean isLocked;
-
-    //DTO
-    private final ConcurrentLinkedQueue<Participants> participantsList = new ConcurrentLinkedQueue<>();
-
-    //REPO
-    private final ActiveGiveawayRepository activeGiveawayRepository;
-    private final ParticipantsRepository participantsRepository;
-    private final ListUsersRepository listUsersRepository;
+    private volatile boolean isFinishGiveaway;
 
     @Getter
-    @NoArgsConstructor
-    public static class GiveawayData {
-        private long messageId;
-        private int countWinners;
-        private Long roleId;
-        private boolean isForSpecificRole;
-        private String urlImage;
-        private String title;
-        private Timestamp endGiveawayDate;
-        private int minParticipants = 2;
+    @Setter
+    private volatile boolean isLocked;
 
-        public GiveawayData(long messageId,
-                            int countWinners,
-                            Long roleId,
-                            boolean isForSpecificRole,
-                            String urlImage,
-                            String title,
-                            Timestamp endGiveawayDate,
-                            int minParticipants) {
-            this.messageId = messageId;
-            this.countWinners = countWinners;
-            this.roleId = roleId;
-            this.isForSpecificRole = isForSpecificRole;
-            this.urlImage = urlImage;
-            this.title = title;
-            this.endGiveawayDate = endGiveawayDate;
-            this.minParticipants = minParticipants;
-        }
-    }
+    @Getter
+    @Setter
+    private volatile boolean isRemoved;
 
-    public Giveaway(long guildId, long textChannelId, long userIdLong,
-                    ActiveGiveawayRepository activeGiveawayRepository,
-                    ParticipantsRepository participantsRepository,
-                    ListUsersRepository listUsersRepository, UpdateController updateController) {
-        this.guildId = guildId;
-        this.textChannelId = textChannelId;
-        this.userIdLong = userIdLong;
-        this.activeGiveawayRepository = activeGiveawayRepository;
-        this.participantsRepository = participantsRepository;
-        this.listUsersRepository = listUsersRepository;
-        this.listUsersHash = new ConcurrentHashMap<>();
-        this.giveawayData = new GiveawayData();
-        this.updateController = updateController;
-        autoInsert();
-    }
+    //REPO
+    private final GiveawayRepositoryService giveawayRepositoryService;
 
-    public Giveaway(long guildId, long textChannelId, long userIdLong,
-                    Map<String, String> listUsersHash,
-                    ActiveGiveawayRepository activeGiveawayRepository,
-                    ParticipantsRepository participantsRepository,
-                    ListUsersRepository listUsersRepository,
-                    GiveawayData giveawayData,
-                    boolean finishGiveaway,
-                    boolean isLocked,
+    public Giveaway(long guildId,
+                    long textChannelId,
+                    long userIdLong,
+                    GiveawayRepositoryService giveawayRepositoryService,
                     UpdateController updateController) {
         this.guildId = guildId;
         this.textChannelId = textChannelId;
         this.userIdLong = userIdLong;
-        this.activeGiveawayRepository = activeGiveawayRepository;
-        this.participantsRepository = participantsRepository;
-        this.listUsersRepository = listUsersRepository;
-        this.listUsersHash = new ConcurrentHashMap<>(listUsersHash);
+        this.giveawayData = new GiveawayData();
+        this.updateController = updateController;
+        this.giveawayRepositoryService = giveawayRepositoryService;
+    }
+
+    public Giveaway(long guildId,
+                    long textChannelId,
+                    long userIdLong,
+                    boolean isFinishGiveaway,
+                    boolean isLocked,
+                    GiveawayData giveawayData,
+                    GiveawayRepositoryService giveawayRepositoryService,
+                    UpdateController updateController) {
+        this.guildId = guildId;
+        this.textChannelId = textChannelId;
+        this.userIdLong = userIdLong;
         this.giveawayData = giveawayData;
-        this.finishGiveaway = finishGiveaway;
+        this.isFinishGiveaway = isFinishGiveaway;
         this.isLocked = isLocked;
         this.updateController = updateController;
-
-        autoInsert();
+        this.giveawayRepositoryService = giveawayRepositoryService;
     }
 
     public Timestamp updateTime(final String time) {
-        if (time == null) return this.giveawayData.endGiveawayDate;
+        if (time == null) return giveawayData.getEndGiveawayDate();
         ZoneOffset offset = ZoneOffset.UTC;
         LocalDateTime localDateTime;
 
@@ -163,14 +95,20 @@ public class Giveaway {
         }
 
         long toEpochSecond = localDateTime.toEpochSecond(offset);
-        this.giveawayData.endGiveawayDate = new Timestamp(toEpochSecond * 1000);
+        giveawayData.setEndGiveawayDate(new Timestamp(toEpochSecond * 1000));
 
-        return this.giveawayData.endGiveawayDate;
+        return giveawayData.getEndGiveawayDate();
     }
 
-    public void startGiveaway(GuildMessageChannel textChannel, String title, int countWinners,
-                              String time, Long role, boolean isOnlyForSpecificRole,
-                              String urlImage, boolean predefined, int minParticipants) {
+    public void startGiveaway(GuildMessageChannel textChannel,
+                              String title,
+                              int countWinners,
+                              String time,
+                              Long role,
+                              boolean isOnlyForSpecificRole,
+                              String urlImage,
+                              boolean predefined,
+                              int minParticipants) {
         //Записываем данные:
         LOGGER.info("\nGuild id: " + guildId
                 + "\nTextChannel: " + textChannel.getName() + " " + textChannel.getId()
@@ -182,12 +120,12 @@ public class Giveaway {
                 + "\nurlImage: " + urlImage
                 + "\npredefined: " + predefined);
 
-        this.giveawayData.title = title == null ? "Giveaway" : title;
-        this.giveawayData.countWinners = countWinners;
-        this.giveawayData.roleId = role;
-        this.giveawayData.urlImage = urlImage;
-        this.giveawayData.isForSpecificRole = isOnlyForSpecificRole;
-        this.giveawayData.minParticipants = minParticipants == 0 ? 2 : minParticipants;
+        giveawayData.setTitle(title);
+        giveawayData.setCountWinners(countWinners);
+        giveawayData.setRoleId(role);
+        giveawayData.setUrlImage(urlImage);
+        giveawayData.setForSpecificRole(isOnlyForSpecificRole);
+        giveawayData.setMinParticipants(minParticipants);
         updateTime(time); //Обновляем время
 
         //Отправка сообщения
@@ -201,266 +139,55 @@ public class Giveaway {
                         updateCollections(message);
                     });
         }
-        //Вот мы запускаем бесконечный поток.
-        autoInsert();
     }
 
     private void updateCollections(Message message) {
-        this.giveawayData.messageId = message.getIdLong();
+        giveawayData.setMessageId(message.getIdLong());
 
         ActiveGiveaways activeGiveaways = new ActiveGiveaways();
-        activeGiveaways.setGuildLongId(guildId);
-        activeGiveaways.setMessageIdLong(message.getIdLong());
-        activeGiveaways.setChannelIdLong(message.getChannel().getIdLong());
-        activeGiveaways.setCountWinners(this.giveawayData.countWinners);
-        activeGiveaways.setGiveawayTitle(this.giveawayData.title);
-        activeGiveaways.setMinParticipants(this.giveawayData.minParticipants);
+        activeGiveaways.setGuildId(guildId);
+        activeGiveaways.setMessageId(message.getIdLong());
+        activeGiveaways.setChannelId(message.getChannel().getIdLong());
+        activeGiveaways.setCountWinners(giveawayData.getCountWinners());
+        activeGiveaways.setTitle(giveawayData.getTitle());
+        activeGiveaways.setMinParticipants(giveawayData.getMinParticipants());
 
-        if (this.giveawayData.roleId == null || this.giveawayData.roleId == 0) {
-            activeGiveaways.setRoleIdLong(null);
+        if (giveawayData.getRoleId() == null || giveawayData.getRoleId() == 0) {
+            activeGiveaways.setRoleId(null);
         } else {
-            activeGiveaways.setRoleIdLong(this.giveawayData.roleId);
+            activeGiveaways.setRoleId(giveawayData.getRoleId());
         }
-        activeGiveaways.setIsForSpecificRole(this.giveawayData.isForSpecificRole);
-        activeGiveaways.setUrlImage(this.giveawayData.urlImage);
-        activeGiveaways.setIdUserWhoCreateGiveaway(userIdLong);
-        activeGiveaways.setDateEndGiveaway(this.giveawayData.endGiveawayDate == null ? null : this.giveawayData.endGiveawayDate);
+        activeGiveaways.setIsForSpecificRole(giveawayData.isForSpecificRole());
+        activeGiveaways.setUrlImage(giveawayData.getUrlImage());
+        activeGiveaways.setCreatedUserId(userIdLong);
+        activeGiveaways.setDateEnd(giveawayData.getEndGiveawayDate());
 
-        activeGiveawayRepository.saveAndFlush(activeGiveaways);
+        giveawayRepositoryService.saveGiveaway(activeGiveaways);
     }
 
-    public void addUser(final User user) {
-        LOGGER.info(String.format(
-                """
-                        \nНовый участник
-                        Nick: %s
-                        UserID: %s
-                        Guild: %s
-                        """,
-                user.getName(),
-                user.getId(),
-                guildId));
-        if (!listUsersHash.containsKey(user.getId())) {
-            count.incrementAndGet();
-            listUsersHash.put(user.getId(), user.getId());
-
-            //Add user to Collection
-            Participants participants = new Participants();
-            participants.setUserIdLong(user.getIdLong());
-            participants.setNickName(user.getName());
-//            participants.setActiveGiveaways(activeGiveaways); //Can`t be null
-            participantsList.add(participants);
-        }
+    public synchronized void addUser(List<User> user) {
+        GiveawayUserHandler giveawayUserHandler = new GiveawayUserHandler(giveawayRepositoryService);
+        giveawayUserHandler.saveUser(this, user);
     }
 
-    private synchronized void multiInsert() {
-        try {
-            if (count.get() > localCountUsers && GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
-                localCountUsers = count.get();
-                if (!participantsList.isEmpty()) {
-                    StringBuilder stringBuilder = new StringBuilder();
-                    Connection connection = DriverManager.getConnection(
-                            Config.getDatabaseUrl(),
-                            Config.getDatabaseUser(),
-                            Config.getDatabasePass());
-                    Statement statement = connection.createStatement();
-                    int size = participantsList.size();
-                    for (int i = 0; i < size; i++) {
-                        Participants poll = participantsList.poll();
-                        if (poll != null) {
-                            stringBuilder
-                                    .append(stringBuilder.isEmpty() ? "(" : ", (")
-                                    .append("'").append(poll.getNickName()
-                                            .replaceAll("'", "")
-                                            .replaceAll("\"", "")
-                                            .replaceAll("`", ""))
-                                    .append("', ")
-                                    .append(poll.getUserIdLong()).append(", ")
-                                    .append(guildId)
-                                    .append(")");
-                        }
-                    }
-
-                    if (!stringBuilder.isEmpty()) {
-                        String executeQuery = String.format("INSERT INTO participants (nick_name, user_long_id, guild_id) VALUES %s;", stringBuilder);
-                        statement.execute(executeQuery);
-                    }
-                    statement.close();
-                    connection.close();
-                }
-                if (participantsList.isEmpty()) {
-                    synchronized (this) {
-                        notifyAll();
-                    }
-                }
-            }
-        } catch (Exception e) {
-            String format = String.format("Таблица: %s больше не существует, скорее всего Giveaway завершился!", guildId);
-            LOGGER.info(format);
-            LOGGER.log(Level.WARNING, e.getMessage(), e);
-        }
+    public synchronized void addUser(User user) {
+        GiveawayUserHandler giveawayUserHandler = new GiveawayUserHandler(giveawayRepositoryService);
+        giveawayUserHandler.saveUser(this, List.of(user));
     }
 
-    public void stopGiveaway(final int countWinner) {
+    public synchronized void stopGiveaway(final int countWinner) {
         String logMessage = String.format(
                 """
                         \n
                         stopGift method:
-                        
+                                                
                         Guild ID: %s
                         ListUsersSize: %s
                         CountWinners: %s
-                        """, guildId, listUsersHash.size(), countWinner);
+                        """, guildId, giveawayData.getParticipantSize(), countWinner);
         LOGGER.info(logMessage);
 
-        Color userColor = GiveawayUtils.getUserColor(guildId);
-        try {
-            if (listUsersHash.size() < this.giveawayData.minParticipants) {
-                String giftNotEnoughUsers = jsonParsers.getLocale("gift_not_enough_users", guildId);
-                String giftGiveawayDeleted = jsonParsers.getLocale("gift_giveaway_deleted", guildId);
-
-                EmbedBuilder notEnoughUsers = new EmbedBuilder();
-                notEnoughUsers.setColor(userColor);
-                notEnoughUsers.setTitle(giftNotEnoughUsers);
-                notEnoughUsers.setDescription(giftGiveawayDeleted);
-                //Отправляет сообщение
-
-                updateController.setView(notEnoughUsers, guildId, textChannelId);
-
-                activeGiveawayRepository.deleteById(guildId);
-                GiveawayRegistry instance = GiveawayRegistry.getInstance();
-                instance.removeGuildFromGiveaway(guildId);
-                return;
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, e.getMessage(), e);
-        }
-
-        try {
-            //выбираем победителей
-            if (!participantsList.isEmpty()) {
-                synchronized (this) {
-                    wait(10000L);
-                }
-            }
-            List<Participants> participants = participantsRepository.findAllByActiveGiveaways_GuildLongId(guildId); //TODO: Native use may be
-            if (participants.isEmpty()) throw new Exception("participants is Empty");
-
-            LOGGER.info(String.format("Завершаем Giveaway: %s, Участников: %s", guildId, participants.size()));
-
-            Winners winners = new Winners(countWinner, 0, listUsersHash.size() - 1);
-            List<String> strings = api.getWinners(winners);
-            for (String string : strings) {
-                uniqueWinners.add("<@" + participants.get(Integer.parseInt(string)).getUserIdLong() + ">");
-            }
-        } catch (Exception e) {
-            if (!finishGiveaway) {
-                finishGiveaway = true;
-                String errorsWithApi = jsonParsers.getLocale("errors_with_api", guildId);
-                String errorsDescriptions = jsonParsers.getLocale("errors_descriptions", guildId);
-                EmbedBuilder errors = new EmbedBuilder();
-                errors.setColor(Color.RED);
-                errors.setTitle(errorsWithApi);
-                errors.setDescription(errorsDescriptions);
-                List<Button> buttons = new ArrayList<>();
-                buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
-                updateController.setView(errors.build(), guildId, textChannelId, buttons);
-
-                LOGGER.log(Level.WARNING, e.getMessage(), e);
-            }
-            return;
-        }
-
-        EmbedBuilder urlEmbedded = new EmbedBuilder();
-        urlEmbedded.setColor(userColor);
-        String url = GiveawayUtils.getDiscordUrlMessage(this.guildId, this.textChannelId, this.giveawayData.messageId);
-        String winnerArray = Arrays.toString(uniqueWinners.toArray())
-                .replaceAll("\\[", "")
-                .replaceAll("]", "");
-
-        String winnersContent;
-        if (uniqueWinners.size() == 1) {
-            winnersContent = String.format(jsonParsers.getLocale("gift_congratulations", guildId), winnerArray);
-            String giftUrl = String.format(jsonParsers.getLocale("gift_url", guildId), url);
-            urlEmbedded.setDescription(giftUrl);
-            EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId);
-            updateController.setView(embedBuilder, guildId, textChannelId);
-        } else {
-            winnersContent = String.format(jsonParsers.getLocale("gift_congratulations_many", guildId), winnerArray);
-            String giftUrl = String.format(jsonParsers.getLocale("gift_url", guildId), url);
-            urlEmbedded.setDescription(giftUrl);
-            EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId);
-            updateController.setView(embedBuilder, guildId, textChannelId);
-        }
-
-        updateController.setView(urlEmbedded.build(), winnersContent, this.guildId, textChannelId);
-
-        listUsersRepository.saveAllParticipantsToUserList(guildId);
-        activeGiveawayRepository.deleteById(guildId);
-
-        //Удаляет данные из коллекций
-        GiveawayRegistry instance = GiveawayRegistry.getInstance();
-        instance.removeGuildFromGiveaway(guildId);
+        GiveawayEnds giveawayEnds = new GiveawayEnds(giveawayRepositoryService);
+        giveawayEnds.stop(this, countWinner, updateController);
     }
-
-    //TODO: Не завершается после завершения
-    //Автоматически отправляет в БД данные которые в буфере StringBuilder
-    private void autoInsert() {
-        new Timer().scheduleAtFixedRate(new TimerTask() {
-            public void run() throws NullPointerException {
-                try {
-                    if (GiveawayRegistry.getInstance().hasGiveaway(guildId)) {
-                        multiInsert();
-                    } else {
-                        Thread.currentThread().interrupt();
-                    }
-                } catch (Exception e) {
-                    LOGGER.log(Level.WARNING, e.getMessage(), e);
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }, 2000, 5000);
-    }
-
-    public boolean isUsercontainsInGiveaway(String user) {
-        return listUsersHash.containsKey(user);
-    }
-
-    public int getListUsersSize() {
-        return listUsersHash.size();
-    }
-
-    public void setCount(int count) {
-        this.count.set(count);
-        this.localCountUsers = count;
-    }
-
-    public long getMessageId() {
-        return this.giveawayData.messageId;
-    }
-
-    public int getCountWinners() {
-        return this.giveawayData.countWinners;
-    }
-
-    public String getTitle() {
-        return this.giveawayData.title;
-    }
-
-    public Timestamp getEndGiveawayDate() {
-        return this.giveawayData.endGiveawayDate;
-    }
-
-    public Long getRoleId() {
-        return this.giveawayData.roleId;
-    }
-
-    public boolean isForSpecificRole() {
-        return this.giveawayData.isForSpecificRole;
-    }
-
-    public String getUrlImage() {
-        return this.giveawayData.urlImage;
-    }
-
 }

@@ -1,10 +1,7 @@
 package main.core.events;
 
 import main.controller.UpdateController;
-import main.giveaway.Giveaway;
-import main.giveaway.GiveawayEmbedUtils;
-import main.giveaway.GiveawayRegistry;
-import main.giveaway.GiveawayUtils;
+import main.giveaway.*;
 import main.jsonparser.JSONParsers;
 import main.model.repository.ActiveGiveawayRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -43,9 +40,9 @@ public class ChangeCommand {
         if (time != null) {
             if (time.matches(GiveawayUtils.ISO_TIME_REGEX)) {
                 if (GiveawayUtils.timeHandler(event, guildId, time)) return;
-
+                GiveawayData giveawayData = giveaway.getGiveawayData();
                 long channelId = giveaway.getTextChannelId();
-                long messageId = giveaway.getMessageId();
+                long messageId = giveawayData.getMessageId();
 
                 Timestamp timestamp = giveaway.updateTime(time);
 

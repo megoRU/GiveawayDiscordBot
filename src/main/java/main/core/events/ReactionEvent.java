@@ -2,6 +2,7 @@ package main.core.events;
 
 import main.controller.UpdateController;
 import main.giveaway.Giveaway;
+import main.giveaway.GiveawayData;
 import main.giveaway.GiveawayRegistry;
 import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
@@ -13,6 +14,7 @@ import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ReactionEvent {
@@ -33,18 +35,21 @@ public class ReactionEvent {
             GiveawayRegistry instance = GiveawayRegistry.getInstance();
             Giveaway giveaway = instance.getGiveaway(guildIdLong);
 
+
             if (giveaway != null) {
+                GiveawayData giveawayData = giveaway.getGiveawayData();
+                if (giveawayData.participantContains(user.getId())) return;
                 if (emoji.equals(TADA)) {
                     //Проверяем event id message с Giveaway message id
                     long messageIdWithReactionCurrent = event.getMessageIdLong();
-                    long messageIdWithReaction = giveaway.getMessageId();
+                    long messageIdWithReaction = giveawayData.getMessageId();
 
                     if (messageIdWithReactionCurrent != messageIdWithReaction) return;
-                    Long roleId = giveaway.getRoleId(); // null -> 0
+                    Long roleId = giveawayData.getRoleId(); // null -> 0
 
                     if (roleId != null && roleId != 0L) {
                         Role roleById = event.getGuild().getRoleById(roleId);
-                        boolean isForSpecificRole = giveaway.isForSpecificRole();
+                        boolean isForSpecificRole = giveawayData.isForSpecificRole();
 
                         if (isForSpecificRole && !event.getMember().getRoles().contains(roleById)) {
                             String url = GiveawayUtils.getDiscordUrlMessage(guildIdLong, event.getGuildChannel().getIdLong(), messageIdWithReactionCurrent);
@@ -61,14 +66,12 @@ public class ReactionEvent {
                         }
                     }
 
-                    if (!giveaway.isUsercontainsInGiveaway(user.getId())) {
-                        LOGGER.info(String.format("\nНовый участник: %s\nСервер: %s", user.getId(), event.getGuild().getId()));
-                        giveaway.addUser(user);
-                    }
+                    LOGGER.info(String.format("\nНовый участник: %s\nСервер: %s", user.getId(), event.getGuild().getId()));
+                    giveaway.addUser(user);
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
     }
 }

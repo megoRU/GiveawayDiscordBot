@@ -19,8 +19,8 @@ public interface ActiveGiveawayRepository extends JpaRepository<ActiveGiveaways,
 
     @Transactional
     @Modifying
-    @Query(value = "UPDATE ActiveGiveaways ac SET ac.dateEndGiveaway = :dateEndGiveaway WHERE ac.guildLongId = :guildIdLong")
-    void updateGiveawayTime(@Param("guildIdLong") Long guildIdLong, @Param("dateEndGiveaway") Timestamp dateEndGiveaway);
+    @Query(value = "UPDATE ActiveGiveaways ac SET ac.dateEnd = :dateEnd WHERE ac.guildId = :guildId")
+    void updateGiveawayTime(@Param("guildId") Long guildId, @Param("dateEnd") Timestamp dateEnd);
 
     @Override
     @NotNull
@@ -28,8 +28,8 @@ public interface ActiveGiveawayRepository extends JpaRepository<ActiveGiveaways,
     List<ActiveGiveaways> findAll();
 
     @Nullable
-    ActiveGiveaways findByGuildLongId(Long guildLongId);
+    ActiveGiveaways findByGuildId(Long guildLongId);
 
     @Nullable
-    ActiveGiveaways findByIdUserWhoCreateGiveawayAndGuildLongId(Long idUserWhoCreateGiveaway, Long guildLongId);
+    ActiveGiveaways findByCreatedUserIdAndGuildId(Long createdUserId, Long guildLongId);
 }
