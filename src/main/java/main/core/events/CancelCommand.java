@@ -30,7 +30,7 @@ public class CancelCommand {
         long guildId = event.getGuild().getIdLong();
         long userId = event.getUser().getIdLong();
 
-        Scheduling scheduling = schedulingRepository.findByCreatedUserIdAndGuildLongId(userId, guildId);
+        Scheduling scheduling = schedulingRepository.findByCreatedUserIdAndGuildId(userId, guildId);
         ActiveGiveaways activeGiveaways = activeGiveawayRepository.findByCreatedUserIdAndGuildId(userId, guildId);
 
         GiveawayRegistry instance = GiveawayRegistry.getInstance();

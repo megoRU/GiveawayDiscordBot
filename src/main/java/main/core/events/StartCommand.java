@@ -57,7 +57,7 @@ public class StartCommand {
         Message.Attachment image = event.getOption("image", OptionMapping::getAsAttachment);
         Integer minParticipants = event.getOption("min_participants", OptionMapping::getAsInt);
 
-        Scheduling schedulingByGuildLongId = schedulingRepository.findByGuildLongId(guildIdLong);
+        Scheduling schedulingByGuildLongId = schedulingRepository.findByGuildId(guildIdLong);
         if (GiveawayRegistry.getInstance().hasGiveaway(guildIdLong)) {
             String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_stop_giveaway", guildId);
             EmbedBuilder errors = new EmbedBuilder();
