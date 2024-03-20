@@ -36,8 +36,13 @@ public class GiveawayEnds {
 
         GiveawayUpdateListUser giveawayUpdateListUser = new GiveawayUpdateListUser(giveawayRepositoryService);
         giveawayUpdateListUser.updateGiveawayByGuild(giveaway);
+        //TODO: Native use may be
+        List<Long> participants = giveawayRepositoryService.findAllParticipants(guildId)
+                .stream()
+                .map(Participants::getUserId)
+                .distinct()
+                .toList();
 
-        List<Participants> participants = giveawayRepositoryService.findAllParticipants(guildId); //TODO: Native use may be
         final Set<String> uniqueWinners = new LinkedHashSet<>();
 
         Color userColor = GiveawayUtils.getUserColor(guildId);
@@ -69,7 +74,7 @@ public class GiveawayEnds {
             Winners winners = new Winners(countWinner, 0, participants.size() - 1);
             List<String> strings = api.getWinners(winners);
             for (String string : strings) {
-                uniqueWinners.add("<@" + participants.get(Integer.parseInt(string)).getUserId() + ">");
+                uniqueWinners.add("<@" + participants.get(Integer.parseInt(string)) + ">");
             }
         } catch (Exception e) {
             if (!finishGiveaway) {

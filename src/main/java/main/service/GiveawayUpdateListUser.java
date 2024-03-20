@@ -109,7 +109,6 @@ public class GiveawayUpdateListUser {
                             }
                         }
                     }
-
                 } catch (Exception e) {
                     if (e.getMessage() != null && e.getMessage().contains("10008: Unknown Message")
                             || e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
