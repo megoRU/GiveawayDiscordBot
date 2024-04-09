@@ -4,17 +4,8 @@ ENV LANG=C.UTF-8
 
 WORKDIR /app
 
-# Копируем только pom.xml, чтобы установить зависимости
-COPY pom.xml .
+COPY . .
 
-# Устанавливаем зависимости без кэша и удаляем временные файлы
-RUN mvn -B dependency:go-offline && rm -rf /root/.m2
+RUN ["mvn", "install"]
 
-# Копируем исходный код
-COPY src/ src/
-
-# Собираем приложение
-RUN ["mvn", "install", "-Dmaven.test.skip=true"]
-
-# Указываем точку входа
-ENTRYPOINT ["java", "-jar", "GiveawayDiscordBot-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "./target/GiveawayDiscordBot-0.0.1-SNAPSHOT.jar"]
