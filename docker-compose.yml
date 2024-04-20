@@ -1,6 +1,16 @@
-version: '3.9'
+version: '3'
 
 services:
   giveaway:
-    image: megoru/giveaway
+    container_name: giveaway_bot
+    image: megoru/giveaway:latest
     restart: always
+    volumes:
+      - ./giveaway_logs:/app/logs
+    environment:
+      DATABASE_URL: jdbc:mariadb:// IP :3306/ YOUR_USER ?useSSL=false&serverTimezone=UTC&characterEncoding=utf8
+      DATABASE_USER: YOUR_USER
+      DATABASE_PASS: YOUR_PASSWORD
+      TOKEN: OUR_BOT_TOKEN #see https://discord.com/developers/applications
+
+# YOUR_IP and YOUR_USER don't forget to remove the spaces

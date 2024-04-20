@@ -76,11 +76,6 @@ public class BotStart {
     private static JDA jda;
     private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
 
-    //API
-    private final BotiCordAPI api = new BotiCordAPI.Builder()
-            .token(Config.getBoticord())
-            .build();
-
     //REPOSITORY
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final UpdateController updateController;
@@ -376,16 +371,20 @@ public class BotStart {
 
     @Scheduled(fixedDelay = 120, initialDelay = 8, timeUnit = TimeUnit.SECONDS)
     private void topGGAndStatcord() {
+        int serverCount = BotStart.jda.getGuilds().size();
+        BotStart.jda.getPresence().setActivity(Activity.playing(BotStart.activity + serverCount + " guilds"));
+        AtomicInteger usersCount = new AtomicInteger();
+        BotStart.jda.getGuilds().forEach(g -> usersCount.addAndGet(g.getMembers().size()));
+
+        String boticord = Config.getBoticord();
+        if (boticord == null) return;
+
+        BotiCordAPI api = new BotiCordAPI.Builder()
+                .token(boticord)
+                .build();
+
         if (!Config.isIsDev()) {
             try {
-                int serverCount = BotStart.jda.getGuilds().size();
-
-                BotStart.jda.getPresence().setActivity(Activity.playing(BotStart.activity + serverCount + " guilds"));
-
-                //BOTICORD API
-                AtomicInteger usersCount = new AtomicInteger();
-                BotStart.jda.getGuilds().forEach(g -> usersCount.addAndGet(g.getMembers().size()));
-
                 BotStats botStats = new BotStats(usersCount.get(), serverCount, 1);
                 api.setBotStats(Config.getBotId(), botStats);
             } catch (Exception e) {
