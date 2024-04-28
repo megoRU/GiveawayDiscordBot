@@ -109,22 +109,27 @@ public class BotStart {
             setLanguages();
             getLocalizationFromDB();
 
-            List<GatewayIntent> intents = new ArrayList<>(
-                    Arrays.asList(
+            List<GatewayIntent> intents = Arrays.asList(
                             GatewayIntent.GUILD_MEMBERS,
                             GatewayIntent.GUILD_MESSAGES,
                             GatewayIntent.GUILD_EMOJIS_AND_STICKERS,
                             GatewayIntent.GUILD_MESSAGE_REACTIONS,
                             GatewayIntent.DIRECT_MESSAGES,
-                            GatewayIntent.DIRECT_MESSAGE_TYPING));
+                            GatewayIntent.DIRECT_MESSAGE_TYPING);
 
-            List<CacheFlag> cacheFlags = new ArrayList<>(
-                    Arrays.asList(
-                            CacheFlag.ROLE_TAGS,
-                            CacheFlag.ACTIVITY,
-                            CacheFlag.MEMBER_OVERRIDES));
+            jdaBuilder.disableCache(
+                    CacheFlag.ACTIVITY,
+                    CacheFlag.VOICE_STATE,
+                    CacheFlag.EMOJI,
+                    CacheFlag.STICKER,
+                    CacheFlag.CLIENT_STATUS,
+                    CacheFlag.MEMBER_OVERRIDES,
+                    CacheFlag.ROLE_TAGS,
+                    CacheFlag.FORUM_TAGS,
+                    CacheFlag.ONLINE_STATUS,
+                    CacheFlag.SCHEDULED_EVENTS
+            );
 
-            jdaBuilder.disableCache(cacheFlags);
             jdaBuilder.enableIntents(intents);
             jdaBuilder.setAutoReconnect(true);
             jdaBuilder.setStatus(OnlineStatus.ONLINE);
