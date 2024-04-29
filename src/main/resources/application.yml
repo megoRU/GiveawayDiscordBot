@@ -12,7 +12,6 @@ spring:
         order_inserts: true
         jdbc.batch_size: 100
     show-sql: false
-    database-platform: org.hibernate.dialect.MariaDBDialect
     hibernate:
       ddl-auto: validate
 
