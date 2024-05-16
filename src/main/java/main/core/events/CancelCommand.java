@@ -1,6 +1,8 @@
 package main.core.events;
 
+import lombok.AllArgsConstructor;
 import main.giveaway.GiveawayRegistry;
+import main.jsonparser.JSONParsers;
 import main.model.entity.ActiveGiveaways;
 import main.model.entity.Scheduling;
 import main.model.repository.ActiveGiveawayRepository;
@@ -8,22 +10,17 @@ import main.model.repository.SchedulingRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
 
 @Service
+@AllArgsConstructor
 public class CancelCommand {
 
     private final SchedulingRepository schedulingRepository;
     private final ActiveGiveawayRepository activeGiveawayRepository;
-
-    @Autowired
-    public CancelCommand(SchedulingRepository schedulingRepository, ActiveGiveawayRepository activeGiveawayRepository) {
-        this.schedulingRepository = schedulingRepository;
-        this.activeGiveawayRepository = activeGiveawayRepository;
-    }
+    private static final JSONParsers jsonParsers = new JSONParsers();
 
     public void cancel(@NotNull SlashCommandInteractionEvent event) {
         if (event.getGuild() == null) return;
@@ -39,19 +36,23 @@ public class CancelCommand {
         cancel.setColor(Color.GREEN);
 
         if (scheduling != null) {
+            String cancelSchedulingGiveaway = jsonParsers.getLocale("cancel_scheduling_giveaway", guildId);
+
             schedulingRepository.deleteById(guildId);
             instance.removeGuildFromGiveaway(guildId);
-            cancel.setDescription("Успешно отменили запланированный Giveaway!");
+            cancel.setDescription(cancelSchedulingGiveaway);
         } else if (activeGiveaways != null) {
+            String cancelGiveaway = jsonParsers.getLocale("cancel_giveaway", guildId);
+
             activeGiveawayRepository.deleteById(guildId);
             instance.removeGuildFromGiveaway(guildId);
-            cancel.setDescription("Успешно отменили Giveaway!");
+            cancel.setDescription(cancelGiveaway);
         } else {
-            cancel.setDescription("Нет доступа или нет активных Giveaway!");
+            String cancelSchedulingGiveaway = jsonParsers.getLocale("no_active_giveaway", guildId);
+
+            cancel.setDescription(cancelSchedulingGiveaway);
         }
 
-        event.replyEmbeds(cancel.build())
-                .setEphemeral(true)
-                .queue();
+        event.replyEmbeds(cancel.build()).setEphemeral(true).queue();
     }
 }

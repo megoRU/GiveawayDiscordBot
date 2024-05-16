@@ -64,5 +64,8 @@
   "you_wrote_date": "Вы написали дату: `%s`\nСейчас (UTC±0):⠀ ⠀`%s`",
   "schedule_start": "Дата и время запуска: <t:%s:R> (<t:%s:f>)\nДата и время завершения: %s\nВ канале: <#%s>",
   "schedule_end": "Не задано",
-  "gift_hosted": "\nСоздатель: <@%s>"
+  "gift_hosted": "\nСоздатель: <@%s>",
+  "cancel_scheduling_giveaway": "Успешно отменили запланированный Giveaway!",
+  "cancel_giveaway": "Успешно отменили Giveaway!",
+  "no_active_giveaway": "Нет доступа или нет активных Giveaway!"
 }
