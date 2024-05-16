@@ -39,7 +39,7 @@ public class HelpCommand {
                         </check-bot-permission:1009065886335914054> - Check bot permissions
                         </change:1027901550456225842> - Change the active Giveaway time
                         </patreon:945299399855210527> - Patreon
-                         """, false);
+                        """, false);
         String messagesEventsLinks = jsonParsers.getLocale("messages_events_links", guildId);
         String messagesEventsSite = jsonParsers.getLocale("messages_events_site", guildId);
         String messagesEventsAddMeToOtherGuilds = jsonParsers.getLocale("messages_events_add_me_to_other_guilds", guildId);
