@@ -43,7 +43,7 @@
   "gift_url": "[Ссылка на Giveaway](%s)",
   "gift_reaction": "Ставьте :tada: чтобы участвовать!",
   "gift_permissions": "Бот имеет все необходимые разрешения в: <#%s>",
-  "check_permissions": "У бота нет в <#%s>\n%s",
+  "check_permissions": "У бота нет в <#%s>\n\n%s",
   "start_in_thread": "Запрещено создавать <@808277484524011531> в Thread!",
   "start_in_not_text_channels": "Можно создавать <@808277484524011531> только в TextChannels!",
   "start_wrong_time": "Вы неправильно задали время: `%s`\n %s",
@@ -67,5 +67,17 @@
   "gift_hosted": "\nСоздатель: <@%s>",
   "cancel_scheduling_giveaway": "Успешно отменили запланированный Giveaway!",
   "cancel_giveaway": "Успешно отменили Giveaway!",
-  "no_active_giveaway": "Нет доступа или нет активных Giveaway!"
+  "no_active_giveaway": "Нет доступа или нет активных Giveaway!",
+  "bot_permissions_deny": "У бота нет разрешений в этом канале: </check-bot-permission:1009065886335914054>",
+  "help_start": "Запустить Giveaway с множеством параметров",
+  "help_stop": "Остановить Giveaway",
+  "help_scheduling": "Запустить запланированный Giveaway",
+  "help_cancel": "Отменить Giveaway",
+  "help_reroll": "Перевыбрать одного победителя по ID Giveaway",
+  "help_predefined": "Собрать участников и немедленно провести Giveaway для определенной @Роли.",
+  "help_list": "Список участников",
+  "help_language": "Настроить язык бота",
+  "help_participants": "Получить список участников по ID Giveaway",
+  "help_permissions": "Проверить разрешения бота",
+  "help_change": "Изменить время активного Giveaway"
 }

@@ -43,7 +43,7 @@
   "gift_url": "[Link to Giveaway](%s)",
   "gift_reaction": "React with :tada: to enter!",
   "gift_permissions": "The bot has all the necessary permissions in: <#%s>",
-  "check_permissions": "Bot don't have in <#%s>\n%s",
+  "check_permissions": "Bot don't have in <#%s>\n\n%s",
   "start_in_thread": "It is forbidden to create <@808277484524011531> in Thread!",
   "start_in_not_text_channels": "You can create <@808277484524011531> only in TextChannels!",
   "start_wrong_time": "You set the time incorrectly: `%s`\n %s",
@@ -67,5 +67,17 @@
   "gift_hosted": "\nCreator: <@%s>",
   "cancel_scheduling_giveaway": "Successfully cancelled the scheduled Giveaway!",
   "cancel_giveaway": "Giveaway was successfully canceled!",
-  "no_active_giveaway": "No access or no active Giveaway!"
+  "no_active_giveaway": "No access or no active Giveaway!",
+  "bot_permissions_deny": "The bot does not have permissions in this channel: </check-bot-permission:1009065886335914054>",
+  "help_start": "Start Giveaway with lots of parameters",
+  "help_stop": "Stop Giveaway",
+  "help_scheduling": "Run scheduled Giveaway",
+  "help_cancel": "Cancel Giveaway",
+  "help_reroll": "Reroll one winner by Giveaway ID",
+  "help_predefined": "Gather participants and immediately hold a drawing for a certain @Role.",
+  "help_list": "List of participants",
+  "help_language": "Setup Bot Language",
+  "help_participants": "Get a list of participants by the Giveaway ID",
+  "help_permissions": "Check bot permissions",
+  "help_change": "Change the active Giveaway time"
 }

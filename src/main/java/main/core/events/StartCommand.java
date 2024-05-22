@@ -1,20 +1,19 @@
 package main.core.events;
 
 import main.controller.UpdateController;
-import main.giveaway.ChecksClass;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
 import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.model.entity.Scheduling;
 import main.model.repository.ActiveGiveawayRepository;
-import main.model.repository.ListUsersRepository;
-import main.model.repository.ParticipantsRepository;
 import main.model.repository.SchedulingRepository;
 import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.channel.unions.GuildMessageChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
@@ -43,11 +42,19 @@ public class StartCommand {
     }
 
     public void start(@NotNull SlashCommandInteractionEvent event, UpdateController updateController) {
-        boolean canSendGiveaway = ChecksClass.canSendGiveaway(event.getGuildChannel(), event);
-        if (!canSendGiveaway) return; //Сообщение уже отправлено
+        GuildMessageChannelUnion channel = event.getGuildChannel();
+        Guild guild = event.getGuild();
+        if (guild == null) return;
 
-        var guildIdLong = Objects.requireNonNull(event.getGuild()).getIdLong();
-        var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
+        boolean checkPermissions = GiveawayUtils.checkPermissions(channel, guild.getSelfMember());
+        if (!checkPermissions) {
+            String botPermissionsDeny = jsonParsers.getLocale("bot_permissions_deny", guild.getIdLong());
+            event.reply(botPermissionsDeny).queue();
+            return; //Сообщение уже отправлено
+        }
+
+        var guildIdLong = Objects.requireNonNull(guild).getIdLong();
+        var guildId = Objects.requireNonNull(guild).getIdLong();
         var userIdLong = event.getUser().getIdLong();
         String title = event.getOption("title", OptionMapping::getAsString);
         String countString = event.getOption("count", OptionMapping::getAsString);

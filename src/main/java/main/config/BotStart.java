@@ -565,9 +565,9 @@ public class BotStart {
     public void stopGiveawayTimer() {
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
         List<Giveaway> giveawayDataList = new LinkedList<>(instance.getAllGiveaway());
+        StopGiveawayHandler stopGiveawayHandler = new StopGiveawayHandler();
         for (Giveaway giveaway : giveawayDataList) {
             try {
-                StopGiveawayHandler stopGiveawayHandler = new StopGiveawayHandler();
                 stopGiveawayHandler.handleGiveaway(giveaway);
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, e.getMessage(), e);

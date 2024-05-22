@@ -180,7 +180,7 @@ public class Giveaway {
                 """
                         \n
                         stopGift method:
-                                                
+                        \s
                         Guild ID: %s
                         ListUsersSize: %s
                         CountWinners: %s

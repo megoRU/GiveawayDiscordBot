@@ -1,6 +1,5 @@
 package main.core.events;
 
-import main.giveaway.ChecksClass;
 import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.model.entity.ActiveGiveaways;
@@ -56,8 +55,12 @@ public class SchedulingCommand {
             return;
         }
 
-        boolean canSendGiveaway = ChecksClass.canSendGiveaway(textChannel, event);
-        if (!canSendGiveaway) return; //Сообщение уже отправлено
+        boolean checkPermissions = GiveawayUtils.checkPermissions(textChannel, event.getGuild().getSelfMember());
+        if (!checkPermissions) {
+            String botPermissionsDeny = jsonParsers.getLocale("bot_permissions_deny", guildId);
+            event.reply(botPermissionsDeny).queue();
+            return; //Сообщение уже отправлено
+        }
 
         //Обработать уведомление
         event.deferReply().setEphemeral(true).queue();

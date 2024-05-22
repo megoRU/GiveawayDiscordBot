@@ -4,6 +4,9 @@ import main.config.BotStart;
 import main.jsonparser.JSONParsers;
 import main.model.entity.Settings;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,6 +23,15 @@ public class GiveawayUtils {
     public static final String ISO_TIME_REGEX = "^\\d{4}.\\d{2}.\\d{2}\\s\\d{2}:\\d{2}$"; //2021.11.16 16:00
     public static final String TIME_REGEX = "(\\d{4}.\\d{2}.\\d{2}\\s\\d{2}:\\d{2})|(\\d{1,2}[smhdсмдч]|\\s)+";
     public static final JSONParsers jsonParsers = new JSONParsers();
+
+    public static boolean checkPermissions(GuildChannel guildChannel, Member selfMember) {
+        return selfMember.hasPermission(guildChannel,
+                Permission.MESSAGE_ADD_REACTION,
+                Permission.MESSAGE_EMBED_LINKS,
+                Permission.MESSAGE_HISTORY,
+                Permission.VIEW_CHANNEL,
+                Permission.MESSAGE_SEND);
+    }
 
     public static long getSeconds(String time) {
         String[] splitTime = time.split("\\s+");
