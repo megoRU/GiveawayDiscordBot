@@ -76,7 +76,7 @@
   "help_reroll": "Reroll one winner by Giveaway ID",
   "help_predefined": "Gather participants and immediately hold a drawing for a certain @Role.",
   "help_list": "List of participants",
-  "help_language": "Setup Bot Language",
+  "help_language": "Setup Bot Language and color messages",
   "help_participants": "Get a list of participants by the Giveaway ID",
   "help_permissions": "Check bot permissions",
   "help_change": "Change the active Giveaway time"

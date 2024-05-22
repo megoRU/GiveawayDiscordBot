@@ -76,7 +76,7 @@
   "help_reroll": "Перевыбрать одного победителя по ID Giveaway",
   "help_predefined": "Собрать участников и немедленно провести Giveaway для определенной @Роли.",
   "help_list": "Список участников",
-  "help_language": "Настроить язык бота",
+  "help_language": "Настроить язык бота и цвет сообщений",
   "help_participants": "Получить список участников по ID Giveaway",
   "help_permissions": "Проверить разрешения бота",
   "help_change": "Изменить время активного Giveaway"

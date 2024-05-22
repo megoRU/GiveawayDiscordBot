@@ -47,7 +47,7 @@ public class HelpCommand {
                         </reroll:957624805446799452> - %s
                         </predefined:1049647289779630080> - %s
                         </list:941286272390037538> - %s
-                        </language:941286272390037534> - %s
+                        </settings:1204911821056905277> - %s
                         </participants:952572018077892638> - %s
                         </check-bot-permission:1009065886335914054> - %s
                         </change:1027901550456225842> - %s
