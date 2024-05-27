@@ -149,7 +149,7 @@ public class BotStart {
             System.out.println("IsDevMode: " + Config.isIsDev());
 
             //Обновить команды
-//            updateSlashCommands();
+            updateSlashCommands();
             System.out.println("20:22");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
@@ -230,6 +230,7 @@ public class BotStart {
 
             optionsScheduling.add(new OptionData(INTEGER, "min_participants", "Delete Giveaway if the number of participants is less than this number")
                     .setName("min_participants")
+                    .setMinValue(2)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Удалить Giveaway если участников меньше этого числа"));
 
             //Start Giveaway
@@ -264,6 +265,7 @@ public class BotStart {
 
             optionsStart.add(new OptionData(INTEGER, "min_participants", "Delete Giveaway if the number of participants is less than this number")
                     .setName("min_participants")
+                    .setMinValue(2)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Удалить Giveaway если участников меньше этого числа"));
 
             List<OptionData> predefined = new ArrayList<>();

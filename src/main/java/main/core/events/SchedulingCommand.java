@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.util.Objects;
+import java.util.Optional;
 
 import static main.giveaway.GiveawayUtils.timeProcessor;
 
@@ -39,15 +40,15 @@ public class SchedulingCommand {
         var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
         var userId = event.getUser().getIdLong();
         var role = event.getOption("mention", OptionMapping::getAsLong);
-        var countString = event.getOption("count", OptionMapping::getAsString);
+        int count = Optional.ofNullable(event.getOption("count", OptionMapping::getAsInt)).orElse(1);
         var title = event.getOption("title", OptionMapping::getAsString);
         var textChannel = event.getOption("textchannel", OptionMapping::getAsChannel);
         var image = event.getOption("image", OptionMapping::getAsAttachment);
         var urlImage = image != null ? image.getUrl() : null;
-        var minParticipants = event.getOption("min_participants", OptionMapping::getAsInt);
-        var startTime = event.getOption("start_time", OptionMapping::getAsString);
+        int minParticipants = Optional.ofNullable(event.getOption("min_participants", OptionMapping::getAsInt)).orElse(2);
+        var startTime = Objects.requireNonNull(event.getOption("start_time", OptionMapping::getAsString));
         var endTime = event.getOption("end_time", OptionMapping::getAsString);
-        var forbiddenRole = event.getOption("forbidden_role", OptionMapping::getAsRole);
+//        var forbiddenRole = event.getOption("forbidden_role", OptionMapping::getAsRole);
         boolean isOnlyForSpecificRole = Objects.equals(event.getOption("role", OptionMapping::getAsString), "yes");
 
         if (textChannel == null) {
@@ -84,21 +85,13 @@ public class SchedulingCommand {
             return;
         }
 
-        if ((startTime != null && !startTime.matches(GiveawayUtils.ISO_TIME_REGEX)
-                || (endTime != null && !endTime.matches(GiveawayUtils.ISO_TIME_REGEX)))) {
+        if (GiveawayUtils.isTimeCorrect(startTime) || (endTime != null && GiveawayUtils.isTimeCorrect(endTime))) {
             String wrongDate = jsonParsers.getLocale("wrong_date", guildId);
             event.getHook().sendMessage(wrongDate).queue();
             return;
         }
 
         if (textChannel instanceof NewsChannel || textChannel instanceof TextChannel) {
-            int count = 1;
-            if (countString != null) count = Integer.parseInt(countString);
-
-            if (minParticipants == null || minParticipants < 2) {
-                minParticipants = 2;
-            }
-
             if (image != null && image.isImage()) {
                 urlImage = image.getUrl();
             }

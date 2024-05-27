@@ -3,11 +3,9 @@ package main.giveaway;
 import main.config.BotStart;
 import main.jsonparser.JSONParsers;
 import main.model.entity.Settings;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -71,26 +69,14 @@ public class GiveawayUtils {
         }
     }
 
-    public static boolean timeHandler(@NotNull SlashCommandInteractionEvent event, long guildId, String time) {
+    public static boolean isTimeCorrect(@NotNull String time) {
+        return time.matches(GiveawayUtils.ISO_TIME_REGEX);
+    }
+
+    public static boolean isTimeBefore(String time) {
         LocalDateTime localDateTime = LocalDateTime.parse(time, FORMATTER);
         LocalDateTime now = Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime();
-        if (localDateTime.isBefore(now)) {
-            String wrongDate = jsonParsers.getLocale("wrong_date", guildId);
-            String youWroteDate = jsonParsers.getLocale("you_wrote_date", guildId);
-
-            String format = String.format(youWroteDate,
-                    localDateTime.toString().replace("T", " "),
-                    now.toString().substring(0, 16).replace("T", " "));
-
-            EmbedBuilder builder = new EmbedBuilder();
-            builder.setColor(Color.RED);
-            builder.setTitle(wrongDate);
-            builder.setDescription(format);
-
-            event.replyEmbeds(builder.build()).queue();
-            return true;
-        }
-        return false;
+        return localDateTime.isBefore(now);
     }
 
     public static String setEndingWord(int num, long guildId) {

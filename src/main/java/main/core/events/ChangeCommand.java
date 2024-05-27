@@ -38,8 +38,13 @@ public class ChangeCommand {
         }
         String time = event.getOption("duration", OptionMapping::getAsString);
         if (time != null) {
-            if (time.matches(GiveawayUtils.ISO_TIME_REGEX)) {
-                if (GiveawayUtils.timeHandler(event, guildId, time)) return;
+            if (GiveawayUtils.isTimeCorrect(time)) {
+                if (GiveawayUtils.isTimeBefore(time)) {
+                    String changeDuration = jsonParsers.getLocale("wrong_date", guildId);
+                    event.reply(changeDuration).setEphemeral(true).queue();
+                    return;
+                }
+
                 GiveawayData giveawayData = giveaway.getGiveawayData();
                 long channelId = giveaway.getTextChannelId();
                 long messageId = giveawayData.getMessageId();
@@ -52,6 +57,7 @@ public class ChangeCommand {
                 activeGiveawayRepository.updateGiveawayTime(guildIdLong, timestamp);
                 EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayPattern(guildIdLong);
 
+                //Редактируем сообщение с Giveaway
                 updateController.setView(embedBuilder.build(), guildIdLong, channelId, messageId);
             }
         }
