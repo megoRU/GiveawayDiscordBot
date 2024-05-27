@@ -85,7 +85,13 @@ public class SchedulingCommand {
             return;
         }
 
-        if (GiveawayUtils.isTimeCorrect(startTime) || (endTime != null && GiveawayUtils.isTimeCorrect(endTime))) {
+        if (!GiveawayUtils.isISOTimeCorrect(startTime)) {
+            String wrongDate = jsonParsers.getLocale("wrong_date", guildId);
+            event.getHook().sendMessage(wrongDate).queue();
+            return;
+        }
+
+        if (endTime != null && !GiveawayUtils.isISOTimeCorrect(endTime)) {
             String wrongDate = jsonParsers.getLocale("wrong_date", guildId);
             event.getHook().sendMessage(wrongDate).queue();
             return;

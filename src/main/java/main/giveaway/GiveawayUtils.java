@@ -69,8 +69,12 @@ public class GiveawayUtils {
         }
     }
 
-    public static boolean isTimeCorrect(@NotNull String time) {
+    public static boolean isISOTimeCorrect(@NotNull String time) {
         return time.matches(GiveawayUtils.ISO_TIME_REGEX);
+    }
+
+    public static boolean isTimeCorrect(@NotNull String time) {
+        return time.matches(GiveawayUtils.TIME_REGEX);
     }
 
     public static boolean isTimeBefore(String time) {

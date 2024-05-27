@@ -38,13 +38,7 @@ public class ChangeCommand {
         }
         String time = event.getOption("duration", OptionMapping::getAsString);
         if (time != null) {
-            if (GiveawayUtils.isTimeCorrect(time)) {
-                if (GiveawayUtils.isTimeBefore(time)) {
-                    String changeDuration = jsonParsers.getLocale("wrong_date", guildId);
-                    event.reply(changeDuration).setEphemeral(true).queue();
-                    return;
-                }
-
+            if (GiveawayUtils.isTimeCorrect(time) || GiveawayUtils.isISOTimeCorrect(time)) {
                 GiveawayData giveawayData = giveaway.getGiveawayData();
                 long channelId = giveaway.getTextChannelId();
                 long messageId = giveawayData.getMessageId();
@@ -59,6 +53,9 @@ public class ChangeCommand {
 
                 //Редактируем сообщение с Giveaway
                 updateController.setView(embedBuilder.build(), guildIdLong, channelId, messageId);
+            } else {
+                String changeDuration = jsonParsers.getLocale("wrong_date", guildId);
+                event.reply(changeDuration).setEphemeral(true).queue();
             }
         }
     }

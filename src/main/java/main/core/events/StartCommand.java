@@ -113,7 +113,7 @@ public class StartCommand {
                 }
 
                 if (time != null) {
-                    if (!time.matches(GiveawayUtils.ISO_TIME_REGEX) || !GiveawayUtils.isTimeBefore(time)) {
+                    if (!GiveawayUtils.isISOTimeCorrect(time) && !GiveawayUtils.isTimeCorrect(time)) {
                         String wrongDate = jsonParsers.getLocale("wrong_date", guildId);
                         EmbedBuilder builder = new EmbedBuilder();
                         builder.setColor(Color.RED);
