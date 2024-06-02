@@ -68,7 +68,7 @@ public class BotStart {
     private final static Logger LOGGER = Logger.getLogger(BotStart.class.getName());
 
     private static final JSONParsers jsonParsers = new JSONParsers();
-    public static final String activity = "/help | ";
+    public static final String activity = "/start | ";
     //String - guildLongId
     private static final ConcurrentMap<Long, Settings> mapLanguages = new ConcurrentHashMap<>();
 
