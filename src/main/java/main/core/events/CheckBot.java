@@ -24,6 +24,11 @@ public class CheckBot {
         GuildChannelUnion textChannel = event.getOption("textchannel", OptionMapping::getAsChannel);
         GuildChannel guildChannel = textChannel != null ? textChannel : event.getGuildChannel().asTextChannel();
 
+        if (textChannel == null) {
+            event.reply("TextChannel is `null`").queue();
+            return;
+        }
+
         StringBuilder stringBuilder = new StringBuilder();
 
         if (!selfMember.hasPermission(textChannel, Permission.MESSAGE_SEND)) {
