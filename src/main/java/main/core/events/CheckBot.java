@@ -22,7 +22,7 @@ public class CheckBot {
         Member selfMember = event.getGuild().getSelfMember();
 
         GuildChannelUnion textChannel = event.getOption("textchannel", OptionMapping::getAsChannel);
-        GuildChannel guildChannel = textChannel != null ? textChannel : event.getGuildChannel().asTextChannel();
+        GuildChannel guildChannel = textChannel != null ? textChannel : event.getGuildChannel();
 
         if (textChannel == null) {
             event.reply("TextChannel is `null`").queue();

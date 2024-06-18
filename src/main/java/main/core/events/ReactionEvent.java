@@ -35,7 +35,6 @@ public class ReactionEvent {
             GiveawayRegistry instance = GiveawayRegistry.getInstance();
             Giveaway giveaway = instance.getGiveaway(guildIdLong);
 
-
             if (giveaway != null) {
                 GiveawayData giveawayData = giveaway.getGiveawayData();
                 if (giveawayData.participantContains(user.getId())) return;
