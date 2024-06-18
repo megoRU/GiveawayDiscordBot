@@ -14,7 +14,7 @@
     <name>giveaway.discord.bot</name>
     <description>Discord Giveaway Bot</description>
     <properties>
-        <java.version>20</java.version>
+        <java.version>21</java.version>
     </properties>
 
     <dependencies>
