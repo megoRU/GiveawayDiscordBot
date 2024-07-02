@@ -49,6 +49,10 @@ public class SettingsCommand {
                 char firstChar = color.charAt(0);
                 if (firstChar == '#') {
                     settings.setColorHex(color.toUpperCase());
+                } else {
+                    String settingsColorError = jsonParsers.getLocale("settings_color_error", guildId);
+                    event.reply(settingsColorError).setEphemeral(true).queue();
+                    return;
                 }
             } else {
                 String settingsColorError = jsonParsers.getLocale("settings_color_error", guildId);

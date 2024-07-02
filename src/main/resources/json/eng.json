@@ -79,5 +79,6 @@
   "help_language": "Setup Bot Language and color messages",
   "help_participants": "Get a list of participants by the Giveaway ID",
   "help_permissions": "Check bot permissions",
-  "help_change": "Change the active Giveaway time"
+  "help_change": "Change the active Giveaway time",
+  "settings_color_error": "You wrote the color incorrectly"
 }
