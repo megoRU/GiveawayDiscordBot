@@ -37,8 +37,8 @@ import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.boticordjava.api.entity.bot.stats.BotStats;
 import org.boticordjava.api.impl.BotiCordAPI;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -466,7 +466,7 @@ public class BotStart {
         }
     }
 
-    private void setLanguages() {
+    public void setLanguages() {
         try {
             List<String> listLanguages = new ArrayList<>();
             listLanguages.add("rus");
@@ -476,15 +476,13 @@ public class BotStart {
                 InputStream inputStream = new ClassPathResource("json/" + listLanguage + ".json").getInputStream();
 
                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-                JSONObject jsonObject = (JSONObject) new JSONParser().parse(reader);
+                JSONObject jsonObject = new JSONObject(new JSONTokener(reader));
 
-                for (Object o : jsonObject.keySet()) {
-                    String key = (String) o;
-
+                for (String o : jsonObject.keySet()) {
                     if (listLanguage.equals("rus")) {
-                        ParserClass.russian.put(key, String.valueOf(jsonObject.get(key)));
+                        ParserClass.russian.put(o, String.valueOf(jsonObject.get(o)));
                     } else {
-                        ParserClass.english.put(key, String.valueOf(jsonObject.get(key)));
+                        ParserClass.english.put(o, String.valueOf(jsonObject.get(o)));
                     }
                 }
                 reader.close();
@@ -493,7 +491,7 @@ public class BotStart {
             }
             System.out.println("setLanguages()");
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            LOGGER.info(e.getMessage());
         }
     }
 
