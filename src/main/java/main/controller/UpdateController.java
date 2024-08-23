@@ -74,7 +74,6 @@ public class UpdateController {
         } else if (event instanceof GuildJoinEvent guildJoinEvent) {
             joinEvent(guildJoinEvent);
         } else if (event instanceof MessageReactionAddEvent messageReactionAddEvent) {
-            LOGGER.info(messageReactionAddEvent.getMessageAuthorId());
             reactionEvent(messageReactionAddEvent);
         } else if (event instanceof GuildLeaveEvent guildLeaveEvent) {
             LOGGER.info(guildLeaveEvent.getGuild().getId());
