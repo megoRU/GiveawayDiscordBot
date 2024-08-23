@@ -10,17 +10,18 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
-import java.util.logging.Logger;
 
 public class Giveaway {
 
-    private static final Logger LOGGER = Logger.getLogger(Giveaway.class.getName());
+    private final static Logger LOGGER = LoggerFactory.getLogger(Giveaway.class.getName());
 
     //USER DATA
     @Getter
@@ -110,15 +111,20 @@ public class Giveaway {
                               boolean predefined,
                               int minParticipants) {
         //Записываем данные:
-        LOGGER.info("\nGuild id: " + guildId
-                + "\nTextChannel: " + textChannel.getName() + " " + textChannel.getId()
-                + "\nTitle: " + title
-                + "\nCount winners: " + countWinners
-                + "\nTime: " + time
-                + "\nRole: " + role
-                + "\nisOnlyForSpecificRole: " + isOnlyForSpecificRole
-                + "\nurlImage: " + urlImage
-                + "\npredefined: " + predefined);
+        LOGGER.info("""
+                        Guild id: {}
+                        TextChannel: {} {}
+                        Title: {}
+                        Count winners: {}
+                        Time: {}
+                        Role: {}
+                        isOnlyForSpecificRole: {}
+                        urlImage: {}
+                        predefined: {}
+                        """,
+                guildId, textChannel.getName(), textChannel.getId(), title,
+                countWinners, time, role, isOnlyForSpecificRole,
+                urlImage, predefined);
 
         giveawayData.setTitle(title);
         giveawayData.setCountWinners(countWinners);

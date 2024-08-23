@@ -10,17 +10,17 @@ import main.service.GiveawayRepositoryService;
 import main.service.GiveawayUpdateListUser;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
-import java.util.*;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.*;
 
 @AllArgsConstructor
 public class GiveawayEnds {
 
-    private static final Logger LOGGER = Logger.getLogger(GiveawayEnds.class.getName());
+    private final static Logger LOGGER = LoggerFactory.getLogger(GiveawayEnds.class.getName());
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     //API
@@ -65,7 +65,7 @@ public class GiveawayEnds {
                 return;
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         }
 
         try {
@@ -90,7 +90,7 @@ public class GiveawayEnds {
                 buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
                 updateController.setView(errors.build(), guildId, textChannelId, buttons);
 
-                LOGGER.log(Level.WARNING, e.getMessage(), e);
+                LOGGER.error(e.getMessage(), e);
             }
             return;
         }

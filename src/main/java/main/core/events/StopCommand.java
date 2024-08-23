@@ -59,7 +59,7 @@ public class StopCommand {
             return;
         }
 
-        if (!event.getOptions().get(0).getAsString().matches("\\d{1,2}")) {
+        if (!event.getOptions().getFirst().getAsString().matches("\\d{1,2}")) {
             String slashErrors = jsonParsers.getLocale("slash_errors", guildId);
             EmbedBuilder errors = new EmbedBuilder();
             errors.setColor(Color.RED);
@@ -93,6 +93,6 @@ public class StopCommand {
             event.replyEmbeds(stop.build()).queue();
         }
 
-        giveaway.stopGiveaway(Integer.parseInt(event.getOptions().get(0).getAsString()));
+        giveaway.stopGiveaway(Integer.parseInt(event.getOptions().getFirst().getAsString()));
     }
 }

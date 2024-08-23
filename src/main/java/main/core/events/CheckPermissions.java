@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 
 @Service
-public class CheckBot {
+public class CheckPermissions {
 
     private static final JSONParsers jsonParsers = new JSONParsers();
 

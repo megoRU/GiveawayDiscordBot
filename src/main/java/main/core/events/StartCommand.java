@@ -17,22 +17,23 @@ import net.dv8tion.jda.api.entities.channel.unions.GuildMessageChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 @Service
 public class StartCommand {
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(StartCommand.class.getName());
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final SchedulingRepository schedulingRepository;
     private final GiveawayRepositoryService giveawayRepositoryService;
-    private final static Logger LOGGER = Logger.getLogger(StartCommand.class.getName());
 
     private static final JSONParsers jsonParsers = new JSONParsers();
 
@@ -173,8 +174,7 @@ public class StartCommand {
                         minParticipants);
 
             } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, e.getMessage(), e);
-
+                LOGGER.error(e.getMessage(), e);
                 String slashErrors = jsonParsers.getLocale("slash_errors", guildId);
                 errors.setDescription(slashErrors);
                 if (event.isAcknowledged()) event.getHook().editOriginalEmbeds(errors.build()).queue();

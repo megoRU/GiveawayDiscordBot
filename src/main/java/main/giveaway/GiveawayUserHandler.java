@@ -5,16 +5,17 @@ import main.model.entity.ActiveGiveaways;
 import main.model.entity.Participants;
 import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.entities.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 @AllArgsConstructor
 public class GiveawayUserHandler {
 
-    private static final Logger LOGGER = Logger.getLogger(GiveawayUserHandler.class.getName());
+    private final static Logger LOGGER = LoggerFactory.getLogger(GiveawayUserHandler.class.getName());
 
     private final GiveawayRepositoryService giveawayRepositoryService;
 

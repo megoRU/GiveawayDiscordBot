@@ -15,12 +15,13 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.logging.Logger;
 
 @Getter
 @Component
@@ -35,7 +36,7 @@ public class UpdateController {
     private final GiveawayRepositoryService giveawayRepositoryService;
 
     //LOGGER
-    private final static Logger LOGGER = Logger.getLogger(UpdateController.class.getName());
+    private final static Logger LOGGER = LoggerFactory.getLogger(UpdateController.class.getName());
 
     //CORE
     private CoreBot coreBot;
@@ -64,16 +65,20 @@ public class UpdateController {
     }
 
     private void distributeEventsByType(Object event) {
-        if (event instanceof SlashCommandInteractionEvent) {
-            slashEvent((SlashCommandInteractionEvent) event);
-        } else if (event instanceof ButtonInteractionEvent) {
-            buttonEvent((ButtonInteractionEvent) event);
-        } else if (event instanceof GuildJoinEvent) {
-            joinEvent((GuildJoinEvent) event);
-        } else if (event instanceof MessageReactionAddEvent) {
-            reactionEvent((MessageReactionAddEvent) event);
-        } else if (event instanceof GuildLeaveEvent) {
-            leaveEvent((GuildLeaveEvent) event);
+        if (event instanceof SlashCommandInteractionEvent slashCommandInteractionEvent) {
+            LOGGER.info(slashCommandInteractionEvent.getName());
+            slashEvent(slashCommandInteractionEvent);
+        } else if (event instanceof ButtonInteractionEvent buttonInteractionEvent) {
+            LOGGER.info(buttonInteractionEvent.getInteraction().getButton().getLabel());
+            buttonEvent(buttonInteractionEvent);
+        } else if (event instanceof GuildJoinEvent guildJoinEvent) {
+            joinEvent(guildJoinEvent);
+        } else if (event instanceof MessageReactionAddEvent messageReactionAddEvent) {
+            LOGGER.info(messageReactionAddEvent.getMessageAuthorId());
+            reactionEvent(messageReactionAddEvent);
+        } else if (event instanceof GuildLeaveEvent guildLeaveEvent) {
+            LOGGER.info(guildLeaveEvent.getGuild().getId());
+            leaveEvent(guildLeaveEvent);
         }
     }
 
@@ -136,8 +141,8 @@ public class UpdateController {
                 cancelCommand.cancel(event);
             }
             case "check-bot-permission" -> {
-                CheckBot checkBot = new CheckBot();
-                checkBot.check(event);
+                CheckPermissions checkPermissions = new CheckPermissions();
+                checkPermissions.check(event);
             }
         }
     }
