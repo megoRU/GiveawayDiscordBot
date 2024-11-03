@@ -69,7 +69,7 @@ public class GiveawayEnds {
         }
 
         try {
-            LOGGER.info(String.format("Завершаем Giveaway: %s, Участников: %s", guildId, participants.size()));
+            LOGGER.info("Завершаем Giveaway: {}, Участников: {}", guildId, participants.size());
 
             Winners winners = new Winners(countWinner, 0, participants.size() - 1);
             List<String> strings = api.getWinners(winners);
@@ -86,7 +86,7 @@ public class GiveawayEnds {
                 errors.setColor(Color.RED);
                 errors.setTitle(errorsWithApi);
                 errors.setDescription(errorsDescriptions);
-                List<net.dv8tion.jda.api.interactions.components.buttons.Button> buttons = new ArrayList<>();
+                List<Button> buttons = new ArrayList<>();
                 buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
                 updateController.setView(errors.build(), guildId, textChannelId, buttons);
 
