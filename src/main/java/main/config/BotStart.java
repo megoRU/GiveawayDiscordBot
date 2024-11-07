@@ -561,7 +561,7 @@ public class BotStart {
         }
     }
 
-    @Scheduled(fixedDelay = 1, initialDelay = 1, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = 2, initialDelay = 1, timeUnit = TimeUnit.SECONDS)
     public void stopGiveawayTimer() {
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
         List<Giveaway> giveawayDataList = new LinkedList<>(instance.getAllGiveaway());
