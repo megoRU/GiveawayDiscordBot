@@ -472,6 +472,7 @@ public class BotStart {
                                     scheduling.getMinParticipants());
 
                             schedulingRepository.deleteById(scheduling.getGuildId());
+                            instance.removeScheduling(guildId);
                         }
                     }
                 } catch (Exception e) {
