@@ -1,5 +1,6 @@
 package main.core.events;
 
+import main.giveaway.GiveawayRegistry;
 import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.model.entity.ActiveGiveaways;
@@ -126,6 +127,9 @@ public class SchedulingCommand {
             scheduling.setMinParticipants(minParticipants);
 
             schedulingRepository.save(scheduling);
+
+            GiveawayRegistry instance = GiveawayRegistry.getInstance();
+            instance.putScheduling(guildId, scheduling);
 
             String scheduleEnd = jsonParsers.getLocale("schedule_end", guildId);
             long timeStart = Objects.requireNonNull(timeProcessor(startTime)).getTime() / 1000;

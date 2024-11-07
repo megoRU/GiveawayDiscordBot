@@ -108,14 +108,14 @@ public class BotStart {
             //Устанавливаем языки
             setLanguages();
             getLocalizationFromDB();
+            getSchedulingFromDB();
 
             List<GatewayIntent> intents = Arrays.asList(
-                            GatewayIntent.GUILD_MEMBERS,
-                            GatewayIntent.GUILD_MESSAGES,
-                            GatewayIntent.GUILD_EMOJIS_AND_STICKERS,
-                            GatewayIntent.GUILD_MESSAGE_REACTIONS,
-                            GatewayIntent.DIRECT_MESSAGES,
-                            GatewayIntent.DIRECT_MESSAGE_TYPING);
+                    GatewayIntent.GUILD_MEMBERS,
+                    GatewayIntent.GUILD_MESSAGES,
+                    GatewayIntent.GUILD_MESSAGE_REACTIONS,
+                    GatewayIntent.DIRECT_MESSAGES,
+                    GatewayIntent.DIRECT_MESSAGE_TYPING);
 
             jdaBuilder.disableCache(
                     CacheFlag.ACTIVITY,
@@ -151,6 +151,20 @@ public class BotStart {
             //Обновить команды
 //            updateSlashCommands();
             System.out.println("20:22");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+        }
+    }
+
+    private void getSchedulingFromDB() {
+        try {
+            List<Scheduling> schedulingList = schedulingRepository.findAll();
+            GiveawayRegistry instance = GiveawayRegistry.getInstance();
+
+            for (Scheduling scheduling : schedulingList) {
+                Long guildId = scheduling.getGuildId();
+                instance.putScheduling(guildId, scheduling);
+            }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
@@ -402,8 +416,10 @@ public class BotStart {
 
     @Scheduled(fixedDelay = 5, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
     private void scheduleStartGiveaway() {
-        List<Scheduling> allScheduling = schedulingRepository.findAll();
-        for (Scheduling scheduling : allScheduling) {
+        GiveawayRegistry instance = GiveawayRegistry.getInstance();
+        Collection<Scheduling> scheduledGiveaways = instance.getScheduledGiveaways();
+
+        for (Scheduling scheduling : scheduledGiveaways) {
             Timestamp localTime = new Timestamp(System.currentTimeMillis());
 
             if (localTime.after(scheduling.getDateCreateGiveaway())) {
@@ -426,7 +442,6 @@ public class BotStart {
                                     giveawayRepositoryService,
                                     updateController);
 
-                            GiveawayRegistry instance = GiveawayRegistry.getInstance();
                             instance.putGift(scheduling.getGuildId(), giveaway);
 
                             String formattedDate = null;

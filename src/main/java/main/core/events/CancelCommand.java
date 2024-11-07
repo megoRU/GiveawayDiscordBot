@@ -41,6 +41,7 @@ public class CancelCommand {
             schedulingRepository.deleteById(guildId);
             instance.removeGuildFromGiveaway(guildId);
             cancel.setDescription(cancelSchedulingGiveaway);
+            instance.removeScheduling(guildId);
         } else if (activeGiveaways != null) {
             String cancelGiveaway = jsonParsers.getLocale("cancel_giveaway", guildId);
 
@@ -49,7 +50,6 @@ public class CancelCommand {
             cancel.setDescription(cancelGiveaway);
         } else {
             String cancelSchedulingGiveaway = jsonParsers.getLocale("no_active_giveaway", guildId);
-
             cancel.setDescription(cancelSchedulingGiveaway);
         }
 

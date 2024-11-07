@@ -1,8 +1,10 @@
 package main.giveaway;
 
+import main.model.entity.Scheduling;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -10,6 +12,7 @@ public class GiveawayRegistry {
 
     //Возвращает GiveawayData по long id
     private static final Map<Long, Giveaway> giveawayMap = new ConcurrentHashMap<>();
+    private static final Map<Long, Scheduling> schedulingMap = new ConcurrentHashMap<>();
     private static volatile GiveawayRegistry giveawayRegistry;
 
     private GiveawayRegistry() {
@@ -28,6 +31,18 @@ public class GiveawayRegistry {
 
     public Collection<Giveaway> getAllGiveaway() {
         return giveawayMap.values();
+    }
+
+    public Collection<Scheduling> getScheduledGiveaways() {
+        return schedulingMap.values();
+    }
+
+    public void removeScheduling(long guildId) {
+        schedulingMap.remove(guildId);
+    }
+
+    public void putScheduling(long guildId, Scheduling scheduling) {
+        schedulingMap.put(guildId, scheduling);
     }
 
     @Nullable
