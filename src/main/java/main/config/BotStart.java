@@ -98,7 +98,7 @@ public class BotStart {
     }
 
     @PostConstruct
-    public synchronized void startBot() {
+    public void startBot() {
         try {
             //Загружаем GiveawayRegistry
             GiveawayRegistry.getInstance();
@@ -146,7 +146,7 @@ public class BotStart {
             System.out.println("IsDevMode: " + Config.isIsDev());
 
             //Обновить команды
-//            updateSlashCommands();
+            updateSlashCommands();
             System.out.println("20:22");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
