@@ -35,8 +35,6 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
-import org.boticordjava.api.entity.bot.stats.BotStats;
-import org.boticordjava.api.impl.BotiCordAPI;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +53,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -392,25 +389,9 @@ public class BotStart {
 
     @Scheduled(fixedDelay = 120, initialDelay = 8, timeUnit = TimeUnit.SECONDS)
     private void topGGAndStatcord() {
-        int serverCount = BotStart.jda.getGuilds().size();
-        BotStart.jda.getPresence().setActivity(Activity.playing(BotStart.activity + serverCount + " guilds"));
-        AtomicInteger usersCount = new AtomicInteger();
-        BotStart.jda.getGuilds().forEach(g -> usersCount.addAndGet(g.getMembers().size()));
-
-        String boticord = Config.getBoticord();
-        if (boticord == null) return;
-
-        BotiCordAPI api = new BotiCordAPI.Builder()
-                .token(boticord)
-                .build();
-
         if (!Config.isIsDev()) {
-            try {
-                BotStats botStats = new BotStats(usersCount.get(), serverCount, 1);
-                api.setBotStats(Config.getBotId(), botStats);
-            } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, e.getMessage(), e);
-            }
+            int serverCount = BotStart.jda.getGuilds().size();
+            BotStart.jda.getPresence().setActivity(Activity.playing(BotStart.activity + serverCount + " guilds"));
         }
     }
 

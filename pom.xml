@@ -40,13 +40,6 @@
             <version>5.2.0</version>
         </dependency>
 
-        <!-- https://github.com/boticord/boticordjava -->
-        <dependency>
-            <groupId>com.github.megoRU</groupId>
-            <artifactId>boticordjava</artifactId>
-            <version>v6.0.1</version>
-        </dependency>
-
         <!-- https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client -->
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
