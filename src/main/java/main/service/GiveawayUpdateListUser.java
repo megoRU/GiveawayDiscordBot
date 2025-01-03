@@ -62,7 +62,7 @@ public class GiveawayUpdateListUser {
                         if (instance.hasGiveaway(guildId) &&
                                 reactions != null &&
                                 !reactions.isEmpty() &&
-                                reactions.get(0).getCount() - 1 != giveawayData.getParticipantSize()) {
+                                reactions.getFirst().getCount() - 1 != giveawayData.getParticipantSize()) {
                             for (MessageReaction reaction : reactions) {
                                 Map<String, User> userList = reaction
                                         .retrieveUsers()
