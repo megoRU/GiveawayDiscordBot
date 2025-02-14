@@ -12,14 +12,15 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class ReactionEvent {
 
-    private final static Logger LOGGER = Logger.getLogger(ReactionEvent.class.getName());
+    private final static Logger LOGGER = LoggerFactory.getLogger(ReactionEvent.class.getName());
+
     public static final String TADA = "\uD83C\uDF89";
     private static final JSONParsers jsonParsers = new JSONParsers();
 
@@ -52,7 +53,7 @@ public class ReactionEvent {
 
                         if (isForSpecificRole && !event.getMember().getRoles().contains(roleById)) {
                             String url = GiveawayUtils.getDiscordUrlMessage(guildIdLong, event.getGuildChannel().getIdLong(), messageIdWithReactionCurrent);
-                            LOGGER.info(String.format("\nНажал на эмодзи, но у него нет доступа к розыгрышу: %s", user.getId()));
+                            LOGGER.info("\nНажал на эмодзи, но у него нет доступа к розыгрышу: {}", user.getId());
                             //Получаем ссылку на Giveaway
 
                             String buttonGiveawayNotAccess = String.format(jsonParsers.getLocale("button_giveaway_not_access", event.getGuild().getIdLong()), url);
@@ -65,12 +66,12 @@ public class ReactionEvent {
                         }
                     }
 
-                    LOGGER.info(String.format("\nНовый участник: %s\nСервер: %s", user.getId(), event.getGuild().getId()));
+                    LOGGER.info("\nНовый участник: {} Сервер: {}", user.getId(), event.getGuild().getId());
                     giveaway.addUser(user);
                 }
             }
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         }
     }
 }

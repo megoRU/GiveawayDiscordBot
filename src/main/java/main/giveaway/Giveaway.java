@@ -112,15 +112,9 @@ public class Giveaway {
                               int minParticipants) {
         //Записываем данные:
         LOGGER.info("""
-                        Guild id: {}
-                        TextChannel: {} {}
-                        Title: {}
-                        Count winners: {}
-                        Time: {}
-                        Role: {}
-                        isOnlyForSpecificRole: {}
+                        GuildId: {} Channel: {} {} Title: {} predefined: {}
+                        Winners: {} Time: {} Role: {} isOnlyForSpecificRole: {}
                         urlImage: {}
-                        predefined: {}
                         """,
                 guildId, textChannel.getName(), textChannel.getId(), title,
                 countWinners, time, role, isOnlyForSpecificRole,
