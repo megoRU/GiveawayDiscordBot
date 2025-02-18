@@ -112,13 +112,11 @@ public class Giveaway {
                               int minParticipants) {
         //Записываем данные:
         LOGGER.info("""
-                        GuildId: {} Channel: {} {} Title: {} predefined: {}
+                        GuildId: {} ChannelId: {} Title: {} predefined: {}
                         Winners: {} Time: {} Role: {} isOnlyForSpecificRole: {}
-                        urlImage: {}
                         """,
-                guildId, textChannel.getName(), textChannel.getId(), title,
-                countWinners, time, role, isOnlyForSpecificRole,
-                urlImage, predefined);
+                guildId, textChannel.getId(), title, predefined,
+                countWinners, time, role, isOnlyForSpecificRole);
 
         giveawayData.setTitle(title);
         giveawayData.setCountWinners(countWinners);
@@ -176,17 +174,7 @@ public class Giveaway {
     }
 
     public synchronized void stopGiveaway(final int countWinner) {
-        String logMessage = String.format(
-                """
-                        \n
-                        stopGift method:
-                        \s
-                        Guild ID: %s
-                        ListUsersSize: %s
-                        CountWinners: %s
-                        """, guildId, giveawayData.getParticipantSize(), countWinner);
-        LOGGER.info(logMessage);
-
+        LOGGER.info("stopGiveaway: GuildID: {}, ListUsersSize: {}, CountWinners: {}", guildId, giveawayData.getParticipantSize(), countWinner);
         GiveawayEnds giveawayEnds = new GiveawayEnds(giveawayRepositoryService);
         giveawayEnds.stop(this, countWinner, updateController);
     }

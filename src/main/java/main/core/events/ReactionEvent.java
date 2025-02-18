@@ -66,7 +66,7 @@ public class ReactionEvent {
                         }
                     }
 
-                    LOGGER.info("\nНовый участник: {} Сервер: {}", user.getId(), event.getGuild().getId());
+                    LOGGER.info("Новый участник: {} Сервер: {}", user.getId(), event.getGuild().getId());
                     giveaway.addUser(user);
                 }
             }
