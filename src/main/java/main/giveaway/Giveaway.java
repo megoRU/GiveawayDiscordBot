@@ -111,12 +111,8 @@ public class Giveaway {
                               boolean predefined,
                               int minParticipants) {
         //Записываем данные:
-        LOGGER.info("""
-                        GuildId: {} ChannelId: {} Title: {} predefined: {}
-                        Winners: {} Time: {} Role: {} isOnlyForSpecificRole: {}
-                        """,
-                guildId, textChannel.getId(), title, predefined,
-                countWinners, time, role, isOnlyForSpecificRole);
+        LOGGER.info("GuildId: {} ChannelId: {} Title: {} predefined: {} Winners: {} Time: {} Role: {} isOnlyForSpecificRole: {}",
+                guildId, textChannel.getId(), title, predefined, countWinners, time, role, isOnlyForSpecificRole);
 
         giveawayData.setTitle(title);
         giveawayData.setCountWinners(countWinners);

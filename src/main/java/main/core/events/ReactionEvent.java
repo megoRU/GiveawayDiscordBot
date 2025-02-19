@@ -53,7 +53,7 @@ public class ReactionEvent {
 
                         if (isForSpecificRole && !event.getMember().getRoles().contains(roleById)) {
                             String url = GiveawayUtils.getDiscordUrlMessage(guildIdLong, event.getGuildChannel().getIdLong(), messageIdWithReactionCurrent);
-                            LOGGER.info("\nНажал на эмодзи, но у него нет доступа к розыгрышу: {}", user.getId());
+                            LOGGER.info("Нажал на эмодзи, но у него нет доступа к розыгрышу: {}", user.getId());
                             //Получаем ссылку на Giveaway
 
                             String buttonGiveawayNotAccess = String.format(jsonParsers.getLocale("button_giveaway_not_access", event.getGuild().getIdLong()), url);
