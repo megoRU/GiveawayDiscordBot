@@ -73,6 +73,7 @@ public class CoreBot extends ListenerAdapter {
     public void editMessage(EmbedBuilder embedBuilder, final long guildId, final long textChannel) {
         try {
             Guild guildById = BotStart.getJda().getGuildById(guildId);
+
             if (guildById != null) {
                 GuildMessageChannel textChannelById = guildById.getTextChannelById(textChannel);
                 if (textChannelById == null) textChannelById = guildById.getNewsChannelById(textChannel);
@@ -85,7 +86,8 @@ public class CoreBot extends ListenerAdapter {
                                 .retrieveMessageById(giveawayData.getMessageId())
                                 .complete()
                                 .editMessageEmbeds(embedBuilder.build())
-                                .submit();
+                                .submit()
+                                .get();
                     }
                 }
             }
@@ -105,6 +107,7 @@ public class CoreBot extends ListenerAdapter {
     public void editMessage(MessageEmbed messageEmbed, long guildId, long textChannel, long messageId) {
         try {
             Guild guildById = BotStart.getJda().getGuildById(guildId);
+
             if (guildById != null) {
                 GuildMessageChannel textChannelById = guildById.getTextChannelById(textChannel);
                 if (textChannelById == null) textChannelById = guildById.getNewsChannelById(textChannel);
@@ -112,7 +115,8 @@ public class CoreBot extends ListenerAdapter {
                 if (textChannelById != null) {
                     textChannelById
                             .editMessageEmbedsById(messageId, messageEmbed)
-                            .queue();
+                            .submit()
+                            .get();
                 }
             }
         } catch (Exception e) {
@@ -123,15 +127,18 @@ public class CoreBot extends ListenerAdapter {
     public void sendMessage(MessageEmbed embedBuilder, String messageContent, Long guildId, Long textChannel) {
         try {
             Guild guildById = BotStart.getJda().getGuildById(guildId);
+
             if (guildById != null) {
                 GuildMessageChannel textChannelById = guildById.getTextChannelById(textChannel);
+
                 if (textChannelById == null) textChannelById = guildById.getNewsChannelById(textChannel);
                 if (textChannelById == null) textChannelById = guildById.getThreadChannelById(textChannel);
                 if (textChannelById != null) {
                     textChannelById
                             .sendMessageEmbeds(embedBuilder)
                             .setContent(messageContent)
-                            .queue();
+                            .submit()
+                            .get();
                 }
             }
         } catch (Exception e) {
@@ -142,6 +149,7 @@ public class CoreBot extends ListenerAdapter {
     public void sendMessage(MessageEmbed embedBuilder, Long guildId, Long textChannel, List<Button> buttons) {
         try {
             Guild guildById = BotStart.getJda().getGuildById(guildId);
+
             if (guildById != null) {
                 GuildMessageChannel textChannelById = guildById.getTextChannelById(textChannel);
                 if (textChannelById == null) textChannelById = guildById.getNewsChannelById(textChannel);
@@ -150,7 +158,8 @@ public class CoreBot extends ListenerAdapter {
                     textChannelById
                             .sendMessageEmbeds(embedBuilder)
                             .setActionRow(buttons)
-                            .queue();
+                            .submit()
+                            .get();
                 }
             }
         } catch (Exception e) {
@@ -160,6 +169,7 @@ public class CoreBot extends ListenerAdapter {
 
     public void sendMessage(JDA jda, String userId, MessageEmbed messageEmbed) {
         RestAction<User> action = jda.retrieveUserById(userId);
+
         action.submit()
                 .thenCompose((user) -> user.openPrivateChannel().submit())
                 .thenCompose((channel) -> channel.sendMessageEmbeds(messageEmbed).submit())

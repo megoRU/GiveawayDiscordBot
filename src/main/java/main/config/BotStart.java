@@ -435,9 +435,9 @@ public class BotStart {
                                 String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guildId), role);
                                 if (Objects.equals(role, guildIdLong)) {
                                     giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_everyone", guildId), "@everyone");
-                                    textChannelById.sendMessage(giftNotificationForThisRole).queue();
+                                    textChannelById.sendMessage(giftNotificationForThisRole).submit().get();
                                 } else {
-                                    textChannelById.sendMessage(giftNotificationForThisRole).queue();
+                                    textChannelById.sendMessage(giftNotificationForThisRole).submit().get();
                                 }
                             }
 
