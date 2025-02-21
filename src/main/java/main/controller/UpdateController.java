@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
@@ -78,7 +79,14 @@ public class UpdateController {
         } else if (event instanceof GuildLeaveEvent guildLeaveEvent) {
             LOGGER.info(guildLeaveEvent.getGuild().getId());
             leaveEvent(guildLeaveEvent);
+        } else if (event instanceof MessageDeleteEvent messageDeleteEvent) {
+            messageDeleteEvent(messageDeleteEvent);
         }
+    }
+
+    private void messageDeleteEvent(MessageDeleteEvent messageDeleteEvent) {
+        DeleteEvent deleteEvent = new DeleteEvent(giveawayRepositoryService);
+        deleteEvent.handle(messageDeleteEvent);
     }
 
     private void slashEvent(@NotNull SlashCommandInteractionEvent event) {
