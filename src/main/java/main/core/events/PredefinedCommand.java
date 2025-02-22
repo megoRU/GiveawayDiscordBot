@@ -3,6 +3,7 @@ package main.core.events;
 import main.controller.UpdateController;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
+import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.ListUsersRepository;
@@ -43,6 +44,14 @@ public class PredefinedCommand {
         var guildIdLong = Objects.requireNonNull(event.getGuild()).getIdLong();
         var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
         var userIdLong = event.getUser().getIdLong();
+
+        boolean checkPermissions = GiveawayUtils.checkPermissions(event.getGuildChannel(), event.getGuild().getSelfMember());
+
+        if (!checkPermissions) {
+            String botPermissionsDeny = jsonParsers.getLocale("bot_permissions_deny", guildId);
+            event.reply(botPermissionsDeny).queue();
+            return; //Сообщение уже отправлено
+        }
 
         if (GiveawayRegistry.getInstance().hasGiveaway(guildIdLong)) {
             String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_stop_giveaway", guildId);
