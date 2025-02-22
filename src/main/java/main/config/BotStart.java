@@ -307,11 +307,12 @@ public class BotStart {
             List<OptionData> reroll = new ArrayList<>();
             reroll.add(new OptionData(STRING, "giveaway_id", "Giveaway ID")
                     .setName("giveaway_id")
-                    .setRequired(true).setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway ID"));
+                    .setRequired(true)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway ID"));
 
             List<OptionData> botPermissions = new ArrayList<>();
-            botPermissions.add(new OptionData(CHANNEL, "textchannel", "Checking the permissions of a specific channel")
-                    .setName("textchannel")
+            botPermissions.add(new OptionData(CHANNEL, "text-channel", "Checking the permissions of a specific channel")
+                    .setName("text-channel")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Проверка разрешений определенного канала"));
 
             commands.addCommands(Commands.slash("check-bot-permission", "Checking the permission bot")

@@ -18,16 +18,15 @@ public class CheckPermissions {
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     public void check(@NotNull SlashCommandInteractionEvent event) {
-        var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
-        Member selfMember = event.getGuild().getSelfMember();
-
-        GuildChannelUnion textChannel = event.getOption("textchannel", OptionMapping::getAsChannel);
+        GuildChannelUnion textChannel = event.getOption("text-channel", OptionMapping::getAsChannel);
         GuildChannel guildChannel = textChannel != null ? textChannel : event.getGuildChannel();
 
-        if (textChannel == null) {
-            event.reply("TextChannel is `null`").queue();
-            return;
-        }
+        checkPermissions(guildChannel, event);
+    }
+
+    public void checkPermissions(GuildChannel textChannel, @NotNull SlashCommandInteractionEvent event) {
+        var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
+        Member selfMember = event.getGuild().getSelfMember();
 
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -52,11 +51,11 @@ public class CheckPermissions {
         }
 
         if (stringBuilder.isEmpty()) {
-            String giftPermissions = String.format(jsonParsers.getLocale("gift_permissions", guildId), guildChannel.getId());
+            String giftPermissions = String.format(jsonParsers.getLocale("gift_permissions", guildId), textChannel.getId());
             event.reply(giftPermissions).queue();
         } else {
             String checkPermissions = jsonParsers.getLocale("check_permissions", event.getGuild().getIdLong());
-            event.reply(String.format(checkPermissions, event.getChannel().getId(), stringBuilder)).queue();
+            event.reply(String.format(checkPermissions, textChannel.getId(), stringBuilder)).queue();
         }
     }
 }
