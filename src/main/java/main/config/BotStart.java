@@ -28,6 +28,7 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.interactions.DiscordLocale;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -315,67 +316,68 @@ public class BotStart {
 
             commands.addCommands(Commands.slash("check-bot-permission", "Checking the permission bot")
                     .addOptions(botPermissions)
-                    .setGuildOnly(true)
+                    .setContexts(InteractionContextType.GUILD)
+                    .setDefaultPermissions(DefaultMemberPermissions.ENABLED)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Проверка разрешений бота"));
 
             commands.addCommands(Commands.slash("settings", "Bot settings")
                     .addOptions(optionsSettings)
-                    .setGuildOnly(true)
+                    .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Настройки бота")
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER)));
 
             commands.addCommands(Commands.slash("start", "Create Giveaway")
                     .addOptions(optionsStart)
-                    .setGuildOnly(true)
+                    .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Создание Giveaway"));
 
             commands.addCommands(Commands.slash("scheduling", "Create Scheduling Giveaway")
                     .addOptions(optionsScheduling)
-                    .setGuildOnly(true)
+                    .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Создать Giveaway по расписанию"));
 
             commands.addCommands(Commands.slash("stop", "Stop the Giveaway")
                     .addOptions(optionsStop)
-                    .setGuildOnly(true)
+                    .setContexts(InteractionContextType.GUILD)
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Остановить Giveaway"));
 
             commands.addCommands(Commands.slash("help", "Bot commands")
-                    .setGuildOnly(true)
+                    .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Команды бота"));
 
             commands.addCommands(Commands.slash("list", "List of participants")
-                    .setGuildOnly(true)
+                    .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Список участников"));
 
             commands.addCommands(Commands.slash("patreon", "Support us on Patreon")
-                    .setGuildOnly(true)
+                    .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Поддержите нас на Patreon"));
 
             commands.addCommands(Commands.slash("participants", "Get file with all participants")
                     .addOptions(participants)
-                    .setGuildOnly(true)
+                    .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Получить файл со всеми участниками"));
 
             commands.addCommands(Commands.slash("reroll", "Reroll one winner")
                     .addOptions(reroll)
-                    .setGuildOnly(true)
+                    .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Перевыбрать одного победителя"));
 
             commands.addCommands(Commands.slash("change", "Change the time")
                     .addOptions(change)
-                    .setGuildOnly(true)
+                    .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Изменить время")
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)));
 
             commands.addCommands(Commands.slash("predefined", "Gather participants and immediately hold a drawing for a certain @Role")
                     .addOptions(predefined)
-                    .setGuildOnly(true)
+                    .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Собрать участников и сразу провести розыгрыш для определенной @Роли")
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)));
 
             commands.addCommands(Commands.slash("cancel", "Cancel Giveaway")
-                    .setGuildOnly(true)
+                    .setContexts(InteractionContextType.GUILD)
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Отменить Giveaway"));
 
