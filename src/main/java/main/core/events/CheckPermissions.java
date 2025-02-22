@@ -54,7 +54,7 @@ public class CheckPermissions {
             String giftPermissions = String.format(jsonParsers.getLocale("gift_permissions", guildId), textChannel.getId());
             event.reply(giftPermissions).queue();
         } else {
-            String checkPermissions = jsonParsers.getLocale("check_permissions", event.getGuild().getIdLong());
+            String checkPermissions = jsonParsers.getLocale("check_permissions", guildId);
             event.reply(String.format(checkPermissions, textChannel.getId(), stringBuilder)).queue();
         }
     }
