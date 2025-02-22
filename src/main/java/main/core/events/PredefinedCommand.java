@@ -5,9 +5,6 @@ import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
 import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
-import main.model.repository.ActiveGiveawayRepository;
-import main.model.repository.ListUsersRepository;
-import main.model.repository.ParticipantsRepository;
 import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
@@ -50,7 +47,7 @@ public class PredefinedCommand {
         if (!checkPermissions) {
             String botPermissionsDeny = jsonParsers.getLocale("bot_permissions_deny", guildId);
             event.reply(botPermissionsDeny).queue();
-            return; //Сообщение уже отправлено
+            return;
         }
 
         if (GiveawayRegistry.getInstance().hasGiveaway(guildIdLong)) {
