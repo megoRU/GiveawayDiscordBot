@@ -72,7 +72,7 @@ public class PredefinedCommand {
         }
 
         Role role = event.getOption("role", OptionMapping::getAsRole);
-        String countString = event.getOption("count", OptionMapping::getAsString);
+        String winners = event.getOption("winners", OptionMapping::getAsString);
         String title = event.getOption("title", OptionMapping::getAsString);
 
         if (role != null) {
@@ -85,11 +85,11 @@ public class PredefinedCommand {
             return;
         }
 
-        if (countString == null) {
+        if (winners == null) {
             event.reply("Count is Null").queue();
             return;
         } else {
-            if (!countString.matches("[0-9]+")) {
+            if (!winners.matches("[0-9]+")) {
                 event.reply("Count not a number").queue();
                 return;
             }
@@ -107,7 +107,7 @@ public class PredefinedCommand {
         giveaway.startGiveaway(
                 textChannel,
                 title,
-                Integer.parseInt(countString),
+                Integer.parseInt(winners),
                 "20s",
                 role.getIdLong(),
                 true,

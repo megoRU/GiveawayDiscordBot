@@ -35,7 +35,7 @@ public class RerollCommand {
         var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
 
         event.deferReply().queue();
-        String id = event.getOption("giveaway_id", OptionMapping::getAsString);
+        String id = event.getOption("giveaway-id", OptionMapping::getAsString);
 
         if (id != null) {
             if (!id.matches("\\d+")) {

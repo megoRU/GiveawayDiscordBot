@@ -62,12 +62,12 @@ public class StartCommand {
         var guildId = Objects.requireNonNull(guild).getIdLong();
         var userIdLong = event.getUser().getIdLong();
         String title = event.getOption("title", OptionMapping::getAsString);
-        int count = Optional.ofNullable(event.getOption("count", OptionMapping::getAsInt)).orElse(1);
+        int winners = Optional.ofNullable(event.getOption("winners", OptionMapping::getAsInt)).orElse(1);
         String time = event.getOption("duration", OptionMapping::getAsString);
         if (time != null) time = time.replaceAll("-", ".");
         Long role = event.getOption("mention", OptionMapping::getAsLong);
         Message.Attachment image = event.getOption("image", OptionMapping::getAsAttachment);
-        int minParticipants = Optional.ofNullable(event.getOption("min_participants", OptionMapping::getAsInt)).orElse(2);
+        int minParticipants = Optional.ofNullable(event.getOption("min-participants", OptionMapping::getAsInt)).orElse(2);
 
         Scheduling schedulingByGuildLongId = schedulingRepository.findByGuildId(guildIdLong);
 
@@ -165,7 +165,7 @@ public class StartCommand {
                 giveaway.startGiveaway(
                         event.getGuildChannel(),
                         title,
-                        count,
+                        winners,
                         time,
                         role,
                         isOnlyForSpecificRole,

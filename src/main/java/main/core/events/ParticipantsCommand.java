@@ -30,7 +30,7 @@ public class ParticipantsCommand {
         var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
 
         event.deferReply().setEphemeral(true).queue();
-        String id = event.getOption("giveaway_id", OptionMapping::getAsString);
+        String id = event.getOption("giveaway-id", OptionMapping::getAsString);
 
         if (id != null) {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();

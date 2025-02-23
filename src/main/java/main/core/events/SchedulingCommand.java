@@ -41,14 +41,14 @@ public class SchedulingCommand {
         var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
         var userId = event.getUser().getIdLong();
         var role = event.getOption("mention", OptionMapping::getAsLong);
-        int count = Optional.ofNullable(event.getOption("count", OptionMapping::getAsInt)).orElse(1);
+        int winners = Optional.ofNullable(event.getOption("winners", OptionMapping::getAsInt)).orElse(1);
         var title = event.getOption("title", OptionMapping::getAsString);
-        var textChannel = event.getOption("textchannel", OptionMapping::getAsChannel);
+        var textChannel = event.getOption("text-channel", OptionMapping::getAsChannel);
         var image = event.getOption("image", OptionMapping::getAsAttachment);
         var urlImage = image != null ? image.getUrl() : null;
-        int minParticipants = Optional.ofNullable(event.getOption("min_participants", OptionMapping::getAsInt)).orElse(2);
-        var startTime = Objects.requireNonNull(event.getOption("start_time", OptionMapping::getAsString));
-        var endTime = event.getOption("end_time", OptionMapping::getAsString);
+        int minParticipants = Optional.ofNullable(event.getOption("min-participants", OptionMapping::getAsInt)).orElse(2);
+        var startTime = Objects.requireNonNull(event.getOption("start-time", OptionMapping::getAsString));
+        var endTime = event.getOption("end-time", OptionMapping::getAsString);
 //        var forbiddenRole = event.getOption("forbidden_role", OptionMapping::getAsRole);
         boolean isOnlyForSpecificRole = Objects.equals(event.getOption("role", OptionMapping::getAsString), "yes");
 
@@ -116,7 +116,7 @@ public class SchedulingCommand {
             scheduling = new Scheduling();
             scheduling.setGuildId(guildId);
             scheduling.setChannelId(textChannel.getIdLong());
-            scheduling.setCountWinners(count);
+            scheduling.setCountWinners(winners);
             scheduling.setDateCreateGiveaway(timeProcessor(startTime));
             scheduling.setDateEnd(timeProcessor(endTime) == null ? null : timeProcessor(endTime));
             scheduling.setTitle(title);
