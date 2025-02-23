@@ -246,7 +246,7 @@ public class BotStart {
                     .addChoice("yes", "yes")
                     .setName("role")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "роль")
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway только для определенной роли? Указать роль в предыдущем выборе"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway только для определенной роли? Укажите роль в предыдущем выборе"));
 
             optionsScheduling.add(new OptionData(ATTACHMENT, "image", "Set Image for Giveaway")
                     .setName("image")
@@ -288,7 +288,7 @@ public class BotStart {
                     .addChoice("yes", "yes")
                     .setName("role")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "роль")
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway только для определенной роли? Указать роль в предыдущем выборе"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway только для определенной роли? Укажите роль в предыдущем выборе"));
 
             optionsStart.add(new OptionData(ATTACHMENT, "image", "Set Image for Giveaway")
                     .setName("image")
