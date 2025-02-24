@@ -81,5 +81,6 @@
   "help_participants": "Get a list of participants by the Giveaway ID",
   "help_permissions": "Check bot permissions",
   "help_change": "Change the active Giveaway time",
-  "settings_color_error": "You wrote the color incorrectly"
+  "settings_color_error": "You wrote the color incorrectly",
+  "giveaway_not_found": "No active or scheduled Giveaway found."
 }

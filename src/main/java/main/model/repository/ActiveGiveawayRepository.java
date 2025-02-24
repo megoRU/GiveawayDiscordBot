@@ -24,6 +24,16 @@ public interface ActiveGiveawayRepository extends JpaRepository<ActiveGiveaways,
 
     @Transactional
     @Modifying
+    @Query(value = "UPDATE ActiveGiveaways ac SET ac.countWinners = :winners WHERE ac.guildId = :guildId")
+    void updateWinners(@Param("guildId") Long guildId, @Param("winners") int winners);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE ActiveGiveaways ac SET ac.title = :title WHERE ac.guildId = :guildId")
+    void updateTitle(@Param("guildId") Long guildId, @Param("title") String title);
+
+    @Transactional
+    @Modifying
     @Query(value = "UPDATE ActiveGiveaways ac SET ac.finish = true WHERE ac.messageId = :messageId")
     void updateFinishGiveaway(@Param("messageId") Long messageId);
 
@@ -34,6 +44,9 @@ public interface ActiveGiveawayRepository extends JpaRepository<ActiveGiveaways,
 
     @Nullable
     ActiveGiveaways findByGuildId(Long guildLongId);
+
+    @Nullable
+    ActiveGiveaways findByMessageId(Long messageId);
 
     @Nullable
     ActiveGiveaways findByCreatedUserIdAndGuildId(Long createdUserId, Long guildLongId);

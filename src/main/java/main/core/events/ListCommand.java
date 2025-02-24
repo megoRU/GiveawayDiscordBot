@@ -26,6 +26,7 @@ public class ListCommand {
         this.participantsRepository = participantsRepository;
     }
 
+    //TODO: Переделать на вывод активных и запланированных Giveaway
     public void list(@NotNull SlashCommandInteractionEvent event) {
         var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
 

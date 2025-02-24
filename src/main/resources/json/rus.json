@@ -81,5 +81,6 @@
   "help_participants": "Получить список участников по ID Giveaway",
   "help_permissions": "Проверить разрешения бота",
   "help_change": "Изменить время активного Giveaway",
-  "settings_color_error": "Вы неправильно написали цвет"
+  "settings_color_error": "Вы неправильно написали цвет",
+  "giveaway_not_found": "Не найден активный или запланированный Giveaway."
 }

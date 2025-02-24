@@ -127,9 +127,9 @@ public class UpdateController {
                 RerollCommand rerollCommand = new RerollCommand(listUsersRepository);
                 rerollCommand.reroll(event);
             }
-            case "change" -> {
-                ChangeCommand changeCommand = new ChangeCommand(activeGiveawayRepository);
-                changeCommand.change(event, this);
+            case "edit" -> {
+                EditGiveawayCommand editGiveawayCommand = new EditGiveawayCommand(activeGiveawayRepository, schedulingRepository, this);
+                editGiveawayCommand.editGiveaway(event);
             }
             case "scheduling" -> {
                 SchedulingCommand schedulingCommand = new SchedulingCommand(schedulingRepository, activeGiveawayRepository);

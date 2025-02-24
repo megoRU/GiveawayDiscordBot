@@ -327,13 +327,31 @@ public class BotStart {
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установка @Роли для сбора")
                     .setRequired(true));
 
-            //change
-            List<OptionData> change = new ArrayList<>();
-            change.add(new OptionData(STRING, "duration", "Examples: 5s, 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style and UTC ±0")
+            //giveaway-edit
+            List<OptionData> giveawayEditData = new ArrayList<>();
+
+            giveawayEditData.add(new OptionData(STRING, "duration", "Examples: 5s, 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style and UTC ±0")
                     .setName("duration")
-                    .setRequired(true)
                     .setNameLocalization(DiscordLocale.RUSSIAN, "продолжительность")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: 5s, 20m, 10h, 1d. Или: 2021.11.16 16:00. Только в этом стиле и UTC ±0"));
+
+            giveawayEditData.add(new OptionData(INTEGER, "winners", "Set count winners.")
+                    .setName("winners")
+                    .setMinValue(1)
+                    .setMaxValue(30)
+                    .setNameLocalization(DiscordLocale.RUSSIAN, "победителей")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить количество победителей."));
+
+            giveawayEditData.add(new OptionData(STRING, "title", "Title for Giveaway")
+                    .setName("title")
+                    .setMaxLength(255)
+                    .setNameLocalization(DiscordLocale.RUSSIAN, "название")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Название для Giveaway"));
+
+            giveawayEditData.add(new OptionData(STRING, "giveaway-id", "Giveaway ID")
+                    .setName("giveaway-id")
+                    .setNameLocalization(DiscordLocale.RUSSIAN, "id-розыгрыша")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway ID"));
 
             List<OptionData> reroll = new ArrayList<>();
             reroll.add(new OptionData(STRING, "giveaway-id", "Giveaway ID")
@@ -402,10 +420,10 @@ public class BotStart {
                     .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Перевыбрать одного победителя");
 
-            CommandData changeCommand = Commands.slash("change", "Change the time")
-                    .addOptions(change)
+            CommandData giveawayEdit = Commands.slash("edit", "Change Giveaway settings")
+                    .addOptions(giveawayEditData)
                     .setContexts(InteractionContextType.GUILD)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Изменить время")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Изменить настройки Giveaway")
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR));
 
             CommandData predefinedCommand = Commands.slash("predefined", "Gather participants and immediately hold a drawing for a certain @Role")
@@ -430,7 +448,7 @@ public class BotStart {
                             patreonCommand,
                             participantsCommand,
                             rerollCommand,
-                            changeCommand,
+                            giveawayEdit,
                             predefinedCommand,
                             cancelCommand)
                     .queue();
