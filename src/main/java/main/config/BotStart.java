@@ -39,6 +39,8 @@ import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -55,8 +57,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
 
@@ -64,7 +64,7 @@ import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
 @EnableScheduling
 public class BotStart {
 
-    private final static Logger LOGGER = Logger.getLogger(BotStart.class.getName());
+    private final static Logger LOGGER = LoggerFactory.getLogger(BotStart.class.getName());
 
     private static final JSONParsers jsonParsers = new JSONParsers();
     public static final String activity = "/start | ";
@@ -102,6 +102,9 @@ public class BotStart {
     @PostConstruct
     public void startBot() {
         try {
+            CoreBot coreBot = new CoreBot(updateController);
+            coreBot.init();
+
             //Загружаем GiveawayRegistry
             GiveawayRegistry.getInstance();
             //Устанавливаем языки
@@ -151,7 +154,7 @@ public class BotStart {
             updateSlashCommands();
             System.out.println("20:22");
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         }
     }
 
@@ -165,7 +168,7 @@ public class BotStart {
                 instance.putScheduling(guildId, scheduling);
             }
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         }
     }
 
@@ -434,7 +437,7 @@ public class BotStart {
 
             System.out.println("Готово");
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         }
     }
 
@@ -508,7 +511,7 @@ public class BotStart {
                         }
                     }
                 } catch (Exception e) {
-                    LOGGER.log(Level.SEVERE, e.getMessage(), e);
+                    LOGGER.error(e.getMessage(), e);
                 }
             }
         }
@@ -578,7 +581,7 @@ public class BotStart {
                         url_image,
                         giveaway_title == null ? "Giveaway" : giveaway_title,
                         date_end_giveaway,
-                        min_participants == null ? 2 : min_participants);
+                        min_participants == null ? 1 : min_participants);
 
                 giveawayData.setParticipantsList(participantsMap);
 
@@ -603,7 +606,8 @@ public class BotStart {
                     giveaway.stopGiveaway(count_winners);
                 }
             } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, e.getMessage(), e);
+                e.printStackTrace();
+                LOGGER.error(e.getMessage(), e);
             }
             System.out.println("getMessageIdFromDB()");
         }
@@ -618,7 +622,7 @@ public class BotStart {
             try {
                 stopGiveawayHandler.handleGiveaway(giveaway);
             } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, e.getMessage(), e);
+                LOGGER.error(e.getMessage(), e);
             }
         }
     }
@@ -632,7 +636,7 @@ public class BotStart {
                 updateGiveawayByGuild.updateGiveawayByGuild(giveaway);
                 Thread.sleep(2000L);
             } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, e.getMessage(), e);
+                LOGGER.error(e.getMessage(), e);
             }
         }
     }
@@ -644,7 +648,7 @@ public class BotStart {
                 mapLanguages.put(settings.getServerId(), settings);
             }
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         }
     }
 

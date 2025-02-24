@@ -46,7 +46,7 @@ public class SchedulingCommand {
         var textChannel = event.getOption("text-channel", OptionMapping::getAsChannel);
         var image = event.getOption("image", OptionMapping::getAsAttachment);
         var urlImage = image != null ? image.getUrl() : null;
-        int minParticipants = Optional.ofNullable(event.getOption("min-participants", OptionMapping::getAsInt)).orElse(2);
+        int minParticipants = Optional.ofNullable(event.getOption("min-participants", OptionMapping::getAsInt)).orElse(1);
         var startTime = Objects.requireNonNull(event.getOption("start-time", OptionMapping::getAsString));
         var endTime = event.getOption("end-time", OptionMapping::getAsString);
 //        var forbiddenRole = event.getOption("forbidden_role", OptionMapping::getAsRole);

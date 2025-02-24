@@ -21,7 +21,7 @@ public class GiveawayData {
     private String urlImage;
     private String title;
     private Timestamp endGiveawayDate;
-    private int minParticipants = 2;
+    private int minParticipants = 1;
 
     public GiveawayData(long messageId,
                         int countWinners,

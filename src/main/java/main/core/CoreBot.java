@@ -22,17 +22,17 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.RestAction;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @Service
 public class CoreBot extends ListenerAdapter {
 
-    private static final Logger LOGGER = Logger.getLogger(CoreBot.class.getName());
+    private final static Logger LOGGER = LoggerFactory.getLogger(CoreBot.class.getName());
 
     private final UpdateController updateController;
 
@@ -41,7 +41,6 @@ public class CoreBot extends ListenerAdapter {
         this.updateController = updateController;
     }
 
-    @PostConstruct
     public void init() {
         updateController.registerBot(this);
     }
@@ -98,14 +97,14 @@ public class CoreBot extends ListenerAdapter {
                 }
             }
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
             if (e.getMessage().contains("10008: Unknown Message")
                     || e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
                 System.out.println(e.getMessage() + " удаляем!");
                 updateController.getActiveGiveawayRepository().deleteById(guildId);
                 GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildId);
             } else {
-                LOGGER.log(Level.SEVERE, e.getMessage(), e);
+                LOGGER.error(e.getMessage(), e);
             }
         }
     }
@@ -126,7 +125,7 @@ public class CoreBot extends ListenerAdapter {
                 }
             }
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         }
     }
 
@@ -148,7 +147,7 @@ public class CoreBot extends ListenerAdapter {
                 }
             }
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         }
     }
 
@@ -169,7 +168,7 @@ public class CoreBot extends ListenerAdapter {
                 }
             }
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         }
     }
 
@@ -182,7 +181,7 @@ public class CoreBot extends ListenerAdapter {
                 .whenComplete((v, throwable) -> {
                     if (throwable != null) {
                         if (throwable.getMessage().contains("50007: Cannot send messages to this user")) {
-                            LOGGER.log(Level.SEVERE, "50007: Cannot send messages to this user", throwable);
+                            LOGGER.error("50007: Cannot send messages to this user", throwable);
                         }
                     }
                 });

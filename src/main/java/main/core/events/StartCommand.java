@@ -67,7 +67,7 @@ public class StartCommand {
         if (time != null) time = time.replaceAll("-", ".");
         Long role = event.getOption("mention", OptionMapping::getAsLong);
         Message.Attachment image = event.getOption("image", OptionMapping::getAsAttachment);
-        int minParticipants = Optional.ofNullable(event.getOption("min-participants", OptionMapping::getAsInt)).orElse(2);
+        int minParticipants = Optional.ofNullable(event.getOption("min-participants", OptionMapping::getAsInt)).orElse(1);
 
         Scheduling schedulingByGuildLongId = schedulingRepository.findByGuildId(guildIdLong);
 

@@ -33,6 +33,7 @@ public class GiveawayEnds {
         long textChannelId = giveaway.getTextChannelId();
         boolean finishGiveaway = giveaway.isFinishGiveaway();
         GiveawayData giveawayData = giveaway.getGiveawayData();
+        long messageId = giveawayData.getMessageId();
 
         GiveawayUpdateListUser giveawayUpdateListUser = new GiveawayUpdateListUser(giveawayRepositoryService);
         giveawayUpdateListUser.updateGiveawayByGuild(giveaway);
@@ -46,8 +47,9 @@ public class GiveawayEnds {
         final Set<String> uniqueWinners = new LinkedHashSet<>();
 
         Color userColor = GiveawayUtils.getUserColor(guildId);
+        int participantsSize = participants.size();
         try {
-            if (participants.size() < giveawayData.getMinParticipants()) {
+            if (participantsSize < giveawayData.getMinParticipants()) {
                 String giftNotEnoughUsers = jsonParsers.getLocale("gift_not_enough_users", guildId);
                 String giftGiveawayDeleted = jsonParsers.getLocale("gift_giveaway_deleted", guildId);
 
@@ -69,16 +71,21 @@ public class GiveawayEnds {
         }
 
         try {
-            LOGGER.info("Завершаем Giveaway: {}, Участников: {}", guildId, participants.size());
+            LOGGER.info("Завершаем Giveaway: {}, Участников: {}", guildId, participantsSize);
 
-            Winners winners = new Winners(countWinner, 0, participants.size() - 1);
-            List<String> strings = api.getWinners(winners);
-            for (String string : strings) {
-                uniqueWinners.add("<@" + participants.get(Integer.parseInt(string)) + ">");
+            if (participantsSize > 1) {
+                Winners winners = new Winners(countWinner, 0, participantsSize - 1);
+                List<String> strings = api.getWinners(winners);
+                for (String string : strings) {
+                    uniqueWinners.add("<@" + participants.get(Integer.parseInt(string)) + ">");
+                }
+            } else {
+                uniqueWinners.add("<@" + participants.getFirst() + ">");
             }
         } catch (Exception e) {
             if (!finishGiveaway) {
                 giveaway.setFinishGiveaway(true);
+                giveawayRepositoryService.setFinishGiveaway(messageId);
 
                 String errorsWithApi = jsonParsers.getLocale("errors_with_api", guildId);
                 String errorsDescriptions = jsonParsers.getLocale("errors_descriptions", guildId);

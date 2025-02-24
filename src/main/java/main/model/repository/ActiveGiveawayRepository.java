@@ -22,6 +22,11 @@ public interface ActiveGiveawayRepository extends JpaRepository<ActiveGiveaways,
     @Query(value = "UPDATE ActiveGiveaways ac SET ac.dateEnd = :dateEnd WHERE ac.guildId = :guildId")
     void updateGiveawayTime(@Param("guildId") Long guildId, @Param("dateEnd") Timestamp dateEnd);
 
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE ActiveGiveaways ac SET ac.finish = true WHERE ac.messageId = :messageId")
+    void updateFinishGiveaway(@Param("messageId") Long messageId);
+
     @Override
     @NotNull
     @EntityGraph(attributePaths = {"participants"})

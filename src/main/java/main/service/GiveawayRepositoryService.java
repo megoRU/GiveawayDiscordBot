@@ -27,6 +27,11 @@ public class GiveawayRepositoryService {
     }
 
     @Transactional
+    public void setFinishGiveaway(long messageId) {
+        activeGiveawayRepository.updateFinishGiveaway(messageId);
+    }
+
+    @Transactional
     @Nullable
     public ActiveGiveaways getGiveaway(long guildId) {
         return activeGiveawayRepository.findByGuildId(guildId);
