@@ -51,13 +51,19 @@ public class RerollCommand {
                 return;
             }
 
+            final Set<String> uniqueWinners = new LinkedHashSet<>();
+
             try {
-                Winners winners = new Winners(1, 0, listUsers.size() - 1);
-                List<String> setWinners = api.getWinners(winners);
-                final Set<String> uniqueWinners = new LinkedHashSet<>();
-                for (String setWinner : setWinners) {
-                    uniqueWinners.add("<@" + listUsers.get(Integer.parseInt(setWinner)).getUserId() + ">");
+                if (listUsers.size() > 1) {
+                    Winners winners = new Winners(1, 0, listUsers.size() - 1);
+                    List<String> setWinners = api.getWinners(winners);
+                    for (String setWinner : setWinners) {
+                        uniqueWinners.add("<@" + listUsers.get(Integer.parseInt(setWinner)).getUserId() + ">");
+                    }
+                } else {
+                    uniqueWinners.add("<@" + listUsers.getFirst() + ">");
                 }
+
                 String winnerList = Arrays.toString(uniqueWinners.toArray())
                         .replaceAll("\\[", "")
                         .replaceAll("]", "");
