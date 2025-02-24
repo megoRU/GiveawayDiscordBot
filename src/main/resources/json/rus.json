@@ -18,6 +18,7 @@
   "gift_giveaway_end": "Giveaway завершилась",
   "language_change_not_admin": "Вы не являетесь Админом или не можете управлять сервером!",
   "button_language": "Вы сменили язык на: `%s`",
+  "button_language_color": "Вы сменили язык на: `%s` и цвет: `%s`",
   "slash_stop_no_has": "Сейчас нет активного Giveaway",
   "slash_stop": "Вы завершили Giveaway",
   "slash_stop_errors": "Вы не завершили Giveaway",

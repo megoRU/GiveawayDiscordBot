@@ -18,6 +18,7 @@
   "gift_giveaway_end": "Giveaway the end",
   "language_change_not_admin": "You are not Admin or you can't managed server",
   "button_language": "You changed the language to: `%s`",
+  "button_language_color": "You changed the language to: `%s` and color: `%s`",
   "slash_stop_no_has": "Currently there is no active Giveaway",
   "slash_stop": "You have completed Giveaway",
   "slash_stop_errors": "You have not completed the Giveaway",
