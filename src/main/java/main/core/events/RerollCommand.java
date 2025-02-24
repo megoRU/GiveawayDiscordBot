@@ -61,7 +61,7 @@ public class RerollCommand {
                         uniqueWinners.add("<@" + listUsers.get(Integer.parseInt(setWinner)).getUserId() + ">");
                     }
                 } else {
-                    uniqueWinners.add("<@" + listUsers.getFirst() + ">");
+                    uniqueWinners.add("<@" + listUsers.getFirst().getUserId() + ">");
                 }
 
                 String winnerList = Arrays.toString(uniqueWinners.toArray())
