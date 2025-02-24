@@ -11,26 +11,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 @Repository
 public interface ActiveGiveawayRepository extends JpaRepository<ActiveGiveaways, Long> {
-
-    @Transactional
-    @Modifying
-    @Query(value = "UPDATE ActiveGiveaways ac SET ac.dateEnd = :dateEnd WHERE ac.guildId = :guildId")
-    void updateGiveawayTime(@Param("guildId") Long guildId, @Param("dateEnd") Timestamp dateEnd);
-
-    @Transactional
-    @Modifying
-    @Query(value = "UPDATE ActiveGiveaways ac SET ac.countWinners = :winners WHERE ac.guildId = :guildId")
-    void updateWinners(@Param("guildId") Long guildId, @Param("winners") int winners);
-
-    @Transactional
-    @Modifying
-    @Query(value = "UPDATE ActiveGiveaways ac SET ac.title = :title WHERE ac.guildId = :guildId")
-    void updateTitle(@Param("guildId") Long guildId, @Param("title") String title);
 
     @Transactional
     @Modifying
@@ -43,11 +27,21 @@ public interface ActiveGiveawayRepository extends JpaRepository<ActiveGiveaways,
     List<ActiveGiveaways> findAll();
 
     @Nullable
-    ActiveGiveaways findByGuildId(Long guildLongId);
+    List<ActiveGiveaways> findByGuildId(Long guildLongId);
 
     @Nullable
     ActiveGiveaways findByMessageId(Long messageId);
 
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM ActiveGiveaways ac WHERE ac.guildId = :guildId")
+    void deleteAllByGuildId(@Param("guildId") Long guildId);
+
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM ActiveGiveaways ac WHERE ac.messageId = :messageId")
+    void deleteByMessageId(@Param("messageId") Long messageId);
+
     @Nullable
-    ActiveGiveaways findByCreatedUserIdAndGuildId(Long createdUserId, Long guildLongId);
+    ActiveGiveaways findByCreatedUserIdAndMessageId(Long createdUserId, Long messageId);
 }

@@ -36,7 +36,7 @@ public class EditGiveawayCommand {
         String time = event.getOption("duration", OptionMapping::getAsString);
 
         if (time != null) {
-            if (!(GiveawayUtils.isTimeCorrect(time) || GiveawayUtils.isISOTimeCorrect(time))) {
+            if (!GiveawayUtils.isISOTimeCorrect(time) && !GiveawayUtils.isTimeCorrect(time)) {
                 String changeDuration = jsonParsers.getLocale("wrong_date", guildId);
                 event.getHook().sendMessage(changeDuration).setEphemeral(true).queue();
                 return;
@@ -44,20 +44,39 @@ public class EditGiveawayCommand {
         }
 
         try {
+            String giveawayEditTitle = jsonParsers.getLocale("giveaway_edit_title", guildId);
+            String giveawayEditWinners = jsonParsers.getLocale("giveaway_edit_winners", guildId);
+            String giveawayEdit = jsonParsers.getLocale("giveaway_edit", guildId);
+            String giveawayEditEnds = jsonParsers.getLocale("giveaway_edit_ends", guildId);
+
             GiveawayData giveawayData = handleGiveaway(event);
-            long endTime = giveawayData.getEndGiveawayDate().getTime() / 1000;
+            Timestamp endGiveawayDate = giveawayData.getEndGiveawayDate();
 
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder.setColor(GiveawayUtils.getUserColor(guildId));
-            embedBuilder.setDescription(String.format("""
-                            • Отредактировал Giveaway •
-                            
-                            Название: `%s`
-                            Победителей: `%s`
-                            Дата завершения: <t:%s:R> (<t:%s:f>)
-                            """, giveawayData.getTitle(),
-                    giveawayData.getCountWinners(),
-                    endTime, endTime));
+
+            if (endGiveawayDate == null) {
+                embedBuilder.setFooter(giveawayEdit);
+                embedBuilder.setDescription(String.format("""
+                                %s `%s`
+                                %s `%s`
+                                """,
+                        giveawayEditTitle, giveawayData.getTitle(),
+                        giveawayEditWinners, giveawayData.getCountWinners()));
+
+            } else {
+                long endTime = endGiveawayDate.getTime() / 1000;
+                embedBuilder.setFooter(giveawayEdit);
+                embedBuilder.setDescription(String.format("""
+ 
+                                %s `%s`
+                                %s `%s`
+                                %s <t:%s:R> (<t:%s:f>)
+                                """,
+                        giveawayEditTitle, giveawayData.getTitle(),
+                        giveawayEditWinners, giveawayData.getCountWinners(),
+                        giveawayEditEnds, endTime, endTime));
+            }
 
             event.getHook().sendMessageEmbeds(embedBuilder.build()).queue();
         } catch (IllegalArgumentException e) {

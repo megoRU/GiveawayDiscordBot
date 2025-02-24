@@ -33,13 +33,13 @@ public class GiveawayRepositoryService {
 
     @Transactional
     @Nullable
-    public ActiveGiveaways getGiveaway(long guildId) {
-        return activeGiveawayRepository.findByGuildId(guildId);
+    public ActiveGiveaways getGiveaway(long messageId) {
+        return activeGiveawayRepository.findByMessageId(messageId);
     }
 
     @Transactional
-    public void deleteGiveaway(long guildId) {
-        activeGiveawayRepository.deleteById(guildId);
+    public void deleteGiveaway(long messageId) {
+        activeGiveawayRepository.deleteById(messageId);
     }
 
     @Transactional
@@ -47,8 +47,8 @@ public class GiveawayRepositoryService {
         participantsRepository.saveAll(participants);
     }
 
-    public List<Participants> findAllParticipants(long guildId) {
-        return participantsRepository.findParticipantsByActiveGiveaways(guildId);
+    public List<Participants> findAllParticipants(long messageId) {
+        return participantsRepository.findParticipantsByActiveGiveaways(messageId);
     }
 
     @Transactional

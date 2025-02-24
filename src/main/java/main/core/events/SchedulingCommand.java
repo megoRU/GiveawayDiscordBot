@@ -3,7 +3,6 @@ package main.core.events;
 import main.giveaway.GiveawayRegistry;
 import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
-import main.model.entity.ActiveGiveaways;
 import main.model.entity.Scheduling;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.SchedulingRepository;
@@ -26,15 +25,12 @@ import static main.giveaway.GiveawayUtils.timeProcessor;
 public class SchedulingCommand {
 
     private final SchedulingRepository schedulingRepository;
-    private final ActiveGiveawayRepository activeGiveawayRepository;
 
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     @Autowired
-    public SchedulingCommand(SchedulingRepository schedulingRepository,
-                             ActiveGiveawayRepository activeGiveawayRepository) {
+    public SchedulingCommand(SchedulingRepository schedulingRepository) {
         this.schedulingRepository = schedulingRepository;
-        this.activeGiveawayRepository = activeGiveawayRepository;
     }
 
     public void scheduling(@NotNull SlashCommandInteractionEvent event) {
@@ -58,6 +54,7 @@ public class SchedulingCommand {
         }
 
         boolean checkPermissions = GiveawayUtils.checkPermissions(textChannel, event.getGuild().getSelfMember());
+
         if (!checkPermissions) {
             String botPermissionsDeny = jsonParsers.getLocale("bot_permissions_deny", guildId);
             event.reply(botPermissionsDeny).queue();
@@ -66,25 +63,6 @@ public class SchedulingCommand {
 
         //Обработать уведомление
         event.deferReply().setEphemeral(true).queue();
-
-        Scheduling scheduling = schedulingRepository.findByGuildId(guildId);
-        ActiveGiveaways activeGiveaways = activeGiveawayRepository.findByGuildId(guildId);
-
-        if (activeGiveaways != null) {
-            String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_stop_giveaway", guildId);
-            EmbedBuilder errors = new EmbedBuilder();
-            errors.setColor(Color.GREEN);
-            errors.setDescription(messageGiftNeedStopGiveaway);
-            event.getHook().sendMessageEmbeds(errors.build()).queue();
-            return;
-        } else if (scheduling != null) {
-            String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_cancel_giveaway", guildId);
-            EmbedBuilder errors = new EmbedBuilder();
-            errors.setColor(Color.GREEN);
-            errors.setDescription(messageGiftNeedStopGiveaway);
-            event.getHook().sendMessageEmbeds(errors.build()).queue();
-            return;
-        }
 
         if (!GiveawayUtils.isISOTimeCorrect(startTime)) {
             String wrongDate = jsonParsers.getLocale("wrong_date", guildId);
@@ -112,8 +90,9 @@ public class SchedulingCommand {
                 event.getHook().sendMessage(slashErrorRoleCanNotBeEveryone).setEphemeral(true).queue();
                 return;
             }
+            String salt = GiveawayUtils.getSalt(20);
 
-            scheduling = new Scheduling();
+            Scheduling scheduling = new Scheduling();
             scheduling.setGuildId(guildId);
             scheduling.setChannelId(textChannel.getIdLong());
             scheduling.setCountWinners(winners);
@@ -125,6 +104,7 @@ public class SchedulingCommand {
             scheduling.setCreatedUserId(userId);
             scheduling.setUrlImage(urlImage);
             scheduling.setMinParticipants(minParticipants);
+            scheduling.setIdSalt(salt);
 
             schedulingRepository.save(scheduling);
 
@@ -144,9 +124,11 @@ public class SchedulingCommand {
                     timeStart,
                     timeStart,
                     scheduleEnd,
-                    textChannel.getId());
+                    textChannel.getId(),
+                    salt);
+
             EmbedBuilder start = new EmbedBuilder();
-            start.setColor(Color.GREEN);
+            start.setColor(GiveawayUtils.getUserColor(guildId));
             start.setDescription(scheduleStart);
 
             event.getHook().sendMessageEmbeds(start.build()).setEphemeral(true).queue();

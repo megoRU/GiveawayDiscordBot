@@ -104,7 +104,7 @@ public class UpdateController {
                 helpCommand.help(event);
             }
             case "start" -> {
-                StartCommand startCommand = new StartCommand(activeGiveawayRepository, schedulingRepository, giveawayRepositoryService);
+                StartCommand startCommand = new StartCommand(activeGiveawayRepository, giveawayRepositoryService);
                 startCommand.start(event, this);
             }
             case "stop" -> {
@@ -119,10 +119,6 @@ public class UpdateController {
                 SettingsCommand settingsCommand = new SettingsCommand(settingsRepository);
                 settingsCommand.language(event);
             }
-            case "list" -> {
-                ListCommand listCommand = new ListCommand(participantsRepository);
-                listCommand.list(event);
-            }
             case "reroll" -> {
                 RerollCommand rerollCommand = new RerollCommand(listUsersRepository);
                 rerollCommand.reroll(event);
@@ -132,7 +128,7 @@ public class UpdateController {
                 editGiveawayCommand.editGiveaway(event);
             }
             case "scheduling" -> {
-                SchedulingCommand schedulingCommand = new SchedulingCommand(schedulingRepository, activeGiveawayRepository);
+                SchedulingCommand schedulingCommand = new SchedulingCommand(schedulingRepository);
                 schedulingCommand.scheduling(event);
             }
             case "participants" -> {

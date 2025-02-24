@@ -37,8 +37,8 @@ public class GiveawayRegistry {
         return schedulingMap.values();
     }
 
-    public void removeScheduling(long guildId) {
-        schedulingMap.remove(guildId);
+    public void removeScheduling(long messageId) {
+        schedulingMap.remove(messageId);
     }
 
     public void putScheduling(long guildId, Scheduling scheduling) {
@@ -46,19 +46,19 @@ public class GiveawayRegistry {
     }
 
     @Nullable
-    public Giveaway getGiveaway(long guildId) {
-        return giveawayMap.get(guildId);
+    public Giveaway getGiveaway(long messageId) {
+        return giveawayMap.get(messageId);
     }
 
-    public boolean hasGiveaway(long guildId) {
-        return giveawayMap.containsKey(guildId);
+    public boolean hasGiveaway(long messageId) {
+        return giveawayMap.containsKey(messageId);
     }
 
-    public void putGift(long guildId, Giveaway giveaway) {
-        giveawayMap.put(guildId, giveaway);
+    public void putGift(long messageId, Giveaway giveaway) {
+        giveawayMap.put(messageId, giveaway);
     }
 
-    public void removeGuildFromGiveaway(long guildId) {
-        giveawayMap.remove(guildId);
+    public void removeGuildFromGiveaway(long messageId) {
+        giveawayMap.remove(messageId);
     }
 }

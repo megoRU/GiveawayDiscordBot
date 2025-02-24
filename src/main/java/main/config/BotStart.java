@@ -366,6 +366,12 @@ public class BotStart {
                     .setNameLocalization(DiscordLocale.RUSSIAN, "текстовой-канал")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Проверка разрешений определенного канала"));
 
+            List<OptionData> cancelData = new ArrayList<>();
+            cancelData.add(new OptionData(STRING, "giveaway-id", "Giveaway ID")
+                    .setName("giveaway-id")
+                    .setNameLocalization(DiscordLocale.RUSSIAN, "id-розыгрыша")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway ID"));
+
             /*
              * Команды
              */
@@ -402,10 +408,6 @@ public class BotStart {
                     .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Команды бота");
 
-            CommandData listCommand = Commands.slash("list", "List of participants")
-                    .setContexts(InteractionContextType.GUILD)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Список участников");
-
             CommandData patreonCommand = Commands.slash("patreon", "Support us on Patreon")
                     .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Поддержите нас на Patreon");
@@ -433,6 +435,7 @@ public class BotStart {
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR));
 
             CommandData cancelCommand = Commands.slash("cancel", "Cancel Giveaway")
+                    .addOptions(cancelData)
                     .setContexts(InteractionContextType.GUILD)
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Отменить Giveaway");
@@ -444,7 +447,6 @@ public class BotStart {
                             schedulingCommand,
                             stopCommand,
                             helpCommand,
-                            listCommand,
                             patreonCommand,
                             participantsCommand,
                             rerollCommand,

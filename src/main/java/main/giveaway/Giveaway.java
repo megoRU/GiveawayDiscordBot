@@ -139,8 +139,8 @@ public class Giveaway {
         giveawayData.setMessageId(message.getIdLong());
 
         ActiveGiveaways activeGiveaways = new ActiveGiveaways();
-        activeGiveaways.setGuildId(guildId);
         activeGiveaways.setMessageId(message.getIdLong());
+        activeGiveaways.setGuildId(guildId);
         activeGiveaways.setChannelId(message.getChannel().getIdLong());
         activeGiveaways.setCountWinners(giveawayData.getCountWinners());
         activeGiveaways.setTitle(giveawayData.getTitle());

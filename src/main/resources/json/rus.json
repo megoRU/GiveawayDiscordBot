@@ -63,7 +63,7 @@
   "errors_descriptions": "Не беспокойтесь, мы завершим ваш Giveaway автоматически, когда это станет возможным.\nЕсли у вас все еще есть вопросы, задавайте их нам.",
   "errors_descriptions_again": "Не волнуйтесь, задача уже запущена.\nМы завершим ваш Giveaway, как только сможем.",
   "you_wrote_date": "Вы написали дату: `%s`\nСейчас (UTC±0):⠀ ⠀`%s`",
-  "schedule_start": "Дата и время запуска: <t:%s:R> (<t:%s:f>)\nДата и время завершения: %s\nВ канале: <#%s>",
+  "schedule_start": "Дата запуска: <t:%s:R> (<t:%s:f>)\nДата завершения: %s\nВ канале: <#%s>\nID: `%s`",
   "schedule_end": "Не задано",
   "gift_hosted": "\nСоздатель: <@%s>",
   "cancel_scheduling_giveaway": "Успешно отменили запланированный Giveaway!",
@@ -82,5 +82,9 @@
   "help_permissions": "Проверить разрешения бота",
   "help_change": "Изменить время активного Giveaway",
   "settings_color_error": "Вы неправильно написали цвет",
-  "giveaway_not_found": "Не найден активный или запланированный Giveaway."
+  "giveaway_not_found": "Не найден активный или запланированный Giveaway.",
+  "giveaway_edit": "• Отредактировал Giveaway •",
+  "giveaway_edit_title": "Название:",
+  "giveaway_edit_winners": "Победителей:",
+  "giveaway_edit_ends": "Дата завершения:"
 }

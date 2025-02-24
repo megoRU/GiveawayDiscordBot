@@ -19,8 +19,8 @@ import java.util.Set;
 public class ActiveGiveaways {
 
     @Id
-    @Column(name = "guild_id", nullable = false)
-    private Long guildId;
+    @Column(name = "message_id", nullable = false)
+    private Long messageId;
 
     @Column(name = "channel_id", nullable = false)
     private Long channelId;
@@ -34,8 +34,8 @@ public class ActiveGiveaways {
     @Column(name = "title")
     private String title;
 
-    @Column(name = "message_id", nullable = false)
-    private Long messageId;
+    @Column(name = "guild_id", nullable = false)
+    private Long guildId;
 
     @Column(name = "is_for_specific_role")
     private Boolean isForSpecificRole;

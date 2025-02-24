@@ -63,7 +63,7 @@
   "errors_descriptions": "Don't worry, we will complete your Giveaway automatically when it becomes possible.\nIf you still have questions, ask us them.",
   "errors_descriptions_again": "Don't worry, the task is already running.\nWe will complete your Giveaway as soon as we can.",
   "you_wrote_date": "You wrote the date: `%s`\nNow (UTC±0): ⠀⠀⠀⠀`%s`",
-  "schedule_start": "Launch date and time: <t:%s:R> (<t:%s:f>)\nEnd date and time: %s\nIn the channel: <#%s>",
+  "schedule_start": "Launch date: <t:%s:R> (<t:%s:f>)\nEnd date: %s\nIn the channel: <#%s>\nID: `%s`",
   "schedule_end": "Not set",
   "gift_hosted": "\nCreator: <@%s>",
   "cancel_scheduling_giveaway": "Successfully cancelled the scheduled Giveaway!",
@@ -82,5 +82,10 @@
   "help_permissions": "Check bot permissions",
   "help_change": "Change the active Giveaway time",
   "settings_color_error": "You wrote the color incorrectly",
-  "giveaway_not_found": "No active or scheduled Giveaway found."
+  "giveaway_not_found": "No active or scheduled Giveaway found.",
+  "giveaway_edit": "• Edited Giveaway •",
+  "giveaway_edit_title": "Title:",
+  "giveaway_edit_winners": "Winners:",
+  "giveaway_edit_ends": "End date:"
+
 }

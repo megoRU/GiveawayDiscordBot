@@ -18,11 +18,13 @@ public class StopCommand {
 
     private static final JSONParsers jsonParsers = new JSONParsers();
 
+    //TODO: под множество обновить
     public void stop(@NotNull SlashCommandInteractionEvent event) {
         if (event.getGuild() == null) return;
         var guildId = event.getGuild().getIdLong();
 
         Giveaway giveaway = GiveawayRegistry.getInstance().getGiveaway(guildId);
+
         if (giveaway == null) {
             String slashStopNoHas = jsonParsers.getLocale("slash_stop_no_has", guildId);
             EmbedBuilder notHas = new EmbedBuilder();
