@@ -42,18 +42,11 @@ public class StopCommand {
         }
 
         if (giveawayList.size() > 1 && id == null) {
-            event.reply("""
-                            У вас более двух активных `Giveaway`. Используйте параметр `giveaway-id`,
-                            чтобы определить, какой из них завершить.
-                            """)
-                    .setEphemeral(true)
-                    .queue();
+            String giveawayStopCommand = jsonParsers.getLocale("giveaway_stop_command", guildId);
+            event.reply(giveawayStopCommand).setEphemeral(true).queue();
         } else if (giveawayList.size() > 1 && !id.matches("[0-9]+")) {
-            event.reply("""
-                                ID должен быть числом!
-                                """)
-                    .setEphemeral(true)
-                    .queue();
+            String slashStopNoHas = jsonParsers.getLocale("id_must_be_a_number", guildId);
+            event.reply(slashStopNoHas).setEphemeral(true).queue();
         } else if (giveawayList.size() > 1) {
             Optional<Giveaway> optionalGiveaway = giveawayList.stream()
                     .filter(giveaway -> giveaway.getGiveawayData().getMessageId() == Long.parseLong(id))
@@ -72,11 +65,8 @@ public class StopCommand {
                 String slashStopNoHas = jsonParsers.getLocale("slash_stop", guildId);
                 event.reply(slashStopNoHas).setEphemeral(true).queue();
             } else {
-                event.reply("""
-                                Не смог найти по данному ID Giveaway.
-                                """)
-                        .setEphemeral(true)
-                        .queue();
+                String giveawayNotFoundById = jsonParsers.getLocale("giveaway_not_found_by_id", guildId);
+                event.reply(giveawayNotFoundById).setEphemeral(true).queue();
             }
         } else {
             Giveaway giveaway = giveawayList.getFirst();

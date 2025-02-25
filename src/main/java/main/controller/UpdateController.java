@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -76,12 +77,19 @@ public class UpdateController {
             joinEvent(guildJoinEvent);
         } else if (event instanceof MessageReactionAddEvent messageReactionAddEvent) {
             reactionEvent(messageReactionAddEvent);
+        } else if (event instanceof StringSelectInteractionEvent stringSelectInteractionEvent) {
+            selectMenuEvent(stringSelectInteractionEvent);
         } else if (event instanceof GuildLeaveEvent guildLeaveEvent) {
             LOGGER.info(guildLeaveEvent.getGuild().getId());
             leaveEvent(guildLeaveEvent);
         } else if (event instanceof MessageDeleteEvent messageDeleteEvent) {
             messageDeleteEvent(messageDeleteEvent);
         }
+    }
+
+    private void selectMenuEvent(StringSelectInteractionEvent stringSelectInteractionEvent) {
+        SelectMenuInteraction selectMenuInteraction = new SelectMenuInteraction();
+        selectMenuInteraction.handle(stringSelectInteractionEvent);
     }
 
     private void messageDeleteEvent(MessageDeleteEvent messageDeleteEvent) {
@@ -102,6 +110,10 @@ public class UpdateController {
             case "help" -> {
                 HelpCommand helpCommand = new HelpCommand();
                 helpCommand.help(event);
+            }
+            case "list" -> {
+                ListCommand listCommand = new ListCommand();
+                listCommand.handle(event);
             }
             case "start" -> {
                 StartCommand startCommand = new StartCommand(giveawayRepositoryService);

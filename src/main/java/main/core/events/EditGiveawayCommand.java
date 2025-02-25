@@ -171,9 +171,7 @@ public class EditGiveawayCommand {
         String time = event.getOption("duration", OptionMapping::getAsString);
         int winners = Optional.ofNullable(event.getOption("winners", OptionMapping::getAsInt)).orElse(-1);
         String title = event.getOption("title", OptionMapping::getAsString);
-
-        Long guildId = scheduling.getGuildId();
-
+        String idSalt = scheduling.getIdSalt();
 
         if (title != null) {
             scheduling.setTitle(title);
@@ -187,7 +185,7 @@ public class EditGiveawayCommand {
             scheduling.setDateEnd(Timestamp.valueOf(time));
         }
 
-        instance.putScheduling(guildId, scheduling);
+        instance.putScheduling(idSalt, scheduling);
         schedulingRepository.save(scheduling);
 
         return GiveawayData.builder()

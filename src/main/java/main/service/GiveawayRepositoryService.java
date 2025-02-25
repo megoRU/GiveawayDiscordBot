@@ -10,7 +10,6 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -55,5 +54,4 @@ public class GiveawayRepositoryService {
     public void backupAllParticipants(long messageId) {
         listUsersRepository.saveAllParticipantsToUserList(messageId);
     }
-
 }

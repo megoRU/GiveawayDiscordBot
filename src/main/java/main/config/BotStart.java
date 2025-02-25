@@ -164,8 +164,8 @@ public class BotStart {
             GiveawayRegistry instance = GiveawayRegistry.getInstance();
 
             for (Scheduling scheduling : schedulingList) {
-                Long guildId = scheduling.getGuildId();
-                instance.putScheduling(guildId, scheduling);
+                String idSalt = scheduling.getIdSalt();
+                instance.putScheduling(idSalt, scheduling);
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
@@ -439,6 +439,11 @@ public class BotStart {
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Собрать участников и сразу провести розыгрыш для определенной @Роли")
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR));
 
+            CommandData listCommand = Commands.slash("list", "List of all active and planned Giveaway")
+                    .setContexts(InteractionContextType.GUILD)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Список всех активных и запланированных Giveaway")
+                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR));
+
             CommandData cancelCommand = Commands.slash("cancel", "Cancel Giveaway")
                     .addOptions(cancelData)
                     .setContexts(InteractionContextType.GUILD)
@@ -446,6 +451,7 @@ public class BotStart {
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Отменить Giveaway");
 
             commands.addCommands(
+                            listCommand,
                             checkCommand,
                             settingsCommand,
                             startCommand,
@@ -532,7 +538,7 @@ public class BotStart {
 
                             long messageId = giveaway.getGiveawayData().getMessageId();
 
-                            instance.removeScheduling(messageId); //Чтобы не моросил
+                            instance.removeScheduling(idSalt); //Чтобы не моросил
                             instance.putGift(messageId, giveaway);
 
                             schedulingRepository.deleteByIdSalt(idSalt);

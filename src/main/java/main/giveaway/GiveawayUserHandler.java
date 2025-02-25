@@ -19,6 +19,12 @@ public class GiveawayUserHandler {
 
     private final GiveawayRepositoryService giveawayRepositoryService;
 
+    /*
+    TODO:
+    Если по реакции, то оптимизация не работает, нужно вообще переписать так чтобы сразу все собирались или в коллекцию потом из неё брать.
+    Типа K V - K = messageId V очередь
+     */
+
     @Transactional
     public void saveUser(Giveaway giveaway, List<User> user) {
         long messageId = giveaway.getGiveawayData().getMessageId();

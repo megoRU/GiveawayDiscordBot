@@ -89,5 +89,9 @@
   "giveaway_edit_ends": "Дата завершения:",
   "giveaway_edit_command": "У вас более двух активных `Giveaway`. Используйте параметр `giveaway-id`, чтобы определить, какой из них редактировать.",
   "more_giveaway_for_cancel": "У вас более двух активных `Giveaway`. Используйте параметр `giveaway-id`, чтобы определить, какой из них отменять.",
-  "no_active_giveaway_use_parameter": "У вас нет активных Giveaway. Если вам нужно отменить запланированный, используйте параметр `giveaway-id`."
+  "giveaway_stop_command": "У вас более двух активных `Giveaway`. Используйте параметр `giveaway-id`, чтобы определить, какой из них завершить.",
+  "no_active_giveaway_use_parameter": "У вас нет активных Giveaway. Если вам нужно отменить запланированный, используйте параметр `giveaway-id`.",
+  "giveaway_data_end": "Дата завершения: <t:%s:R> (<t:%s:f>)",
+  "giveaway_not_found_by_id": "Не смог найти по данному ID Giveaway.",
+  "id_must_be_a_number": "ID должен быть числом!"
 }

@@ -4,7 +4,6 @@ import main.giveaway.GiveawayRegistry;
 import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.model.entity.Scheduling;
-import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.SchedulingRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
@@ -15,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.awt.*;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -109,7 +107,7 @@ public class SchedulingCommand {
             schedulingRepository.save(scheduling);
 
             GiveawayRegistry instance = GiveawayRegistry.getInstance();
-            instance.putScheduling(guildId, scheduling);
+            instance.putScheduling(salt, scheduling);
 
             String scheduleEnd = jsonParsers.getLocale("schedule_end", guildId);
             long timeStart = Objects.requireNonNull(timeProcessor(startTime)).getTime() / 1000;

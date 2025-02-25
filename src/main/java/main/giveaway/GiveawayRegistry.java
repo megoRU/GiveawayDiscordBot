@@ -12,7 +12,7 @@ public class GiveawayRegistry {
 
     //Возвращает GiveawayData по long id
     private static final Map<Long, Giveaway> giveawayMap = new ConcurrentHashMap<>();
-    private static final Map<Long, Scheduling> schedulingMap = new ConcurrentHashMap<>();
+    private static final Map<String, Scheduling> schedulingMap = new ConcurrentHashMap<>();
     private static volatile GiveawayRegistry giveawayRegistry;
 
     private GiveawayRegistry() {
@@ -37,12 +37,12 @@ public class GiveawayRegistry {
         return schedulingMap.values();
     }
 
-    public void removeScheduling(long messageId) {
+    public void removeScheduling(String messageId) {
         schedulingMap.remove(messageId);
     }
 
-    public void putScheduling(long guildId, Scheduling scheduling) {
-        schedulingMap.put(guildId, scheduling);
+    public void putScheduling(String messageId, Scheduling scheduling) {
+        schedulingMap.put(messageId, scheduling);
     }
 
     @Nullable
@@ -50,9 +50,20 @@ public class GiveawayRegistry {
         return giveawayMap.get(messageId);
     }
 
+    @Nullable
+    public Scheduling getScheduling(String messageId) {
+        return schedulingMap.get(messageId);
+    }
+
     public List<Giveaway> getGiveawaysByGuild(long guildId) {
         return giveawayMap.values().stream()
                 .filter(giveaway -> giveaway.getGuildId() == guildId)
+                .toList();
+    }
+
+    public List<Scheduling> getSchedulingByGuild(long guildId) {
+        return schedulingMap.values().stream()
+                .filter(scheduling -> scheduling.getGuildId() == guildId)
                 .toList();
     }
 
