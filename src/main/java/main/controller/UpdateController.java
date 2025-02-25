@@ -88,7 +88,7 @@ public class UpdateController {
     }
 
     private void selectMenuEvent(StringSelectInteractionEvent stringSelectInteractionEvent) {
-        SelectMenuInteraction selectMenuInteraction = new SelectMenuInteraction();
+        SelectMenuInteraction selectMenuInteraction = new SelectMenuInteraction(activeGiveawayRepository, schedulingRepository);
         selectMenuInteraction.handle(stringSelectInteractionEvent);
     }
 

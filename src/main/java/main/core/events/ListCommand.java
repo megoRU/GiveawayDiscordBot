@@ -25,10 +25,6 @@ public class ListCommand {
         List<Scheduling> schedulingList = instance.getSchedulingByGuild(guildId);
         List<Giveaway> giveawayList = instance.getGiveawaysByGuild(guildId);
 
-
-
-
-
         // Формируем сообщение
         String message = "**🎉 Активные Giveaway:**\n";
         message += giveawayList.isEmpty() ? "Нет активных Giveaway.\n" : giveawayList.stream()
@@ -37,7 +33,7 @@ public class ListCommand {
 
         message += "\n**📅 Запланированные Giveaway:**\n";
         message += schedulingList.isEmpty() ? "Нет запланированных Giveaway.\n" : schedulingList.stream()
-                .map(s -> "- " + s.getTitle())
+                .map(s -> "- " + s.getTitle() +  " | `" + s.getIdSalt() + "`")
                 .collect(Collectors.joining("\n"));
 
         var menuBuilder = StringSelectMenu.create("select_action");
@@ -47,12 +43,23 @@ public class ListCommand {
                         g.getGiveawayData().getTitle(),
                         "giveaway_" + g.getGiveawayData().getMessageId(),
                         "Просмотр #" + g.getGiveawayData().getMessageId()
+
                 )
         );
 
-        var menu = menuBuilder.build();
-        var actionRow = ActionRow.of(menu);
+        schedulingList.forEach(s ->
+                menuBuilder.addOption(
+                        s.getTitle(),
+                        "scheduling_" + s.getIdSalt(),
+                        "Просмотр #" + s.getIdSalt()
+                ));
 
-        event.reply(message).setComponents(actionRow).queue();
+        if (menuBuilder.getOptions().isEmpty()) {
+            event.reply(message).queue();
+        } else {
+            var menu = menuBuilder.build();
+            var actionRow = ActionRow.of(menu);
+            event.reply(message).setComponents(actionRow).queue();
+        }
     }
 }

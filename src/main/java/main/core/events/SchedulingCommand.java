@@ -36,7 +36,7 @@ public class SchedulingCommand {
         var userId = event.getUser().getIdLong();
         var role = event.getOption("mention", OptionMapping::getAsLong);
         int winners = Optional.ofNullable(event.getOption("winners", OptionMapping::getAsInt)).orElse(1);
-        var title = event.getOption("title", OptionMapping::getAsString);
+        var title = Optional.ofNullable(event.getOption("title", OptionMapping::getAsString)).orElse("Giveaway");
         var textChannel = event.getOption("text-channel", OptionMapping::getAsChannel);
         var image = event.getOption("image", OptionMapping::getAsAttachment);
         var urlImage = image != null ? image.getUrl() : null;
