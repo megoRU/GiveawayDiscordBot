@@ -93,6 +93,7 @@ public class SchedulingCommand {
             String salt = GiveawayUtils.getSalt(20);
 
             Scheduling scheduling = new Scheduling();
+            scheduling.setIdSalt(salt);
             scheduling.setGuildId(guildId);
             scheduling.setChannelId(textChannel.getIdLong());
             scheduling.setCountWinners(winners);
@@ -104,7 +105,6 @@ public class SchedulingCommand {
             scheduling.setCreatedUserId(userId);
             scheduling.setUrlImage(urlImage);
             scheduling.setMinParticipants(minParticipants);
-            scheduling.setIdSalt(salt);
 
             schedulingRepository.save(scheduling);
 

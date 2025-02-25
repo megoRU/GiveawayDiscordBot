@@ -163,6 +163,26 @@ public class CoreBot extends ListenerAdapter {
         }
     }
 
+    public void sendMessage(JDA jda, Long guildId, Long textChannel, String text) {
+        try {
+            Guild guildById = jda.getGuildById(guildId);
+
+            if (guildById != null) {
+                GuildMessageChannel textChannelById = guildById.getTextChannelById(textChannel);
+                if (textChannelById == null) textChannelById = guildById.getNewsChannelById(textChannel);
+                if (textChannelById == null) textChannelById = guildById.getThreadChannelById(textChannel);
+                if (textChannelById != null) {
+                    textChannelById
+                            .sendMessage(text)
+                            .submit()
+                            .get();
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+    }
+
     public void sendMessage(JDA jda, String userId, MessageEmbed messageEmbed) {
         RestAction<User> action = jda.retrieveUserById(userId);
 

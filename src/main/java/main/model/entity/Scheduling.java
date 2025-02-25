@@ -20,6 +20,9 @@ import java.sql.Timestamp;
 public class Scheduling {
 
     @Id
+    @Column(name = "id_salt")
+    private String idSalt;
+
     @Column(name = "guild_id", nullable = false)
     private Long guildId;
 
@@ -52,7 +55,4 @@ public class Scheduling {
 
     @Column(name = "min_participants")
     private Integer minParticipants;
-
-    @Column(name = "id_salt")
-    private String idSalt;
 }

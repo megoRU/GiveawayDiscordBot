@@ -193,6 +193,11 @@ public class BotStart {
                     .setNameLocalization(DiscordLocale.RUSSIAN, "победителей")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Если не указано -> стандартное значение при запуске"));
 
+            optionsStop.add(new OptionData(STRING, "giveaway-id", "Giveaway ID")
+                    .setName("giveaway-id")
+                    .setNameLocalization(DiscordLocale.RUSSIAN, "id-розыгрыша")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway ID"));
+
             //Set language
             List<OptionData> optionsSettings = new ArrayList<>();
             optionsSettings.add(new OptionData(STRING, "language", "Setting the bot language")

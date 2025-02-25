@@ -6,6 +6,7 @@ import main.controller.UpdateController;
 import main.core.events.ReactionEvent;
 import main.model.entity.ActiveGiveaways;
 import main.service.GiveawayRepositoryService;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
@@ -101,6 +102,7 @@ public class Giveaway {
         return giveawayData.getEndGiveawayDate();
     }
 
+    //TODO: Возможно добавлять в колекцию тут
     public void startGiveaway(GuildMessageChannel textChannel,
                               String title,
                               int countWinners,
@@ -122,16 +124,18 @@ public class Giveaway {
         giveawayData.setMinParticipants(minParticipants);
         updateTime(time); //Обновляем время
 
-        //Отправка сообщения
-        if (predefined) {
-            textChannel.sendMessageEmbeds(GiveawayEmbedUtils.giveawayPattern(guildId).build())
-                    .queue(this::updateCollections);
-        } else {
-            textChannel.sendMessageEmbeds(GiveawayEmbedUtils.giveawayPattern(guildId).build())
-                    .queue(message -> {
-                        message.addReaction(Emoji.fromUnicode(ReactionEvent.TADA)).queue();
-                        updateCollections(message);
-                    });
+        EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayPattern(giveawayData, this);
+        try {
+            //Отправка сообщения
+            Message message = textChannel.sendMessageEmbeds(embedBuilder.build()).submit().get();
+            if (predefined) {
+                updateCollections(message);
+            } else {
+                message.addReaction(Emoji.fromUnicode(ReactionEvent.TADA)).submit().get();
+                updateCollections(message);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error updating collections", e);
         }
     }
 

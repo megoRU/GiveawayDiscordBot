@@ -6,7 +6,6 @@ import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
 import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
-import main.model.repository.ActiveGiveawayRepository;
 import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -147,6 +146,7 @@ public class StartCommand {
                     minParticipants);
 
             long messageId = giveaway.getGiveawayData().getMessageId();
+            System.out.println("messageId " + messageId);
             instance.putGift(messageId, giveaway);
 
         } catch (Exception e) {

@@ -3,12 +3,14 @@ package main.giveaway;
 import api.megoru.ru.entity.Winners;
 import api.megoru.ru.impl.MegoruAPI;
 import lombok.AllArgsConstructor;
+import main.config.BotStart;
 import main.controller.UpdateController;
 import main.jsonparser.JSONParsers;
 import main.model.entity.Participants;
 import main.service.GiveawayRepositoryService;
 import main.service.GiveawayUpdateListUser;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +39,8 @@ public class GiveawayEnds {
 
         GiveawayUpdateListUser giveawayUpdateListUser = new GiveawayUpdateListUser(giveawayRepositoryService);
         giveawayUpdateListUser.updateGiveawayByGuild(giveaway);
-        //TODO: Native use may be
-        List<Long> participants = giveawayRepositoryService.findAllParticipants(guildId)
+
+        List<Long> participants = giveawayRepositoryService.findAllParticipants(messageId)
                 .stream()
                 .map(Participants::getUserId)
                 .distinct()
@@ -102,29 +104,26 @@ public class GiveawayEnds {
             return;
         }
 
-        EmbedBuilder urlEmbedded = new EmbedBuilder();
-        urlEmbedded.setColor(userColor);
         String url = GiveawayUtils.getDiscordUrlMessage(guildId, textChannelId, giveawayData.getMessageId());
+        String giftUrl = String.format(jsonParsers.getLocale("gift_url", guildId), url);
+
         String winnerArray = Arrays.toString(uniqueWinners.toArray())
                 .replaceAll("\\[", "")
                 .replaceAll("]", "");
 
         String winnersContent;
         if (uniqueWinners.size() == 1) {
-            winnersContent = String.format(jsonParsers.getLocale("gift_congratulations", guildId), winnerArray);
-            String giftUrl = String.format(jsonParsers.getLocale("gift_url", guildId), url);
-            urlEmbedded.setDescription(giftUrl);
+            winnersContent = String.format(jsonParsers.getLocale("gift_congratulations", guildId), winnerArray, giftUrl);
             EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId, messageId);
             updateController.setView(embedBuilder, guildId, textChannelId, messageId);
         } else {
-            winnersContent = String.format(jsonParsers.getLocale("gift_congratulations_many", guildId), winnerArray);
-            String giftUrl = String.format(jsonParsers.getLocale("gift_url", guildId), url);
-            urlEmbedded.setDescription(giftUrl);
+            winnersContent = String.format(jsonParsers.getLocale("gift_congratulations_many", guildId), winnerArray, giftUrl);
             EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId, messageId);
             updateController.setView(embedBuilder, guildId, textChannelId, messageId);
         }
 
-        updateController.setView(urlEmbedded.build(), winnersContent, guildId, textChannelId);
+        JDA jda = BotStart.getJda();
+        updateController.setView(jda, winnersContent, guildId, textChannelId);
 
         giveaway.setRemoved(true);
         //Удаляет данные из коллекций

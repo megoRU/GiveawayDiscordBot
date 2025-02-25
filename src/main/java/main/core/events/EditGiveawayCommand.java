@@ -107,10 +107,8 @@ public class EditGiveawayCommand {
                     .toList();
 
             if (activeGiveawaysList.size() > 1) {
-                event.getHook().sendMessage("""
-                                У вас более двух активных `Giveaway`. Используйте параметр `giveaway-id`,
-                                чтобы определить, какой из них редактировать.
-                                """)
+                String giveawayEditCommand = jsonParsers.getLocale("giveaway_edit_command", guildId);
+                event.getHook().sendMessage(giveawayEditCommand)
                         .setEphemeral(true)
                         .queue();
             } else {
@@ -123,12 +121,8 @@ public class EditGiveawayCommand {
                     .toList();
 
             if (schedulingList.size() > 1) {
-                event.getHook().sendMessage("""
-                                У вас более двух запланированных `Giveaway`. Используйте параметр `giveaway-id`,
-                                чтобы определить, какой из них редактировать.
-                                """)
-                        .setEphemeral(true)
-                        .queue();
+                String giveawayEditCommand = jsonParsers.getLocale("giveaway_edit_command", guildId);
+                event.getHook().sendMessage(giveawayEditCommand).setEphemeral(true).queue();
             } else {
                 return updateSchedulingGiveaway(event, schedulingList.getFirst());
             }
@@ -149,6 +143,7 @@ public class EditGiveawayCommand {
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
         Giveaway giveaway = instance.getGiveaway(messageId);
         if (giveaway == null) throw new IllegalArgumentException("Giveaway not found");
+        GiveawayData giveawayData = giveaway.getGiveawayData();
 
         if (title != null) {
             updateTitle(giveaway, activeGiveaway, title);
@@ -164,7 +159,7 @@ public class EditGiveawayCommand {
 
         activeGiveawayRepository.save(activeGiveaway);
 
-        EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayPattern(guildId);
+        EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayPattern(giveawayData, giveaway);
         updateController.setView(embedBuilder.build(), guildId, channelId, messageId);
 
         return giveaway.getGiveawayData();

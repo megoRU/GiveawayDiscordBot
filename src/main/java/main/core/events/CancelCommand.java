@@ -35,18 +35,16 @@ public class CancelCommand {
 
         if (giveawayId != null) {
             boolean handleCancel = handleCancel(giveawayId, userId, guildId);
-            if (handleCancel) event.getHook().sendMessage("Успешно удалил Giveaway").setEphemeral(true).queue();
-            else event.getHook().sendMessage("Не смог найти такого id. Возможно у вас нет доступа.").setEphemeral(true).queue();
+            String cancelSchedulingGiveaway = jsonParsers.getLocale("cancel_scheduling_giveaway", guildId);
+            String giveawayNotFound = jsonParsers.getLocale("giveaway_not_found", guildId);
+            if (handleCancel) event.getHook().sendMessage(cancelSchedulingGiveaway).setEphemeral(true).queue();
+            else event.getHook().sendMessage(giveawayNotFound).setEphemeral(true).queue();
         } else {
             List<ActiveGiveaways> activeGiveawaysList = activeGiveawayRepository.findByGuildId(guildId);
 
             if (activeGiveawaysList != null && activeGiveawaysList.size() > 1) {
-                event.getHook().sendMessage("""
-                                У вас более двух активных `Giveaway`. Используйте параметр `giveaway-id`,
-                                чтобы определить, какой из них редактировать.
-                                """)
-                        .setEphemeral(true)
-                        .queue();
+                String moreGiveawayForCancel = jsonParsers.getLocale("more_giveaway_for_cancel", guildId);
+                event.getHook().sendMessage(moreGiveawayForCancel).setEphemeral(true).queue();
             } else if (activeGiveawaysList != null && activeGiveawaysList.size() == 1) {
                 ActiveGiveaways first = activeGiveawaysList.getFirst();
                 String cancelGiveaway = jsonParsers.getLocale("cancel_giveaway", guildId);
@@ -59,12 +57,8 @@ public class CancelCommand {
 
                 event.getHook().sendMessageEmbeds(cancel.build()).setEphemeral(true).queue();
             } else {
-                event.getHook().sendMessage("""
-                                У вас нет активных Giveaway. Если вам нужно завершить запланированный,
-                                используйте параметр `giveaway-id`.
-                                """)
-                        .setEphemeral(true)
-                        .queue();
+                String noActiveGiveawayUseParameter = jsonParsers.getLocale("no_active_giveaway_use_parameter", guildId);
+                event.getHook().sendMessage(noActiveGiveawayUseParameter).setEphemeral(true).queue();
             }
         }
     }

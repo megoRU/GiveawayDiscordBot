@@ -60,7 +60,7 @@ public class GiveawayData {
     }
 
     public void setMinParticipants(int minParticipants) {
-        if (minParticipants == 0) this.minParticipants = 2;
+        if (minParticipants == 0) this.minParticipants = 1;
         else this.minParticipants = minParticipants;
     }
 

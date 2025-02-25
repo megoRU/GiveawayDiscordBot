@@ -11,6 +11,6 @@ import java.util.List;
 @Repository
 public interface ParticipantsRepository extends JpaRepository<Participants, Long> {
 
-    @Query(value = "SELECT p FROM Participants p WHERE p.activeGiveaways.messageId = :messageId")
+    @Query(value = "SELECT * FROM participants p WHERE p.message_id = :messageId", nativeQuery = true)
     List<Participants> findParticipantsByActiveGiveaways(@Param("messageId") Long messageId);
 }

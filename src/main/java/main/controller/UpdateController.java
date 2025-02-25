@@ -185,6 +185,10 @@ public class UpdateController {
         coreBot.sendMessage(embedBuilder, messageContent, guildId, textChannel);
     }
 
+    public void setView(JDA jda, String messageContent, Long guildId, Long textChannel) {
+        coreBot.sendMessage(jda, guildId, textChannel, messageContent);
+    }
+
     public void setView(MessageEmbed embedBuilder, Long guildId, Long textChannel, List<Button> buttons) {
         coreBot.sendMessage(embedBuilder, guildId, textChannel, buttons);
     }
