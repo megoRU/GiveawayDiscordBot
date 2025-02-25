@@ -1,5 +1,6 @@
 package main.core.events;
 
+import lombok.AllArgsConstructor;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayData;
 import main.giveaway.GiveawayRegistry;
@@ -9,11 +10,14 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
+@AllArgsConstructor
 public class StopCommand {
 
     private static final JSONParsers jsonParsers = new JSONParsers();
@@ -22,10 +26,11 @@ public class StopCommand {
     public void stop(@NotNull SlashCommandInteractionEvent event) {
         if (event.getGuild() == null) return;
         var guildId = event.getGuild().getIdLong();
+        GiveawayRegistry instance = GiveawayRegistry.getInstance();
 
-        Giveaway giveaway = GiveawayRegistry.getInstance().getGiveaway(guildId);
+        List<Giveaway> giveawayList = instance.getGiveawaysByGuild(guildId);
 
-        if (giveaway == null) {
+        if (giveawayList.isEmpty()) {
             String slashStopNoHas = jsonParsers.getLocale("slash_stop_no_has", guildId);
             EmbedBuilder notHas = new EmbedBuilder();
             notHas.setColor(Color.GREEN);
@@ -33,6 +38,19 @@ public class StopCommand {
             event.replyEmbeds(notHas.build()).queue();
             return;
         }
+
+        if (giveawayList.size() > 1) {
+            event.reply("""
+                            У вас более двух активных `Giveaway`. Используйте параметр `giveaway-id`,
+                            чтобы определить, какой из них редактировать.
+                            """)
+                    .setEphemeral(true)
+                    .queue();
+            return;
+        }
+
+        Giveaway giveaway = giveawayList.getFirst();
+        GiveawayData giveawayData = giveaway.getGiveawayData();
 
         //Это для того чтобы когда мы останавливаем Giveaway повторно
         if (giveaway.isFinishGiveaway()) {
@@ -69,8 +87,6 @@ public class StopCommand {
             event.replyEmbeds(errors.build()).queue();
             return;
         }
-
-        GiveawayData giveawayData = giveaway.getGiveawayData();
 
         //TODO: Что это)
         EmbedBuilder stop = new EmbedBuilder();

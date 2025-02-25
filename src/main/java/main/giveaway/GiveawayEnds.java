@@ -59,11 +59,11 @@ public class GiveawayEnds {
                 notEnoughUsers.setDescription(giftGiveawayDeleted);
                 //Отправляет сообщение
 
-                updateController.setView(notEnoughUsers, guildId, textChannelId);
+                updateController.setView(notEnoughUsers, guildId, textChannelId, messageId);
 
-                giveawayRepositoryService.deleteGiveaway(guildId);
+                giveawayRepositoryService.deleteGiveaway(messageId);
                 GiveawayRegistry instance = GiveawayRegistry.getInstance();
-                instance.removeGuildFromGiveaway(guildId);
+                instance.removeGiveaway(messageId);
                 return;
             }
         } catch (Exception e) {
@@ -114,14 +114,14 @@ public class GiveawayEnds {
             winnersContent = String.format(jsonParsers.getLocale("gift_congratulations", guildId), winnerArray);
             String giftUrl = String.format(jsonParsers.getLocale("gift_url", guildId), url);
             urlEmbedded.setDescription(giftUrl);
-            EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId);
-            updateController.setView(embedBuilder, guildId, textChannelId);
+            EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId, messageId);
+            updateController.setView(embedBuilder, guildId, textChannelId, messageId);
         } else {
             winnersContent = String.format(jsonParsers.getLocale("gift_congratulations_many", guildId), winnerArray);
             String giftUrl = String.format(jsonParsers.getLocale("gift_url", guildId), url);
             urlEmbedded.setDescription(giftUrl);
-            EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId);
-            updateController.setView(embedBuilder, guildId, textChannelId);
+            EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId, messageId);
+            updateController.setView(embedBuilder, guildId, textChannelId, messageId);
         }
 
         updateController.setView(urlEmbedded.build(), winnersContent, guildId, textChannelId);
@@ -129,9 +129,9 @@ public class GiveawayEnds {
         giveaway.setRemoved(true);
         //Удаляет данные из коллекций
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
-        instance.removeGuildFromGiveaway(guildId);
+        instance.removeGiveaway(messageId);
 
-        giveawayRepositoryService.backupAllParticipants(guildId);
-        giveawayRepositoryService.deleteGiveaway(guildId);
+        giveawayRepositoryService.backupAllParticipants(messageId);
+        giveawayRepositoryService.deleteGiveaway(messageId);
     }
 }

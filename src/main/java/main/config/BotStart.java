@@ -489,6 +489,7 @@ public class BotStart {
                             Boolean isOnlyForSpecificRole = scheduling.getIsForSpecificRole();
                             Long guildIdLong = scheduling.getGuildId();
                             Long guildId = scheduling.getGuildId();
+                            String idSalt = scheduling.getIdSalt();
 
                             Giveaway giveaway = new Giveaway(
                                     scheduling.getGuildId(),
@@ -496,8 +497,6 @@ public class BotStart {
                                     scheduling.getCreatedUserId(),
                                     giveawayRepositoryService,
                                     updateController);
-
-                            instance.putGift(scheduling.getGuildId(), giveaway);
 
                             String formattedDate = null;
                             if (scheduling.getDateEnd() != null) {
@@ -526,8 +525,12 @@ public class BotStart {
                                     false,
                                     scheduling.getMinParticipants());
 
-                            schedulingRepository.deleteById(scheduling.getGuildId());
-                            instance.removeScheduling(guildId);
+                            long messageId = giveaway.getGiveawayData().getMessageId();
+
+                            instance.removeScheduling(messageId); //Чтобы не моросил
+                            instance.putGift(messageId, giveaway);
+
+                            schedulingRepository.deleteByIdSalt(idSalt);
                         }
                     }
                 } catch (Exception e) {
@@ -615,7 +618,7 @@ public class BotStart {
                         updateController);
 
                 GiveawayRegistry instance = GiveawayRegistry.getInstance();
-                instance.putGift(guild_long_id, giveaway);
+                instance.putGift(message_id_long, giveaway);
 
                 if (date_end_giveaway != null) {
                     updateGiveawayByGuild.updateGiveawayByGuild(giveaway);
@@ -626,7 +629,6 @@ public class BotStart {
                     giveaway.stopGiveaway(count_winners);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
                 LOGGER.error(e.getMessage(), e);
             }
             System.out.println("getMessageIdFromDB()");

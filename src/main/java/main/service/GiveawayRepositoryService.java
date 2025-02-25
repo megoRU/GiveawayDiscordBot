@@ -52,8 +52,8 @@ public class GiveawayRepositoryService {
     }
 
     @Transactional
-    public void backupAllParticipants(long guildId) {
-        listUsersRepository.saveAllParticipantsToUserList(guildId);
+    public void backupAllParticipants(long messageId) {
+        listUsersRepository.saveAllParticipantsToUserList(messageId);
     }
 
 }

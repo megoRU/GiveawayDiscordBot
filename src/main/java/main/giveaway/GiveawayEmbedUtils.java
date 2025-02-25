@@ -11,10 +11,10 @@ public class GiveawayEmbedUtils {
 
     private static final JSONParsers jsonParsers = new JSONParsers();
 
-    public static EmbedBuilder giveawayPattern(final long guildId) {
+    public static EmbedBuilder giveawayPattern(final long guildId, long messageId) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
-        Giveaway giveaway = instance.getGiveaway(guildId);
+        Giveaway giveaway = instance.getGiveaway(messageId);
         Color userColor = GiveawayUtils.getUserColor(guildId);
 
         if (giveaway != null) {
@@ -75,10 +75,10 @@ public class GiveawayEmbedUtils {
         return embedBuilder;
     }
 
-    public static EmbedBuilder giveawayEnd(final String winners, int countWinners, final long guildId) {
+    public static EmbedBuilder giveawayEnd(final String winners, int countWinners, final long guildId, long messageId) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
-        Giveaway giveaway = instance.getGiveaway(guildId);
+        Giveaway giveaway = instance.getGiveaway(messageId);
         Color userColor = GiveawayUtils.getUserColor(guildId);
 
         if (giveaway != null) {
@@ -115,11 +115,10 @@ public class GiveawayEmbedUtils {
 
                 embedBuilder.appendDescription(giftOnlyFor);
             }
-            long giveawayIdLong = giveawayData.getMessageId();
 
             String giftHosted = String.format(jsonParsers.getLocale("gift_hosted", guildId), createdUserId);
 
-            String giveawayIdDescription = String.format("\n\nGiveaway ID: `%s`", giveawayIdLong);
+            String giveawayIdDescription = String.format("\n\nGiveaway ID: `%s`", messageId);
 
             //Hosted By
             embedBuilder.appendDescription(giftHosted);

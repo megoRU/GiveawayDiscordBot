@@ -22,13 +22,12 @@ public class DeleteEvent {
         boolean fromGuild = event.isFromGuild();
 
         if (fromGuild) {
-            long guildId = event.getGuild().getIdLong();
             GiveawayRegistry instance = GiveawayRegistry.getInstance();
-            Giveaway giveaway = instance.getGiveaway(guildId);
+            Giveaway giveaway = instance.getGiveaway(messageId);
 
             if (giveaway != null) {
                 if (giveaway.getGiveawayData().getMessageId() == messageId) {
-                    giveawayRepositoryService.deleteGiveaway(guildId);
+                    giveawayRepositoryService.deleteGiveaway(messageId);
                     LOGGER.info("DeleteEvent: {}", messageId);
                 }
             }

@@ -104,7 +104,7 @@ public class UpdateController {
                 helpCommand.help(event);
             }
             case "start" -> {
-                StartCommand startCommand = new StartCommand(activeGiveawayRepository, giveawayRepositoryService);
+                StartCommand startCommand = new StartCommand(giveawayRepositoryService);
                 startCommand.start(event, this);
             }
             case "stop" -> {
@@ -173,8 +173,8 @@ public class UpdateController {
         reactionEvent.reaction(event, this);
     }
 
-    public void setView(EmbedBuilder embedBuilder, final long guildId, final long textChannel) {
-        coreBot.editMessage(embedBuilder, guildId, textChannel);
+    public void setView(EmbedBuilder embedBuilder, final long guildId, final long textChannel, final long messageId) {
+        coreBot.editMessage(embedBuilder, guildId, textChannel, messageId);
     }
 
     public void setView(MessageEmbed messageEmbed, final long guildId, final long textChannel, long messageId) {

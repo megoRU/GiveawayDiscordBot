@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class GiveawayRegistry {
 
@@ -50,6 +51,12 @@ public class GiveawayRegistry {
         return giveawayMap.get(messageId);
     }
 
+    public List<Giveaway> getGiveawaysByGuild(long guildId) {
+        return giveawayMap.values().stream()
+                .filter(giveaway -> giveaway.getGuildId() == guildId)
+                .toList();
+    }
+
     public boolean hasGiveaway(long messageId) {
         return giveawayMap.containsKey(messageId);
     }
@@ -58,7 +65,7 @@ public class GiveawayRegistry {
         giveawayMap.put(messageId, giveaway);
     }
 
-    public void removeGuildFromGiveaway(long messageId) {
+    public void removeGiveaway(long messageId) {
         giveawayMap.remove(messageId);
     }
 }

@@ -29,7 +29,6 @@ import java.util.Optional;
 public class StartCommand {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(StartCommand.class.getName());
-    private final ActiveGiveawayRepository activeGiveawayRepository;
     private final GiveawayRepositoryService giveawayRepositoryService;
 
     private static final JSONParsers jsonParsers = new JSONParsers();
@@ -40,6 +39,7 @@ public class StartCommand {
         if (guild == null) return;
 
         boolean checkPermissions = GiveawayUtils.checkPermissions(channel, guild.getSelfMember());
+
         if (!checkPermissions) {
             String botPermissionsDeny = jsonParsers.getLocale("bot_permissions_deny", guild.getIdLong());
             event.reply(botPermissionsDeny).queue();
@@ -125,7 +125,7 @@ public class StartCommand {
                     giveawayRepositoryService,
                     updateController);
 
-            GiveawayRegistry.getInstance().putGift(guildIdLong, giveaway);
+            GiveawayRegistry instance = GiveawayRegistry.getInstance();
 
             if (!event.getInteraction().isAcknowledged()) {
                 try {
@@ -146,6 +146,9 @@ public class StartCommand {
                     false,
                     minParticipants);
 
+            long messageId = giveaway.getGiveawayData().getMessageId();
+            instance.putGift(messageId, giveaway);
+
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             String slashErrors = jsonParsers.getLocale("slash_errors", guildId);
@@ -154,8 +157,6 @@ public class StartCommand {
             errors.setDescription(slashErrors);
             if (event.isAcknowledged()) event.getHook().editOriginalEmbeds(errors.build()).queue();
             else event.replyEmbeds(errors.build()).queue();
-            GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildIdLong);
-            activeGiveawayRepository.deleteById(guildIdLong);
         }
     }
 }

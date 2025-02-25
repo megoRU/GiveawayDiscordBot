@@ -3,12 +3,10 @@ package main.core.events;
 import lombok.AllArgsConstructor;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.SchedulingRepository;
-import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,10 +19,10 @@ public class LeaveEvent {
 
     public void leave(@NotNull GuildLeaveEvent event) {
         try {
+            LOGGER.info("Leaving guild {}", event.getGuild().getName());
             long guildId = event.getGuild().getIdLong();
-            System.out.println("Удаляем данные после удаления бота из Guild");
             activeGiveawayRepository.deleteAllByGuildId(guildId);
-            schedulingRepository.deleteById(guildId);
+            schedulingRepository.deleteByGuildId(guildId);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }

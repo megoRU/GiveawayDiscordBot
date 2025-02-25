@@ -1,10 +1,7 @@
 package main.core;
 
-import jakarta.annotation.PostConstruct;
 import main.config.BotStart;
 import main.controller.UpdateController;
-import main.giveaway.Giveaway;
-import main.giveaway.GiveawayData;
 import main.giveaway.GiveawayRegistry;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -75,36 +72,30 @@ public class CoreBot extends ListenerAdapter {
         updateController.processEvent(event);
     }
 
-    public void editMessage(EmbedBuilder embedBuilder, final long guildId, final long textChannel) {
+    public void editMessage(EmbedBuilder embedBuilder, final long guildId, final long textChannel, final long messageId) {
         try {
+
             Guild guildById = BotStart.getJda().getGuildById(guildId);
 
             if (guildById != null) {
                 GuildMessageChannel textChannelById = guildById.getTextChannelById(textChannel);
                 if (textChannelById == null) textChannelById = guildById.getNewsChannelById(textChannel);
                 if (textChannelById != null) {
-                    GiveawayRegistry instance = GiveawayRegistry.getInstance();
-                    Giveaway giveaway = instance.getGiveaway(guildId);
-                    if (giveaway != null) {
-                        GiveawayData giveawayData = giveaway.getGiveawayData();
                         textChannelById
-                                .retrieveMessageById(giveawayData.getMessageId())
+                                .retrieveMessageById(messageId)
                                 .complete()
                                 .editMessageEmbeds(embedBuilder.build())
                                 .submit()
                                 .get();
                     }
                 }
-            }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            if (e.getMessage().contains("10008: Unknown Message")
-                    || e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
-                System.out.println(e.getMessage() + " удаляем!");
-                updateController.getActiveGiveawayRepository().deleteById(guildId);
-                GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildId);
-            } else {
-                LOGGER.error(e.getMessage(), e);
+            if (e.getMessage().contains("10008: Unknown Message") || e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
+                LOGGER.info("Delete Giveaway {}", messageId);
+                updateController.getGiveawayRepositoryService().deleteGiveaway(messageId);
+                GiveawayRegistry instance = GiveawayRegistry.getInstance();
+                instance.removeGiveaway(messageId);
             }
         }
     }

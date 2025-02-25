@@ -68,7 +68,7 @@ public class EditGiveawayCommand {
                 long endTime = endGiveawayDate.getTime() / 1000;
                 embedBuilder.setFooter(giveawayEdit);
                 embedBuilder.setDescription(String.format("""
- 
+                                
                                 %s `%s`
                                 %s `%s`
                                 %s <t:%s:R> (<t:%s:f>)
@@ -108,9 +108,11 @@ public class EditGiveawayCommand {
 
             if (activeGiveawaysList.size() > 1) {
                 event.getHook().sendMessage("""
-                        У вас более двух активных `Giveaway`. Используйте параметр `giveaway-id`,
-                        чтобы определить, какой из них редактировать.
-                        """).setEphemeral(true).queue();
+                                У вас более двух активных `Giveaway`. Используйте параметр `giveaway-id`,
+                                чтобы определить, какой из них редактировать.
+                                """)
+                        .setEphemeral(true)
+                        .queue();
             } else {
                 return updateActiveGiveaway(event, activeGiveawaysList.getFirst());
             }
@@ -122,9 +124,11 @@ public class EditGiveawayCommand {
 
             if (schedulingList.size() > 1) {
                 event.getHook().sendMessage("""
-                        У вас более двух запланированных `Giveaway`. Используйте параметр `giveaway-id`,
-                        чтобы определить, какой из них редактировать.
-                        """).setEphemeral(true).queue();
+                                У вас более двух запланированных `Giveaway`. Используйте параметр `giveaway-id`,
+                                чтобы определить, какой из них редактировать.
+                                """)
+                        .setEphemeral(true)
+                        .queue();
             } else {
                 return updateSchedulingGiveaway(event, schedulingList.getFirst());
             }
@@ -143,7 +147,7 @@ public class EditGiveawayCommand {
         Long channelId = activeGiveaway.getChannelId();
 
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
-        Giveaway giveaway = instance.getGiveaway(guildId);
+        Giveaway giveaway = instance.getGiveaway(messageId);
         if (giveaway == null) throw new IllegalArgumentException("Giveaway not found");
 
         if (title != null) {

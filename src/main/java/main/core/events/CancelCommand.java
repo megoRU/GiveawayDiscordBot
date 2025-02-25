@@ -34,9 +34,9 @@ public class CancelCommand {
         String giveawayId = event.getOption("giveaway-id", OptionMapping::getAsString);
 
         if (giveawayId != null) {
-            handleCancel(giveawayId, userId, guildId);
-
-            event.getHook().sendMessage("Успешно удалено").setEphemeral(true).queue();
+            boolean handleCancel = handleCancel(giveawayId, userId, guildId);
+            if (handleCancel) event.getHook().sendMessage("Успешно удалил Giveaway").setEphemeral(true).queue();
+            else event.getHook().sendMessage("Не смог найти такого id. Возможно у вас нет доступа.").setEphemeral(true).queue();
         } else {
             List<ActiveGiveaways> activeGiveawaysList = activeGiveawayRepository.findByGuildId(guildId);
 
@@ -69,29 +69,32 @@ public class CancelCommand {
         }
     }
 
-    private void handleCancel(String giveawayId, long userId, long guildId) {
+    private boolean handleCancel(String giveawayId, long userId, long guildId) {
         ActiveGiveaways activeGiveaways = activeGiveawayRepository.findByCreatedUserIdAndMessageId(userId, Long.valueOf(giveawayId));
         if (activeGiveaways != null) {
             removeActiveGiveaway(giveawayId, guildId);
+            return true;
         } else {
             Scheduling scheduling = schedulingRepository.findByCreatedUserIdAndIdSalt(userId, giveawayId);
             if (scheduling != null) {
                 removeScheduling(giveawayId, guildId);
+                return true;
             }
         }
+        return false;
     }
 
-    private void removeScheduling(String giveawayId, long guildId) {
+    private void removeScheduling(String giveawayId, long messageId) {
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
-        instance.removeScheduling(guildId);
-        instance.removeGuildFromGiveaway(guildId);
+        instance.removeScheduling(messageId);
+        instance.removeGiveaway(messageId);
 
         schedulingRepository.deleteByIdSalt(giveawayId);
     }
 
-    private void removeActiveGiveaway(String giveawayId, long guildId) {
+    private void removeActiveGiveaway(String giveawayId, long messageId) {
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
-        instance.removeGuildFromGiveaway(guildId);
+        instance.removeGiveaway(messageId);
 
         activeGiveawayRepository.deleteByMessageId(Long.valueOf(giveawayId));
     }

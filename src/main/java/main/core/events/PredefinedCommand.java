@@ -83,14 +83,13 @@ public class PredefinedCommand {
                 return;
             }
         }
+        GiveawayRegistry instance = GiveawayRegistry.getInstance();
 
         Giveaway giveaway = new Giveaway(guildIdLong,
                 textChannel.getIdLong(),
                 userIdLong,
                 giveawayRepositoryService,
                 updateController);
-
-        GiveawayRegistry.getInstance().putGift(guildIdLong, giveaway);
 
         //TODO: Возможно будет проблема когда Guild слишком большая
         giveaway.startGiveaway(
@@ -103,6 +102,9 @@ public class PredefinedCommand {
                 null,
                 true,
                 2);
+
+        long messageId = giveaway.getGiveawayData().getMessageId();
+        instance.putGift(messageId, giveaway);
 
         Task<List<Member>> listTask = event.getGuild().loadMembers()
                 .onSuccess(members -> {
