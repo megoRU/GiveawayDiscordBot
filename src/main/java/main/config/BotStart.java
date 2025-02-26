@@ -164,8 +164,8 @@ public class BotStart {
             GiveawayRegistry instance = GiveawayRegistry.getInstance();
 
             for (Scheduling scheduling : schedulingList) {
-                Long guildId = scheduling.getGuildId();
-                instance.putScheduling(guildId, scheduling);
+                String idSalt = scheduling.getIdSalt();
+                instance.putScheduling(idSalt, scheduling);
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
@@ -192,6 +192,11 @@ public class BotStart {
                     .setMaxValue(30)
                     .setNameLocalization(DiscordLocale.RUSSIAN, "победителей")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Если не указано -> стандартное значение при запуске"));
+
+            optionsStop.add(new OptionData(STRING, "giveaway-id", "Giveaway ID")
+                    .setName("giveaway-id")
+                    .setNameLocalization(DiscordLocale.RUSSIAN, "id-розыгрыша")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway ID"));
 
             //Set language
             List<OptionData> optionsSettings = new ArrayList<>();
@@ -327,13 +332,40 @@ public class BotStart {
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установка @Роли для сбора")
                     .setRequired(true));
 
-            //change
-            List<OptionData> change = new ArrayList<>();
-            change.add(new OptionData(STRING, "duration", "Examples: 5s, 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style and UTC ±0")
+            //endmessage
+            List<OptionData> endMessageDate = new ArrayList<>();
+
+            endMessageDate.add(new OptionData(STRING, "text", "The text should contain @winner in a specific place at your discretion.")
+                    .setName("text")
+                    .setMaxLength(255)
+                    .setNameLocalization(DiscordLocale.RUSSIAN, "текст")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Текст должен содержать @winner в определенном месте на ваше усмотрение"));
+
+            //giveaway-edit
+            List<OptionData> giveawayEditData = new ArrayList<>();
+
+            giveawayEditData.add(new OptionData(STRING, "duration", "Examples: 5s, 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style and UTC ±0")
                     .setName("duration")
-                    .setRequired(true)
                     .setNameLocalization(DiscordLocale.RUSSIAN, "продолжительность")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: 5s, 20m, 10h, 1d. Или: 2021.11.16 16:00. Только в этом стиле и UTC ±0"));
+
+            giveawayEditData.add(new OptionData(INTEGER, "winners", "Set count winners.")
+                    .setName("winners")
+                    .setMinValue(1)
+                    .setMaxValue(30)
+                    .setNameLocalization(DiscordLocale.RUSSIAN, "победителей")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить количество победителей."));
+
+            giveawayEditData.add(new OptionData(STRING, "title", "Title for Giveaway")
+                    .setName("title")
+                    .setMaxLength(255)
+                    .setNameLocalization(DiscordLocale.RUSSIAN, "название")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Название для Giveaway"));
+
+            giveawayEditData.add(new OptionData(STRING, "giveaway-id", "Giveaway ID")
+                    .setName("giveaway-id")
+                    .setNameLocalization(DiscordLocale.RUSSIAN, "id-розыгрыша")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway ID"));
 
             List<OptionData> reroll = new ArrayList<>();
             reroll.add(new OptionData(STRING, "giveaway-id", "Giveaway ID")
@@ -348,6 +380,12 @@ public class BotStart {
                     .setNameLocalization(DiscordLocale.RUSSIAN, "текстовой-канал")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Проверка разрешений определенного канала"));
 
+            List<OptionData> cancelData = new ArrayList<>();
+            cancelData.add(new OptionData(STRING, "giveaway-id", "Giveaway ID")
+                    .setName("giveaway-id")
+                    .setNameLocalization(DiscordLocale.RUSSIAN, "id-розыгрыша")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway ID"));
+
             /*
              * Команды
              */
@@ -355,7 +393,6 @@ public class BotStart {
             CommandData checkCommand = Commands.slash("check-bot-permission", "Checking the permission bot")
                     .addOptions(botPermissions)
                     .setContexts(InteractionContextType.GUILD)
-                    .setDefaultPermissions(DefaultMemberPermissions.ENABLED)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Проверка разрешений бота");
 
             CommandData settingsCommand = Commands.slash("settings", "Bot settings")
@@ -377,16 +414,12 @@ public class BotStart {
             CommandData stopCommand = Commands.slash("stop", "Stop the Giveaway")
                     .addOptions(optionsStop)
                     .setContexts(InteractionContextType.GUILD)
-                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
+                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER))
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Остановить Giveaway");
 
             CommandData helpCommand = Commands.slash("help", "Bot commands")
                     .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Команды бота");
-
-            CommandData listCommand = Commands.slash("list", "List of participants")
-                    .setContexts(InteractionContextType.GUILD)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Список участников");
 
             CommandData patreonCommand = Commands.slash("patreon", "Support us on Patreon")
                     .setContexts(InteractionContextType.GUILD)
@@ -397,40 +430,53 @@ public class BotStart {
                     .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Получить файл со всеми участниками");
 
+            CommandData endMessage = Commands.slash("endmessage", "Set up a message announcing the winners, replacing it with the specified text.")
+                    .addOptions(endMessageDate)
+                    .setContexts(InteractionContextType.GUILD)
+                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER))
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Настройте сообщение с объявлением победителей, заменяя его на указанный текст.");
+
             CommandData rerollCommand = Commands.slash("reroll", "Reroll one winner")
                     .addOptions(reroll)
                     .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Перевыбрать одного победителя");
 
-            CommandData changeCommand = Commands.slash("change", "Change the time")
-                    .addOptions(change)
+            CommandData giveawayEdit = Commands.slash("edit", "Change Giveaway settings")
+                    .addOptions(giveawayEditData)
                     .setContexts(InteractionContextType.GUILD)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Изменить время")
-                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Изменить настройки Giveaway")
+                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER));
 
             CommandData predefinedCommand = Commands.slash("predefined", "Gather participants and immediately hold a drawing for a certain @Role")
                     .addOptions(predefined)
                     .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Собрать участников и сразу провести розыгрыш для определенной @Роли")
-                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR));
+                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER));
+
+            CommandData listCommand = Commands.slash("list", "List of all active and planned Giveaway")
+                    .setContexts(InteractionContextType.GUILD)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Список всех активных и запланированных Giveaway")
+                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER));
 
             CommandData cancelCommand = Commands.slash("cancel", "Cancel Giveaway")
+                    .addOptions(cancelData)
                     .setContexts(InteractionContextType.GUILD)
-                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
+                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER))
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Отменить Giveaway");
 
             commands.addCommands(
+                            listCommand,
                             checkCommand,
+                            endMessage,
                             settingsCommand,
                             startCommand,
                             schedulingCommand,
                             stopCommand,
                             helpCommand,
-                            listCommand,
                             patreonCommand,
                             participantsCommand,
                             rerollCommand,
-                            changeCommand,
+                            giveawayEdit,
                             predefinedCommand,
                             cancelCommand)
                     .queue();
@@ -469,6 +515,7 @@ public class BotStart {
                             Boolean isOnlyForSpecificRole = scheduling.getIsForSpecificRole();
                             Long guildIdLong = scheduling.getGuildId();
                             Long guildId = scheduling.getGuildId();
+                            String idSalt = scheduling.getIdSalt();
 
                             Giveaway giveaway = new Giveaway(
                                     scheduling.getGuildId(),
@@ -476,8 +523,6 @@ public class BotStart {
                                     scheduling.getCreatedUserId(),
                                     giveawayRepositoryService,
                                     updateController);
-
-                            instance.putGift(scheduling.getGuildId(), giveaway);
 
                             String formattedDate = null;
                             if (scheduling.getDateEnd() != null) {
@@ -506,8 +551,12 @@ public class BotStart {
                                     false,
                                     scheduling.getMinParticipants());
 
-                            schedulingRepository.deleteById(scheduling.getGuildId());
-                            instance.removeScheduling(guildId);
+                            long messageId = giveaway.getGiveawayData().getMessageId();
+
+                            instance.removeScheduling(idSalt); //Чтобы не моросил
+                            instance.putGift(messageId, giveaway);
+
+                            schedulingRepository.deleteByIdSalt(idSalt);
                         }
                     }
                 } catch (Exception e) {
@@ -595,7 +644,7 @@ public class BotStart {
                         updateController);
 
                 GiveawayRegistry instance = GiveawayRegistry.getInstance();
-                instance.putGift(guild_long_id, giveaway);
+                instance.putGift(message_id_long, giveaway);
 
                 if (date_end_giveaway != null) {
                     updateGiveawayByGuild.updateGiveawayByGuild(giveaway);
@@ -606,7 +655,6 @@ public class BotStart {
                     giveaway.stopGiveaway(count_winners);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
                 LOGGER.error(e.getMessage(), e);
             }
             System.out.println("getMessageIdFromDB()");

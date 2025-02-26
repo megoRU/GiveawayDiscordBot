@@ -17,9 +17,10 @@ public interface ListUsersRepository extends JpaRepository<ListUsers, Long> {
     @Modifying
     @Query(value = "INSERT INTO list_users(giveaway_id, guild_id, created_user_id, nick_name, user_id) " +
             "SELECT ag.message_id, ag.guild_id, ag.created_user_id, p.nick_name, p.user_id " +
-            "FROM active_giveaways ag, participants p " +
-            "WHERE ag.guild_id = :guildId AND p.guild_id = :guildId", nativeQuery = true)
-    void saveAllParticipantsToUserList(@Param("guildId") Long guildId);
+            "FROM active_giveaways ag " +
+            "JOIN participants p ON ag.message_id = p.message_id " +
+            "WHERE ag.message_id = :messageId", nativeQuery = true)
+    void saveAllParticipantsToUserList(@Param("messageId") Long messageId);
 
     List<ListUsers> findAllByGiveawayIdAndCreatedUserId(Long giveawayId, Long createdUserId);
 }

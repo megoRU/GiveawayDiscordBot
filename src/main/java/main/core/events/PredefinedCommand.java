@@ -6,7 +6,6 @@ import main.giveaway.GiveawayRegistry;
 import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.service.GiveawayRepositoryService;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
@@ -20,7 +19,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.awt.*;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -47,15 +45,6 @@ public class PredefinedCommand {
         if (!checkPermissions) {
             String botPermissionsDeny = jsonParsers.getLocale("bot_permissions_deny", guildId);
             event.reply(botPermissionsDeny).queue();
-            return;
-        }
-
-        if (GiveawayRegistry.getInstance().hasGiveaway(guildIdLong)) {
-            String messageGiftNeedStopGiveaway = jsonParsers.getLocale("message_gift_need_stop_giveaway", guildId);
-            EmbedBuilder errors = new EmbedBuilder();
-            errors.setColor(Color.GREEN);
-            errors.setDescription(messageGiftNeedStopGiveaway);
-            event.replyEmbeds(errors.build()).queue();
             return;
         }
 
@@ -94,14 +83,13 @@ public class PredefinedCommand {
                 return;
             }
         }
+        GiveawayRegistry instance = GiveawayRegistry.getInstance();
 
         Giveaway giveaway = new Giveaway(guildIdLong,
                 textChannel.getIdLong(),
                 userIdLong,
                 giveawayRepositoryService,
                 updateController);
-
-        GiveawayRegistry.getInstance().putGift(guildIdLong, giveaway);
 
         //TODO: Возможно будет проблема когда Guild слишком большая
         giveaway.startGiveaway(
@@ -113,7 +101,10 @@ public class PredefinedCommand {
                 true,
                 null,
                 true,
-                2);
+                1);
+
+        long messageId = giveaway.getGiveawayData().getMessageId();
+        instance.putGift(messageId, giveaway);
 
         Task<List<Member>> listTask = event.getGuild().loadMembers()
                 .onSuccess(members -> {

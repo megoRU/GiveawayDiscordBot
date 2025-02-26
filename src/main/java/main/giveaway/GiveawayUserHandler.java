@@ -19,8 +19,15 @@ public class GiveawayUserHandler {
 
     private final GiveawayRepositoryService giveawayRepositoryService;
 
+    /*
+    TODO:
+    Если по реакции, то оптимизация не работает, нужно вообще переписать так чтобы сразу все собирались или в коллекцию потом из неё брать.
+    Типа K V - K = messageId V очередь
+     */
+
     @Transactional
     public void saveUser(Giveaway giveaway, List<User> user) {
+        long messageId = giveaway.getGiveawayData().getMessageId();
         long guildId = giveaway.getGuildId();
         boolean removed = giveaway.isRemoved();
 
@@ -31,12 +38,12 @@ public class GiveawayUserHandler {
                 .toList();
 
         if (!removed && !userList.isEmpty()) {
-            ActiveGiveaways activeGiveaways = giveawayRepositoryService.getGiveaway(guildId);
+            ActiveGiveaways activeGiveaways = giveawayRepositoryService.getGiveaway(messageId);
             if (activeGiveaways == null) return;
 
             List<Participants> participantsList = new ArrayList<>(userList.size() + 1);
             for (User users : userList) {
-                LOGGER.info("Новый участник: Nick: {} UserID: {} Guild: {}", users.getName(), users.getId(), guildId);
+                LOGGER.info("Новый участник: Nick: {} UserID: {} Guild: {} MessageId {}", users.getName(), users.getId(), guildId, messageId);
 
                 Participants participants = new Participants();
                 participants.setUserId(users.getIdLong());

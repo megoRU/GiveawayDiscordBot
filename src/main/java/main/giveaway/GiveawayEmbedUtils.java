@@ -11,74 +11,72 @@ public class GiveawayEmbedUtils {
 
     private static final JSONParsers jsonParsers = new JSONParsers();
 
-    public static EmbedBuilder giveawayPattern(final long guildId) {
+    public static EmbedBuilder giveawayPattern(GiveawayData giveawayData, Giveaway giveaway) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
-        GiveawayRegistry instance = GiveawayRegistry.getInstance();
-        Giveaway giveaway = instance.getGiveaway(guildId);
+        long guildId = giveaway.getGuildId();
+
         Color userColor = GiveawayUtils.getUserColor(guildId);
 
-        if (giveaway != null) {
-            GiveawayData giveawayData = giveaway.getGiveawayData();
-            String title = giveawayData.getTitle();
-            long createdUserId = giveaway.getUserIdLong();
-            String giftReaction = jsonParsers.getLocale("gift_reaction", guildId);
-            int countWinners = giveawayData.getCountWinners();
-            String imageUrl = giveawayData.getUrlImage();
-            Long role = giveawayData.getRoleId();
-            boolean isForSpecificRole = giveawayData.isForSpecificRole();
-            Timestamp endGiveaway = giveawayData.getEndGiveawayDate();
+        String title = giveawayData.getTitle();
+        long createdUserId = giveaway.getUserIdLong();
+        String giftReaction = jsonParsers.getLocale("gift_reaction", guildId);
+        int countWinners = giveawayData.getCountWinners();
+        String imageUrl = giveawayData.getUrlImage();
+        Long role = giveawayData.getRoleId();
+        boolean isForSpecificRole = giveawayData.isForSpecificRole();
+        Timestamp endGiveaway = giveawayData.getEndGiveawayDate();
 
-            //Title
-            embedBuilder.setTitle(title);
-            //Color
-            embedBuilder.setColor(userColor);
+        //Title
+        embedBuilder.setTitle(title);
+        //Color
+        embedBuilder.setColor(userColor);
 
-            String footer;
-            if (countWinners == 1) {
-                footer = String.format("1 %s", GiveawayUtils.setEndingWord(1, guildId));
-            } else {
-                footer = String.format("%s %s", countWinners, GiveawayUtils.setEndingWord(countWinners, guildId));
-            }
-
-            //Reaction
-            embedBuilder.setDescription(giftReaction);
-
-            //Giveaway only for Role
-            if (isForSpecificRole) {
-                String giftOnlyFor;
-                if (role == guildId) {
-                    giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", guildId), role)
-                            .replace("<@&" + guildId + ">", "@everyone");
-                } else {
-                    giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", guildId), role);
-                }
-                embedBuilder.appendDescription(giftOnlyFor);
-            }
-            
-            //EndGiveaway
-            if (endGiveaway != null) {
-                long endTime = endGiveaway.getTime() / 1000;
-                String endTimeFormat =
-                        String.format(jsonParsers.getLocale("gift_ends_giveaway", guildId), endTime, endTime);
-                embedBuilder.appendDescription(endTimeFormat);
-            }
-
-            String giftHosted = String.format(jsonParsers.getLocale("gift_hosted", guildId), createdUserId);
-
-            //Hosted By
-            embedBuilder.appendDescription(giftHosted);
-            //Image
-            embedBuilder.setImage(imageUrl);
-            //Footer
-            embedBuilder.setFooter(footer);
+        String footer;
+        if (countWinners == 1) {
+            footer = String.format("1 %s", GiveawayUtils.setEndingWord(1, guildId));
+        } else {
+            footer = String.format("%s %s", countWinners, GiveawayUtils.setEndingWord(countWinners, guildId));
         }
+
+        //Reaction
+        embedBuilder.setDescription(giftReaction);
+
+        //Giveaway only for Role
+        if (isForSpecificRole) {
+            String giftOnlyFor;
+            if (role == guildId) {
+                giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", guildId), role)
+                        .replace("<@&" + guildId + ">", "@everyone");
+            } else {
+                giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", guildId), role);
+            }
+            embedBuilder.appendDescription(giftOnlyFor);
+        }
+
+        //EndGiveaway
+        if (endGiveaway != null) {
+            long endTime = endGiveaway.getTime() / 1000;
+            String endTimeFormat =
+                    String.format(jsonParsers.getLocale("gift_ends_giveaway", guildId), endTime, endTime);
+            embedBuilder.appendDescription(endTimeFormat);
+        }
+
+        String giftHosted = String.format(jsonParsers.getLocale("gift_hosted", guildId), createdUserId);
+
+        //Hosted By
+        embedBuilder.appendDescription(giftHosted);
+        //Image
+        embedBuilder.setImage(imageUrl);
+        //Footer
+        embedBuilder.setFooter(footer);
+
         return embedBuilder;
     }
 
-    public static EmbedBuilder giveawayEnd(final String winners, int countWinners, final long guildId) {
+    public static EmbedBuilder giveawayEnd(final String winners, int countWinners, final long guildId, long messageId) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
-        Giveaway giveaway = instance.getGiveaway(guildId);
+        Giveaway giveaway = instance.getGiveaway(messageId);
         Color userColor = GiveawayUtils.getUserColor(guildId);
 
         if (giveaway != null) {
@@ -115,11 +113,10 @@ public class GiveawayEmbedUtils {
 
                 embedBuilder.appendDescription(giftOnlyFor);
             }
-            long giveawayIdLong = giveawayData.getMessageId();
 
             String giftHosted = String.format(jsonParsers.getLocale("gift_hosted", guildId), createdUserId);
 
-            String giveawayIdDescription = String.format("\n\nGiveaway ID: `%s`", giveawayIdLong);
+            String giveawayIdDescription = String.format("\n\nGiveaway ID: `%s`", messageId);
 
             //Hosted By
             embedBuilder.appendDescription(giftHosted);

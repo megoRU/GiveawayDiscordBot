@@ -1,5 +1,6 @@
 package main.giveaway;
 
+import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
 import main.config.BotStart;
 import main.jsonparser.JSONParsers;
 import main.model.entity.Settings;
@@ -7,6 +8,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.sql.Timestamp;
@@ -15,12 +17,15 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
+import static com.aventrix.jnanoid.jnanoid.NanoIdUtils.DEFAULT_NUMBER_GENERATOR;
+
 public class GiveawayUtils {
 
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
     public static final String ISO_TIME_REGEX = "^\\d{4}.\\d{2}.\\d{2}\\s\\d{2}:\\d{2}$"; //2021.11.16 16:00
     public static final String TIME_REGEX = "(\\d{4}.\\d{2}.\\d{2}\\s\\d{2}:\\d{2})|(\\d{1,2}[smhdсмдч]|\\s)+";
     public static final JSONParsers jsonParsers = new JSONParsers();
+    public static final char[] DEFAULT_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray();
 
     public static boolean checkPermissions(GuildChannel guildChannel, Member selfMember) {
         return selfMember.hasPermission(guildChannel,
@@ -29,6 +34,10 @@ public class GiveawayUtils {
                 Permission.MESSAGE_HISTORY,
                 Permission.VIEW_CHANNEL,
                 Permission.MESSAGE_SEND);
+    }
+
+    public static String getSalt(int size) {
+        return NanoIdUtils.randomNanoId(DEFAULT_NUMBER_GENERATOR, DEFAULT_ALPHABET, size);
     }
 
     public static long getSeconds(String time) {
@@ -66,6 +75,16 @@ public class GiveawayUtils {
             }
         } else {
             return Color.GREEN;
+        }
+    }
+
+    @Nullable
+    public static String getGuildText(long guildId) {
+        Settings settings = BotStart.getMapLanguages().get(guildId);
+        if (settings != null) {
+            return settings.getText();
+        } else {
+            return null;
         }
     }
 

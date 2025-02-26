@@ -10,20 +10,20 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class GiveawayUpdateListUser {
 
-    private static final Logger LOGGER = Logger.getLogger(GiveawayUpdateListUser.class.getName());
+    private final static Logger LOGGER = LoggerFactory.getLogger(GiveawayUpdateListUser.class.getName());
 
     private final GiveawayRepositoryService giveawayRepositoryService;
 
@@ -38,7 +38,7 @@ public class GiveawayUpdateListUser {
         JDA jda = BotStart.getJda();
 
         if (jda != null) {
-            if (instance.hasGiveaway(guildId)) {
+            if (instance.hasGiveaway(messageId)) {
                 long channelId = giveaway.getTextChannelId();
                 //System.out.println("Guild ID: " + guildIdLong);
 
@@ -59,7 +59,7 @@ public class GiveawayUpdateListUser {
                         }
 
                         //-1 because one Bot
-                        if (instance.hasGiveaway(guildId) &&
+                        if (instance.hasGiveaway(messageId) &&
                                 reactions != null &&
                                 !reactions.isEmpty() &&
                                 reactions.getFirst().getCount() - 1 != giveawayData.getParticipantSize()) {
@@ -91,32 +91,33 @@ public class GiveawayUpdateListUser {
                                                     if (e.getMessage().contains("10007: Unknown Member")) {
                                                         userList.remove(entry.getKey());
                                                     } else {
-                                                        LOGGER.log(Level.SEVERE, e.getMessage(), e);
+                                                        LOGGER.error(e.getMessage(), e);
                                                     }
                                                 }
                                             }
                                         }
                                     } catch (Exception e) {
-                                        LOGGER.log(Level.SEVERE, e.getMessage(), e);
+                                        LOGGER.error(e.getMessage(), e);
                                     }
                                 }
 
                                 //System.out.println("UserList count: " + userList);
                                 //Перебираем Users в реакциях
-                                if (instance.hasGiveaway(guildId)) {
+                                if (instance.hasGiveaway(messageId)) {
                                     giveaway.addUser(userList.values().stream().toList());
                                 }
                             }
                         }
                     }
                 } catch (Exception e) {
-                    if (e.getMessage() != null && e.getMessage().contains("10008: Unknown Message")
-                            || e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
-                        System.out.println("updateUserList() " + e.getMessage() + " удаляем!");
-                        giveawayRepositoryService.deleteGiveaway(guildId);
-                        GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildId);
+                    if (e.getMessage() != null &&
+                            e.getMessage().contains("10008: Unknown Message") ||
+                            e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
+                        LOGGER.info("GiveawayUpdateList: {} удаляем", e.getMessage());
+                        giveawayRepositoryService.deleteGiveaway(messageId);
+                        instance.removeGiveaway(messageId);
                     } else {
-                        LOGGER.log(Level.SEVERE, e.getMessage(), e);
+                        LOGGER.error(e.getMessage(), e);
                     }
                 }
             }

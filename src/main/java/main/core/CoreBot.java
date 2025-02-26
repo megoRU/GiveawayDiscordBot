@@ -1,10 +1,7 @@
 package main.core;
 
-import jakarta.annotation.PostConstruct;
 import main.config.BotStart;
 import main.controller.UpdateController;
-import main.giveaway.Giveaway;
-import main.giveaway.GiveawayData;
 import main.giveaway.GiveawayRegistry;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -16,6 +13,7 @@ import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -56,6 +54,11 @@ public class CoreBot extends ListenerAdapter {
     }
 
     @Override
+    public void onStringSelectInteraction(@NotNull StringSelectInteractionEvent event) {
+        updateController.processEvent(event);
+    }
+
+    @Override
     public void onGuildJoin(@NotNull GuildJoinEvent event) {
         updateController.processEvent(event);
     }
@@ -75,36 +78,30 @@ public class CoreBot extends ListenerAdapter {
         updateController.processEvent(event);
     }
 
-    public void editMessage(EmbedBuilder embedBuilder, final long guildId, final long textChannel) {
+    public void editMessage(EmbedBuilder embedBuilder, final long guildId, final long textChannel, final long messageId) {
         try {
+
             Guild guildById = BotStart.getJda().getGuildById(guildId);
 
             if (guildById != null) {
                 GuildMessageChannel textChannelById = guildById.getTextChannelById(textChannel);
                 if (textChannelById == null) textChannelById = guildById.getNewsChannelById(textChannel);
                 if (textChannelById != null) {
-                    GiveawayRegistry instance = GiveawayRegistry.getInstance();
-                    Giveaway giveaway = instance.getGiveaway(guildId);
-                    if (giveaway != null) {
-                        GiveawayData giveawayData = giveaway.getGiveawayData();
                         textChannelById
-                                .retrieveMessageById(giveawayData.getMessageId())
+                                .retrieveMessageById(messageId)
                                 .complete()
                                 .editMessageEmbeds(embedBuilder.build())
                                 .submit()
                                 .get();
                     }
                 }
-            }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            if (e.getMessage().contains("10008: Unknown Message")
-                    || e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
-                System.out.println(e.getMessage() + " удаляем!");
-                updateController.getActiveGiveawayRepository().deleteById(guildId);
-                GiveawayRegistry.getInstance().removeGuildFromGiveaway(guildId);
-            } else {
-                LOGGER.error(e.getMessage(), e);
+            if (e.getMessage().contains("10008: Unknown Message") || e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
+                LOGGER.info("Delete Giveaway {}", messageId);
+                updateController.getGiveawayRepositoryService().deleteGiveaway(messageId);
+                GiveawayRegistry instance = GiveawayRegistry.getInstance();
+                instance.removeGiveaway(messageId);
             }
         }
     }
@@ -163,6 +160,26 @@ public class CoreBot extends ListenerAdapter {
                     textChannelById
                             .sendMessageEmbeds(embedBuilder)
                             .setActionRow(buttons)
+                            .submit()
+                            .get();
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+    }
+
+    public void sendMessage(JDA jda, Long guildId, Long textChannel, String text) {
+        try {
+            Guild guildById = jda.getGuildById(guildId);
+
+            if (guildById != null) {
+                GuildMessageChannel textChannelById = guildById.getTextChannelById(textChannel);
+                if (textChannelById == null) textChannelById = guildById.getNewsChannelById(textChannel);
+                if (textChannelById == null) textChannelById = guildById.getThreadChannelById(textChannel);
+                if (textChannelById != null) {
+                    textChannelById
+                            .sendMessage(text)
                             .submit()
                             .get();
                 }

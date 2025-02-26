@@ -10,7 +10,6 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -33,13 +32,13 @@ public class GiveawayRepositoryService {
 
     @Transactional
     @Nullable
-    public ActiveGiveaways getGiveaway(long guildId) {
-        return activeGiveawayRepository.findByGuildId(guildId);
+    public ActiveGiveaways getGiveaway(long messageId) {
+        return activeGiveawayRepository.findByMessageId(messageId);
     }
 
     @Transactional
-    public void deleteGiveaway(long guildId) {
-        activeGiveawayRepository.deleteById(guildId);
+    public void deleteGiveaway(long messageId) {
+        activeGiveawayRepository.deleteById(messageId);
     }
 
     @Transactional
@@ -47,13 +46,13 @@ public class GiveawayRepositoryService {
         participantsRepository.saveAll(participants);
     }
 
-    public List<Participants> findAllParticipants(long guildId) {
-        return participantsRepository.findParticipantsByActiveGiveaways(guildId);
+    @Transactional
+    public List<Participants> findAllParticipants(long messageId) {
+        return participantsRepository.findParticipantsByActiveGiveaways(messageId);
     }
 
     @Transactional
-    public void backupAllParticipants(long guildId) {
-        listUsersRepository.saveAllParticipantsToUserList(guildId);
+    public void backupAllParticipants(long messageId) {
+        listUsersRepository.saveAllParticipantsToUserList(messageId);
     }
-
 }

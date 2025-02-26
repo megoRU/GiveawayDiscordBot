@@ -26,4 +26,7 @@ public class Settings {
 
     @Column(name = "color_hex")
     private String colorHex;
+
+    @Column(name = "text")
+    private String text;
 }

@@ -1,5 +1,6 @@
 package main.giveaway;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 public class GiveawayData {
 
@@ -58,7 +60,7 @@ public class GiveawayData {
     }
 
     public void setMinParticipants(int minParticipants) {
-        if (minParticipants == 0) this.minParticipants = 2;
+        if (minParticipants == 0) this.minParticipants = 1;
         else this.minParticipants = minParticipants;
     }
 

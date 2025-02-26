@@ -1,16 +1,15 @@
 package main.model.entity;
 
+import com.google.gson.annotations.Expose;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@ToString
 @Table(name = "participants")
 public class Participants {
 
@@ -20,7 +19,7 @@ public class Participants {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "guild_id", referencedColumnName = "guild_id", nullable = false)
+    @JoinColumn(name = "message_id", referencedColumnName = "message_id", nullable = false)
     private ActiveGiveaways activeGiveaways;
 
     @Column(name = "user_id", nullable = false)

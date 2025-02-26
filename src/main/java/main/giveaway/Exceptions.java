@@ -26,7 +26,7 @@ public class Exceptions {
                 errors.setTitle("Errors with API");
                 errors.setDescription("Repeat later. Or write to us about it.");
 
-                List<net.dv8tion.jda.api.interactions.components.buttons.Button> buttons = new ArrayList<>();
+                List<Button> buttons = new ArrayList<>();
                 buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
                 hook.sendMessageEmbeds(errors.build()).addActionRow(buttons).queue();
                 LOGGER.info(uhe.getMessage(), uhe);

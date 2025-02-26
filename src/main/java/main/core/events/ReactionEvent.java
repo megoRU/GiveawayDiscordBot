@@ -32,19 +32,19 @@ public class ReactionEvent {
             if (member == null || user.isBot()) return;
 
             String emoji = event.getEmoji().getName();
+            long messageId = event.getMessageIdLong();
             long guildIdLong = event.getGuild().getIdLong();
             GiveawayRegistry instance = GiveawayRegistry.getInstance();
-            Giveaway giveaway = instance.getGiveaway(guildIdLong);
+            Giveaway giveaway = instance.getGiveaway(messageId);
 
             if (giveaway != null) {
                 GiveawayData giveawayData = giveaway.getGiveawayData();
                 if (giveawayData.participantContains(user.getId())) return;
                 if (emoji.equals(TADA)) {
                     //Проверяем event id message с Giveaway message id
-                    long messageIdWithReactionCurrent = event.getMessageIdLong();
                     long messageIdWithReaction = giveawayData.getMessageId();
 
-                    if (messageIdWithReactionCurrent != messageIdWithReaction) return;
+                    if (messageId != messageIdWithReaction) return;
                     Long roleId = giveawayData.getRoleId(); // null -> 0
 
                     if (roleId != null && roleId != 0L) {
@@ -52,7 +52,7 @@ public class ReactionEvent {
                         boolean isForSpecificRole = giveawayData.isForSpecificRole();
 
                         if (isForSpecificRole && !event.getMember().getRoles().contains(roleById)) {
-                            String url = GiveawayUtils.getDiscordUrlMessage(guildIdLong, event.getGuildChannel().getIdLong(), messageIdWithReactionCurrent);
+                            String url = GiveawayUtils.getDiscordUrlMessage(guildIdLong, event.getGuildChannel().getIdLong(), messageId);
                             LOGGER.info("Нажал на эмодзи, но у него нет доступа к розыгрышу: {}", user.getId());
                             //Получаем ссылку на Giveaway
 

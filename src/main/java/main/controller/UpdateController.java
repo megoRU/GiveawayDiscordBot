@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -20,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -61,6 +63,7 @@ public class UpdateController {
         this.coreBot = coreBot;
     }
 
+    @Transactional
     public void processEvent(Object event) {
         distributeEventsByType(event);
     }
@@ -76,12 +79,19 @@ public class UpdateController {
             joinEvent(guildJoinEvent);
         } else if (event instanceof MessageReactionAddEvent messageReactionAddEvent) {
             reactionEvent(messageReactionAddEvent);
+        } else if (event instanceof StringSelectInteractionEvent stringSelectInteractionEvent) {
+            selectMenuEvent(stringSelectInteractionEvent);
         } else if (event instanceof GuildLeaveEvent guildLeaveEvent) {
             LOGGER.info(guildLeaveEvent.getGuild().getId());
             leaveEvent(guildLeaveEvent);
         } else if (event instanceof MessageDeleteEvent messageDeleteEvent) {
             messageDeleteEvent(messageDeleteEvent);
         }
+    }
+
+    private void selectMenuEvent(StringSelectInteractionEvent stringSelectInteractionEvent) {
+        SelectMenuInteraction selectMenuInteraction = new SelectMenuInteraction(activeGiveawayRepository, schedulingRepository);
+        selectMenuInteraction.handle(stringSelectInteractionEvent);
     }
 
     private void messageDeleteEvent(MessageDeleteEvent messageDeleteEvent) {
@@ -103,8 +113,16 @@ public class UpdateController {
                 HelpCommand helpCommand = new HelpCommand();
                 helpCommand.help(event);
             }
+            case "list" -> {
+                ListCommand listCommand = new ListCommand();
+                listCommand.handle(event);
+            }
+            case "endmessage" -> {
+                EndMessageCommand endMessageCommand = new EndMessageCommand(settingsRepository);
+                endMessageCommand.handle(event);
+            }
             case "start" -> {
-                StartCommand startCommand = new StartCommand(activeGiveawayRepository, schedulingRepository, giveawayRepositoryService);
+                StartCommand startCommand = new StartCommand(giveawayRepositoryService);
                 startCommand.start(event, this);
             }
             case "stop" -> {
@@ -119,24 +137,20 @@ public class UpdateController {
                 SettingsCommand settingsCommand = new SettingsCommand(settingsRepository);
                 settingsCommand.language(event);
             }
-            case "list" -> {
-                ListCommand listCommand = new ListCommand(participantsRepository);
-                listCommand.list(event);
-            }
             case "reroll" -> {
                 RerollCommand rerollCommand = new RerollCommand(listUsersRepository);
                 rerollCommand.reroll(event);
             }
-            case "change" -> {
-                ChangeCommand changeCommand = new ChangeCommand(activeGiveawayRepository);
-                changeCommand.change(event, this);
+            case "edit" -> {
+                EditGiveawayCommand editGiveawayCommand = new EditGiveawayCommand(activeGiveawayRepository, schedulingRepository, this);
+                editGiveawayCommand.editGiveaway(event);
             }
             case "scheduling" -> {
-                SchedulingCommand schedulingCommand = new SchedulingCommand(schedulingRepository, activeGiveawayRepository);
+                SchedulingCommand schedulingCommand = new SchedulingCommand(schedulingRepository);
                 schedulingCommand.scheduling(event);
             }
             case "participants" -> {
-                ParticipantsCommand participantsCommand = new ParticipantsCommand(listUsersRepository);
+                ParticipantsCommand participantsCommand = new ParticipantsCommand(listUsersRepository, participantsRepository);
                 participantsCommand.participants(event);
             }
             case "patreon" -> {
@@ -177,8 +191,8 @@ public class UpdateController {
         reactionEvent.reaction(event, this);
     }
 
-    public void setView(EmbedBuilder embedBuilder, final long guildId, final long textChannel) {
-        coreBot.editMessage(embedBuilder, guildId, textChannel);
+    public void setView(EmbedBuilder embedBuilder, final long guildId, final long textChannel, final long messageId) {
+        coreBot.editMessage(embedBuilder, guildId, textChannel, messageId);
     }
 
     public void setView(MessageEmbed messageEmbed, final long guildId, final long textChannel, long messageId) {
@@ -187,6 +201,10 @@ public class UpdateController {
 
     public void setView(MessageEmbed embedBuilder, String messageContent, Long guildId, Long textChannel) {
         coreBot.sendMessage(embedBuilder, messageContent, guildId, textChannel);
+    }
+
+    public void setView(JDA jda, String messageContent, Long guildId, Long textChannel) {
+        coreBot.sendMessage(jda, guildId, textChannel, messageContent);
     }
 
     public void setView(MessageEmbed embedBuilder, Long guildId, Long textChannel, List<Button> buttons) {
