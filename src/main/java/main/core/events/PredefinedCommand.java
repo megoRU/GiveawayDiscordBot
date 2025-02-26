@@ -101,7 +101,7 @@ public class PredefinedCommand {
                 true,
                 null,
                 true,
-                2);
+                1);
 
         long messageId = giveaway.getGiveawayData().getMessageId();
         instance.putGift(messageId, giveaway);

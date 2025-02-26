@@ -76,11 +76,11 @@
   "help_cancel": "Cancel Giveaway",
   "help_reroll": "Reroll one winner by Giveaway ID",
   "help_predefined": "Gather participants and immediately hold a drawing for a certain @Role.",
-  "help_list": "List of participants",
+  "help_list": "List of active and scheduled Giveaway",
   "help_language": "Setup Bot Language and color messages",
   "help_participants": "Get a list of participants by the Giveaway ID",
   "help_permissions": "Check bot permissions",
-  "help_change": "Change the active Giveaway time",
+  "help_edit": "Change Giveaway Settings",
   "settings_color_error": "You wrote the color incorrectly",
   "giveaway_not_found": "Couldn't find an active or scheduled Giveaway.",
   "giveaway_edit": "• Edited Giveaway •",
@@ -111,5 +111,6 @@
   "list_menu_participants": "Minimum number of participants: ",
   "giveaway_was_canceled": "Giveaway has been cancelled",
   "end_message_edit": "Successfully edited the message",
-  "end_message_edit_error": "You can't edit other people's messages!"
+  "end_message_edit_error": "You can't edit other people's messages!",
+  "help_end_message": "Change bot message"
 }

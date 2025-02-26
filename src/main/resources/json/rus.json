@@ -76,11 +76,11 @@
   "help_cancel": "Отменить Giveaway",
   "help_reroll": "Перевыбрать одного победителя по ID Giveaway",
   "help_predefined": "Собрать участников и немедленно провести Giveaway для определенной @Роли.",
-  "help_list": "Список участников",
+  "help_list": "Список активных и запланированных Giveaway",
   "help_language": "Настроить язык бота и цвет сообщений",
   "help_participants": "Получить список участников по ID Giveaway",
   "help_permissions": "Проверить разрешения бота",
-  "help_change": "Изменить время активного Giveaway",
+  "help_edit": "Изменить настройки Giveaway",
   "settings_color_error": "Вы неправильно написали цвет",
   "giveaway_not_found": "Не смог найти активный или запланированный Giveaway.",
   "giveaway_edit": "• Отредактировал Giveaway •",
@@ -111,5 +111,6 @@
   "list_menu_participants": "Минимум участников: ",
   "giveaway_was_canceled": "Giveaway была отменена",
   "end_message_edit": "Успешно отредактировал сообщение",
-  "end_message_edit_error": "Чужие сообщения нельзя редактировать!"
+  "end_message_edit_error": "Чужие сообщения нельзя редактировать!",
+  "help_end_message": "Изменить сообщение бота"
 }

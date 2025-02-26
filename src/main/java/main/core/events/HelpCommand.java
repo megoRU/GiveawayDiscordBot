@@ -30,7 +30,8 @@ public class HelpCommand {
         String helpLanguage = jsonParsers.getLocale("help_language", guildId);
         String helpParticipants = jsonParsers.getLocale("help_participants", guildId);
         String helpPermissions = jsonParsers.getLocale("help_permissions", guildId);
-        String helpChange = jsonParsers.getLocale("help_change", guildId);
+        String helpEdit = jsonParsers.getLocale("help_edit", guildId);
+        String helpEndMessage = jsonParsers.getLocale("help_end_message", guildId);
 
         EmbedBuilder info = new EmbedBuilder();
         info.setColor(Color.GREEN);
@@ -47,7 +48,8 @@ public class HelpCommand {
                                 </settings:1204911821056905277> - %s
                                 </participants:952572018077892638> - %s
                                 </check-bot-permission:1009065886335914054> - %s
-                                </change:1027901550456225842> - %s
+                                </edit:1027901550456225842> - %s
+                                </endmessage:> - %s
                                 """,
                         helpStart,
                         helpStop,
@@ -59,7 +61,8 @@ public class HelpCommand {
                         helpLanguage,
                         helpParticipants,
                         helpPermissions,
-                        helpChange), false);
+                        helpEdit,
+                        helpEndMessage), false);
         String messagesEventsLinks = jsonParsers.getLocale("messages_events_links", guildId);
         String messagesEventsSite = jsonParsers.getLocale("messages_events_site", guildId);
         String messagesEventsAddMeToOtherGuilds = jsonParsers.getLocale("messages_events_add_me_to_other_guilds", guildId);
