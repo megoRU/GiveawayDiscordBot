@@ -118,7 +118,7 @@ public class UpdateController {
                 listCommand.handle(event);
             }
             case "endmessage" -> {
-                EndMessageCommand endMessageCommand = new EndMessageCommand();
+                EndMessageCommand endMessageCommand = new EndMessageCommand(settingsRepository);
                 endMessageCommand.handle(event);
             }
             case "start" -> {

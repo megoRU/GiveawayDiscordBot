@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.sql.Timestamp;
@@ -74,6 +75,16 @@ public class GiveawayUtils {
             }
         } else {
             return Color.GREEN;
+        }
+    }
+
+    @Nullable
+    public static String getGuildText(long guildId) {
+        Settings settings = BotStart.getMapLanguages().get(guildId);
+        if (settings != null) {
+            return settings.getText();
+        } else {
+            return null;
         }
     }
 

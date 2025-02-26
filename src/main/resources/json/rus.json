@@ -110,7 +110,8 @@
   "list_menu_viewer": "Просмотр #",
   "list_menu_participants": "Минимум участников: ",
   "giveaway_was_canceled": "Giveaway была отменена",
-  "end_message_edit": "Успешно отредактировал сообщение",
-  "end_message_edit_error": "Чужие сообщения нельзя редактировать!",
-  "help_end_message": "Изменить сообщение бота"
+  "end_message": "Так будет выглядеть сообщение с поздравлением:",
+  "end_message_edit_error": "Ваш текст должен содержать: `@winner`",
+  "help_end_message": "Настройка сообщения с объявлением победителей",
+  "end_message_deleted": "Установил стандартные настройки"
 }

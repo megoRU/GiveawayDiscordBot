@@ -43,126 +43,144 @@ public class EditGiveawayCommand {
             }
         }
 
-        try {
-            String giveawayEditTitle = jsonParsers.getLocale("giveaway_edit_title", guildId);
-            String giveawayEditWinners = jsonParsers.getLocale("giveaway_edit_winners", guildId);
-            String giveawayEdit = jsonParsers.getLocale("giveaway_edit", guildId);
-            String giveawayEditEnds = jsonParsers.getLocale("giveaway_edit_ends", guildId);
+        String giveawayEditTitle = jsonParsers.getLocale("giveaway_edit_title", guildId);
+        String giveawayEditWinners = jsonParsers.getLocale("giveaway_edit_winners", guildId);
+        String giveawayEdit = jsonParsers.getLocale("giveaway_edit", guildId);
+        String giveawayEditEnds = jsonParsers.getLocale("giveaway_edit_ends", guildId);
 
-            GiveawayData giveawayData = handleGiveaway(event);
-            Timestamp endGiveawayDate = giveawayData.getEndGiveawayDate();
+        GiveawayData giveawayData = handleGiveaway(event);
+        if (giveawayData == null) return;
+        Timestamp endGiveawayDate = giveawayData.getEndGiveawayDate();
 
-            EmbedBuilder embedBuilder = new EmbedBuilder();
-            embedBuilder.setColor(GiveawayUtils.getUserColor(guildId));
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setColor(GiveawayUtils.getUserColor(guildId));
 
-            if (endGiveawayDate == null) {
-                embedBuilder.setFooter(giveawayEdit);
-                embedBuilder.setDescription(String.format("""
-                                %s `%s`
-                                %s `%s`
-                                """,
-                        giveawayEditTitle, giveawayData.getTitle(),
-                        giveawayEditWinners, giveawayData.getCountWinners()));
+        if (endGiveawayDate == null) {
+            embedBuilder.setFooter(giveawayEdit);
+            embedBuilder.setDescription(String.format("""
+                            %s `%s`
+                            %s `%s`
+                            """,
+                    giveawayEditTitle, giveawayData.getTitle(),
+                    giveawayEditWinners, giveawayData.getCountWinners()));
 
-            } else {
-                long endTime = endGiveawayDate.getTime() / 1000;
-                embedBuilder.setFooter(giveawayEdit);
-                embedBuilder.setDescription(String.format("""
-                                
-                                %s `%s`
-                                %s `%s`
-                                %s <t:%s:R> (<t:%s:f>)
-                                """,
-                        giveawayEditTitle, giveawayData.getTitle(),
-                        giveawayEditWinners, giveawayData.getCountWinners(),
-                        giveawayEditEnds, endTime, endTime));
-            }
-
-            event.getHook().sendMessageEmbeds(embedBuilder.build()).queue();
-        } catch (IllegalArgumentException e) {
-            String giveawayNotFound = jsonParsers.getLocale("giveaway_not_found", guildId);
-            event.getHook().sendMessage(giveawayNotFound).queue();
+        } else {
+            long endTime = endGiveawayDate.getTime() / 1000;
+            embedBuilder.setFooter(giveawayEdit);
+            embedBuilder.setDescription(String.format("""
+                            
+                            %s `%s`
+                            %s `%s`
+                            %s <t:%s:R> (<t:%s:f>)
+                            """,
+                    giveawayEditTitle, giveawayData.getTitle(),
+                    giveawayEditWinners, giveawayData.getCountWinners(),
+                    giveawayEditEnds, endTime, endTime));
         }
+
+        event.getHook().sendMessageEmbeds(embedBuilder.build()).queue();
     }
 
-    private GiveawayData handleGiveaway(@NotNull SlashCommandInteractionEvent event) throws IllegalArgumentException {
+    private GiveawayData handleGiveaway(@NotNull SlashCommandInteractionEvent event) {
         String giveawayId = event.getOption("giveaway-id", OptionMapping::getAsString);
         long guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
+        GiveawayRegistry instance = GiveawayRegistry.getInstance();
 
-        if (giveawayId != null) {
-            ActiveGiveaways activeGiveaways = activeGiveawayRepository.findByMessageId(Long.parseLong(giveawayId));
-
-            if (activeGiveaways != null) {
-                return updateActiveGiveaway(event, activeGiveaways);
-            } else {
-                Scheduling scheduling = schedulingRepository.findByIdSalt(giveawayId);
-                if (scheduling != null) {
-                    return updateSchedulingGiveaway(event, scheduling);
-                }
-            }
-        } else {
-            List<ActiveGiveaways> activeGiveawaysList = activeGiveawayRepository.findAll()
-                    .stream()
-                    .filter(activeGiveaways -> activeGiveaways.getGuildId() == guildId)
-                    .toList();
-
-            if (activeGiveawaysList.size() > 1) {
-                String giveawayEditCommand = jsonParsers.getLocale("giveaway_edit_command", guildId);
-                event.getHook().sendMessage(giveawayEditCommand)
-                        .setEphemeral(true)
-                        .queue();
-            } else {
-                return updateActiveGiveaway(event, activeGiveawaysList.getFirst());
-            }
-
-            List<Scheduling> schedulingList = schedulingRepository.findAll()
-                    .stream()
-                    .filter(scheduling -> scheduling.getGuildId() == guildId)
-                    .toList();
-
-            if (schedulingList.size() > 1) {
-                String giveawayEditCommand = jsonParsers.getLocale("giveaway_edit_command", guildId);
-                event.getHook().sendMessage(giveawayEditCommand).setEphemeral(true).queue();
-            } else {
-                return updateSchedulingGiveaway(event, schedulingList.getFirst());
-            }
+        if (giveawayId == null) {
+            return handleGiveawayByGuild(event, guildId, instance);
         }
 
-        throw new IllegalArgumentException("Don't know how to handle giveaway: " + giveawayId);
+        try {
+            long giveawayIdLong = Long.parseLong(giveawayId);
+            Giveaway giveaway = instance.getGiveaway(giveawayIdLong);
+            if (giveaway != null) {
+                return updateActiveGiveaway(event, giveaway);
+            } else {
+                String selectMenuGiveawayNotFound = jsonParsers.getLocale("select_menu_giveaway_not_found", guildId);
+                event.getHook().sendMessage(selectMenuGiveawayNotFound).setEphemeral(true).queue();
+            }
+        } catch (NumberFormatException ignored) {
+            Scheduling scheduling = instance.getScheduling(giveawayId);
+            if (scheduling != null) {
+                return updateSchedulingGiveaway(event, scheduling);
+            } else {
+                String selectMenuSchedulingNotFound = jsonParsers.getLocale("select_menu_scheduling_not_found", guildId);
+                event.getHook().sendMessage(selectMenuSchedulingNotFound).setEphemeral(true).queue();
+            }
+        }
+        return null;
     }
 
-    private GiveawayData updateActiveGiveaway(@NotNull SlashCommandInteractionEvent event, @NotNull ActiveGiveaways activeGiveaway) throws IllegalArgumentException {
+    private GiveawayData handleGiveawayByGuild(@NotNull SlashCommandInteractionEvent event, long guildId, GiveawayRegistry instance) {
+        List<Giveaway> giveawayList = instance.getGiveawaysByGuild(guildId);
+        if (giveawayList.size() == 1) {
+            return updateActiveGiveaway(event, giveawayList.getFirst());
+        }
+
+        List<Scheduling> schedulingList = instance.getSchedulingByGuild(guildId);
+        if (schedulingList.size() == 1) {
+            return updateSchedulingGiveaway(event, schedulingList.getFirst());
+        }
+
+        String responseKey = giveawayList.isEmpty() && schedulingList.isEmpty()
+                ? "giveaway_not_found"
+                : "giveaway_edit_command";
+
+        event.getHook().sendMessage(jsonParsers.getLocale(responseKey, guildId)).setEphemeral(true).queue();
+        return null;
+    }
+
+    private GiveawayData updateActiveGiveaway(@NotNull SlashCommandInteractionEvent event, @NotNull Giveaway giveaway) {
         String time = event.getOption("duration", OptionMapping::getAsString);
         int winners = Optional.ofNullable(event.getOption("winners", OptionMapping::getAsInt)).orElse(-1);
         String title = event.getOption("title", OptionMapping::getAsString);
 
-        Long messageId = activeGiveaway.getMessageId();
-        Long guildId = activeGiveaway.getGuildId();
-        Long channelId = activeGiveaway.getChannelId();
+        long messageId = giveaway.getGiveawayData().getMessageId();
+        long guildId = giveaway.getGuildId();
+        long channelId = giveaway.getTextChannelId();
 
-        GiveawayRegistry instance = GiveawayRegistry.getInstance();
-        Giveaway giveaway = instance.getGiveaway(messageId);
-        if (giveaway == null) throw new IllegalArgumentException("Giveaway not found");
         GiveawayData giveawayData = giveaway.getGiveawayData();
 
         if (title != null) {
-            updateTitle(giveaway, activeGiveaway, title);
+            updateTitle(giveaway, title);
         }
 
         if (winners != -1) {
-            updateWinners(giveaway, activeGiveaway, winners);
+            updateWinners(giveaway, winners);
         }
 
         if (time != null) {
-            updateTime(giveaway, activeGiveaway, time);
+            updateTime(giveaway, time);
         }
 
-        activeGiveawayRepository.save(activeGiveaway);
+        updateGiveaway(giveaway);
 
         EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayPattern(giveawayData, giveaway);
         updateController.setView(embedBuilder.build(), guildId, channelId, messageId);
 
         return giveaway.getGiveawayData();
+    }
+
+    private void updateGiveaway(Giveaway giveaway) {
+        long messageId = giveaway.getGiveawayData().getMessageId();
+        String title = giveaway.getGiveawayData().getTitle();
+        Timestamp endGiveawayDate = giveaway.getGiveawayData().getEndGiveawayDate();
+        long textChannelId = giveaway.getTextChannelId();
+        int countWinners = giveaway.getGiveawayData().getCountWinners();
+        long guildId = giveaway.getGuildId();
+        long userIdLong = giveaway.getUserIdLong();
+
+        ActiveGiveaways activeGiveaways = new ActiveGiveaways();
+        activeGiveaways.setMessageId(messageId);
+        activeGiveaways.setFinish(false);
+        activeGiveaways.setCreatedUserId(userIdLong);
+        activeGiveaways.setGuildId(guildId);
+        activeGiveaways.setTitle(title);
+        activeGiveaways.setChannelId(textChannelId);
+        activeGiveaways.setCountWinners(countWinners);
+        activeGiveaways.setDateEnd(endGiveawayDate);
+
+        activeGiveawayRepository.save(activeGiveaways);
     }
 
     private GiveawayData updateSchedulingGiveaway(@NotNull SlashCommandInteractionEvent event, @NotNull Scheduling scheduling) {
@@ -195,23 +213,20 @@ public class EditGiveawayCommand {
                 .build();
     }
 
-    private void updateTitle(Giveaway giveaway, ActiveGiveaways activeGiveaways, String title) {
+    private void updateTitle(Giveaway giveaway, String title) {
         GiveawayData giveawayData = giveaway.getGiveawayData();
         giveawayData.setTitle(title);
-        activeGiveaways.setTitle(title);
     }
 
-    private void updateWinners(Giveaway giveaway, ActiveGiveaways activeGiveaways, int winners) {
+    private void updateWinners(Giveaway giveaway, int winners) {
         GiveawayData giveawayData = giveaway.getGiveawayData();
 
         if (winners != -1) {
             giveawayData.setCountWinners(winners);
-            activeGiveaways.setCountWinners(winners);
         }
     }
 
-    private void updateTime(Giveaway giveaway, ActiveGiveaways activeGiveaways, String time) {
-        Timestamp timestamp = giveaway.updateTime(time);
-        activeGiveaways.setDateEnd(timestamp);
+    private void updateTime(Giveaway giveaway, String time) {
+        giveaway.updateTime(time);
     }
 }

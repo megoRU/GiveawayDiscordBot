@@ -334,18 +334,12 @@ public class BotStart {
 
             //endmessage
             List<OptionData> endMessageDate = new ArrayList<>();
-            endMessageDate.add(new OptionData(STRING, "message-id", "message ID")
-                    .setName("message-id")
-                    .setRequired(true)
-                    .setNameLocalization(DiscordLocale.RUSSIAN, "id-сообщения")
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "ID сообщения"));
 
-            endMessageDate.add(new OptionData(STRING, "text", "Text for message")
+            endMessageDate.add(new OptionData(STRING, "text", "The text should contain @winner in a specific place at your discretion.")
                     .setName("text")
                     .setMaxLength(255)
                     .setNameLocalization(DiscordLocale.RUSSIAN, "текст")
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Текст для сообщения")
-                    .setRequired(true));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Текст должен содержать @winner в определенном месте на ваше усмотрение"));
 
             //giveaway-edit
             List<OptionData> giveawayEditData = new ArrayList<>();
@@ -436,11 +430,11 @@ public class BotStart {
                     .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Получить файл со всеми участниками");
 
-            CommandData endMessage = Commands.slash("endmessage", "Edit the bot message")
+            CommandData endMessage = Commands.slash("endmessage", "Set up a message announcing the winners, replacing it with the specified text.")
                     .addOptions(endMessageDate)
                     .setContexts(InteractionContextType.GUILD)
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER))
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Отредактировать сообщение бота");
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Настройте сообщение с объявлением победителей, заменяя его на указанный текст.");
 
             CommandData rerollCommand = Commands.slash("reroll", "Reroll one winner")
                     .addOptions(reroll)

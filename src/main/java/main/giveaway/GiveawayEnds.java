@@ -69,6 +69,7 @@ public class GiveawayEnds {
         final Set<String> uniqueWinners = new LinkedHashSet<>();
 
         Color userColor = GiveawayUtils.getUserColor(guildId);
+        String guildText = GiveawayUtils.getGuildText(guildId);
         int participantsSize = participants.size();
         try {
             if (participantsSize < giveawayData.getMinParticipants()) {
@@ -131,19 +132,24 @@ public class GiveawayEnds {
                 .replaceAll("\\[", "")
                 .replaceAll("]", "");
 
-        String winnersContent;
-        if (uniqueWinners.size() == 1) {
-            winnersContent = String.format(jsonParsers.getLocale("gift_congratulations", guildId), winnerArray, giftUrl);
-            EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId, messageId);
-            updateController.setView(embedBuilder, guildId, textChannelId, messageId);
-        } else {
-            winnersContent = String.format(jsonParsers.getLocale("gift_congratulations_many", guildId), winnerArray, giftUrl);
-            EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId, messageId);
-            updateController.setView(embedBuilder, guildId, textChannelId, messageId);
-        }
-
         JDA jda = BotStart.getJda();
-        updateController.setView(jda, winnersContent, guildId, textChannelId);
+
+        String winnersContent;
+        if (guildText != null) {
+            String string = guildText.replaceAll("@winner", winnerArray);
+            updateController.setView(jda, string, guildId, textChannelId);
+        } else {
+            if (uniqueWinners.size() == 1) {
+                winnersContent = String.format(jsonParsers.getLocale("gift_congratulations", guildId), winnerArray, giftUrl);
+                EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId, messageId);
+                updateController.setView(embedBuilder, guildId, textChannelId, messageId);
+            } else {
+                winnersContent = String.format(jsonParsers.getLocale("gift_congratulations_many", guildId), winnerArray, giftUrl);
+                EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId, messageId);
+                updateController.setView(embedBuilder, guildId, textChannelId, messageId);
+            }
+            updateController.setView(jda, winnersContent, guildId, textChannelId);
+        }
 
         giveaway.setRemoved(true);
         //Удаляет данные из коллекций

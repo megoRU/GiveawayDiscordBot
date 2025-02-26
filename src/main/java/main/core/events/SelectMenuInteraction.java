@@ -89,7 +89,7 @@ public class SelectMenuInteraction {
 
         if (giveaway != null) {
             giveaway.stopGiveaway(giveaway.getGiveawayData().getCountWinners());
-            event.editMessage(jsonParsers.getLocale("slash_stop", guildId)).queue();
+            handleBackSelection(event, guildId, instance);
         } else {
             event.editMessage(jsonParsers.getLocale("giveaway_not_found_by_id", guildId)).queue();
         }
@@ -124,9 +124,7 @@ public class SelectMenuInteraction {
                 event.editMessage(giveawayNotFoundById).setComponents().queue();
             } else {
                 removeActiveGiveaway(messageIdLong);
-
-                String cancelGiveaway = jsonParsers.getLocale("cancel_giveaway", guildId);
-                event.editMessage(cancelGiveaway).setComponents().queue();
+                handleBackSelection(event, guildId, instance);
             }
         } else {
             Scheduling scheduling = instance.getScheduling(messageId);
@@ -136,9 +134,7 @@ public class SelectMenuInteraction {
                 event.editMessage(giveawayNotFoundById).setComponents().queue();
             } else {
                 removeScheduling(messageId);
-
-                String cancelSchedulingGiveaway = jsonParsers.getLocale("cancel_scheduling_giveaway", guildId);
-                event.editMessage(cancelSchedulingGiveaway).setComponents().queue();
+                handleBackSelection(event, guildId, instance);
             }
         }
     }
@@ -243,6 +239,6 @@ public class SelectMenuInteraction {
         instance.removeGiveaway(messageId);
 
         activeGiveawayRepository.deleteByMessageId(messageId);
-        if (giveaway != null)giveaway.cancelGiveaway();
+        if (giveaway != null) giveaway.cancelGiveaway();
     }
 }

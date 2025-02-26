@@ -110,7 +110,8 @@
   "list_menu_viewer": "View #",
   "list_menu_participants": "Minimum number of participants: ",
   "giveaway_was_canceled": "Giveaway has been cancelled",
-  "end_message_edit": "Successfully edited the message",
-  "end_message_edit_error": "You can't edit other people's messages!",
-  "help_end_message": "Change bot message"
+  "end_message": "This is what a congratulatory message will look like:",
+  "end_message_edit_error": "Your text should contain: `@winner`",
+  "help_end_message": "Setting up a message announcing the winners",
+  "end_message_deleted": "I set the standard settings"
 }
