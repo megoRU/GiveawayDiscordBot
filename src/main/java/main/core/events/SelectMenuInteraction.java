@@ -2,6 +2,7 @@ package main.core.events;
 
 import lombok.AllArgsConstructor;
 import main.giveaway.Giveaway;
+import main.giveaway.GiveawayData;
 import main.giveaway.GiveawayRegistry;
 import main.jsonparser.JSONParsers;
 import main.model.entity.Scheduling;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -28,13 +28,15 @@ public class SelectMenuInteraction {
     private final SchedulingRepository schedulingRepository;
 
     public void handle(@NotNull StringSelectInteractionEvent event) {
+        long guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
+
         if (event.getSelectedOptions().isEmpty()) {
-            event.reply("Вы ничего не выбрали.").queue();
+            String selectMenuNotSelect = jsonParsers.getLocale("select_menu_not_select", guildId);
+            event.reply(selectMenuNotSelect).queue();
             return;
         }
 
         String selectedValue = event.getSelectedOptions().getFirst().getValue();
-        long guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
 
         if (selectedValue.startsWith("giveaway_")) {
@@ -48,7 +50,8 @@ public class SelectMenuInteraction {
         } else if (selectedValue.startsWith("cancel_")) {
             handleCancelSelection(event, selectedValue, guildId, instance);
         } else {
-            event.reply("Неизвестный выбор.").queue();
+            String selectMenuError = jsonParsers.getLocale("select_menu_error", guildId);
+            event.reply(selectMenuError).queue();
         }
     }
 
@@ -61,7 +64,8 @@ public class SelectMenuInteraction {
             var menu = createGiveawayMenu(giveaway);
             event.editMessage(message).setComponents(ActionRow.of(menu)).queue();
         } else {
-            event.reply("Giveaway с таким ID не найден!").queue();
+            String selectMenuGiveawayNotFound = jsonParsers.getLocale("select_menu_giveaway_not_found", guildId);
+            event.reply(selectMenuGiveawayNotFound).queue();
         }
     }
 
@@ -74,7 +78,8 @@ public class SelectMenuInteraction {
             var menu = createSchedulingMenu(scheduling);
             event.editMessage(message).setComponents(ActionRow.of(menu)).queue();
         } else {
-            event.reply("Scheduling с таким ID не найден!").queue();
+            String selectMenuSchedulingNotFound = jsonParsers.getLocale("select_menu_scheduling_not_found", guildId);
+            event.reply(selectMenuSchedulingNotFound).queue();
         }
     }
 
@@ -95,40 +100,15 @@ public class SelectMenuInteraction {
         List<Giveaway> giveawayList = instance.getGiveawaysByGuild(guildId);
 
         // Формируем сообщение
-        String message = "**🎉 Активные Giveaway:**\n";
-        message += giveawayList.isEmpty() ? "Нет активных Giveaway.\n" : giveawayList.stream()
-                .map(g -> "- " + g.getGiveawayData().getTitle() + " | `" + g.getGiveawayData().getMessageId() + "`")
-                .collect(Collectors.joining("\n")) + "\n";
-
-        message += "\n**📅 Запланированные Giveaway:**\n";
-        message += schedulingList.isEmpty() ? "Нет запланированных Giveaway.\n" : schedulingList.stream()
-                .map(s -> "- " + s.getTitle() + " | `" + s.getIdSalt() + "`")
-                .collect(Collectors.joining("\n"));
-
-        var menuBuilder = StringSelectMenu.create("select_action");
-
-        giveawayList.forEach(g ->
-                menuBuilder.addOption(
-                        g.getGiveawayData().getTitle(),
-                        "giveaway_" + g.getGiveawayData().getMessageId(),
-                        "Просмотр #" + g.getGiveawayData().getMessageId()
-
-                )
-        );
-
-        schedulingList.forEach(s ->
-                menuBuilder.addOption(
-                        s.getTitle(),
-                        "scheduling_" + s.getIdSalt(),
-                        "Просмотр #" + s.getIdSalt()
-                ));
+        String formatListMessage = ListCommand.formatListMessage(schedulingList, giveawayList, guildId);
+        var menuBuilder = ListCommand.formatListMenuMessage(schedulingList, giveawayList, guildId);
 
         if (menuBuilder.getOptions().isEmpty()) {
-            event.editMessage(message).queue();
+            event.editMessage(formatListMessage).queue();
         } else {
             var menu = menuBuilder.build();
             var actionRow = ActionRow.of(menu);
-            event.editMessage(message).setComponents(actionRow).queue();
+            event.editMessage(formatListMessage).setComponents(actionRow).queue();
         }
     }
 
@@ -164,29 +144,71 @@ public class SelectMenuInteraction {
     }
 
     private String formatGiveawayMessage(Giveaway giveaway, long guildId) {
+        GiveawayData giveawayData = giveaway.getGiveawayData();
+        String title = giveawayData.getTitle();
+        Long roleId = giveawayData.getRoleId();
+        int countWinners = giveawayData.getCountWinners();
+        int minParticipants = giveawayData.getMinParticipants();
+        Timestamp endGiveawayDate = giveawayData.getEndGiveawayDate();
+        String urlImage = giveawayData.getUrlImage();
+
+        String giveawayEditTitle = jsonParsers.getLocale("giveaway_edit_title", guildId);
+        String giveawayEditWinners = jsonParsers.getLocale("giveaway_edit_winners", guildId);
+        String giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", guildId), roleId);
+        String listMenuParticipants = String.format(jsonParsers.getLocale("list_menu_participants", guildId), roleId);
+
         return "**🎉 Giveaway:**\n" +
-                "Название: " + giveaway.getGiveawayData().getTitle() + "\n" +
-                getDateTranslation(giveaway.getGiveawayData().getEndGiveawayDate(), guildId);
+                giveawayEditTitle + " " + title + "\n" +
+                giveawayEditWinners + " " + countWinners + "\n" +
+                (roleId != null ? giftOnlyFor + "\n" : "") +
+                listMenuParticipants + minParticipants + "\n" +
+                getDateTranslation(endGiveawayDate, guildId) + "\n" +
+                (urlImage != null ? urlImage : "");
     }
 
     private String formatSchedulingMessage(Scheduling scheduling, long guildId) {
-        return "**🎉 Scheduling:**\n" +
-                "Название: " + scheduling.getTitle() + "\n" +
-                getDateTranslation(scheduling.getDateEnd(), guildId);
+        Long roleId = scheduling.getRoleId();
+        String title = scheduling.getTitle();
+        int countWinners = scheduling.getCountWinners();
+        Timestamp dateEnd = scheduling.getDateEnd();
+        String urlImage = scheduling.getUrlImage();
+        Timestamp dateCreateGiveaway = scheduling.getDateCreateGiveaway();
+
+        String giveawayEditTitle = jsonParsers.getLocale("giveaway_edit_title", guildId);
+        String giveawayEditWinners = jsonParsers.getLocale("giveaway_edit_winners", guildId);
+        String giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", guildId), roleId);
+
+        return "**📅 Scheduling:**\n" +
+                giveawayEditTitle + " " + title + "\n" +
+                giveawayEditWinners + " " + countWinners + "\n" +
+                (roleId != null ? giftOnlyFor + "\n" : "") +
+                getDateTranslation(dateEnd, guildId) + "\n" +
+                getDateStartTranslation(dateCreateGiveaway, guildId) + "\n" +
+                (urlImage != null ? urlImage : "");
     }
 
     private StringSelectMenu createGiveawayMenu(Giveaway giveaway) {
+        long guildId = giveaway.getGuildId();
+
+        String selectMenuBack = jsonParsers.getLocale("select_menu_back", guildId);
+        String selectMenuCancel = jsonParsers.getLocale("select_menu_cancel", guildId);
+        String selectMenuStop = jsonParsers.getLocale("select_menu_stop", guildId);
+
         return StringSelectMenu.create("select_action")
-                .addOption("Разыграть", "stop_" + giveaway.getGiveawayData().getMessageId(), Emoji.fromUnicode("🎉"))
-                .addOption("Отменить", "cancel_" + giveaway.getGiveawayData().getMessageId(), Emoji.fromUnicode("❌"))
-                .addOption("Назад", "back_" + giveaway.getGiveawayData().getMessageId(), Emoji.fromUnicode("⬅️"))
+                .addOption(selectMenuStop, "stop_" + giveaway.getGiveawayData().getMessageId(), Emoji.fromUnicode("🎉"))
+                .addOption(selectMenuCancel, "cancel_" + giveaway.getGiveawayData().getMessageId(), Emoji.fromUnicode("❌"))
+                .addOption(selectMenuBack, "back_" + giveaway.getGiveawayData().getMessageId(), Emoji.fromUnicode("⬅️"))
                 .build();
     }
 
     private StringSelectMenu createSchedulingMenu(Scheduling scheduling) {
+        Long guildId = scheduling.getGuildId();
+        String selectMenuCancel = jsonParsers.getLocale("select_menu_cancel", guildId);
+        String selectMenuBack = jsonParsers.getLocale("select_menu_back", guildId);
+
         return StringSelectMenu.create("select_action")
-                .addOption("Отменить", "cancel_" + scheduling.getIdSalt(), Emoji.fromUnicode("❌"))
-                .addOption("Назад", "back_" + scheduling.getIdSalt(), Emoji.fromUnicode("⬅️"))
+                .addOption(selectMenuCancel, "cancel_" + scheduling.getIdSalt(), Emoji.fromUnicode("❌"))
+                .addOption(selectMenuBack, "back_" + scheduling.getIdSalt(), Emoji.fromUnicode("⬅️"))
                 .build();
     }
 
@@ -196,6 +218,15 @@ public class SelectMenuInteraction {
         } else {
             long time = timestamp.getTime() / 1000;
             return String.format(jsonParsers.getLocale("giveaway_data_end", guildId), time, time);
+        }
+    }
+
+    private String getDateStartTranslation(Timestamp timestamp, long guildId) {
+        if (timestamp == null) {
+            return jsonParsers.getLocale("giveaway_edit_start", guildId) + " N/A";
+        } else {
+            long time = timestamp.getTime() / 1000;
+            return String.format(jsonParsers.getLocale("giveaway_data_start", guildId), time, time);
         }
     }
 

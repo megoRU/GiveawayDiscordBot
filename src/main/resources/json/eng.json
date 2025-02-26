@@ -87,11 +87,27 @@
   "giveaway_edit_title": "Title:",
   "giveaway_edit_winners": "Winners:",
   "giveaway_edit_ends": "End date:",
+  "giveaway_edit_start": "Start date:",
   "giveaway_edit_command": "You have more than two active `Giveaway`. Use the `giveaway-id` parameter to determine which one to edit.",
   "more_giveaway_for_cancel": "You have more than two active `Giveaway`. Use the `giveaway-id` parameter to determine which one to cancel.",
   "giveaway_stop_command": "You have more than two active `Giveaway`. Use the `giveaway-id` parameter to determine which one to complete.",
   "no_active_giveaway_use_parameter": "You don't have any active `Giveaway`. If you need to cancel a scheduled one, use the `giveaway-id` parameter.",
   "giveaway_data_end": "End date: <t:%s:R> (<t:%s:f>)",
+  "giveaway_data_start": "Start date: <t:%s:R> (<t:%s:f>)",
   "giveaway_not_found_by_id": "Couldn't find Giveaway by this ID.",
-  "id_must_be_a_number": "The ID must be a number!"
+  "id_must_be_a_number": "The ID must be a number!",
+  "select_menu_back": "Back",
+  "select_menu_cancel": "Cancel",
+  "select_menu_stop": "Stop Giveaway",
+  "select_menu_scheduling_not_found" : "Scheduling with this ID was not found!",
+  "select_menu_giveaway_not_found" : "Giveaway with this ID was not found!",
+  "select_menu_error": "Unknown choice.",
+  "select_menu_not_select": "You haven't chosen anything.",
+  "list_active_giveaway": "**\uD83C\uDF89 Active Giveaway:**\n",
+  "list_no_active_giveaway": "There are no active Giveaway.\n",
+  "list_scheduling_giveaway": "\n**📅 Scheduled Giveaway:**\n",
+  "list_no_scheduling_giveaway": "No Scheduled Giveaway.\n",
+  "list_menu_viewer": "View #",
+  "list_menu_participants": "Minimum number of participants: "
+
 }
