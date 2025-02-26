@@ -14,12 +14,6 @@ CREATE TABLE `active_giveaways`
     `url_image`            varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `language`
-(
-    `server_id` varchar(255) NOT NULL,
-    `language`  varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
 CREATE TABLE `list_users`
 (
     `created_user_id` bigint(20) NOT NULL,
@@ -66,15 +60,12 @@ CREATE TABLE `settings`
 (
     `server_id` bigint(20) NOT NULL,
     `color_hex` varchar(255) DEFAULT NULL,
-    `language`  varchar(255) NOT NULL
+    `language`  varchar(255) NOT NULL,
+    `text`      varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 ALTER TABLE `active_giveaways`
     ADD PRIMARY KEY (`message_id`);
-
-
-ALTER TABLE `language`
-    ADD PRIMARY KEY (`server_id`);
 
 ALTER TABLE `list_users`
     ADD PRIMARY KEY (`id`);
@@ -82,7 +73,6 @@ ALTER TABLE `list_users`
 ALTER TABLE `notification`
     ADD PRIMARY KEY (`user_id_long`),
   ADD UNIQUE KEY `user_id_long` (`user_id_long`);
-
 
 ALTER TABLE `participants`
     ADD PRIMARY KEY (`id`),
