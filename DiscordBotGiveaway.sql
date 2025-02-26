@@ -87,7 +87,6 @@ ALTER TABLE `settings`
 ALTER TABLE `list_users`
     MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
-
 ALTER TABLE `participants`
     MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2004;
 
