@@ -48,8 +48,8 @@ public class HelpCommand {
                                 </settings:1204911821056905277> - %s
                                 </participants:952572018077892638> - %s
                                 </check-bot-permission:1009065886335914054> - %s
-                                </edit:1027901550456225842> - %s
-                                </endmessage:> - %s
+                                </edit:1344440007603126304> - %s
+                                </endmessage:1344440007603126303> - %s
                                 """,
                         helpStart,
                         helpStop,
