@@ -56,5 +56,5 @@ public class ActiveGiveaways {
     private Integer minParticipants;
 
     @OneToMany(mappedBy = "activeGiveaways", cascade = CascadeType.ALL)
-    private Set<Participants> participants = new HashSet<>();
+    private Set<Participants> participants;
 }

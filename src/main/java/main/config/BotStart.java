@@ -332,6 +332,21 @@ public class BotStart {
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установка @Роли для сбора")
                     .setRequired(true));
 
+            //endmessage
+            List<OptionData> endMessageDate = new ArrayList<>();
+            endMessageDate.add(new OptionData(STRING, "message-id", "message ID")
+                    .setName("message-id")
+                    .setRequired(true)
+                    .setNameLocalization(DiscordLocale.RUSSIAN, "id-сообщения")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "ID сообщения"));
+
+            endMessageDate.add(new OptionData(STRING, "text", "Text for message")
+                    .setName("text")
+                    .setMaxLength(255)
+                    .setNameLocalization(DiscordLocale.RUSSIAN, "текст")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Текст для сообщения")
+                    .setRequired(true));
+
             //giveaway-edit
             List<OptionData> giveawayEditData = new ArrayList<>();
 
@@ -384,7 +399,6 @@ public class BotStart {
             CommandData checkCommand = Commands.slash("check-bot-permission", "Checking the permission bot")
                     .addOptions(botPermissions)
                     .setContexts(InteractionContextType.GUILD)
-                    .setDefaultPermissions(DefaultMemberPermissions.ENABLED)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Проверка разрешений бота");
 
             CommandData settingsCommand = Commands.slash("settings", "Bot settings")
@@ -406,7 +420,7 @@ public class BotStart {
             CommandData stopCommand = Commands.slash("stop", "Stop the Giveaway")
                     .addOptions(optionsStop)
                     .setContexts(InteractionContextType.GUILD)
-                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
+                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER))
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Остановить Giveaway");
 
             CommandData helpCommand = Commands.slash("help", "Bot commands")
@@ -422,6 +436,12 @@ public class BotStart {
                     .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Получить файл со всеми участниками");
 
+            CommandData endMessage = Commands.slash("endmessage", "Edit the bot message")
+                    .addOptions(endMessageDate)
+                    .setContexts(InteractionContextType.GUILD)
+                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER))
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Отредактировать сообщение бота");
+
             CommandData rerollCommand = Commands.slash("reroll", "Reroll one winner")
                     .addOptions(reroll)
                     .setContexts(InteractionContextType.GUILD)
@@ -431,28 +451,29 @@ public class BotStart {
                     .addOptions(giveawayEditData)
                     .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Изменить настройки Giveaway")
-                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR));
+                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER));
 
             CommandData predefinedCommand = Commands.slash("predefined", "Gather participants and immediately hold a drawing for a certain @Role")
                     .addOptions(predefined)
                     .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Собрать участников и сразу провести розыгрыш для определенной @Роли")
-                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR));
+                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER));
 
             CommandData listCommand = Commands.slash("list", "List of all active and planned Giveaway")
                     .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Список всех активных и запланированных Giveaway")
-                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR));
+                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER));
 
             CommandData cancelCommand = Commands.slash("cancel", "Cancel Giveaway")
                     .addOptions(cancelData)
                     .setContexts(InteractionContextType.GUILD)
-                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
+                    .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER))
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Отменить Giveaway");
 
             commands.addCommands(
                             listCommand,
                             checkCommand,
+                            endMessage,
                             settingsCommand,
                             startCommand,
                             schedulingCommand,

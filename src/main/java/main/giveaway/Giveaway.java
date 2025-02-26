@@ -178,4 +178,10 @@ public class Giveaway {
         GiveawayEnds giveawayEnds = new GiveawayEnds(giveawayRepositoryService);
         giveawayEnds.stop(this, countWinner, updateController);
     }
+
+    public synchronized void cancelGiveaway() {
+        LOGGER.info("cancelGiveaway: GuildID: {} GiveawayId: {}", guildId, giveawayData.getMessageId());
+        GiveawayEnds giveawayEnds = new GiveawayEnds(giveawayRepositoryService);
+        giveawayEnds.cancel(this, updateController);
+    }
 }

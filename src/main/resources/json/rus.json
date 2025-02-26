@@ -108,5 +108,8 @@
   "list_scheduling_giveaway": "\n**📅 Запланированные Giveaway:**\n",
   "list_no_scheduling_giveaway": "Нет запланированных Giveaway.\n",
   "list_menu_viewer": "Просмотр #",
-  "list_menu_participants": "Минимум участников: "
+  "list_menu_participants": "Минимум участников: ",
+  "giveaway_was_canceled": "Giveaway была отменена",
+  "end_message_edit": "Успешно отредактировал сообщение",
+  "end_message_edit_error": "Чужие сообщения нельзя редактировать!"
 }

@@ -115,7 +115,7 @@ public class SelectMenuInteraction {
     private void handleCancelSelection(StringSelectInteractionEvent event, String selectedValue, long guildId, GiveawayRegistry instance) {
         String messageId = selectedValue.replaceAll("cancel_", "");
 
-        if (messageId.matches("[0+9]+")) {
+        if (messageId.matches("[0-9]+")) {
             long messageIdLong = Long.parseLong(messageId);
             Giveaway giveaway = instance.getGiveaway(messageIdLong);
 
@@ -239,8 +239,10 @@ public class SelectMenuInteraction {
 
     private void removeActiveGiveaway(long messageId) {
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
+        Giveaway giveaway = instance.getGiveaway(messageId);
         instance.removeGiveaway(messageId);
 
         activeGiveawayRepository.deleteByMessageId(messageId);
+        if (giveaway != null)giveaway.cancelGiveaway();
     }
 }

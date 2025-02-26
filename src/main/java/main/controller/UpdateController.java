@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -62,6 +63,7 @@ public class UpdateController {
         this.coreBot = coreBot;
     }
 
+    @Transactional
     public void processEvent(Object event) {
         distributeEventsByType(event);
     }
@@ -115,6 +117,10 @@ public class UpdateController {
                 ListCommand listCommand = new ListCommand();
                 listCommand.handle(event);
             }
+            case "endmessage" -> {
+                EndMessageCommand endMessageCommand = new EndMessageCommand();
+                endMessageCommand.handle(event);
+            }
             case "start" -> {
                 StartCommand startCommand = new StartCommand(giveawayRepositoryService);
                 startCommand.start(event, this);
@@ -144,7 +150,7 @@ public class UpdateController {
                 schedulingCommand.scheduling(event);
             }
             case "participants" -> {
-                ParticipantsCommand participantsCommand = new ParticipantsCommand(listUsersRepository);
+                ParticipantsCommand participantsCommand = new ParticipantsCommand(listUsersRepository, participantsRepository);
                 participantsCommand.participants(event);
             }
             case "patreon" -> {

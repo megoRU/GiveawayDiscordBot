@@ -30,6 +30,26 @@ public class GiveawayEnds {
 
     private final GiveawayRepositoryService giveawayRepositoryService;
 
+    public void cancel(Giveaway giveaway, UpdateController updateController) {
+        long guildId = giveaway.getGuildId();
+        long textChannelId = giveaway.getTextChannelId();
+        GiveawayData giveawayData = giveaway.getGiveawayData();
+        long messageId = giveawayData.getMessageId();
+
+        Color userColor = GiveawayUtils.getUserColor(guildId);
+
+        String giveawayWasCanceled = jsonParsers.getLocale("giveaway_was_canceled", guildId);
+        String giftGiveawayDeleted = jsonParsers.getLocale("gift_giveaway_deleted", guildId);
+
+
+        EmbedBuilder cancel = new EmbedBuilder();
+        cancel.setColor(userColor);
+        cancel.setTitle(giveawayWasCanceled);
+        cancel.setDescription(giftGiveawayDeleted);
+
+        updateController.setView(cancel.build(), guildId, textChannelId, messageId);
+    }
+
     public void stop(Giveaway giveaway, int countWinner, UpdateController updateController) {
         long guildId = giveaway.getGuildId();
         long textChannelId = giveaway.getTextChannelId();

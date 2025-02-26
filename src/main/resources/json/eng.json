@@ -108,6 +108,8 @@
   "list_scheduling_giveaway": "\n**📅 Scheduled Giveaway:**\n",
   "list_no_scheduling_giveaway": "No Scheduled Giveaway.\n",
   "list_menu_viewer": "View #",
-  "list_menu_participants": "Minimum number of participants: "
-
+  "list_menu_participants": "Minimum number of participants: ",
+  "giveaway_was_canceled": "Giveaway has been cancelled",
+  "end_message_edit": "Successfully edited the message",
+  "end_message_edit_error": "You can't edit other people's messages!"
 }

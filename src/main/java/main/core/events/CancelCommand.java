@@ -88,8 +88,10 @@ public class CancelCommand {
 
     private void removeActiveGiveaway(long messageId) {
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
+        Giveaway giveaway = instance.getGiveaway(messageId);
         instance.removeGiveaway(messageId);
 
         activeGiveawayRepository.deleteByMessageId(messageId);
+        if (giveaway != null)giveaway.cancelGiveaway();
     }
 }

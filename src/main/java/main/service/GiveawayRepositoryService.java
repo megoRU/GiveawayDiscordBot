@@ -46,6 +46,7 @@ public class GiveawayRepositoryService {
         participantsRepository.saveAll(participants);
     }
 
+    @Transactional
     public List<Participants> findAllParticipants(long messageId) {
         return participantsRepository.findParticipantsByActiveGiveaways(messageId);
     }

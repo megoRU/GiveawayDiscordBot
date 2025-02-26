@@ -102,5 +102,5 @@ ALTER TABLE `participants`
     MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2004;
 
 ALTER TABLE `participants`
-    ADD CONSTRAINT `FK5wwgegod4ejelbpml5lgnic9b` FOREIGN KEY (`message_id`) REFERENCES `active_giveaways` (`message_id`);
+    ADD CONSTRAINT `FK5wwgegod4ejelbpml5lgnic9b` FOREIGN KEY (`message_id`) REFERENCES `active_giveaways` (`message_id`) ON DELETE CASCADE;
 COMMIT;
