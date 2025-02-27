@@ -41,63 +41,67 @@ public class StopCommand {
             return;
         }
 
-        if (giveawayList.size() > 1 && id == null) {
-            String giveawayStopCommand = jsonParsers.getLocale("giveaway_stop_command", guildId);
-            event.reply(giveawayStopCommand).setEphemeral(true).queue();
-        } else if (giveawayList.size() > 1 && !id.matches("[0-9]+")) {
-            String slashStopNoHas = jsonParsers.getLocale("id_must_be_a_number", guildId);
-            event.reply(slashStopNoHas).setEphemeral(true).queue();
-        } else if (giveawayList.size() > 1) {
-            Optional<Giveaway> optionalGiveaway = giveawayList.stream()
-                    .filter(giveaway -> giveaway.getGiveawayData().getMessageId() == Long.parseLong(id))
-                    .findFirst();
+        if (id != null) {
+            if (id.matches("[0-9]+")) {
+                long giveawayId = Long.parseLong(id);
+                Giveaway giveaway = instance.getGiveaway(giveawayId);
 
-            if (optionalGiveaway.isPresent()) {
-                Giveaway giveaway = optionalGiveaway.get();
-                if (winners == -1) {
-                    GiveawayData giveawayData = giveaway.getGiveawayData();
-                    int countWinners = giveawayData.getCountWinners();
-                    giveaway.stopGiveaway(countWinners);
+                if (giveaway != null) {
+                    handleStopCommand(event, giveaway, winners);
                 } else {
-                    giveaway.stopGiveaway(winners);
+                    String selectMenuGiveawayNotFound = jsonParsers.getLocale("select_menu_giveaway_not_found", guildId);
+                    event.reply(selectMenuGiveawayNotFound).setEphemeral(true).queue();
                 }
-
-                String slashStopNoHas = jsonParsers.getLocale("slash_stop", guildId);
-                event.reply(slashStopNoHas).setEphemeral(true).queue();
             } else {
-                String giveawayNotFoundById = jsonParsers.getLocale("giveaway_not_found_by_id", guildId);
-                event.reply(giveawayNotFoundById).setEphemeral(true).queue();
+                String idMustBeANumber = jsonParsers.getLocale("id_must_be_a_number", guildId);
+                event.reply(idMustBeANumber).setEphemeral(true).queue();
             }
         } else {
-            Giveaway giveaway = giveawayList.getFirst();
-            GiveawayData giveawayData = giveaway.getGiveawayData();
-
-            //Это для того чтобы когда мы останавливаем Giveaway повторно
-            if (giveaway.isFinishGiveaway()) {
-                EmbedBuilder errorsAgain = new EmbedBuilder();
-                String errorsWithApi = jsonParsers.getLocale("errors_with_api", guildId);
-                String errorsDescriptionsAgain = jsonParsers.getLocale("errors_descriptions_again", guildId);
-                errorsAgain.setColor(Color.RED);
-                errorsAgain.setTitle(errorsWithApi);
-                errorsAgain.setDescription(errorsDescriptionsAgain);
-                List<Button> buttons = new ArrayList<>();
-                buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
-                event.replyEmbeds(errorsAgain.build()).setActionRow(buttons).setEphemeral(true).queue();
-                return;
-            }
-
-            String slashStop = jsonParsers.getLocale("slash_stop", guildId);
-            EmbedBuilder stop = new EmbedBuilder();
-            stop.setColor(Color.GREEN);
-            stop.setDescription(slashStop);
-            event.replyEmbeds(stop.build()).setEphemeral(true).queue();
-
-            if (winners == -1) {
-                int countWinners = giveawayData.getCountWinners();
-                giveaway.stopGiveaway(countWinners);
+            if (giveawayList.size() > 1) {
+                String giveawayStopCommand = jsonParsers.getLocale("giveaway_stop_command", guildId);
+                event.reply(giveawayStopCommand).setEphemeral(true).queue();
             } else {
-                giveaway.stopGiveaway(winners);
+                Giveaway giveaway = giveawayList.getFirst();
+                handleStopCommand(event, giveaway, winners);
             }
+        }
+    }
+
+    private void handleStopCommand(SlashCommandInteractionEvent event, Giveaway giveaway, long winners) {
+        GiveawayData giveawayData = giveaway.getGiveawayData();
+        long guildId = giveaway.getGuildId();
+
+        if (giveaway.isFinishGiveaway()) {
+            EmbedBuilder errorsAgain = new EmbedBuilder();
+            String errorsWithApi = jsonParsers.getLocale("errors_with_api", guildId);
+            String errorsDescriptionsAgain = jsonParsers.getLocale("errors_descriptions_again", guildId);
+            errorsAgain.setColor(Color.RED);
+            errorsAgain.setTitle(errorsWithApi);
+            errorsAgain.setDescription(errorsDescriptionsAgain);
+            List<Button> buttons = new ArrayList<>();
+            buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
+            event.replyEmbeds(errorsAgain.build()).setActionRow(buttons).setEphemeral(true).queue();
+            return;
+        }
+
+        int countWinners = giveawayData.getCountWinners();
+        int participantSize = giveawayData.getParticipantSize();
+
+        if (winners == -1) {
+            stop(event, giveaway, countWinners, guildId, countWinners, participantSize);
+        } else {
+            stop(event, giveaway, winners, guildId, countWinners, participantSize);
+        }
+    }
+
+    private void stop(SlashCommandInteractionEvent event, Giveaway giveaway, long winners, long guildId, int countWinners, int participantSize) {
+        if (winners < participantSize) {
+            giveaway.stopGiveaway(countWinners);
+            String slashStopNoHas = jsonParsers.getLocale("slash_stop", guildId);
+            event.reply(slashStopNoHas).setEphemeral(true).queue();
+        } else {
+            String giftNotEnoughUsers = jsonParsers.getLocale("gift_not_enough_users", guildId);
+            event.reply(giftNotEnoughUsers).setEphemeral(true).queue();
         }
     }
 }
