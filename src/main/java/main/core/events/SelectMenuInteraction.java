@@ -8,6 +8,8 @@ import main.jsonparser.JSONParsers;
 import main.model.entity.Scheduling;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.SchedulingRepository;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -33,6 +35,16 @@ public class SelectMenuInteraction {
         if (event.getSelectedOptions().isEmpty()) {
             String selectMenuNotSelect = jsonParsers.getLocale("select_menu_not_select", guildId);
             event.reply(selectMenuNotSelect).queue();
+            return;
+        }
+
+        Member member = event.getMember();
+        if (member == null) return;
+        boolean isUserHasManageServer = member.getPermissions().contains(Permission.MANAGE_SERVER);
+
+        if (!isUserHasManageServer) {
+            String userDontHasPermission = jsonParsers.getLocale("user_dont_has_permission", guildId);
+            event.reply(userDontHasPermission).setEphemeral(true).queue();
             return;
         }
 

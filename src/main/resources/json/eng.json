@@ -114,5 +114,6 @@
   "end_message": "This is what a congratulatory message will look like:",
   "end_message_edit_error": "Your text should contain: `@winner`",
   "help_end_message": "Setting up a message announcing the winners",
-  "end_message_deleted": "I set the standard settings"
+  "end_message_deleted": "I set the standard settings",
+  "user_dont_has_permission": "You do not have permission to use this interaction!"
 }
