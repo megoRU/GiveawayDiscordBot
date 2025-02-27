@@ -8,6 +8,7 @@ import main.model.repository.SchedulingRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.NewsChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.unions.GuildChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
@@ -46,9 +47,8 @@ public class SchedulingCommand {
 //        var forbiddenRole = event.getOption("forbidden_role", OptionMapping::getAsRole);
         boolean isOnlyForSpecificRole = Objects.equals(event.getOption("role", OptionMapping::getAsString), "yes");
 
-        if (textChannel == null) {
-            event.reply("TextChannel is `Null`").queue();
-            return;
+        if (textChannel == null && event.getChannel() instanceof GuildChannelUnion) {
+            textChannel = (GuildChannelUnion) event.getChannel();
         }
 
         boolean checkPermissions = GiveawayUtils.checkPermissions(textChannel, event.getGuild().getSelfMember());

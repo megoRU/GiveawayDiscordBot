@@ -221,11 +221,10 @@ public class BotStart {
                     .setNameLocalization(DiscordLocale.RUSSIAN, "время-начала")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: 2023.04.29 16:00. Только в этом стиле и UTC ±0"));
 
-            optionsScheduling.add(new OptionData(CHANNEL, "channel", "Choose #TextChannel")
+            optionsScheduling.add(new OptionData(CHANNEL, "channel", "By default, the text channel where the command was executed.")
                     .setName("text-channel")
-                    .setRequired(true)
                     .setNameLocalization(DiscordLocale.RUSSIAN, "текстовый-канал")
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Выбрать #TextChannel"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "По умолчанию текстовый канал, в котором была выполнена команда."));
 
             optionsScheduling.add(new OptionData(STRING, "end-time", "Examples: 2023.04.29 17:00. Only in this style and UTC ±0")
                     .setName("end-time")
