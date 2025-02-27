@@ -38,7 +38,7 @@ public class GiveawayRepositoryService {
 
     @Transactional
     public void deleteGiveaway(long messageId) {
-        activeGiveawayRepository.deleteById(messageId);
+        activeGiveawayRepository.deleteByMessageId(messageId);
     }
 
     @Transactional
