@@ -169,16 +169,24 @@ public class EditGiveawayCommand {
         int countWinners = giveaway.getGiveawayData().getCountWinners();
         long guildId = giveaway.getGuildId();
         long userIdLong = giveaway.getUserIdLong();
+        int minParticipants = giveaway.getGiveawayData().getMinParticipants();
+        Long roleId = giveaway.getGiveawayData().getRoleId();
+        String urlImage = giveaway.getGiveawayData().getUrlImage();
+        boolean forSpecificRole = giveaway.getGiveawayData().isForSpecificRole();
 
         ActiveGiveaways activeGiveaways = new ActiveGiveaways();
         activeGiveaways.setMessageId(messageId);
-        activeGiveaways.setFinish(false);
-        activeGiveaways.setCreatedUserId(userIdLong);
-        activeGiveaways.setGuildId(guildId);
         activeGiveaways.setTitle(title);
+        activeGiveaways.setGuildId(guildId);
         activeGiveaways.setChannelId(textChannelId);
         activeGiveaways.setCountWinners(countWinners);
+        activeGiveaways.setFinish(false);
+        activeGiveaways.setIsForSpecificRole(forSpecificRole);
+        activeGiveaways.setMinParticipants(minParticipants);
         activeGiveaways.setDateEnd(endGiveawayDate);
+        activeGiveaways.setRoleId(roleId);
+        activeGiveaways.setUrlImage(urlImage);
+        activeGiveaways.setCreatedUserId(userIdLong);
 
         activeGiveawayRepository.save(activeGiveaways);
     }

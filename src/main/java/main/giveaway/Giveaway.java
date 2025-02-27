@@ -108,7 +108,7 @@ public class Giveaway {
                               int countWinners,
                               String time,
                               Long role,
-                              boolean isOnlyForSpecificRole,
+                              Boolean isOnlyForSpecificRole,
                               String urlImage,
                               boolean predefined,
                               int minParticipants) {

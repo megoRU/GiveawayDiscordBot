@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.sql.Timestamp;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
@@ -28,7 +29,7 @@ public class GiveawayData {
     public GiveawayData(long messageId,
                         int countWinners,
                         Long roleId,
-                        boolean isForSpecificRole,
+                        Boolean isForSpecificRole,
                         String urlImage,
                         String title,
                         Timestamp endGiveawayDate,
@@ -36,7 +37,7 @@ public class GiveawayData {
         this.messageId = messageId;
         this.countWinners = countWinners;
         this.roleId = roleId;
-        this.isForSpecificRole = isForSpecificRole;
+        this.isForSpecificRole = Optional.ofNullable(isForSpecificRole).orElse(false);
         this.urlImage = urlImage;
         this.title = title;
         this.endGiveawayDate = endGiveawayDate;

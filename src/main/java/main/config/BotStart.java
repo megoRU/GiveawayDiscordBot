@@ -606,8 +606,8 @@ public class BotStart {
                 long message_id_long = activeGiveaways.getMessageId();
                 String giveaway_title = activeGiveaways.getTitle();
                 Timestamp date_end_giveaway = activeGiveaways.getDateEnd();
-                Long role_id_long = activeGiveaways.getRoleId(); // null -> 0
-                boolean is_for_specific_role = activeGiveaways.getIsForSpecificRole();
+                Long role_id_long = activeGiveaways.getRoleId();
+                boolean is_for_specific_role = Optional.ofNullable(activeGiveaways.getIsForSpecificRole()).orElse(false);
                 String url_image = activeGiveaways.getUrlImage();
                 long id_user_who_create_giveaway = activeGiveaways.getCreatedUserId();
                 Integer min_participants = activeGiveaways.getMinParticipants();

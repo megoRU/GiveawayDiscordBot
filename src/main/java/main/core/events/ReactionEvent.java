@@ -45,9 +45,9 @@ public class ReactionEvent {
                     long messageIdWithReaction = giveawayData.getMessageId();
 
                     if (messageId != messageIdWithReaction) return;
-                    Long roleId = giveawayData.getRoleId(); // null -> 0
+                    Long roleId = giveawayData.getRoleId(); // null
 
-                    if (roleId != null && roleId != 0L) {
+                    if (roleId != null) {
                         Role roleById = event.getGuild().getRoleById(roleId);
                         boolean isForSpecificRole = giveawayData.isForSpecificRole();
 
