@@ -104,7 +104,7 @@ public class SelectMenuInteraction {
         var menuBuilder = ListCommand.formatListMenuMessage(schedulingList, giveawayList, guildId);
 
         if (menuBuilder.getOptions().isEmpty()) {
-            event.editMessage(formatListMessage).queue();
+            event.editMessage(formatListMessage).setComponents().queue();
         } else {
             var menu = menuBuilder.build();
             var actionRow = ActionRow.of(menu);
