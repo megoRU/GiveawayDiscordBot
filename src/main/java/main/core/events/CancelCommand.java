@@ -48,10 +48,10 @@ public class CancelCommand {
                 Scheduling scheduling = instance.getScheduling(giveawayId);
 
                 if (scheduling == null) {
-                    String giveawayNotFound = jsonParsers.getLocale("giveaway_not_found", guildId);
-                    event.getHook().sendMessage(giveawayNotFound).setEphemeral(true).queue();
+                    String selectMenuSchedulingNotFound = jsonParsers.getLocale("select_menu_scheduling_not_found", guildId);
+                    event.getHook().sendMessage(selectMenuSchedulingNotFound).setEphemeral(true).queue();
                 } else {
-                    removeScheduling(giveawayId);
+                    removeScheduling(scheduling);
 
                     String cancelSchedulingGiveaway = jsonParsers.getLocale("cancel_scheduling_giveaway", guildId);
                     event.getHook().sendMessage(cancelSchedulingGiveaway).setEphemeral(true).queue();
@@ -59,28 +59,40 @@ public class CancelCommand {
             }
         } else {
             List<Giveaway> giveawayList = instance.getGiveawaysByGuild(guildId);
+            List<Scheduling> schedulingList = instance.getSchedulingByGuild(guildId);
 
             if (giveawayList != null && giveawayList.size() > 1) {
                 String moreGiveawayForCancel = jsonParsers.getLocale("more_giveaway_for_cancel", guildId);
                 event.getHook().sendMessage(moreGiveawayForCancel).setEphemeral(true).queue();
-            } else if (giveawayList != null && giveawayList.size() == 1) {
-                Giveaway giveaway = giveawayList.getFirst();
-                String cancelGiveaway = jsonParsers.getLocale("cancel_giveaway", guildId);
-
-                removeActiveGiveaway(giveaway);
-                event.getHook().sendMessage(cancelGiveaway).setEphemeral(true).queue();
+            } else if (schedulingList != null && schedulingList.size() > 1) {
+                String moreSchedulingForCancel = jsonParsers.getLocale("more_scheduling_for_cancel", guildId);
+                event.getHook().sendMessage(moreSchedulingForCancel).setEphemeral(true).queue();
             } else {
-                String noActiveGiveawayUseParameter = jsonParsers.getLocale("no_active_giveaway_use_parameter", guildId);
-                event.getHook().sendMessage(noActiveGiveawayUseParameter).setEphemeral(true).queue();
+                if (giveawayList != null && giveawayList.size() == 1) {
+                    Giveaway giveaway = giveawayList.getFirst();
+                    String cancelGiveaway = jsonParsers.getLocale("cancel_giveaway", guildId);
+
+                    removeActiveGiveaway(giveaway);
+                    event.getHook().sendMessage(cancelGiveaway).setEphemeral(true).queue();
+                } else if (schedulingList != null && schedulingList.size() == 1) {
+                    Scheduling scheduling = schedulingList.getFirst();
+                    String cancelSchedulingGiveaway = jsonParsers.getLocale("cancel_scheduling_giveaway", guildId);
+
+                    removeScheduling(scheduling);
+                    event.getHook().sendMessage(cancelSchedulingGiveaway).setEphemeral(true).queue();
+                } else {
+                    String giveawayNotFound = jsonParsers.getLocale("giveaway_not_found", guildId);
+                    event.getHook().sendMessage(giveawayNotFound).setEphemeral(true).queue();
+                }
             }
         }
     }
 
-    private void removeScheduling(String giveawayId) {
-        GiveawayRegistry instance = GiveawayRegistry.getInstance();
-        instance.removeScheduling(giveawayId);
+    private void removeScheduling(@NotNull Scheduling scheduling) {
+        String idSalt = scheduling.getIdSalt();
+        instance.removeScheduling(idSalt);
 
-        schedulingRepository.deleteByIdSalt(giveawayId);
+        schedulingRepository.deleteByIdSalt(idSalt);
     }
 
     private void removeActiveGiveaway(@NotNull Giveaway giveaway) {

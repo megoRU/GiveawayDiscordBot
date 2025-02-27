@@ -90,6 +90,7 @@
   "giveaway_edit_start": "Start date:",
   "giveaway_edit_command": "You have more than two active `Giveaway`. Use the `giveaway-id` parameter to determine which one to edit.",
   "more_giveaway_for_cancel": "You have more than two active `Giveaway`. Use the `giveaway-id` parameter to determine which one to cancel.",
+  "more_scheduling_for_cancel": "You have more than two scheduled `Giveaway`. Use the `giveaway-id` parameter to determine which one to cancel.",
   "giveaway_stop_command": "You have more than two active `Giveaway`. Use the `giveaway-id` parameter to determine which one to complete.",
   "no_active_giveaway_use_parameter": "You don't have any active `Giveaway`. If you need to cancel a scheduled one, use the `giveaway-id` parameter.",
   "giveaway_data_end": "End date: <t:%s:R> (<t:%s:f>)",
