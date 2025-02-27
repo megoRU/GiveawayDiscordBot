@@ -95,7 +95,7 @@ public class StopCommand {
     }
 
     private void stop(SlashCommandInteractionEvent event, Giveaway giveaway, long winners, long guildId, int countWinners, int participantSize) {
-        if (winners < participantSize) {
+        if (winners <= participantSize) {
             giveaway.stopGiveaway(countWinners);
             String slashStopNoHas = jsonParsers.getLocale("slash_stop", guildId);
             event.reply(slashStopNoHas).setEphemeral(true).queue();
