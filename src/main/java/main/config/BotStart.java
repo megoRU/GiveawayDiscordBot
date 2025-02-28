@@ -186,7 +186,7 @@ public class BotStart {
 
             //Stop
             List<OptionData> optionsStop = new ArrayList<>();
-            optionsStop.add(new OptionData(INTEGER, "winners", "If not specified -> default value at startup")
+            optionsStop.add(new OptionData(INTEGER, "winners", "Set number of winners, if not set defaults to value set at start of Giveaway")
                     .setName("winners")
                     .setMinValue(1)
                     .setMaxValue(30)
@@ -200,14 +200,14 @@ public class BotStart {
 
             //Set language
             List<OptionData> optionsSettings = new ArrayList<>();
-            optionsSettings.add(new OptionData(STRING, "language", "Setting the bot language")
+            optionsSettings.add(new OptionData(STRING, "language", "Set the bot language")
                     .addChoice("\uD83C\uDDEC\uD83C\uDDE7 English Language", "eng")
                     .addChoice("\uD83C\uDDF7\uD83C\uDDFA Russian Language", "rus")
                     .setRequired(true)
                     .setNameLocalization(DiscordLocale.RUSSIAN, "язык")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Настройка языка бота"));
 
-            optionsSettings.add(new OptionData(STRING, "color", "Embed color: #00FF00")
+            optionsSettings.add(new OptionData(STRING, "color", "Set the embed color. Example usage: `#ff00ff`")
                     .setName("color")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "цвет")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Embed цвет: #00FF00"));
@@ -215,18 +215,18 @@ public class BotStart {
             //Scheduling Giveaway
             List<OptionData> optionsScheduling = new ArrayList<>();
 
-            optionsScheduling.add(new OptionData(STRING, "start-time", "Examples: 2023.04.29 16:00. Only in this style and UTC ±0")
+            optionsScheduling.add(new OptionData(STRING, "start-time", "Set start time in UTC ±0 form. Example usage: `2023.04.29 17:00`")
                     .setName("start-time")
                     .setRequired(true)
                     .setNameLocalization(DiscordLocale.RUSSIAN, "время-начала")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: 2023.04.29 16:00. Только в этом стиле и UTC ±0"));
 
-            optionsScheduling.add(new OptionData(CHANNEL, "channel", "By default, the text channel where the command was executed.")
+            optionsScheduling.add(new OptionData(CHANNEL, "channel", "Set channel for Giveaway, if not set defaults to the channel command was executed in")
                     .setName("text-channel")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "текстовый-канал")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "По умолчанию текстовый канал, в котором была выполнена команда."));
 
-            optionsScheduling.add(new OptionData(STRING, "end-time", "Examples: 2023.04.29 17:00. Only in this style and UTC ±0")
+            optionsScheduling.add(new OptionData(STRING, "end-time", "Set end time in UTC ±0 form. Example usage: `2023.04.29 17:00`")
                     .setName("end-time")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "время-окончания")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: 2023.04.29 17:00. Только в этом стиле и UTC ±0"));
@@ -237,30 +237,30 @@ public class BotStart {
                     .setNameLocalization(DiscordLocale.RUSSIAN, "название")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Название для Giveaway"));
 
-            optionsScheduling.add(new OptionData(INTEGER, "winners", "Set count winners. Default 1")
+            optionsScheduling.add(new OptionData(INTEGER, "winners", "Set number of winners, if not set defaults to 1")
                     .setName("winners")
                     .setMinValue(1)
                     .setMaxValue(30)
                     .setNameLocalization(DiscordLocale.RUSSIAN, "победителей")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить количество победителей. По умолчанию 1"));
 
-            optionsScheduling.add(new OptionData(ROLE, "mention", "Mentioning a specific @Role")
+            optionsScheduling.add(new OptionData(ROLE, "mention", "Mention a specific @Role")
                     .setName("select")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "выбрать")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Упоминание определенной @Роли"));
 
-            optionsScheduling.add(new OptionData(STRING, "role", "Is Giveaway only for a specific role? Specify the role in the previous selection")
+            optionsScheduling.add(new OptionData(STRING, "role", "Set whether Giveaway is for a specific role. Role is set in previous selection")
                     .addChoice("yes", "yes")
                     .setName("role")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "роль")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway только для определенной роли? Укажите роль в предыдущем выборе"));
 
-            optionsScheduling.add(new OptionData(ATTACHMENT, "image", "Set Image for Giveaway")
+            optionsScheduling.add(new OptionData(ATTACHMENT, "image", "Set image used in Giveaway embed")
                     .setName("image")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "изображение")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить изображение для Giveaway"));
 
-            optionsScheduling.add(new OptionData(INTEGER, "min-participants", "Delete Giveaway if the number of participants is less than this number")
+            optionsScheduling.add(new OptionData(INTEGER, "min-participants", "Delete Giveaway if the number of participants is lesser than this number")
                     .setName("min-participants")
                     .setMinValue(2)
                     .setNameLocalization(DiscordLocale.RUSSIAN, "минимум-участников")
@@ -281,7 +281,7 @@ public class BotStart {
                     .setNameLocalization(DiscordLocale.RUSSIAN, "победителей")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить количество победителей. По умолчанию 1"));
 
-            optionsStart.add(new OptionData(STRING, "duration", "Examples: 5s, 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style and UTC ±0")
+            optionsStart.add(new OptionData(STRING, "duration", "Set duration in UTC ±0 form. Example usage: `1h` | `1d` | `20m` | `30s` | `1h 30m 15s` | `2022.08.18 13:48`")
                     .setName("duration")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "продолжительность")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: 5s, 20m, 10h, 1d. Или: 2021.11.16 16:00. Только в этом стиле и UTC ±0"));
@@ -317,7 +317,7 @@ public class BotStart {
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Название для Giveaway")
                     .setRequired(true));
 
-            predefined.add(new OptionData(INTEGER, "winners", "Set count winners")
+            predefined.add(new OptionData(INTEGER, "winners", "Set number of winners")
                     .setName("winners")
                     .setMinValue(1)
                     .setMaxValue(30)
@@ -325,7 +325,7 @@ public class BotStart {
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить количество победителей")
                     .setRequired(true));
 
-            predefined.add(new OptionData(ROLE, "role", "Installing a @Role for collecting")
+            predefined.add(new OptionData(ROLE, "role", "Set @Role from which all participants are selected from")
                     .setName("role")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "роль")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установка @Роли для сбора")
@@ -334,7 +334,7 @@ public class BotStart {
             //endmessage
             List<OptionData> endMessageDate = new ArrayList<>();
 
-            endMessageDate.add(new OptionData(STRING, "text", "The text should contain @winner in a specific place at your discretion.")
+            endMessageDate.add(new OptionData(STRING, "text", "Set text. Must contain @winner to properly parse")
                     .setName("text")
                     .setMaxLength(255)
                     .setNameLocalization(DiscordLocale.RUSSIAN, "текст")
@@ -348,7 +348,7 @@ public class BotStart {
                     .setNameLocalization(DiscordLocale.RUSSIAN, "продолжительность")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: 5s, 20m, 10h, 1d. Или: 2021.11.16 16:00. Только в этом стиле и UTC ±0"));
 
-            giveawayEditData.add(new OptionData(INTEGER, "winners", "Set count winners.")
+            giveawayEditData.add(new OptionData(INTEGER, "winners", "Set number of winners")
                     .setName("winners")
                     .setMinValue(1)
                     .setMaxValue(30)
@@ -392,7 +392,7 @@ public class BotStart {
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить количество победителей."));
 
             List<OptionData> botPermissions = new ArrayList<>();
-            botPermissions.add(new OptionData(CHANNEL, "text-channel", "Checking the permissions of a specific channel")
+            botPermissions.add(new OptionData(CHANNEL, "text-channel", "Check permissions of a specific channel")
                     .setName("text-channel")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "текстовой-канал")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Проверка разрешений определенного канала"));
@@ -407,12 +407,12 @@ public class BotStart {
              * Команды
              */
 
-            CommandData checkCommand = Commands.slash("check-bot-permission", "Checking the permission bot")
+            CommandData checkCommand = Commands.slash("check-bot-permission", "Check permissions of bot")
                     .addOptions(botPermissions)
                     .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Проверка разрешений бота");
 
-            CommandData settingsCommand = Commands.slash("settings", "Bot settings")
+            CommandData settingsCommand = Commands.slash("settings", "Change bot settings")
                     .addOptions(optionsSettings)
                     .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Настройки бота")
@@ -423,12 +423,12 @@ public class BotStart {
                     .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Создание Giveaway");
 
-            CommandData schedulingCommand = Commands.slash("scheduling", "Create Scheduling Giveaway")
+            CommandData schedulingCommand = Commands.slash("scheduling", "Create scheduled Giveaway")
                     .addOptions(optionsScheduling)
                     .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Создать Giveaway по расписанию");
 
-            CommandData stopCommand = Commands.slash("stop", "Stop the Giveaway")
+            CommandData stopCommand = Commands.slash("stop", "Stop the Giveaway and announce winners")
                     .addOptions(optionsStop)
                     .setContexts(InteractionContextType.GUILD)
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER))
@@ -447,13 +447,13 @@ public class BotStart {
                     .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Получить файл со всеми участниками");
 
-            CommandData endMessage = Commands.slash("endmessage", "Set up a message announcing the winners, replacing it with the specified text.")
+            CommandData endMessage = Commands.slash("endmessage", "Set message announcing the winners")
                     .addOptions(endMessageDate)
                     .setContexts(InteractionContextType.GUILD)
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER))
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Настройте сообщение с объявлением победителей, заменяя его на указанный текст.");
 
-            CommandData rerollCommand = Commands.slash("reroll", "Reroll one winner")
+            CommandData rerollCommand = Commands.slash("reroll", "Reroll winners")
                     .addOptions(reroll)
                     .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Перевыбрать одного победителя");
@@ -464,13 +464,13 @@ public class BotStart {
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Изменить настройки Giveaway")
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER));
 
-            CommandData predefinedCommand = Commands.slash("predefined", "Gather participants and immediately hold a drawing for a certain @Role")
+            CommandData predefinedCommand = Commands.slash("predefined", "Gather participants and immediately hold a drawing for a specific @Role")
                     .addOptions(predefined)
                     .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Собрать участников и сразу провести розыгрыш для определенной @Роли")
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER));
 
-            CommandData listCommand = Commands.slash("list", "List of all active and planned Giveaway")
+            CommandData listCommand = Commands.slash("list", "List of all active and scheduled Giveaways")
                     .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Список всех активных и запланированных Giveaway")
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER));
