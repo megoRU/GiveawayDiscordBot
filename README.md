@@ -1,7 +1,6 @@
 # GiveawayDiscordBot
 [![CI/CD](https://github.com/megoRU/GiveawayDiscordBot/actions/workflows/ci_cd.yml/badge.svg?branch=main)](https://github.com/megoRU/GiveawayDiscordBot/actions/workflows/ci_cd.yml)
 [![Discord](https://img.shields.io/discord/779317239722672128?label=Discord)](https://discord.gg/UrWG3R683d)
-[![Add](https://img.shields.io/badge/invite-Giveaway-blue?logo=discord)](https://top.gg/bot/808277484524011531/invite/)
 
 ## LICENSE
 
