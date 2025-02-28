@@ -4,6 +4,7 @@ import api.megoru.ru.entity.Winners;
 import api.megoru.ru.impl.MegoruAPI;
 import lombok.AllArgsConstructor;
 import main.giveaway.Exceptions;
+import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.model.entity.ListUsers;
 import main.model.repository.ListUsersRepository;
@@ -91,14 +92,23 @@ public class RerollCommand {
                     .replaceAll("\\[", "")
                     .replaceAll("]", "");
 
+
+            Color userColor = GiveawayUtils.getUserColor(guildId);
+            String guildText = GiveawayUtils.getGuildText(guildId);
+
             String giftCongratulationsReroll = String.format(jsonParsers.getLocale("gift_congratulations_reroll", guildId), winnerList);
             String giftCongratulationsMany = String.format(jsonParsers.getLocale("gift_congratulations_many", guildId), winnerList);
 
             EmbedBuilder winner = new EmbedBuilder();
-            winner.setColor(Color.GREEN);
-            if (winners > 1) winner.setDescription(giftCongratulationsMany);
-            else winner.setDescription(giftCongratulationsReroll);
+            winner.setColor(userColor);
 
+            if (guildText != null) {
+                String string = guildText.replaceAll("@winner", winnerList);
+                winner.setDescription(string);
+            } else {
+                if (winners > 1) winner.setDescription(giftCongratulationsMany);
+                else winner.setDescription(giftCongratulationsReroll);
+            }
             event.getHook().sendMessageEmbeds(winner.build()).queue();
         } catch (Exception ex) {
             Exceptions.handle(ex, event.getHook());
