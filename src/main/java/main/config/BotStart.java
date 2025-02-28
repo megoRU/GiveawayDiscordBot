@@ -207,10 +207,10 @@ public class BotStart {
                     .setNameLocalization(DiscordLocale.RUSSIAN, "язык")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Настройка языка бота"));
 
-            optionsSettings.add(new OptionData(STRING, "color", "Set the embed color. Example usage: `#ff00ff`")
+            optionsSettings.add(new OptionData(STRING, "color", "Set the embed color. Example usage: #ff00ff")
                     .setName("color")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "цвет")
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установите цвет embed. Пример использования: `#ff00ff`"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установите цвет embed. Пример использования: #ff00ff"));
 
             //Scheduling Giveaway
             List<OptionData> optionsScheduling = new ArrayList<>();
