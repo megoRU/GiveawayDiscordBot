@@ -2,84 +2,106 @@ package main.core.events;
 
 import api.megoru.ru.entity.Winners;
 import api.megoru.ru.impl.MegoruAPI;
+import lombok.AllArgsConstructor;
 import main.giveaway.Exceptions;
 import main.jsonparser.JSONParsers;
 import main.model.entity.ListUsers;
 import main.model.repository.ListUsersRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Mentions;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class RerollCommand {
 
-    private final ListUsersRepository listUsersRepository;
-
+    private final static Logger LOGGER = LoggerFactory.getLogger(RerollCommand.class.getName());
     private static final JSONParsers jsonParsers = new JSONParsers();
     private final static MegoruAPI api = new MegoruAPI.Builder().build();
 
-    @Autowired
-    public RerollCommand(ListUsersRepository listUsersRepository) {
-        this.listUsersRepository = listUsersRepository;
-    }
+    private final ListUsersRepository listUsersRepository;
 
     public void reroll(@NotNull SlashCommandInteractionEvent event) {
         var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
+        var channel = Objects.requireNonNull(event.getChannel());
 
         event.deferReply().queue();
-        String id = event.getOption("giveaway-id", OptionMapping::getAsString);
 
-        if (id != null) {
-            if (!id.matches("\\d+")) {
-                event.getHook().sendMessage("ID is not Number!").setEphemeral(true).queue();
-                return;
-            }
+        String id = event.getOption("giveaway-id", OptionMapping::getAsString);
+        int winners = Optional.ofNullable(event.getOption("winners", OptionMapping::getAsInt)).orElse(1);
+
+        if (id != null && id.matches("\\d+")) {
             User user = event.getUser();
             List<ListUsers> listUsers = listUsersRepository.findAllByGiveawayIdAndCreatedUserId(Long.valueOf(id), user.getIdLong());
 
             if (listUsers.isEmpty()) {
-                String noAccessReroll = jsonParsers.getLocale("no_access_reroll", guildId);
-                event.getHook().sendMessage(noAccessReroll).setEphemeral(true).queue();
-                return;
-            }
+                try {
+                    Message message = channel.retrieveMessageById(id).submit().get();
+                    Mentions mentions = message.getMentions();
+                    List<Member> members = mentions.getMembers();
 
-            final Set<String> uniqueWinners = new LinkedHashSet<>();
-
-            try {
-                if (listUsers.size() > 1) {
-                    Winners winners = new Winners(1, 0, listUsers.size() - 1);
-                    List<String> setWinners = api.getWinners(winners);
-                    for (String setWinner : setWinners) {
-                        uniqueWinners.add("<@" + listUsers.get(Integer.parseInt(setWinner)).getUserId() + ">");
+                    if (!members.isEmpty()) {
+                        List<Long> userListMapped = members.stream().map(Member::getUser).map(User::getIdLong).toList();
+                        giveawayReroll(event, guildId, winners, userListMapped);
+                    } else {
+                        String noAccessReroll = jsonParsers.getLocale("no_access_reroll", guildId);
+                        event.getHook().sendMessage(noAccessReroll).setEphemeral(true).queue();
                     }
-                } else {
-                    uniqueWinners.add("<@" + listUsers.getFirst().getUserId() + ">");
+                } catch (Exception e) {
+                    LOGGER.error(e.getMessage(), e);
                 }
-
-                String winnerList = Arrays.toString(uniqueWinners.toArray())
-                        .replaceAll("\\[", "")
-                        .replaceAll("]", "");
-                String giftCongratulationsReroll = String.format(jsonParsers.getLocale("gift_congratulations_reroll",
-                        guildId), winnerList);
-
-                EmbedBuilder winner = new EmbedBuilder();
-                winner.setColor(Color.GREEN);
-                winner.setDescription(giftCongratulationsReroll);
-
-                event.getHook().sendMessageEmbeds(winner.build()).queue();
-            } catch (Exception ex) {
-                Exceptions.handle(ex, event.getHook());
+            } else {
+                List<Long> userListMapped = listUsers.stream().map(ListUsers::getUserId).toList();
+                giveawayReroll(event, guildId, winners, userListMapped);
             }
         } else {
-            event.getHook().sendMessage("Options is null").setEphemeral(true).queue();
+            String idMustBeANumber = jsonParsers.getLocale("id_must_be_a_number", guildId);
+            event.getHook().sendMessage(idMustBeANumber).setEphemeral(true).queue();
+        }
+    }
+
+    private void giveawayReroll(@NotNull SlashCommandInteractionEvent event, long guildId, int winners, List<Long> userList) {
+        final Set<String> uniqueWinners = new LinkedHashSet<>();
+
+        try {
+            if (userList.size() > winners) {
+                Winners winnersClass = new Winners(winners, 0, userList.size() - 1);
+                List<String> setWinners = api.getWinners(winnersClass);
+
+                for (String setWinner : setWinners) {
+                    uniqueWinners.add("<@" + userList.get(Integer.parseInt(setWinner)) + ">");
+                }
+            } else {
+                uniqueWinners.add("<@" + userList.getFirst() + ">");
+            }
+
+            String winnerList = Arrays.toString(uniqueWinners.toArray())
+                    .replaceAll("\\[", "")
+                    .replaceAll("]", "");
+
+            String giftCongratulationsReroll = String.format(jsonParsers.getLocale("gift_congratulations_reroll", guildId), winnerList);
+            String giftCongratulationsMany = String.format(jsonParsers.getLocale("gift_congratulations_many", guildId), winnerList);
+
+            EmbedBuilder winner = new EmbedBuilder();
+            winner.setColor(Color.GREEN);
+            if (winners > 1) winner.setDescription(giftCongratulationsMany);
+            else winner.setDescription(giftCongratulationsReroll);
+
+            event.getHook().sendMessageEmbeds(winner.build()).queue();
+        } catch (Exception ex) {
+            Exceptions.handle(ex, event.getHook());
         }
     }
 }

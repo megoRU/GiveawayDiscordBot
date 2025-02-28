@@ -384,6 +384,13 @@ public class BotStart {
                     .setNameLocalization(DiscordLocale.RUSSIAN, "id-розыгрыша")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway ID"));
 
+            reroll.add(new OptionData(INTEGER, "winners", "Set count winners.")
+                    .setName("winners")
+                    .setMinValue(1)
+                    .setMaxValue(30)
+                    .setNameLocalization(DiscordLocale.RUSSIAN, "победителей")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить количество победителей."));
+
             List<OptionData> botPermissions = new ArrayList<>();
             botPermissions.add(new OptionData(CHANNEL, "text-channel", "Checking the permissions of a specific channel")
                     .setName("text-channel")
