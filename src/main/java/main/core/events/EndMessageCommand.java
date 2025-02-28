@@ -11,8 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 @Component
 @AllArgsConstructor
@@ -32,10 +32,10 @@ public class EndMessageCommand {
             updateSettings(guildId, text);
 
             event.reply(String.format("""
-                    %s
-                    
-                    %s
-                    """, endMessage, text.replaceAll("@winner", "<@" + userId + ">")))
+                            %s
+                            
+                            %s
+                            """, endMessage, text.replaceAll("@winner", "<@" + userId + ">")))
                     .setEphemeral(true)
                     .queue();
         } else if (text == null) {
@@ -49,17 +49,17 @@ public class EndMessageCommand {
     }
 
     private void updateSettings(long guildId, @Nullable String text) {
-        Optional<Settings> optionalSettings = settingsRepository.findById(guildId);
+        Map<Long, Settings> mapLanguages = BotStart.getMapLanguages();
+        Settings settings = mapLanguages.get(guildId);
 
-        Settings settings;
-        if (optionalSettings.isPresent()) {
-            settings = optionalSettings.get();
-        } else {
+        if (settings == null) {
             settings = new Settings();
             settings.setServerId(guildId);
             settings.setLanguage("eng");
         }
+
         settings.setText(text);
+
         BotStart.getMapLanguages().put(guildId, settings);
         settingsRepository.save(settings);
     }

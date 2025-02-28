@@ -53,34 +53,20 @@ public class StartCommand {
         String time = event.getOption("duration", OptionMapping::getAsString);
         if (time != null) time = time.replaceAll("-", ".");
         Long role = event.getOption("mention", OptionMapping::getAsLong);
-        Message.Attachment image = event.getOption("image", OptionMapping::getAsAttachment);
+        var image = event.getOption("image", OptionMapping::getAsAttachment);
         int minParticipants = Optional.ofNullable(event.getOption("min-participants", OptionMapping::getAsInt)).orElse(1);
+        var urlImage = image != null ? image.getUrl() : null;
+        boolean isOnlyForSpecificRole = Objects.equals(event.getOption("role", OptionMapping::getAsString), "yes");
 
         try {
-            String urlImage = null;
-
-            if (image != null && image.isImage()) {
-                urlImage = image.getUrl();
-            }
-
-            boolean isOnlyForSpecificRole = Objects.equals(event.getOption("role", OptionMapping::getAsString), "yes");
-
-            EmbedBuilder embedBuilder = new EmbedBuilder();
-            embedBuilder.setColor(Color.BLACK);
-
             if (time != null && !time.matches(GiveawayUtils.TIME_REGEX)) {
+                EmbedBuilder embedBuilder = new EmbedBuilder();
+                embedBuilder.setColor(Color.RED);
+
                 String startExamples = jsonParsers.getLocale("start_examples", guildId);
                 String startWrongTime = String.format(jsonParsers.getLocale("start_wrong_time", guildId), time, startExamples);
 
                 embedBuilder.setDescription(startWrongTime);
-                event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
-                return;
-            }
-
-            if (title != null && title.length() >= MessageEmbed.TITLE_MAX_LENGTH) {
-                String slashError256 = jsonParsers.getLocale("slash_error_256", guildId);
-
-                embedBuilder.setDescription(slashError256);
                 event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
                 return;
             }

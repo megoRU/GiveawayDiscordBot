@@ -44,7 +44,6 @@ public class SchedulingCommand {
         int minParticipants = Optional.ofNullable(event.getOption("min-participants", OptionMapping::getAsInt)).orElse(1);
         var startTime = Objects.requireNonNull(event.getOption("start-time", OptionMapping::getAsString));
         var endTime = event.getOption("end-time", OptionMapping::getAsString);
-//        var forbiddenRole = event.getOption("forbidden_role", OptionMapping::getAsRole);
         boolean isOnlyForSpecificRole = Objects.equals(event.getOption("role", OptionMapping::getAsString), "yes");
 
         if (textChannel == null && event.getChannel() instanceof GuildChannelUnion) {
@@ -75,10 +74,6 @@ public class SchedulingCommand {
         }
 
         if (textChannel instanceof NewsChannel || textChannel instanceof TextChannel) {
-            if (image != null && image.isImage()) {
-                urlImage = image.getUrl();
-            }
-
             if (role == null && isOnlyForSpecificRole) {
                 String slashErrorOnlyForThisRole = jsonParsers.getLocale("slash_error_only_for_this_role", guildId);
                 event.getHook().sendMessage(slashErrorOnlyForThisRole).setEphemeral(true).queue();

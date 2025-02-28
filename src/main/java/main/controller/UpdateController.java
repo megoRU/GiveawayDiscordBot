@@ -182,7 +182,7 @@ public class UpdateController {
     }
 
     private void leaveEvent(@NotNull GuildLeaveEvent event) {
-        LeaveEvent leaveEvent = new LeaveEvent(activeGiveawayRepository, schedulingRepository);
+        LeaveEvent leaveEvent = new LeaveEvent(activeGiveawayRepository, schedulingRepository, settingsRepository);
         leaveEvent.leave(event);
     }
 

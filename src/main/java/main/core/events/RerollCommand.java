@@ -92,7 +92,6 @@ public class RerollCommand {
                     .replaceAll("\\[", "")
                     .replaceAll("]", "");
 
-
             Color userColor = GiveawayUtils.getUserColor(guildId);
             String guildText = GiveawayUtils.getGuildText(guildId);
 

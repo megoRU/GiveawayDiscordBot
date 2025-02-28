@@ -2,7 +2,6 @@
 [![CI/CD](https://github.com/megoRU/GiveawayDiscordBot/actions/workflows/ci_cd.yml/badge.svg?branch=main)](https://github.com/megoRU/GiveawayDiscordBot/actions/workflows/ci_cd.yml)
 [![Discord](https://img.shields.io/discord/779317239722672128?label=Discord)](https://discord.gg/UrWG3R683d)
 [![Add](https://img.shields.io/badge/invite-Giveaway-blue?logo=discord)](https://top.gg/bot/808277484524011531/invite/)
-[![top](https://img.shields.io/badge/TOP.GG-pink?logo=discord)](https://top.gg/bot/808277484524011531) [![Discord Bots](https://top.gg/api/widget/servers/808277484524011531.svg)](https://top.gg/bot/808277484524011531)
 
 ## LICENSE
 
@@ -18,7 +17,7 @@ This work is licensed under a [GNU GPL v3](https://www.gnu.org/licenses/gpl-3.0.
 6. If you need to stop: `docker-compose stop`
 
 ## Add bot to your guild
-[![Discord Bots](https://top.gg/api/widget/808277484524011531.svg)](https://top.gg/bot/808277484524011531)
+[Add Giveaway](https://discord.com/oauth2/authorize?client_id=808277484524011531&permissions=277025647680&scope=applications.commands+bot)
 
 ## Copyright Notice
 
