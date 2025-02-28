@@ -191,7 +191,7 @@ public class BotStart {
                     .setMinValue(1)
                     .setMaxValue(30)
                     .setNameLocalization(DiscordLocale.RUSSIAN, "победителей")
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить количество победителей, если оно не установлено, по умолчанию равно значению, установленное в Giveaway"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить количество победителей. По умолчанию установленное в Giveaway"));
 
             optionsStop.add(new OptionData(STRING, "giveaway-id", "Giveaway ID")
                     .setName("giveaway-id")
