@@ -47,9 +47,13 @@ public class EditGiveawayCommand {
         String giveawayEditWinners = jsonParsers.getLocale("giveaway_edit_winners", guildId);
         String giveawayEdit = jsonParsers.getLocale("giveaway_edit", guildId);
         String giveawayEditEnds = jsonParsers.getLocale("giveaway_edit_ends", guildId);
+        String listMenuParticipants = jsonParsers.getLocale("list_menu_participants", guildId);
 
         GiveawayData giveawayData = handleGiveaway(event);
         if (giveawayData == null) return;
+
+        int minParticipants = giveawayData.getMinParticipants();
+
         Timestamp endGiveawayDate = giveawayData.getEndGiveawayDate();
 
         EmbedBuilder embedBuilder = new EmbedBuilder();
@@ -60,9 +64,12 @@ public class EditGiveawayCommand {
             embedBuilder.setDescription(String.format("""
                             %s `%s`
                             %s `%s`
+                            %s `%s`
                             """,
                     giveawayEditTitle, giveawayData.getTitle(),
-                    giveawayEditWinners, giveawayData.getCountWinners()));
+                    giveawayEditWinners, giveawayData.getCountWinners(),
+                    listMenuParticipants, minParticipants
+            ));
 
         } else {
             long endTime = endGiveawayDate.getTime() / 1000;
@@ -71,10 +78,12 @@ public class EditGiveawayCommand {
                             
                             %s `%s`
                             %s `%s`
+                            %s `%s`
                             %s <t:%s:R> (<t:%s:f>)
                             """,
                     giveawayEditTitle, giveawayData.getTitle(),
                     giveawayEditWinners, giveawayData.getCountWinners(),
+                    listMenuParticipants, minParticipants,
                     giveawayEditEnds, endTime, endTime));
         }
 
@@ -113,27 +122,26 @@ public class EditGiveawayCommand {
 
     private GiveawayData handleGiveawayByGuild(@NotNull SlashCommandInteractionEvent event, long guildId, GiveawayRegistry instance) {
         List<Giveaway> giveawayList = instance.getGiveawaysByGuild(guildId);
-        if (giveawayList.size() == 1) {
-            return updateActiveGiveaway(event, giveawayList.getFirst());
-        }
-
         List<Scheduling> schedulingList = instance.getSchedulingByGuild(guildId);
-        if (schedulingList.size() == 1) {
+
+        if (giveawayList.size() == 1 && schedulingList.isEmpty()) {
+            return updateActiveGiveaway(event, giveawayList.getFirst());
+        } else if (schedulingList.size() == 1 && giveawayList.isEmpty()) {
             return updateSchedulingGiveaway(event, schedulingList.getFirst());
+        } else {
+            String giveawayEditCommand = jsonParsers.getLocale("giveaway_edit_command", guildId);
+            event.getHook().sendMessage(giveawayEditCommand).setEphemeral(true).queue();
+            return null;
         }
-
-        String responseKey = giveawayList.isEmpty() && schedulingList.isEmpty()
-                ? "giveaway_not_found"
-                : "giveaway_edit_command";
-
-        event.getHook().sendMessage(jsonParsers.getLocale(responseKey, guildId)).setEphemeral(true).queue();
-        return null;
     }
 
     private GiveawayData updateActiveGiveaway(@NotNull SlashCommandInteractionEvent event, @NotNull Giveaway giveaway) {
         String time = event.getOption("duration", OptionMapping::getAsString);
         int winners = Optional.ofNullable(event.getOption("winners", OptionMapping::getAsInt)).orElse(-1);
         String title = event.getOption("title", OptionMapping::getAsString);
+        var image = event.getOption("image", OptionMapping::getAsAttachment);
+        var urlImage = image != null ? image.getUrl() : null;
+        Integer minParticipants = event.getOption("min-participants", OptionMapping::getAsInt);
 
         long messageId = giveaway.getGiveawayData().getMessageId();
         long guildId = giveaway.getGuildId();
@@ -151,6 +159,14 @@ public class EditGiveawayCommand {
 
         if (time != null) {
             updateTime(giveaway, time);
+        }
+
+        if (urlImage != null) {
+            updateImage(giveaway, urlImage);
+        }
+
+        if (minParticipants != null) {
+            updateMinParticipants(giveaway, minParticipants);
         }
 
         updateGiveaway(giveaway);
@@ -189,6 +205,9 @@ public class EditGiveawayCommand {
         activeGiveaways.setCreatedUserId(userIdLong);
 
         activeGiveawayRepository.save(activeGiveaways);
+
+        GiveawayRegistry instance = GiveawayRegistry.getInstance();
+        instance.putGift(messageId, giveaway);
     }
 
     private GiveawayData updateSchedulingGiveaway(@NotNull SlashCommandInteractionEvent event, @NotNull Scheduling scheduling) {
@@ -198,6 +217,9 @@ public class EditGiveawayCommand {
         int winners = Optional.ofNullable(event.getOption("winners", OptionMapping::getAsInt)).orElse(-1);
         String title = event.getOption("title", OptionMapping::getAsString);
         String idSalt = scheduling.getIdSalt();
+        var image = event.getOption("image", OptionMapping::getAsAttachment);
+        String urlImage = image != null ? image.getUrl() : null;
+        Integer minParticipants = event.getOption("min-participants", OptionMapping::getAsInt);
 
         if (title != null) {
             scheduling.setTitle(title);
@@ -209,6 +231,14 @@ public class EditGiveawayCommand {
 
         if (time != null) {
             scheduling.setDateEnd(Timestamp.valueOf(time));
+        }
+
+        if (urlImage != null) {
+            scheduling.setUrlImage(urlImage);
+        }
+
+        if (minParticipants != null) {
+            scheduling.setMinParticipants(minParticipants);
         }
 
         instance.putScheduling(idSalt, scheduling);
@@ -228,13 +258,20 @@ public class EditGiveawayCommand {
 
     private void updateWinners(Giveaway giveaway, int winners) {
         GiveawayData giveawayData = giveaway.getGiveawayData();
-
-        if (winners != -1) {
-            giveawayData.setCountWinners(winners);
-        }
+        giveawayData.setCountWinners(winners);
     }
 
     private void updateTime(Giveaway giveaway, String time) {
         giveaway.updateTime(time);
+    }
+
+    private void updateMinParticipants(@NotNull Giveaway giveaway, Integer minParticipants) {
+        GiveawayData giveawayData = giveaway.getGiveawayData();
+        giveawayData.setMinParticipants(minParticipants);
+    }
+
+    private void updateImage(@NotNull Giveaway giveaway, String urlImage) {
+        GiveawayData giveawayData = giveaway.getGiveawayData();
+        giveawayData.setUrlImage(urlImage);
     }
 }

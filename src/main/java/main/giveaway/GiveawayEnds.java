@@ -56,6 +56,7 @@ public class GiveawayEnds {
         boolean finishGiveaway = giveaway.isFinishGiveaway();
         GiveawayData giveawayData = giveaway.getGiveawayData();
         long messageId = giveawayData.getMessageId();
+        int minParticipants = giveawayData.getMinParticipants();
 
         GiveawayUpdateListUser giveawayUpdateListUser = new GiveawayUpdateListUser(giveawayRepositoryService);
         giveawayUpdateListUser.updateGiveawayByGuild(giveaway);
@@ -72,7 +73,7 @@ public class GiveawayEnds {
         String guildText = GiveawayUtils.getGuildText(guildId);
         int participantsSize = participants.size();
 
-        if (countWinner <= participantsSize) {
+        if (countWinner <= participantsSize && countWinner >= minParticipants) {
             try {
                 LOGGER.info("Завершаем Giveaway: {}, Участников: {}", guildId, participantsSize);
 

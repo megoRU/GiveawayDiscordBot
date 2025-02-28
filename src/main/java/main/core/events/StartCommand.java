@@ -146,7 +146,6 @@ public class StartCommand {
                     minParticipants);
 
             long messageId = giveaway.getGiveawayData().getMessageId();
-            System.out.println("messageId " + messageId);
             instance.putGift(messageId, giveaway);
 
         } catch (Exception e) {

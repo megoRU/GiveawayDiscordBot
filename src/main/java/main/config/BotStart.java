@@ -361,6 +361,17 @@ public class BotStart {
                     .setNameLocalization(DiscordLocale.RUSSIAN, "название")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Название для Giveaway"));
 
+            giveawayEditData.add(new OptionData(ATTACHMENT, "image", "Set Image for Giveaway")
+                    .setName("image")
+                    .setNameLocalization(DiscordLocale.RUSSIAN, "изображение")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить изображение для Giveaway"));
+
+            giveawayEditData.add(new OptionData(INTEGER, "min-participants", "Delete Giveaway if the number of participants is less than this number")
+                    .setName("min-participants")
+                    .setMinValue(1)
+                    .setNameLocalization(DiscordLocale.RUSSIAN, "минимум-участников")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Удалить Giveaway если участников меньше этого числа"));
+
             giveawayEditData.add(new OptionData(STRING, "giveaway-id", "Giveaway ID")
                     .setName("giveaway-id")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "id-розыгрыша")
