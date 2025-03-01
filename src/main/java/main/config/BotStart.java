@@ -210,7 +210,7 @@ public class BotStart {
             optionsSettings.add(new OptionData(STRING, "color", "Set the embed color. Example usage: #ff00ff")
                     .setName("color")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "цвет")
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установите цвет embed. Пример использования: #ff00ff"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить цвет embed. Пример использования: #ff00ff"));
 
             //Scheduling Giveaway
             List<OptionData> optionsScheduling = new ArrayList<>();
@@ -219,9 +219,9 @@ public class BotStart {
                     .setName("start-time")
                     .setRequired(true)
                     .setNameLocalization(DiscordLocale.RUSSIAN, "время-начала")
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установите время начала в формате UTC ±0. Пример использования: 2023.04.29 17:00"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить время начала в формате UTC ±0. Пример использования: 2023.04.29 17:00"));
 
-            optionsScheduling.add(new OptionData(CHANNEL, "channel", "Установите канал для Giveaway. По умолчанию канал в котором была запущена команда")
+            optionsScheduling.add(new OptionData(CHANNEL, "channel", "Установить канал для Giveaway. По умолчанию канал в котором была запущена команда")
                     .setName("text-channel")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "текстовый-канал")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "По умолчанию текстовый канал, в котором была выполнена команда."));
@@ -253,7 +253,7 @@ public class BotStart {
                     .addChoice("yes", "yes")
                     .setName("role")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "роль")
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway предназначен для определенной роли? Укажите роль в предыдущем выборе"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway предназначен для определенной роли? Установите роль в предыдущем выборе"));
 
             optionsScheduling.add(new OptionData(ATTACHMENT, "image", "Set image used in Giveaway embed")
                     .setName("image")
@@ -295,7 +295,7 @@ public class BotStart {
                     .addChoice("yes", "yes")
                     .setName("role")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "роль")
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway только для определенной роли? Укажите роль в предыдущем выборе"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway только для определенной роли? Установите роль в предыдущем выборе"));
 
             optionsStart.add(new OptionData(ATTACHMENT, "image", "Set Image for Giveaway")
                     .setName("image")
@@ -378,11 +378,11 @@ public class BotStart {
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway ID"));
 
             List<OptionData> reroll = new ArrayList<>();
-            reroll.add(new OptionData(STRING, "giveaway-id", "Giveaway ID")
+            reroll.add(new OptionData(STRING, "giveaway-id", "Giveaway ID or message ID with user mentions")
                     .setName("giveaway-id")
                     .setRequired(true)
                     .setNameLocalization(DiscordLocale.RUSSIAN, "id-розыгрыша")
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway ID"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway ID или message ID с упоминаниями пользователей"));
 
             reroll.add(new OptionData(INTEGER, "winners", "Set count winners.")
                     .setName("winners")
@@ -426,21 +426,17 @@ public class BotStart {
             CommandData schedulingCommand = Commands.slash("scheduling", "Create scheduled Giveaway")
                     .addOptions(optionsScheduling)
                     .setContexts(InteractionContextType.GUILD)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Создать Giveaway по расписанию");
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Создание запланированного Giveaway");
 
             CommandData stopCommand = Commands.slash("stop", "Stop the Giveaway and announce winners")
                     .addOptions(optionsStop)
                     .setContexts(InteractionContextType.GUILD)
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER))
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Остановить Giveaway");
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Остановить Giveaway и определить победителей");
 
             CommandData helpCommand = Commands.slash("help", "Bot commands")
                     .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Команды бота");
-
-            CommandData patreonCommand = Commands.slash("patreon", "Support us on Patreon")
-                    .setContexts(InteractionContextType.GUILD)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Поддержите нас на Patreon");
 
             CommandData participantsCommand = Commands.slash("participants", "Get file with all participants")
                     .addOptions(participants)
@@ -456,7 +452,7 @@ public class BotStart {
             CommandData rerollCommand = Commands.slash("reroll", "Reroll winners")
                     .addOptions(reroll)
                     .setContexts(InteractionContextType.GUILD)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Перевыбрать одного победителя");
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Перевыбрать победителей");
 
             CommandData giveawayEdit = Commands.slash("edit", "Change Giveaway settings")
                     .addOptions(giveawayEditData)
@@ -490,7 +486,6 @@ public class BotStart {
                             schedulingCommand,
                             stopCommand,
                             helpCommand,
-                            patreonCommand,
                             participantsCommand,
                             rerollCommand,
                             giveawayEdit,

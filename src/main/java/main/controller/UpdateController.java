@@ -153,10 +153,6 @@ public class UpdateController {
                 ParticipantsCommand participantsCommand = new ParticipantsCommand(listUsersRepository, participantsRepository);
                 participantsCommand.participants(event);
             }
-            case "patreon" -> {
-                PatreonCommand patreonCommand = new PatreonCommand();
-                patreonCommand.patreon(event);
-            }
             case "cancel" -> {
                 CancelCommand cancelCommand = new CancelCommand(schedulingRepository, activeGiveawayRepository);
                 cancelCommand.cancel(event);
