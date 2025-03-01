@@ -49,7 +49,7 @@
   "help_stop": "Остановить Giveaway",
   "help_scheduling": "Запустить запланированный Giveaway",
   "help_cancel": "Отменить Giveaway",
-  "help_reroll": "Перевыбрать одного победителя по ID Giveaway",
+  "help_reroll": "Перевыбрать победителя по Giveaway ID",
   "help_predefined": "Собрать участников и немедленно провести Giveaway для определенной @Роли.",
   "help_list": "Список активных и запланированных Giveaway",
   "help_language": "Настроить язык бота и цвет сообщений",
