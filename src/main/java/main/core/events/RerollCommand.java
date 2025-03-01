@@ -57,8 +57,8 @@ public class RerollCommand {
                         List<Long> userListMapped = members.stream().map(Member::getUser).map(User::getIdLong).toList();
                         giveawayReroll(event, guildId, winners, userListMapped);
                     } else {
-                        String noAccessReroll = jsonParsers.getLocale("no_access_reroll", guildId);
-                        event.getHook().sendMessage(noAccessReroll).setEphemeral(true).queue();
+                        String noMentionsUserOnMessage = jsonParsers.getLocale("no_mentions_user_on_message", guildId);
+                        event.getHook().sendMessage(noMentionsUserOnMessage).setEphemeral(true).queue();
                     }
                 } catch (Exception e) {
                     LOGGER.error(e.getMessage(), e);
