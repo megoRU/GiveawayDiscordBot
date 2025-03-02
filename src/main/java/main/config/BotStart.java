@@ -207,7 +207,7 @@ public class BotStart {
                     .setNameLocalization(DiscordLocale.RUSSIAN, "язык")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Настройка языка бота"));
 
-            optionsSettings.add(new OptionData(STRING, "color", "Set the embed color. Example usage: #ff00ff")
+            optionsSettings.add(new OptionData(STRING, "color", "Set the embed color. Example: #ff00ff")
                     .setName("color")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "цвет")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить цвет embed. Пример использования: #ff00ff"));
@@ -215,7 +215,7 @@ public class BotStart {
             //Scheduling Giveaway
             List<OptionData> optionsScheduling = new ArrayList<>();
 
-            optionsScheduling.add(new OptionData(STRING, "start-time", "Set start time in UTC ±0 form. Example usage: 2023.04.29 17:00")
+            optionsScheduling.add(new OptionData(STRING, "start-time", "Set start time in UTC ±0 form. Example: 2023.04.29 17:00")
                     .setName("start-time")
                     .setRequired(true)
                     .setNameLocalization(DiscordLocale.RUSSIAN, "время-начала")
@@ -226,7 +226,7 @@ public class BotStart {
                     .setNameLocalization(DiscordLocale.RUSSIAN, "текстовый-канал")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "По умолчанию текстовый канал, в котором была выполнена команда."));
 
-            optionsScheduling.add(new OptionData(STRING, "end-time", "Set end time in UTC ±0 form. Example usage: 2023.04.29 17:00")
+            optionsScheduling.add(new OptionData(STRING, "end-time", "Set end time in UTC ±0 form. Example: 2023.04.29 17:00")
                     .setName("end-time")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "время-окончания")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Укажите время окончания в формате UTC ±0. Пример использования: 2023.04.29 17:00"));
@@ -281,7 +281,7 @@ public class BotStart {
                     .setNameLocalization(DiscordLocale.RUSSIAN, "победителей")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить количество победителей. По умолчанию 1"));
 
-            optionsStart.add(new OptionData(STRING, "duration", "Set duration in UTC ±0 form. Example usage: `1h` | `1d` | `20m` | `30s` | `1h 30m 15s` | `2022.08.18 13:48`")
+            optionsStart.add(new OptionData(STRING, "duration", "Set duration. Example: 1h, 1d, 20m, 1h 30m 15s, 2022.08.18 13:48 (UTC ±0)")
                     .setName("duration")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "продолжительность")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить продолжительность. Примеры: 5s, 20m, 10h, 1d. Или: 2021.11.16 16:00. UTC ±0"));
@@ -343,7 +343,7 @@ public class BotStart {
             //giveaway-edit
             List<OptionData> giveawayEditData = new ArrayList<>();
 
-            giveawayEditData.add(new OptionData(STRING, "duration", "Set duration in UTC ±0 form. Example usage: `1h` | `1d` | `20m` | `30s` | `1h 30m 15s` | `2022.08.18 13:48`")
+            giveawayEditData.add(new OptionData(STRING, "duration", "Set duration. Example: 1h, 1d, 20m, 1h 30m 15s, 2022.08.18 13:48 (UTC ±0)")
                     .setName("duration")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "продолжительность")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: 5s, 20m, 10h, 1d. Или: 2021.11.16 16:00. Только в этом стиле и UTC ±0"));
