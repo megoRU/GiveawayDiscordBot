@@ -101,7 +101,6 @@ public class GiveawayUpdateListUser {
                                     }
                                 }
 
-                                //System.out.println("UserList count: " + userList);
                                 //Перебираем Users в реакциях
                                 if (instance.hasGiveaway(messageId)) {
                                     giveaway.addUser(userList.values().stream().toList());
