@@ -10,12 +10,15 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
 
@@ -23,6 +26,7 @@ import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
 public class SlashService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(SlashService.class.getName());
+    private final static Map<String, Long> commandMap = new HashMap<>();
 
     public void updateSlash(JDA jda) {
         try {
@@ -259,7 +263,7 @@ public class SlashService {
              * Команды
              */
 
-            CommandData checkCommand = Commands.slash("check-bot-permission", "Check permissions of bot")
+            CommandData checkCommand = Commands.slash("check", "Check permissions of bot")
                     .addOptions(botPermissions)
                     .setContexts(InteractionContextType.GUILD)
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Проверка разрешений бота");
@@ -345,7 +349,14 @@ public class SlashService {
                             cancelCommand)
                     .queue();
 
-            jda.retrieveCommands().queue(c -> System.out.println(c.toString()));
+            List<Command> commandsList = jda.retrieveCommands().submit().get();
+
+            for (Command command : commandsList) {
+                String name = command.getName();
+                long id = command.getIdLong();
+                System.out.printf("%s [%s]%n", id, name);
+                commandMap.put(name, id);
+            }
 
             System.out.println("Готово");
         } catch (Exception e) {
@@ -353,4 +364,8 @@ public class SlashService {
         }
     }
 
+    @Nullable
+    public static Long getCommandId(String commandName) {
+        return commandMap.get(commandName);
+    }
 }

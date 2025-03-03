@@ -157,7 +157,7 @@ public class UpdateController {
                 CancelCommand cancelCommand = new CancelCommand(schedulingRepository, activeGiveawayRepository);
                 cancelCommand.cancel(event);
             }
-            case "check-bot-permission" -> {
+            case "check" -> {
                 CheckPermissions checkPermissions = new CheckPermissions();
                 checkPermissions.check(event);
             }

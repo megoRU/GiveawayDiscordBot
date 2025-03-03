@@ -1,5 +1,6 @@
 package main.core.events;
 
+import main.service.SlashService;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
@@ -21,14 +22,22 @@ public class JoinEvent {
     public void join(@NotNull GuildJoinEvent event) {
         Member selfMember = event.getGuild().getSelfMember();
         EmbedBuilder welcome = new EmbedBuilder();
+
+        Long settings = SlashService.getCommandId("settings");
+        Long start = SlashService.getCommandId("start");
+        Long reroll = SlashService.getCommandId("reroll");
+        Long help = SlashService.getCommandId("help");
+        Long stop = SlashService.getCommandId("stop");
+        Long predefined = SlashService.getCommandId("predefined");
+
         welcome.setColor(Color.GREEN);
         welcome.addField("Giveaway", "Thanks for adding " + "**" + "Giveaway" + "** " + "bot to " + event.getGuild().getName() + "!\n", false);
-        welcome.addField("Setup Bot Language", "Use: </settings:1204911821056905277>", false);
-        welcome.addField("Create Giveaway", "Use: </start:941286272390037535>", false);
-        welcome.addField("Create predefined Giveaway", "Use: </predefined:1049647289779630080> (Permission Manage server)", false);
-        welcome.addField("Reroll Winner", "Use: </reroll:957624805446799452>", false);
-        welcome.addField("Stop Giveaway manually", "Use: </stop:941286272390037536> (Permission Manage server)", false);
-        welcome.addField("List of commands", "Use: </help:941286272390037537>", false);
+        welcome.addField("Setup Bot Language", String.format("Use: </settings:%s>", settings), false);
+        welcome.addField("Create Giveaway", String.format("Use: </start:%s>", start), false);
+        welcome.addField("Create predefined Giveaway", String.format("Use: </predefined:%s> (Permission Manage server)", predefined), false);
+        welcome.addField("Reroll Winner", String.format("Use: </reroll:%s>", reroll), false);
+        welcome.addField("Stop Giveaway manually", String.format("Use: </stop:%s> (Permission Manage server)", stop), false);
+        welcome.addField("List of commands", String.format("Use: </help:%s>", help), false);
         welcome.addField("Support server", ":helmet_with_cross: [Discord server](https://discord.com/invite/UrWG3R683d)\n", false);
         welcome.addField("Information", "Our bot supports recovery of any Giveaway, upon request in support. " +
                 "Also, the bot automatically checks the lists of participants, even if the bot is turned off or there are problems in recording while working, " +

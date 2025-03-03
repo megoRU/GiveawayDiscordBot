@@ -7,6 +7,7 @@ import main.giveaway.GiveawayRegistry;
 import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.service.GiveawayRepositoryService;
+import main.service.SlashService;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
@@ -40,7 +41,8 @@ public class StartCommand {
         boolean checkPermissions = GiveawayUtils.checkPermissions(channel, guild.getSelfMember());
 
         if (!checkPermissions) {
-            String botPermissionsDeny = jsonParsers.getLocale("bot_permissions_deny", guild.getIdLong());
+            Long check = SlashService.getCommandId("check");
+            String botPermissionsDeny = String.format(jsonParsers.getLocale("bot_permissions_deny", guild.getIdLong()), check);
             event.reply(botPermissionsDeny).queue();
             return; //Сообщение уже отправлено
         }

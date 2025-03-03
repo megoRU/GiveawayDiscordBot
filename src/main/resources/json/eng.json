@@ -1,7 +1,7 @@
 {
   "messages_events_links": "Links:",
   "messages_events_site": ":zap: [megoru.ru](https://megoru.ru)\n",
-  "messages_events_add_me_to_other_guilds": ":robot: [Add me to other guilds](https://discord.com/oauth2/authorize?client_id=808277484524011531&permissions=2147740736&scope=applications.commands%20bot)\n",
+  "messages_events_add_me_to_other_guilds": ":robot: [Add me to other guilds](https://discord.com/oauth2/authorize?client_id=808277484524011531)\n",
   "gift_ends": "Ended in",
   "gift_only_for": "\nOnly for: <@&%s>",
   "gift_not_enough_users": "Not enough users",
@@ -44,7 +44,7 @@
   "cancel_scheduling_giveaway": "Scheduled Giveaway has been successfully canceled.",
   "cancel_giveaway": "Giveaway has been successfully canceled.",
   "no_active_giveaway": "No access or no active Giveaway!",
-  "bot_permissions_deny": "Bot does not have permissions in this channel: </check-bot-permission:1009065886335914054>",
+  "bot_permissions_deny": "Bot does not have permissions in this channel: </check:%s>",
   "help_start": "Start a Giveaway with multiple parameters.",
   "help_stop": "Stop the Giveaway and immediately announce the winners.",
   "help_scheduling": "Run a scheduled Giveaway.",

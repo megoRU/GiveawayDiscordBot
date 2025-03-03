@@ -1,6 +1,7 @@
 package main.core.events;
 
 import main.jsonparser.JSONParsers;
+import main.service.SlashService;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -33,36 +34,49 @@ public class HelpCommand {
         String helpEdit = jsonParsers.getLocale("help_edit", guildId);
         String helpEndMessage = jsonParsers.getLocale("help_end_message", guildId);
 
+        Long check = SlashService.getCommandId("check");
+        Long start = SlashService.getCommandId("start");
+        Long stop = SlashService.getCommandId("stop");
+        Long scheduling = SlashService.getCommandId("scheduling");
+        Long cancel = SlashService.getCommandId("cancel");
+        Long reroll = SlashService.getCommandId("reroll");
+        Long predefined = SlashService.getCommandId("predefined");
+        Long list = SlashService.getCommandId("list");
+        Long settings = SlashService.getCommandId("settings");
+        Long participants = SlashService.getCommandId("participants");
+        Long edit = SlashService.getCommandId("edit");
+        Long endMessage = SlashService.getCommandId("endmessage");
+
         EmbedBuilder info = new EmbedBuilder();
         info.setColor(Color.GREEN);
         info.setTitle("Giveaway");
         info.addField("Slash Commands",
                 String.format("""
-                                </start:941286272390037535> - %s
-                                </stop:941286272390037536> - %s
-                                </scheduling:1102283573349851166> - %s
-                                </cancel:1102283573349851167> - %s
-                                </reroll:957624805446799452> - %s
-                                </predefined:1049647289779630080> - %s
-                                </list:941286272390037538> - %s
-                                </settings:1204911821056905277> - %s
-                                </participants:952572018077892638> - %s
-                                </check-bot-permission:1009065886335914054> - %s
-                                </edit:1344440007603126304> - %s
-                                </endmessage:1344440007603126303> - %s
+                                </start:%s> - %s
+                                </stop:%s> - %s
+                                </scheduling:%s> - %s
+                                </cancel:%s> - %s
+                                </reroll:%s> - %s
+                                </predefined:%s> - %s
+                                </list:%s> - %s
+                                </settings:%s> - %s
+                                </participants:%s> - %s
+                                </check:%s> - %s
+                                </edit:%s> - %s
+                                </endmessage:%s> - %s
                                 """,
-                        helpStart,
-                        helpStop,
-                        helpScheduling,
-                        helpCancel,
-                        helpReroll,
-                        helpPredefined,
-                        helpList,
-                        helpLanguage,
-                        helpParticipants,
-                        helpPermissions,
-                        helpEdit,
-                        helpEndMessage), false);
+                        start, helpStart,
+                        stop, helpStop,
+                        scheduling, helpScheduling,
+                        cancel, helpCancel,
+                        reroll, helpReroll,
+                        predefined, helpPredefined,
+                        list, helpList,
+                        settings, helpLanguage,
+                        participants, helpParticipants,
+                        check, helpPermissions,
+                        edit, helpEdit,
+                        endMessage, helpEndMessage), false);
         String messagesEventsLinks = jsonParsers.getLocale("messages_events_links", guildId);
         String messagesEventsSite = jsonParsers.getLocale("messages_events_site", guildId);
         String messagesEventsAddMeToOtherGuilds = jsonParsers.getLocale("messages_events_add_me_to_other_guilds", guildId);
