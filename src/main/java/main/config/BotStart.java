@@ -5,27 +5,21 @@ import lombok.Getter;
 import main.controller.UpdateController;
 import main.core.CoreBot;
 import main.giveaway.Giveaway;
-import main.giveaway.GiveawayData;
 import main.giveaway.GiveawayRegistry;
-import main.giveaway.GiveawayUtils;
-import main.jsonparser.JSONParsers;
 import main.jsonparser.ParserClass;
-import main.model.entity.ActiveGiveaways;
-import main.model.entity.Participants;
 import main.model.entity.Scheduling;
 import main.model.entity.Settings;
-import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.SchedulingRepository;
 import main.model.repository.SettingsRepository;
-import main.service.*;
+import main.service.GiveawayUpdateListUser;
+import main.service.ScheduleStartService;
+import main.service.SlashService;
+import main.service.UploadGiveawaysService;
 import main.threads.StopGiveawayHandler;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.json.JSONObject;
@@ -41,9 +35,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -64,12 +55,10 @@ public class BotStart {
     private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
 
     //REPOSITORY
-    private final ActiveGiveawayRepository activeGiveawayRepository;
     private final UpdateController updateController;
     private final SchedulingRepository schedulingRepository;
     private final SettingsRepository settingsRepository;
 
-    private final GiveawayRepositoryService giveawayRepositoryService;
     private final GiveawayUpdateListUser updateGiveawayByGuild;
 
     //Service
@@ -78,20 +67,16 @@ public class BotStart {
     private final UploadGiveawaysService uploadGiveawaysService;
 
     @Autowired
-    public BotStart(ActiveGiveawayRepository activeGiveawayRepository,
-                    UpdateController updateController,
+    public BotStart(UpdateController updateController,
                     SchedulingRepository schedulingRepository,
                     SettingsRepository settingsRepository,
-                    GiveawayRepositoryService giveawayRepositoryService,
                     GiveawayUpdateListUser updateGiveawayByGuild,
                     SlashService slashService,
                     ScheduleStartService scheduleStartService,
                     UploadGiveawaysService uploadGiveawaysService) {
-        this.activeGiveawayRepository = activeGiveawayRepository;
         this.updateController = updateController;
         this.schedulingRepository = schedulingRepository;
         this.settingsRepository = settingsRepository;
-        this.giveawayRepositoryService = giveawayRepositoryService;
         this.updateGiveawayByGuild = updateGiveawayByGuild;
         this.slashService = slashService;
         this.scheduleStartService = scheduleStartService;
