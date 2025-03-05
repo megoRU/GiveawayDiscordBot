@@ -113,10 +113,13 @@ public class SchedulingCommand {
                 }
             }
 
+            String scheduleRole = jsonParsers.getLocale("schedule_end", guildId);
+
             String scheduleStart = String.format(jsonParsers.getLocale("schedule_start", guildId),
                     timeStart,
                     timeStart,
                     scheduleEnd,
+                    role == null ? scheduleRole : "<@&" + role + ">",
                     textChannel.getId(),
                     salt);
 

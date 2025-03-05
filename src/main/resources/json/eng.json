@@ -38,7 +38,7 @@
   "errors_with_api": "There is a problem with our API.",
   "errors_descriptions": "Task is already running.\nGiveaway will be completed soon.",
   "errors_descriptions_again": "Task is already running.\nGiveaway will be completed soon.",
-  "schedule_start": "Start date: <t:%s:R> (<t:%s:f>)\nEnd date: %s\nChannel: <#%s>\nID: %s",
+  "schedule_start": "Start date: <t:%s:R> (<t:%s:f>)\nEnd date: %s\nRole: %s\nChannel: <#%s>\nID: %s",
   "schedule_end": "Not set",
   "gift_hosted": "\nHosted by: <@%s>",
   "cancel_scheduling_giveaway": "Scheduled Giveaway has been successfully canceled.",
