@@ -101,8 +101,8 @@ public class SlashService {
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить количество победителей. По умолчанию 1"));
 
             optionsScheduling.add(new OptionData(ROLE, "mention", "Mention a specific @Role")
-                    .setName("select")
-                    .setNameLocalization(DiscordLocale.RUSSIAN, "выбрать")
+                    .setName("mention")
+                    .setNameLocalization(DiscordLocale.RUSSIAN, "упомянуть")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Упоминание определенной @Роли"));
 
             optionsScheduling.add(new OptionData(STRING, "role", "Set whether Giveaway is for a specific role. Role is set in previous selection")
