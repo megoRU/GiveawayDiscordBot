@@ -30,11 +30,11 @@ public class GiveawayRegistry {
     }
 
     public Collection<Giveaway> getAllGiveaway() {
-        return giveawayMap.values();
+        return List.copyOf(giveawayMap.values());
     }
 
     public Collection<Scheduling> getScheduledGiveaways() {
-        return schedulingMap.values();
+        return List.copyOf(schedulingMap.values());
     }
 
     public void removeScheduling(String messageId) {

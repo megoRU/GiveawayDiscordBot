@@ -4,11 +4,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import net.dv8tion.jda.api.entities.User;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.Timestamp;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Getter
 @Setter
@@ -17,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GiveawayData {
 
     private final ConcurrentHashMap<String, String> participantsList = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Long, ConcurrentLinkedQueue<User>> queueConcurrentHashMap = new ConcurrentHashMap<>();
     private long messageId;
     private int countWinners;
     private Long roleId;
@@ -42,6 +46,22 @@ public class GiveawayData {
         this.title = title;
         this.endGiveawayDate = endGiveawayDate;
         this.minParticipants = minParticipants;
+    }
+
+    public void addUserToQueue(User user) {
+        ConcurrentLinkedQueue<User> users = queueConcurrentHashMap.get(messageId);
+        if (users == null) {
+            users = new ConcurrentLinkedQueue<>();
+            users.add(user);
+        } else {
+            users.add(user);
+        }
+        queueConcurrentHashMap.put(messageId, users);
+    }
+
+    @Nullable
+    public ConcurrentLinkedQueue<User> getCollectionQueue() {
+        return queueConcurrentHashMap.get(messageId);
     }
 
     public boolean participantContains(String user) {

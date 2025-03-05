@@ -56,4 +56,14 @@ public class GiveawayUserHandler {
             giveawayRepositoryService.saveParticipants(participantsList);
         }
     }
+
+    public void preSaveUser(Giveaway giveaway, User user) {
+        boolean removed = giveaway.isRemoved();
+        GiveawayData giveawayData = giveaway.getGiveawayData();
+
+        if (!removed) {
+            giveawayData.addUserToQueue(user);
+            giveawayData.addParticipant(user.getId());
+        }
+    }
 }
