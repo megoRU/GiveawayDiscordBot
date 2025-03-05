@@ -18,7 +18,7 @@ This work is licensed under a [GNU GPL v3](https://www.gnu.org/licenses/gpl-3.0.
 6. If you need to stop: `docker-compose stop`
 
 ## Add bot to your guild
-[Add Giveaway](https://discord.com/oauth2/authorize?client_id=808277484524011531&permissions=277025647680&scope=applications.commands+bot)
+[Add Giveaway](https://discord.com/oauth2/authorize?client_id=808277484524011531)
 
 ## Copyright Notice
 
