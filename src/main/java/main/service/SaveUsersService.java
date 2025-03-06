@@ -25,7 +25,6 @@ public class SaveUsersService {
     private final GiveawayRepositoryService giveawayRepositoryService;
 
     public void saveParticipants() {
-        LOGGER.info("Saving participants");
         Collection<Giveaway> giveawayCollection = giveawayRegistry.getAllGiveaway();
         GiveawayUserHandler giveawayUserHandler = new GiveawayUserHandler(giveawayRepositoryService);
 
