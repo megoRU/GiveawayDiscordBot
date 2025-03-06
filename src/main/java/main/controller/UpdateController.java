@@ -150,7 +150,7 @@ public class UpdateController {
                 schedulingCommand.scheduling(event);
             }
             case "participants" -> {
-                ParticipantsCommand participantsCommand = new ParticipantsCommand(listUsersRepository, participantsRepository);
+                ParticipantsCommand participantsCommand = new ParticipantsCommand(listUsersRepository);
                 participantsCommand.participants(event);
             }
             case "cancel" -> {

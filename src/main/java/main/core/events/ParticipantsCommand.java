@@ -4,13 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.AllArgsConstructor;
 import main.giveaway.Giveaway;
+import main.giveaway.GiveawayData;
 import main.giveaway.GiveawayRegistry;
 import main.jsonparser.JSONParsers;
-import main.model.entity.ActiveGiveaways;
 import main.model.entity.ListUsers;
-import main.model.entity.Participants;
 import main.model.repository.ListUsersRepository;
-import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -26,7 +24,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -34,7 +31,6 @@ public class ParticipantsCommand {
 
     private static final JSONParsers jsonParsers = new JSONParsers();
     private final ListUsersRepository listUsersRepository;
-    private final ParticipantsRepository participantsRepository;
     private final static Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     @Transactional
@@ -53,23 +49,22 @@ public class ParticipantsCommand {
                 Giveaway giveaway = instance.getGiveaway(giveawayId);
 
                 if (giveaway != null) {
-                    List<ActiveGiveaways> giveawaysWithParticipants = participantsRepository.findActiveGiveawaysWithParticipants(giveawayId, userIdLong);
-                    Set<Participants> participants = giveawaysWithParticipants.getFirst().getParticipants();
+                    GiveawayData giveawayData = giveaway.getGiveawayData();
+                    List<Long> participantsList = giveawayData.getParticipantsList().values().stream().map(Long::valueOf).toList();
+                    long creatorUserId = giveaway.getUserIdLong();
+
+                    if (userIdLong != creatorUserId) {
+                        String noAccessReroll = jsonParsers.getLocale("no_access_reroll", guildId);
+                        event.getHook().sendMessage(noAccessReroll).setEphemeral(true).queue();
+                        return;
+                    }
 
                     List<ListUsers> listUsers = new ArrayList<>();
 
-                    participants.forEach(participant -> {
-                        String nickName = participant.getNickName();
-                        Long userId = participant.getUserId();
-                        Long createdUserId = participant.getActiveGiveaways().getCreatedUserId();
-                        Long guildIdFrom = participant.getActiveGiveaways().getGuildId();
-
+                    participantsList.forEach(participant -> {
                         ListUsers listUser = new ListUsers();
-                        listUser.setUserId(userId);
-                        listUser.setNickName(nickName);
-                        listUser.setGuildId(guildIdFrom);
-                        listUser.setGiveawayId(giveawayId);
-                        listUser.setCreatedUserId(createdUserId);
+                        listUser.setUserId(participant);
+
                         listUsers.add(listUser);
                     });
 
@@ -108,7 +103,7 @@ public class ParticipantsCommand {
             stringBuilder.append(stringBuilder.isEmpty() ? "<@" : ", <@").append(participants.getUserId()).append(">");
         }
 
-        if (stringBuilder.length() > 4096) {
+        if (stringBuilder.length() > 1) {
             sendParticipants(event, gson.toJson(listUsers));
         } else {
             String participants = jsonParsers.getLocale("participants", guildId);
