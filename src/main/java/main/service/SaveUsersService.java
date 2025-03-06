@@ -25,6 +25,7 @@ public class SaveUsersService {
     private final GiveawayRepositoryService giveawayRepositoryService;
 
     public void saveParticipants() {
+        LOGGER.info("Saving participants");
         Collection<Giveaway> giveawayCollection = giveawayRegistry.getAllGiveaway();
         GiveawayUserHandler giveawayUserHandler = new GiveawayUserHandler(giveawayRepositoryService);
 
@@ -35,10 +36,11 @@ public class SaveUsersService {
 
                 if (collectionQueue != null && !collectionQueue.isEmpty()) {
                     List<User> userList = new ArrayList<>();
-                    User user;
-                    while ((user = collectionQueue.poll()) != null) {
-                        userList.add(user);
+
+                    for (int i = 0; i < collectionQueue.size(); i++) {
+                        userList.add(collectionQueue.poll());
                     }
+
                     giveawayUserHandler.saveUser(giveaway, userList);
                 }
             } catch (Exception e) {

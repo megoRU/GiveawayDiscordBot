@@ -152,7 +152,7 @@ public class BotStart {
         }
     }
 
-    @Scheduled(fixedDelay = 120, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = 60, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
     private void saveUsers() {
         try {
             saveUsersService.saveParticipants();
