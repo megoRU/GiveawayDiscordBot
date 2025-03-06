@@ -11,6 +11,7 @@ import main.model.entity.ListUsers;
 import main.model.entity.Participants;
 import main.model.repository.ListUsersRepository;
 import main.model.repository.ParticipantsRepository;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.utils.FileUpload;
@@ -18,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -33,6 +35,7 @@ public class ParticipantsCommand {
     private static final JSONParsers jsonParsers = new JSONParsers();
     private final ListUsersRepository listUsersRepository;
     private final ParticipantsRepository participantsRepository;
+    private final static Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     @Transactional
     public void participants(@NotNull SlashCommandInteractionEvent event) {
@@ -43,10 +46,6 @@ public class ParticipantsCommand {
         String id = event.getOption("giveaway-id", OptionMapping::getAsString);
 
         if (id != null) {
-            Gson gson = new GsonBuilder()
-                    .setPrettyPrinting()
-                    .create();
-
             if (id.matches("[0-9]+")) {
                 long giveawayId = Long.parseLong(id);
 
@@ -74,10 +73,10 @@ public class ParticipantsCommand {
                         listUsers.add(listUser);
                     });
 
-                    sendParticipants(event, guildId, participants.isEmpty(), gson.toJson(listUsers));
+                    handlerMessageSender(event, listUsers);
                 } else {
                     List<ListUsers> listUsers = listUsersRepository.findAllByGiveawayIdAndCreatedUserId(Long.parseLong(id), userIdLong);
-                    sendParticipants(event, guildId, listUsers.isEmpty(), gson.toJson(listUsers));
+                    handlerMessageSender(event, listUsers);
                 }
             } else {
                 String slashStopNoHas = jsonParsers.getLocale("id_must_be_a_number", guildId);
@@ -88,15 +87,38 @@ public class ParticipantsCommand {
         }
     }
 
+    private void sendParticipants(@NotNull SlashCommandInteractionEvent event, String json) {
+        InputStream inputStream = getInputStream(json);
+        FileUpload fileUpload = FileUpload.fromData(inputStream, "participants.json");
+        event.getHook().sendFiles(fileUpload).setEphemeral(true).queue();
+    }
 
-    private void sendParticipants(@NotNull SlashCommandInteractionEvent event, long guildId, boolean empty, String json) {
-        if (empty) {
+    private void handlerMessageSender(@NotNull SlashCommandInteractionEvent event, List<ListUsers> listUsers) {
+        var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        if (listUsers.isEmpty()) {
             String noAccessReroll = jsonParsers.getLocale("no_access_reroll", guildId);
             event.getHook().sendMessage(noAccessReroll).setEphemeral(true).queue();
+            return;
+        }
+
+        for (ListUsers participants : listUsers) {
+            stringBuilder.append(stringBuilder.isEmpty() ? "<@" : ", <@").append(participants.getUserId()).append(">");
+        }
+
+        if (stringBuilder.length() > 4096) {
+            sendParticipants(event, gson.toJson(listUsers));
         } else {
-            InputStream inputStream = getInputStream(json);
-            FileUpload fileUpload = FileUpload.fromData(inputStream, "participants.json");
-            event.getHook().sendFiles(fileUpload).setEphemeral(true).queue();
+            String participants = jsonParsers.getLocale("participants", guildId);
+
+            EmbedBuilder list = new EmbedBuilder();
+            list.setColor(Color.GREEN);
+            list.setTitle(participants);
+            list.setDescription(stringBuilder);
+
+            event.getHook().sendMessageEmbeds(list.build()).setEphemeral(true).queue();
         }
     }
 

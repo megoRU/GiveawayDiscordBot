@@ -90,5 +90,6 @@
   "help_end_message": "Set up the message announcing the winners.",
   "end_message_deleted": "Custom end message has been removed and reset to default.",
   "user_dont_has_permission": "You do not have permission to use this interaction!",
-  "no_mentions_user_on_message": "Couldn't find @mentioned users in the message. Or you don't have access to get a list of users to this Giveaway"
+  "no_mentions_user_on_message": "Couldn't find @mentioned users in the message. Or you don't have access to get a list of users to this Giveaway",
+  "participants": "Participants"
 }

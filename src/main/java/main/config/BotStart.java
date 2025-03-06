@@ -50,6 +50,7 @@ public class BotStart {
     @Getter
     private static JDA jda;
     private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
+    private final static GiveawayRegistry instance = GiveawayRegistry.getInstance();
 
     //REPOSITORY
     private final UpdateController updateController;
@@ -89,8 +90,6 @@ public class BotStart {
             CoreBot coreBot = new CoreBot(updateController);
             coreBot.init();
 
-            //Загружаем GiveawayRegistry
-            GiveawayRegistry.getInstance();
             //Устанавливаем языки
             setLanguages();
             getLocalizationFromDB();
@@ -141,7 +140,6 @@ public class BotStart {
     private void getSchedulingFromDB() {
         try {
             List<Scheduling> schedulingList = schedulingRepository.findAll();
-            GiveawayRegistry instance = GiveawayRegistry.getInstance();
 
             for (Scheduling scheduling : schedulingList) {
                 String idSalt = scheduling.getIdSalt();
@@ -211,7 +209,6 @@ public class BotStart {
 
     @Scheduled(fixedDelay = 2, initialDelay = 1, timeUnit = TimeUnit.SECONDS)
     public void stopGiveawayTimer() {
-        GiveawayRegistry instance = GiveawayRegistry.getInstance();
         List<Giveaway> giveawayDataList = new LinkedList<>(instance.getAllGiveaway());
         StopGiveawayHandler stopGiveawayHandler = new StopGiveawayHandler();
         for (Giveaway giveaway : giveawayDataList) {
@@ -225,7 +222,6 @@ public class BotStart {
 
     @Scheduled(fixedDelay = 150, initialDelay = 25, timeUnit = TimeUnit.SECONDS)
     public void updateUserList() {
-        GiveawayRegistry instance = GiveawayRegistry.getInstance();
         List<Giveaway> giveawayDataList = new LinkedList<>(instance.getAllGiveaway());
         for (Giveaway giveaway : giveawayDataList) {
             try {
