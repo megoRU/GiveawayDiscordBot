@@ -170,7 +170,7 @@ public class Giveaway {
 
     public synchronized void addUser(User user) {
         GiveawayUserHandler giveawayUserHandler = new GiveawayUserHandler(giveawayRepositoryService);
-        giveawayUserHandler.saveUser(this, List.of(user));
+        giveawayUserHandler.preSaveUser(this, user);
     }
 
     public synchronized void stopGiveaway(final int countWinner) {

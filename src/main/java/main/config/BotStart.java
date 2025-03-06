@@ -11,10 +11,7 @@ import main.model.entity.Scheduling;
 import main.model.entity.Settings;
 import main.model.repository.SchedulingRepository;
 import main.model.repository.SettingsRepository;
-import main.service.GiveawayUpdateListUser;
-import main.service.ScheduleStartService;
-import main.service.SlashService;
-import main.service.UploadGiveawaysService;
+import main.service.*;
 import main.threads.StopGiveawayHandler;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -65,6 +62,7 @@ public class BotStart {
     private final SlashService slashService;
     private final ScheduleStartService scheduleStartService;
     private final UploadGiveawaysService uploadGiveawaysService;
+    private final SaveUsersService saveUsersService;
 
     @Autowired
     public BotStart(UpdateController updateController,
@@ -73,7 +71,8 @@ public class BotStart {
                     GiveawayUpdateListUser updateGiveawayByGuild,
                     SlashService slashService,
                     ScheduleStartService scheduleStartService,
-                    UploadGiveawaysService uploadGiveawaysService) {
+                    UploadGiveawaysService uploadGiveawaysService,
+                    SaveUsersService saveUsersService) {
         this.updateController = updateController;
         this.schedulingRepository = schedulingRepository;
         this.settingsRepository = settingsRepository;
@@ -81,6 +80,7 @@ public class BotStart {
         this.slashService = slashService;
         this.scheduleStartService = scheduleStartService;
         this.uploadGiveawaysService = uploadGiveawaysService;
+        this.saveUsersService = saveUsersService;
     }
 
     @PostConstruct
@@ -147,6 +147,15 @@ public class BotStart {
                 String idSalt = scheduling.getIdSalt();
                 instance.putScheduling(idSalt, scheduling);
             }
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+    }
+
+    @Scheduled(fixedDelay = 60, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
+    private void saveUsers() {
+        try {
+            saveUsersService.saveParticipants();
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }
