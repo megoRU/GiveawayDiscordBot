@@ -32,7 +32,6 @@ public class SaveUsersService {
             try {
                 GiveawayData giveawayData = giveaway.getGiveawayData();
                 ConcurrentLinkedQueue<User> collectionQueue = giveawayData.getCollectionQueue();
-                LOGGER.info("Queue before poll: {}", collectionQueue);
 
                 if (collectionQueue != null && !collectionQueue.isEmpty()) {
                     List<User> userList = new ArrayList<>();
@@ -41,13 +40,7 @@ public class SaveUsersService {
                         userList.add(collectionQueue.poll());
                     }
 
-                    LOGGER.info("Queue after poll: {}", collectionQueue);
-
                     giveawayUserHandler.saveUser(giveaway, userList);
-
-                    //
-                    //2025-03-07T08:56:55.185Z
-                    //2025-03-07T09:00:17.498Z
                 }
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
