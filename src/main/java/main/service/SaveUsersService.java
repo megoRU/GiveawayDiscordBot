@@ -32,6 +32,7 @@ public class SaveUsersService {
             try {
                 GiveawayData giveawayData = giveaway.getGiveawayData();
                 ConcurrentLinkedQueue<User> collectionQueue = giveawayData.getCollectionQueue();
+                LOGGER.info("Queue before poll: {}", collectionQueue);
 
                 if (collectionQueue != null && !collectionQueue.isEmpty()) {
                     List<User> userList = new ArrayList<>();
@@ -39,6 +40,8 @@ public class SaveUsersService {
                     for (int i = 0; i < collectionQueue.size(); i++) {
                         userList.add(collectionQueue.poll());
                     }
+
+                    LOGGER.info("Queue after poll: {}", collectionQueue);
 
                     giveawayUserHandler.saveUser(giveaway, userList);
                 }
