@@ -223,7 +223,6 @@ public class BotStart {
 
     @Scheduled(fixedDelay = 150, initialDelay = 25, timeUnit = TimeUnit.SECONDS)
     public void updateUserList() {
-        System.out.println("updateUserList");
         List<Giveaway> giveawayDataList = new LinkedList<>(instance.getAllGiveaway());
         for (Giveaway giveaway : giveawayDataList) {
             try {
