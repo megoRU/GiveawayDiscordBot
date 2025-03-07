@@ -44,6 +44,10 @@ public class SaveUsersService {
                     LOGGER.info("Queue after poll: {}", collectionQueue);
 
                     giveawayUserHandler.saveUser(giveaway, userList);
+
+                    //
+                    //2025-03-07T08:56:55.185Z
+                    //2025-03-07T09:00:17.498Z
                 }
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);

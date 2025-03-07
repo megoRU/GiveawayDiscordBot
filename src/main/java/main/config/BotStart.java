@@ -127,6 +127,7 @@ public class BotStart {
 
             //Получаем Giveaway и пользователей. Устанавливаем данные
             uploadGiveawaysService.uploadGiveaways(updateController);
+            System.out.println("uploadGiveaways");
 
             //Обновить команды
             slashService.updateSlash(jda);
@@ -220,8 +221,9 @@ public class BotStart {
         }
     }
 
-    @Scheduled(fixedDelay = 150, initialDelay = 25, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = 5, initialDelay = 25, timeUnit = TimeUnit.SECONDS)
     public void updateUserList() {
+        System.out.println("updateUserList");
         List<Giveaway> giveawayDataList = new LinkedList<>(instance.getAllGiveaway());
         for (Giveaway giveaway : giveawayDataList) {
             try {
