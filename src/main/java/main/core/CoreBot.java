@@ -87,14 +87,14 @@ public class CoreBot extends ListenerAdapter {
                 GuildMessageChannel textChannelById = guildById.getTextChannelById(textChannel);
                 if (textChannelById == null) textChannelById = guildById.getNewsChannelById(textChannel);
                 if (textChannelById != null) {
-                        textChannelById
-                                .retrieveMessageById(messageId)
-                                .complete()
-                                .editMessageEmbeds(embedBuilder.build())
-                                .submit()
-                                .get();
-                    }
+                    textChannelById
+                            .retrieveMessageById(messageId)
+                            .complete()
+                            .editMessageEmbeds(embedBuilder.build())
+                            .submit()
+                            .get();
                 }
+            }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             if (e.getMessage().contains("10008: Unknown Message") || e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
@@ -193,14 +193,9 @@ public class CoreBot extends ListenerAdapter {
         RestAction<User> action = jda.retrieveUserById(userId);
 
         action.submit()
-                .thenCompose((user) -> user.openPrivateChannel().submit())
-                .thenCompose((channel) -> channel.sendMessageEmbeds(messageEmbed).submit())
+                .thenCompose(user -> user.openPrivateChannel().submit())
+                .thenCompose(channel -> channel.sendMessageEmbeds(messageEmbed).submit())
                 .whenComplete((v, throwable) -> {
-                    if (throwable != null) {
-                        if (throwable.getMessage().contains("50007: Cannot send messages to this user")) {
-                            LOGGER.error("50007: Cannot send messages to this user", throwable);
-                        }
-                    }
                 });
     }
 }

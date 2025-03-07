@@ -31,6 +31,7 @@ public class GiveawayUpdateListUser {
         GiveawayData giveawayData = giveaway.getGiveawayData();
 
         long guildId = giveaway.getGuildId();
+        long channelId = giveaway.getTextChannelId();
         boolean isForSpecificRole = giveawayData.isForSpecificRole();
         long messageId = giveawayData.getMessageId();
 
@@ -39,9 +40,6 @@ public class GiveawayUpdateListUser {
 
         if (jda != null) {
             if (instance.hasGiveaway(messageId)) {
-                long channelId = giveaway.getTextChannelId();
-                //System.out.println("Guild ID: " + guildIdLong);
-
                 try {
                     Guild guildById = jda.getGuildById(guildId);
                     if (guildById != null) {
@@ -56,8 +54,6 @@ public class GiveawayUpdateListUser {
                                     .toList();
 
                             //-1 because one Bot
-                            System.out.println(giveawayData.getParticipantSize());
-                            System.out.println(reactions.getFirst().getCount() - 1);
                             if (!reactions.isEmpty() && reactions.getFirst().getCount() - 1 != giveawayData.getParticipantSize()) {
                                 for (MessageReaction reaction : reactions) {
                                     Map<String, User> userList = reaction
@@ -65,6 +61,7 @@ public class GiveawayUpdateListUser {
                                             .complete()
                                             .stream()
                                             .filter(user -> !user.isBot())
+                                            .filter(user -> !giveawayData.participantContains(user.getId()))
                                             .collect(Collectors.toMap(User::getId, user -> user));
 
                                     if (isForSpecificRole) {
