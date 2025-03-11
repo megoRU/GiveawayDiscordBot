@@ -5,7 +5,6 @@ import main.core.CoreBot;
 import main.core.events.*;
 import main.model.repository.*;
 import main.service.GiveawayRepositoryService;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
@@ -187,16 +186,8 @@ public class UpdateController {
         reactionEvent.reaction(event, this);
     }
 
-    public void setView(EmbedBuilder embedBuilder, final long guildId, final long textChannel, final long messageId) {
-        coreBot.editMessage(embedBuilder, guildId, textChannel, messageId);
-    }
-
-    public void setView(MessageEmbed messageEmbed, final long guildId, final long textChannel, long messageId) {
+    public void setView(MessageEmbed messageEmbed, long guildId, long textChannel, long messageId) {
         coreBot.editMessage(messageEmbed, guildId, textChannel, messageId);
-    }
-
-    public void setView(MessageEmbed embedBuilder, String messageContent, Long guildId, Long textChannel) {
-        coreBot.sendMessage(embedBuilder, messageContent, guildId, textChannel);
     }
 
     public void setView(JDA jda, String messageContent, Long guildId, Long textChannel) {

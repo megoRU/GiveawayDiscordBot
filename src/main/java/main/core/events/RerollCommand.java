@@ -11,7 +11,6 @@ import main.model.repository.ListUsersRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Mentions;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -48,8 +47,7 @@ public class RerollCommand {
             List<ListUsers> listUsers = listUsersRepository.findAllByGiveawayIdAndCreatedUserId(Long.valueOf(id), user.getIdLong());
 
             if (listUsers.isEmpty()) {
-                try {
-                    Message message = channel.retrieveMessageById(id).submit().get();
+                channel.retrieveMessageById(id).queue(message -> {
                     Mentions mentions = message.getMentions();
                     List<Member> members = mentions.getMembers();
 
@@ -60,9 +58,7 @@ public class RerollCommand {
                         String noMentionsUserOnMessage = jsonParsers.getLocale("no_mentions_user_on_message", guildId);
                         event.getHook().sendMessage(noMentionsUserOnMessage).setEphemeral(true).queue();
                     }
-                } catch (Exception e) {
-                    LOGGER.error(e.getMessage(), e);
-                }
+                }, throwable -> LOGGER.error(throwable.getMessage(), throwable));
             } else {
                 List<Long> userListMapped = listUsers.stream().map(ListUsers::getUserId).toList();
                 giveawayReroll(event, guildId, winners, userListMapped);

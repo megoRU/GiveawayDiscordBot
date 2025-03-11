@@ -69,9 +69,9 @@ public class ScheduleStartService {
                                 String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guildId), role);
                                 if (Objects.equals(role, guildIdLong)) {
                                     giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_everyone", guildId), "@everyone");
-                                    textChannelById.sendMessage(giftNotificationForThisRole).submit().get();
+                                    textChannelById.sendMessage(giftNotificationForThisRole).queue();
                                 } else {
-                                    textChannelById.sendMessage(giftNotificationForThisRole).submit().get();
+                                    textChannelById.sendMessage(giftNotificationForThisRole).queue();
                                 }
                             }
 
