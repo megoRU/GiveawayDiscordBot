@@ -36,7 +36,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import java.util.random.RandomGenerator;
 
 @Configuration
 @EnableScheduling
@@ -121,24 +120,24 @@ public class BotStart {
         }
     }
 
-//    @Scheduled(fixedDelay = 60, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
-//    private void saveUsers() {
-//        try {
-//            saveUsersService.saveParticipants();
-//        } catch (Exception e) {
-//            LOGGER.error(e.getMessage(), e);
-//        }
-//    }
-//
-//    @Scheduled(fixedDelay = 120, initialDelay = 8, timeUnit = TimeUnit.SECONDS)
-//    private void updateActivity() {
-//        if (!Config.isIsDev()) {
-//            int serverCount = BotStart.jda.getGuilds().size();
-//            BotStart.jda.getPresence().setActivity(Activity.playing(BotStart.activity + serverCount + " guilds"));
-//        } else {
-//            BotStart.jda.getPresence().setActivity(Activity.playing("Develop"));
-//        }
-//    }
+    @Scheduled(fixedDelay = 60, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
+    private void saveUsers() {
+        try {
+            saveUsersService.saveParticipants();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+    }
+
+    @Scheduled(fixedDelay = 120, initialDelay = 8, timeUnit = TimeUnit.SECONDS)
+    private void updateActivity() {
+        if (!Config.isIsDev()) {
+            int serverCount = BotStart.jda.getGuilds().size();
+            BotStart.jda.getPresence().setActivity(Activity.playing(BotStart.activity + serverCount + " guilds"));
+        } else {
+            BotStart.jda.getPresence().setActivity(Activity.playing("Develop"));
+        }
+    }
 
     @Scheduled(fixedDelay = 5, initialDelay = 1, timeUnit = TimeUnit.SECONDS)
     private void schStartGiveaway() {

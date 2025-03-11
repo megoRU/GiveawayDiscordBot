@@ -7,10 +7,7 @@ import main.giveaway.Giveaway;
 import main.giveaway.GiveawayData;
 import main.giveaway.GiveawayRegistry;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageReaction;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -29,81 +26,94 @@ public class GiveawayUpdateListUser {
     private final static Logger LOGGER = LoggerFactory.getLogger(GiveawayUpdateListUser.class.getName());
 
     private final GiveawayRepositoryService giveawayRepositoryService;
-    private final static GiveawayRegistry instance = GiveawayRegistry.getInstance();
 
     public void updateGiveawayByGuild(@NotNull Giveaway giveaway) {
         GiveawayData giveawayData = giveaway.getGiveawayData();
+
         long guildId = giveaway.getGuildId();
         long channelId = giveaway.getTextChannelId();
         boolean isForSpecificRole = giveawayData.isForSpecificRole();
         long messageId = giveawayData.getMessageId();
 
+        GiveawayRegistry instance = GiveawayRegistry.getInstance();
         JDA jda = BotStart.getJda();
+
         if (jda != null) {
             if (instance.hasGiveaway(messageId)) {
-                Guild guildById = jda.getGuildById(guildId);
-                if (guildById != null) {
-                    TextChannel textChannelById = guildById.getTextChannelById(channelId);
-                    if (textChannelById != null) {
-                        textChannelById.retrieveMessageById(messageId)
-                                .queue(message -> {
-                                    List<MessageReaction> reactions = message.getReactions().stream()
-                                            .filter(messageReaction -> messageReaction.getEmoji().getName().equals(ReactionEvent.TADA))
-                                            .toList();
+                try {
+                    Guild guildById = jda.getGuildById(guildId);
+                    if (guildById != null) {
+                        TextChannel textChannelById = guildById.getTextChannelById(channelId);
+                        if (textChannelById != null) {
+                            List<MessageReaction> reactions = textChannelById
+                                    .retrieveMessageById(messageId)
+                                    .complete()
+                                    .getReactions()
+                                    .stream()
+                                    .filter(messageReaction -> messageReaction.getEmoji().getName().equals(ReactionEvent.TADA))
+                                    .toList();
 
-                                    if (!reactions.isEmpty() && reactions.getFirst().getCount() - 1 != giveawayData.getParticipantSize()) {
-                                        for (MessageReaction reaction : reactions) {
-                                            reaction.retrieveUsers()
-                                                    .queue(users -> {
-                                                        Map<String, User> userList = users.stream()
-                                                                .filter(user -> !user.isBot())
-                                                                .filter(user -> !giveawayData.participantContains(user.getId()))
-                                                                .collect(Collectors.toMap(User::getId, user -> user));
+                            //-1 because one Bot
+                            if (!reactions.isEmpty() && reactions.getFirst().getCount() - 1 != giveawayData.getParticipantSize()) {
+                                for (MessageReaction reaction : reactions) {
+                                    Map<String, User> userList = reaction
+                                            .retrieveUsers()
+                                            .complete()
+                                            .stream()
+                                            .filter(user -> !user.isBot())
+                                            .filter(user -> !giveawayData.participantContains(user.getId()))
+                                            .collect(Collectors.toMap(User::getId, user -> user));
 
-                                                        if (isForSpecificRole) {
-                                                            try {
-                                                                Map<String, User> localUserMap = new HashMap<>(userList);
-                                                                Role roleGiveaway = jda.getRoleById(giveawayData.getRoleId());
-                                                                for (Map.Entry<String, User> entry : localUserMap.entrySet()) {
-                                                                    Guild guild = jda.getGuildById(guildId);
-                                                                    if (guild != null) {
-                                                                        guild.retrieveMemberById(entry.getKey()).queue(member -> {
-                                                                            if (member != null) {
-                                                                                boolean contains = member.getRoles().contains(roleGiveaway);
-                                                                                if (!contains) {
-                                                                                    userList.remove(entry.getKey());
-                                                                                }
-                                                                            }
-                                                                        }, throwable -> handleEditException(throwable, messageId));
-                                                                    }
-                                                                }
-                                                            } catch (Exception e) {
-                                                                LOGGER.error(e.getMessage(), e);
+                                    if (isForSpecificRole) {
+                                        try {
+                                            Map<String, User> localUserMap = new HashMap<>(userList); //bad practice but it`s work
+                                            Role roleGiveaway = jda.getRoleById(giveawayData.getRoleId());
+                                            for (Map.Entry<String, User> entry : localUserMap.entrySet()) {
+                                                Guild guild = jda.getGuildById(guildId);
+                                                if (guild != null) {
+                                                    try {
+                                                        Member member = guild.retrieveMemberById(entry.getKey()).complete();
+                                                        if (member != null) {
+                                                            boolean contains = member.getRoles().contains(roleGiveaway);
+                                                            if (!contains) {
+                                                                userList.remove(entry.getKey());
                                                             }
                                                         }
-
-                                                        // Перебираем Users в реакциях
-                                                        if (instance.hasGiveaway(messageId)) {
-                                                            giveaway.addUser(userList.values().stream().toList());
+                                                    } catch (Exception e) {
+                                                        //Если пользователя нет в Гильдии удаляем из списка
+                                                        if (e.getMessage().contains("10007: Unknown Member")) {
+                                                            userList.remove(entry.getKey());
+                                                        } else {
+                                                            LOGGER.error(e.getMessage(), e);
                                                         }
-                                                    });
+                                                    }
+                                                }
+                                            }
+                                        } catch (Exception e) {
+                                            LOGGER.error(e.getMessage(), e);
                                         }
                                     }
-                                }, throwable -> handleEditException(throwable, messageId));
+
+                                    //Перебираем Users в реакциях
+                                    if (instance.hasGiveaway(messageId)) {
+                                        giveaway.addUser(userList.values().stream().toList());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    if (e.getMessage() != null &&
+                            e.getMessage().contains("10008: Unknown Message") ||
+                            e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
+                        LOGGER.info("GiveawayUpdateList: {} удаляем", e.getMessage());
+                        giveawayRepositoryService.deleteGiveaway(messageId);
+                        instance.removeGiveaway(messageId);
+                    } else {
+                        LOGGER.error(e.getMessage(), e);
                     }
                 }
             }
-        }
-    }
-
-    private void handleEditException(Throwable throwable, long messageId) {
-        String message = throwable.getMessage();
-        if (message != null && (message.contains("10008: Unknown Message") || message.contains("Missing permission: VIEW_CHANNEL"))) {
-            LOGGER.info("GiveawayUpdateList: {} удаляем", message);
-            giveawayRepositoryService.deleteGiveaway(messageId);
-            instance.removeGiveaway(messageId);
-        } else {
-            LOGGER.error(throwable.getMessage(), throwable);
         }
     }
 }

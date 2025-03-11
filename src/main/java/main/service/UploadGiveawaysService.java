@@ -76,10 +76,8 @@ public class UploadGiveawaysService {
                 GiveawayRegistry instance = GiveawayRegistry.getInstance();
                 instance.putGift(message_id_long, giveaway);
 
-                if (date_end_giveaway != null) {
-                    updateGiveawayByGuild.updateGiveawayByGuild(giveaway);
-                    giveaway.setLocked(false);
-                }
+                updateGiveawayByGuild.updateGiveawayByGuild(giveaway);
+                giveaway.setLocked(false);
 
                 if (finishGiveaway) {
                     giveaway.stopGiveaway(count_winners);
