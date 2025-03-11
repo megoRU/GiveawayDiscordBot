@@ -349,14 +349,16 @@ public class SlashService {
                             cancelCommand)
                     .queue();
 
-            List<Command> commandsList = jda.retrieveCommands().submit().get();
-
-            for (Command command : commandsList) {
-                String name = command.getName();
-                long id = command.getIdLong();
-                System.out.printf("%s [%s]%n", id, name);
-                commandMap.put(name, id);
-            }
+            jda.retrieveCommands().queue(
+                    list -> {
+                        for (Command command : list) {
+                            String name = command.getName();
+                            long id = command.getIdLong();
+                            System.out.printf("%s [%s]%n", id, name);
+                            commandMap.put(name, id);
+                        }
+                    }
+            );
 
             System.out.println("Готово");
         } catch (Exception e) {
