@@ -1,6 +1,7 @@
 package main.config;
 
 import jakarta.annotation.PostConstruct;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import main.controller.UpdateController;
 import main.core.CoreBot;
@@ -23,7 +24,6 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -36,9 +36,11 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.random.RandomGenerator;
 
 @Configuration
 @EnableScheduling
+@AllArgsConstructor
 public class BotStart {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(BotStart.class.getName());
@@ -64,25 +66,6 @@ public class BotStart {
     private final ScheduleStartService scheduleStartService;
     private final UploadGiveawaysService uploadGiveawaysService;
     private final SaveUsersService saveUsersService;
-
-    @Autowired
-    public BotStart(UpdateController updateController,
-                    SchedulingRepository schedulingRepository,
-                    SettingsRepository settingsRepository,
-                    GiveawayUpdateListUser updateGiveawayByGuild,
-                    SlashService slashService,
-                    ScheduleStartService scheduleStartService,
-                    UploadGiveawaysService uploadGiveawaysService,
-                    SaveUsersService saveUsersService) {
-        this.updateController = updateController;
-        this.schedulingRepository = schedulingRepository;
-        this.settingsRepository = settingsRepository;
-        this.updateGiveawayByGuild = updateGiveawayByGuild;
-        this.slashService = slashService;
-        this.scheduleStartService = scheduleStartService;
-        this.uploadGiveawaysService = uploadGiveawaysService;
-        this.saveUsersService = saveUsersService;
-    }
 
     @PostConstruct
     public void startBot() {
@@ -138,6 +121,60 @@ public class BotStart {
         }
     }
 
+//    @Scheduled(fixedDelay = 60, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
+//    private void saveUsers() {
+//        try {
+//            saveUsersService.saveParticipants();
+//        } catch (Exception e) {
+//            LOGGER.error(e.getMessage(), e);
+//        }
+//    }
+//
+//    @Scheduled(fixedDelay = 120, initialDelay = 8, timeUnit = TimeUnit.SECONDS)
+//    private void updateActivity() {
+//        if (!Config.isIsDev()) {
+//            int serverCount = BotStart.jda.getGuilds().size();
+//            BotStart.jda.getPresence().setActivity(Activity.playing(BotStart.activity + serverCount + " guilds"));
+//        } else {
+//            BotStart.jda.getPresence().setActivity(Activity.playing("Develop"));
+//        }
+//    }
+
+    @Scheduled(fixedDelay = 5, initialDelay = 1, timeUnit = TimeUnit.SECONDS)
+    private void schStartGiveaway() {
+        try {
+            scheduleStartService.scheduleStart(updateController, jda);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            LOGGER.error(e.getMessage(), e);
+        }
+    }
+
+    @Scheduled(fixedDelay = 2, initialDelay = 1, timeUnit = TimeUnit.SECONDS)
+    private void stopGiveawayTimer() {
+        List<Giveaway> giveawayDataList = new LinkedList<>(instance.getAllGiveaway());
+        StopGiveawayHandler stopGiveawayHandler = new StopGiveawayHandler();
+        for (Giveaway giveaway : giveawayDataList) {
+            try {
+                stopGiveawayHandler.handleGiveaway(giveaway);
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    @Scheduled(fixedDelay = 150, initialDelay = 25, timeUnit = TimeUnit.SECONDS)
+    public void updateUserList() {
+        List<Giveaway> giveawayDataList = new LinkedList<>(instance.getAllGiveaway());
+        for (Giveaway giveaway : giveawayDataList) {
+            try {
+                updateGiveawayByGuild.updateGiveawayByGuild(giveaway);
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
+            }
+        }
+    }
+
     private void getSchedulingFromDB() {
         try {
             List<Scheduling> schedulingList = schedulingRepository.findAll();
@@ -151,35 +188,7 @@ public class BotStart {
         }
     }
 
-    @Scheduled(fixedDelay = 60, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
-    private void saveUsers() {
-        try {
-            saveUsersService.saveParticipants();
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-    }
-
-    @Scheduled(fixedDelay = 120, initialDelay = 8, timeUnit = TimeUnit.SECONDS)
-    private void updateActivity() {
-        if (!Config.isIsDev()) {
-            int serverCount = BotStart.jda.getGuilds().size();
-            BotStart.jda.getPresence().setActivity(Activity.playing(BotStart.activity + serverCount + " guilds"));
-        } else {
-            BotStart.jda.getPresence().setActivity(Activity.playing("Develop"));
-        }
-    }
-
-    @Scheduled(fixedDelay = 5, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
-    private void scheduleStartGiveaway() {
-        try {
-            scheduleStartService.scheduleStart(updateController, jda);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-    }
-
-    public void setLanguages() {
+    private void setLanguages() {
         try {
             List<String> listLanguages = new ArrayList<>();
             listLanguages.add("rus");
@@ -205,32 +214,6 @@ public class BotStart {
             System.out.println("setLanguages()");
         } catch (Exception e) {
             LOGGER.info(e.getMessage());
-        }
-    }
-
-    @Scheduled(fixedDelay = 2, initialDelay = 1, timeUnit = TimeUnit.SECONDS)
-    public void stopGiveawayTimer() {
-        List<Giveaway> giveawayDataList = new LinkedList<>(instance.getAllGiveaway());
-        StopGiveawayHandler stopGiveawayHandler = new StopGiveawayHandler();
-        for (Giveaway giveaway : giveawayDataList) {
-            try {
-                stopGiveawayHandler.handleGiveaway(giveaway);
-            } catch (Exception e) {
-                LOGGER.error(e.getMessage(), e);
-            }
-        }
-    }
-
-    @Scheduled(fixedDelay = 150, initialDelay = 25, timeUnit = TimeUnit.SECONDS)
-    public void updateUserList() {
-        List<Giveaway> giveawayDataList = new LinkedList<>(instance.getAllGiveaway());
-        for (Giveaway giveaway : giveawayDataList) {
-            try {
-                updateGiveawayByGuild.updateGiveawayByGuild(giveaway);
-                Thread.sleep(2000L);
-            } catch (Exception e) {
-                LOGGER.error(e.getMessage(), e);
-            }
         }
     }
 

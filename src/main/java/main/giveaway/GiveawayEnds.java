@@ -128,11 +128,11 @@ public class GiveawayEnds {
                 if (uniqueWinners.size() == 1) {
                     winnersContent = String.format(jsonParsers.getLocale("gift_congratulations", guildId), winnerArray, giftUrl);
                     EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId, messageId);
-                    updateController.setView(embedBuilder, guildId, textChannelId, messageId);
+                    updateController.setView(embedBuilder.build(), guildId, textChannelId, messageId);
                 } else {
                     winnersContent = String.format(jsonParsers.getLocale("gift_congratulations_many", guildId), winnerArray, giftUrl);
                     EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId, messageId);
-                    updateController.setView(embedBuilder, guildId, textChannelId, messageId);
+                    updateController.setView(embedBuilder.build(), guildId, textChannelId, messageId);
                 }
                 updateController.setView(jda, winnersContent, guildId, textChannelId);
             }
@@ -155,7 +155,7 @@ public class GiveawayEnds {
                 notEnoughUsers.setDescription(giftGiveawayDeleted);
 
                 //Отправляет сообщение
-                updateController.setView(notEnoughUsers, guildId, textChannelId, messageId);
+                updateController.setView(notEnoughUsers.build(), guildId, textChannelId, messageId);
 
                 giveawayRepositoryService.deleteGiveaway(messageId);
                 GiveawayRegistry instance = GiveawayRegistry.getInstance();

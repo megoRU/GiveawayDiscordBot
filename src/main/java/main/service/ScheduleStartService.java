@@ -30,9 +30,9 @@ public class ScheduleStartService {
 
     private final GiveawayRepositoryService giveawayRepositoryService;
     private final SchedulingRepository schedulingRepository;
+    private final static GiveawayRegistry instance = GiveawayRegistry.getInstance();
 
     public void scheduleStart(UpdateController updateController, JDA jda) {
-        GiveawayRegistry instance = GiveawayRegistry.getInstance();
         Collection<Scheduling> scheduledGiveaways = instance.getScheduledGiveaways();
 
         for (Scheduling scheduling : scheduledGiveaways) {
