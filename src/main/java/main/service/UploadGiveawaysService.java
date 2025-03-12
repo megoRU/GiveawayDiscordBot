@@ -85,7 +85,7 @@ public class UploadGiveawaysService {
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
             }
-            System.out.println("getMessageIdFromDB()");
         }
+        System.out.println("uploadGiveaways()");
     }
 }

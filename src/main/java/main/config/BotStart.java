@@ -109,7 +109,6 @@ public class BotStart {
 
             //Получаем Giveaway и пользователей. Устанавливаем данные
             uploadGiveawaysService.uploadGiveaways(updateController);
-            System.out.println("uploadGiveaways");
 
             //Обновить команды
             slashService.updateSlash(jda);
