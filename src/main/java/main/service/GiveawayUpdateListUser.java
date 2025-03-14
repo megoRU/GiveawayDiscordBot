@@ -47,7 +47,7 @@ public class GiveawayUpdateListUser {
                         if (textChannelById != null) {
                             List<MessageReaction> reactions = textChannelById
                                     .retrieveMessageById(messageId)
-                                    .complete()
+                                    .complete(true)
                                     .getReactions()
                                     .stream()
                                     .filter(messageReaction -> messageReaction.getEmoji().getName().equals(ReactionEvent.TADA))
@@ -58,7 +58,7 @@ public class GiveawayUpdateListUser {
                                 for (MessageReaction reaction : reactions) {
                                     Map<String, User> userList = reaction
                                             .retrieveUsers()
-                                            .complete()
+                                            .complete(true)
                                             .stream()
                                             .filter(user -> !user.isBot())
                                             .filter(user -> !giveawayData.participantContains(user.getId()))
@@ -72,7 +72,7 @@ public class GiveawayUpdateListUser {
                                                 Guild guild = jda.getGuildById(guildId);
                                                 if (guild != null) {
                                                     try {
-                                                        Member member = guild.retrieveMemberById(entry.getKey()).complete();
+                                                        Member member = guild.retrieveMemberById(entry.getKey()).complete(true);
                                                         if (member != null) {
                                                             boolean contains = member.getRoles().contains(roleGiveaway);
                                                             if (!contains) {
