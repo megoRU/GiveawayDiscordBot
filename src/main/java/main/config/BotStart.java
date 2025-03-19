@@ -167,6 +167,7 @@ public class BotStart {
         for (Giveaway giveaway : giveawayDataList) {
             try {
                 updateGiveawayByGuild.updateGiveawayByGuild(giveaway);
+                Thread.sleep(1000);
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
             }
