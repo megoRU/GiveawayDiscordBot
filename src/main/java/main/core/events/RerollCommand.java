@@ -92,7 +92,7 @@ public class RerollCommand {
             String guildText = GiveawayUtils.getGuildText(guildId);
 
             String giftCongratulationsReroll = String.format(jsonParsers.getLocale("gift_congratulations_reroll", guildId), winnerList);
-            String giftCongratulationsMany = String.format(jsonParsers.getLocale("gift_congratulations_many", guildId), winnerList);
+            String giftCongratulationsRerollMany = String.format(jsonParsers.getLocale("gift_congratulations_reroll_many", guildId), winnerList);
 
             EmbedBuilder winner = new EmbedBuilder();
             winner.setColor(userColor);
@@ -101,7 +101,7 @@ public class RerollCommand {
                 String string = guildText.replaceAll("@winner", winnerList);
                 winner.setDescription(string);
             } else {
-                if (winners > 1) winner.setDescription(giftCongratulationsMany);
+                if (winners > 1) winner.setDescription(giftCongratulationsRerollMany);
                 else winner.setDescription(giftCongratulationsReroll);
             }
             event.getHook().sendMessageEmbeds(winner.build()).queue();

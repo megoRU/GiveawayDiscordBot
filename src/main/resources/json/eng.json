@@ -23,6 +23,7 @@
   "gift_winner": "Winner: %s",
   "gift_congratulations": "Congratulations to the winner!\n%s\n%s",
   "gift_congratulations_reroll": "New winner: %s! Congratulations!",
+  "gift_congratulations_reroll_many": "New winners: %s! Congratulations!",
   "gift_congratulations_many": "Congratulations to the winners!\n%s\n%s",
   "gift_url": "[Link to Giveaway](%s)",
   "gift_reaction": "React with :tada: to enter!",

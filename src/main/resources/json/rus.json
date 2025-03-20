@@ -23,6 +23,7 @@
   "gift_winner": "Победитель: %s",
   "gift_congratulations": "Поздравляем победителя!\n%s\n%s",
   "gift_congratulations_reroll": "Новый победитель: %s! Поздравляем!",
+  "gift_congratulations_reroll_many": "Новые победители: %s! Поздравляем!",
   "gift_congratulations_many": "Поздравляем победителей!\n%s\n%s",
   "gift_url": "[Ссылка на Giveaway](%s)",
   "gift_reaction": "Ставьте :tada: чтобы участвовать!",
