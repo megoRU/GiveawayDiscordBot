@@ -82,6 +82,7 @@ public class UploadGiveawaysService {
                 if (finishGiveaway) {
                     giveaway.stopGiveaway(count_winners);
                 }
+                Thread.sleep(500);
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
             }

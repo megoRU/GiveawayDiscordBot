@@ -75,7 +75,6 @@ public class BotStart {
             //Устанавливаем языки
             setLanguages();
             getLocalizationFromDB();
-            getSchedulingFromDB();
 
             List<GatewayIntent> intents = Arrays.asList(
                     GatewayIntent.GUILD_MEMBERS,
@@ -109,6 +108,7 @@ public class BotStart {
 
             //Получаем Giveaway и пользователей. Устанавливаем данные
             uploadGiveawaysService.uploadGiveaways(updateController);
+            getSchedulingFromDB();
 
             //Обновить команды
             slashService.updateSlash(jda);
