@@ -113,8 +113,8 @@ public class Giveaway {
                               boolean predefined,
                               int minParticipants) {
         //Записываем данные:
-        LOGGER.info("GuildId: {} ChannelId: {} Title: {} predefined: {} Winners: {} Time: {} Role: {} isOnlyForSpecificRole: {}",
-                guildId, textChannel.getId(), title, predefined, countWinners, time, role, isOnlyForSpecificRole);
+        LOGGER.info("GuildId: {} Title: {} predefined: {} Winners: {} Time: {} Role: {} isOnlyForSpecificRole: {}",
+                guildId, title, predefined, countWinners, time, role, isOnlyForSpecificRole);
 
         giveawayData.setTitle(title);
         giveawayData.setCountWinners(countWinners);
@@ -131,7 +131,7 @@ public class Giveaway {
             if (predefined) {
                 updateCollections(message);
             } else {
-                message.addReaction(Emoji.fromUnicode(ReactionEvent.TADA)).submit().get();
+                message.addReaction(Emoji.fromUnicode(ReactionEvent.TADA)).queue();
                 updateCollections(message);
             }
         } catch (Exception e) {
