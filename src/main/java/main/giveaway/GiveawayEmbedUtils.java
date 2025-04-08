@@ -1,6 +1,7 @@
 package main.giveaway;
 
 import main.jsonparser.JSONParsers;
+import main.service.SlashService;
 import net.dv8tion.jda.api.EmbedBuilder;
 
 import java.awt.*;
@@ -115,12 +116,18 @@ public class GiveawayEmbedUtils {
             }
 
             String giftHosted = String.format(jsonParsers.getLocale("gift_hosted", guildId), createdUserId);
+            String rerollParsers = String.format(jsonParsers.getLocale("reroll", guildId), createdUserId);
+            Long reroll = SlashService.getCommandId("reroll");
 
             String giveawayIdDescription = String.format("\n\nGiveaway ID: `%s`", messageId);
+            String giveawayReroll = String.format("\n%s </reroll:%s>", rerollParsers, reroll);
 
             //Hosted By
             embedBuilder.appendDescription(giftHosted);
+            //Giveaway ID
             embedBuilder.appendDescription(giveawayIdDescription);
+            //Reroll
+            embedBuilder.appendDescription(giveawayReroll);
 
             if (giveawayData.getUrlImage() != null) {
                 embedBuilder.setImage(giveawayData.getUrlImage());
