@@ -122,7 +122,7 @@ public class GiveawayEnds {
 
             String winnersContent;
             if (guildText != null) {
-                String string = guildText.replaceAll("@winner", winnerArray);
+                String string = guildText.replaceAll("@winner", winnerArray).replaceAll("@link", giftUrl);
                 updateController.setView(jda, string, guildId, textChannelId);
             } else {
                 if (uniqueWinners.size() == 1) {

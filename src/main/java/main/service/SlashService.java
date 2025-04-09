@@ -190,11 +190,11 @@ public class SlashService {
             //endmessage
             List<OptionData> endMessageDate = new ArrayList<>();
 
-            endMessageDate.add(new OptionData(STRING, "text", "Set text. Must contain @winner to properly parse")
+            endMessageDate.add(new OptionData(STRING, "text", "Set the text. Must contain @winner to properly parse. @link is optional.")
                     .setName("text")
                     .setMaxLength(255)
                     .setNameLocalization(DiscordLocale.RUSSIAN, "текст")
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Задать текст. Должен содержать @winner для правильного разбора"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Задать текст. Должен содержать @winner для правильного парсинга. Можно добавить @link."));
 
             //giveaway-edit
             List<OptionData> giveawayEditData = new ArrayList<>();

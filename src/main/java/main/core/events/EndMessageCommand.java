@@ -2,6 +2,7 @@ package main.core.events;
 
 import lombok.AllArgsConstructor;
 import main.config.BotStart;
+import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.model.entity.Settings;
 import main.model.repository.SettingsRepository;
@@ -29,13 +30,24 @@ public class EndMessageCommand {
         if (text != null && text.contains("@winner")) {
             String endMessage = jsonParsers.getLocale("end_message", guildId);
 
+            if (!text.contains("@link")) text = text.concat(" \n@link");
+
             updateSettings(guildId, text);
+
+            long latestMessageId = event.getMessageChannel().getLatestMessageIdLong();
+            long messageIdLong = event.getMessageChannel().getIdLong();
+            String url = GiveawayUtils.getDiscordUrlMessage(guildId, messageIdLong, latestMessageId);
+            String giftUrl = String.format(jsonParsers.getLocale("gift_url", guildId), url);
+
+            String string = text
+                    .replaceAll("@winner", "<@" + userId + ">")
+                    .replaceAll("@link", giftUrl);
 
             event.reply(String.format("""
                             %s
                             
                             %s
-                            """, endMessage, text.replaceAll("@winner", "<@" + userId + ">")))
+                            """, endMessage, string))
                     .setEphemeral(true)
                     .queue();
         } else if (text == null) {
