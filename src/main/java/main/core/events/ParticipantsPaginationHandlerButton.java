@@ -53,11 +53,10 @@ public class ParticipantsPaginationHandlerButton {
         String totalPages = String.valueOf(participantsPage.getTotalPages());
 
         int startIndex;
-        if (page <= 1) {
-            startIndex = 0;
-        } else {
-            startIndex = (page + 1) * 10; //content.size()
-        }
+
+        if (page == 0) startIndex = 0;
+        else startIndex = (page + 1) * 10; //content.size()
+
         for (int i = 0; i < content.size(); i++) {
             Participants participants = content.get(i);
             Long userId = participants.getUserId();
