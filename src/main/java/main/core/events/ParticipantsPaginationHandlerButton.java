@@ -55,7 +55,7 @@ public class ParticipantsPaginationHandlerButton {
         int startIndex;
 
         if (page == 0) startIndex = 0;
-        else startIndex = (page + 1) + 10; //content.size()
+        else startIndex = page * 10; //content.size()
 
         for (int i = 0; i < content.size(); i++) {
             Participants participants = content.get(i);
