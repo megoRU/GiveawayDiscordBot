@@ -52,12 +52,16 @@ public class ParticipantsPaginationHandlerButton {
         List<Participants> content = participantsPage.getContent();
         String totalPages = String.valueOf(participantsPage.getTotalPages());
 
-        int startIndex = (page + 1) * 10; //content.size()
-
+        int startIndex;
+        if (page <= 1) {
+            startIndex = 0;
+        } else {
+            startIndex = (page + 1) * 10; //content.size()
+        }
         for (int i = 0; i < content.size(); i++) {
             Participants participants = content.get(i);
             Long userId = participants.getUserId();
-            stringBuilder.append(startIndex + i + 1).append(". ").append("<@!").append(userId).append("> ");
+            stringBuilder.append(startIndex + i + 1).append(". ").append("<@!").append(userId).append("> ").append("\n");
         }
 
         if (stringBuilder.isEmpty()) {
