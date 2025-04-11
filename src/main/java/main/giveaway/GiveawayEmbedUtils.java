@@ -44,14 +44,10 @@ public class GiveawayEmbedUtils {
 
         //Giveaway only for Role
         if (isForSpecificRole) {
-            String giftOnlyFor;
-            if (role == guildId) {
-                giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", guildId), role)
-                        .replace("<@&" + guildId + ">", "@everyone");
-            } else {
-                giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", guildId), role);
+            if (role != guildId) {
+                String giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", guildId), role);
+                embedBuilder.appendDescription(giftOnlyFor);
             }
-            embedBuilder.appendDescription(giftOnlyFor);
         }
 
         //EndGiveaway
@@ -103,16 +99,11 @@ public class GiveawayEmbedUtils {
 
             if (giveawayData.isForSpecificRole()) {
                 Long roleId = giveawayData.getRoleId();
-                String giftOnlyFor;
 
-                if (roleId == guildId) {
-                    giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", guildId), roleId)
-                            .replaceAll("<@&" + guildId + ">", "@everyone");
-                } else {
-                    giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", guildId), roleId);
+                if (roleId != guildId) {
+                    String giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", guildId), roleId);
+                    embedBuilder.appendDescription(giftOnlyFor);
                 }
-
-                embedBuilder.appendDescription(giftOnlyFor);
             }
 
             String giftHosted = String.format(jsonParsers.getLocale("gift_hosted", guildId), createdUserId);
