@@ -36,7 +36,7 @@ public class ParticipantsCommand {
         String id = event.getOption("giveaway-id", OptionMapping::getAsString);
 
         if (id != null) {
-            Pageable pageable = PageRequest.of(0, 1); // первая страница, 10 элементов
+            Pageable pageable = PageRequest.of(0, 10); // первая страница, 10 элементов
             Page<Participants> participantsPage = participantsRepository.findAllByMessageId(Long.parseLong(id), pageable);
             long total = participantsPage.getTotalElements();
             String totalPages = String.valueOf(participantsPage.getTotalPages());

@@ -43,7 +43,7 @@ public class ParticipantsPaginationHandlerButton {
         String giveawayId = split[1];
         int page = Integer.parseInt(split[2]);
 
-        Pageable pageable = PageRequest.of(page, 1); // первая страница, 10 элементов
+        Pageable pageable = PageRequest.of(page, 10); // первая страница, 10 элементов
         Page<Participants> participantsPage = participantsRepository.findAllByMessageId(giveawayIdLong, pageable);
 
         long total = participantsPage.getTotalElements();
