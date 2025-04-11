@@ -93,5 +93,8 @@
   "user_dont_has_permission": "You do not have permission to use this interaction!",
   "no_mentions_user_on_message": "Couldn't find @mentioned users in the message. Or you don't have access to get a list of users to this Giveaway",
   "participants": "Participants",
-  "reroll": "Reroll:"
+  "reroll": "Reroll:",
+  "pagination_page": "Page ",
+  "pagination_no_participants": "No participants!",
+  "pagination_participants_count": "Total Participants: "
 }

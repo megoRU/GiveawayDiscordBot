@@ -149,7 +149,7 @@ public class UpdateController {
                 schedulingCommand.scheduling(event);
             }
             case "participants" -> {
-                ParticipantsCommand participantsCommand = new ParticipantsCommand(listUsersRepository);
+                ParticipantsCommand participantsCommand = new ParticipantsCommand(participantsRepository);
                 participantsCommand.participants(event);
             }
             case "cancel" -> {
@@ -165,9 +165,17 @@ public class UpdateController {
 
     private void buttonEvent(@NotNull ButtonInteractionEvent event) {
         if (event.getGuild() == null) return;
-        if (Objects.equals(event.getButton().getId(), event.getGuild().getId() + ":" + ButtonChangeLanguage.CHANGE_LANGUAGE)) {
+        String idButton = event.getButton().getId();
+
+        if (Objects.equals(idButton, event.getGuild().getId() + ":" + ButtonChangeLanguage.CHANGE_LANGUAGE)) {
             ButtonChangeLanguage buttonChangeLanguage = new ButtonChangeLanguage(settingsRepository);
             buttonChangeLanguage.change(event);
+        } else if (idButton != null && idButton.contains("DOWNLOAD")) {
+            ParticipantsDownloadButton participantsDownloadButton = new ParticipantsDownloadButton(listUsersRepository);
+            participantsDownloadButton.handle(event);
+        } else if (idButton != null && idButton.contains("NEXT")) {
+            ParticipantsPaginationHandlerButton participantsPaginationHandlerButton = new ParticipantsPaginationHandlerButton(participantsRepository);
+            participantsPaginationHandlerButton.handle(event);
         }
     }
 

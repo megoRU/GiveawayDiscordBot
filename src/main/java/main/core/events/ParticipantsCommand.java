@@ -1,123 +1,87 @@
 package main.core.events;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import lombok.AllArgsConstructor;
-import main.giveaway.Giveaway;
-import main.giveaway.GiveawayData;
-import main.giveaway.GiveawayRegistry;
+import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
-import main.model.entity.ListUsers;
-import main.model.repository.ListUsersRepository;
+import main.model.entity.Participants;
+import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.SelfUser;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.utils.FileUpload;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.awt.*;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @AllArgsConstructor
 public class ParticipantsCommand {
 
     private static final JSONParsers jsonParsers = new JSONParsers();
-    private final ListUsersRepository listUsersRepository;
-    private final static Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    private final ParticipantsRepository participantsRepository;
 
     @Transactional
     public void participants(@NotNull SlashCommandInteractionEvent event) {
-        var userIdLong = event.getUser().getIdLong();
-        var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
-
-        event.deferReply().setEphemeral(true).queue();
+        if (event.getGuild() == null) return;
+        long guildId = event.getGuild().getIdLong();
         String id = event.getOption("giveaway-id", OptionMapping::getAsString);
 
         if (id != null) {
-            if (id.matches("[0-9]+")) {
-                long giveawayId = Long.parseLong(id);
+            Pageable pageable = PageRequest.of(0, 1); // первая страница, 10 элементов
+            Page<Participants> participantsPage = participantsRepository.findAllByMessageId(Long.parseLong(id), pageable);
+            long total = participantsPage.getTotalElements();
+            String totalPages = String.valueOf(participantsPage.getTotalPages());
 
-                GiveawayRegistry instance = GiveawayRegistry.getInstance();
-                Giveaway giveaway = instance.getGiveaway(giveawayId);
+            StringBuilder stringBuilder = new StringBuilder();
+            List<Participants> content = participantsPage.getContent();
 
-                if (giveaway != null) {
-                    GiveawayData giveawayData = giveaway.getGiveawayData();
-                    List<Long> participantsList = giveawayData.getParticipantsList().values().stream().map(Long::valueOf).toList();
-                    long creatorUserId = giveaway.getUserIdLong();
+            for (int i = 0; i < content.size(); i++) {
+                Participants participants = content.get(i);
+                Long userId = participants.getUserId();
+                stringBuilder.append(i + 1).append(". ").append("<@!").append(userId).append("> ").append("\n");
+            }
 
-                    if (userIdLong != creatorUserId) {
-                        String noAccessReroll = jsonParsers.getLocale("no_access_reroll", guildId);
-                        event.getHook().sendMessage(noAccessReroll).setEphemeral(true).queue();
-                        return;
-                    }
-
-                    List<ListUsers> listUsers = new ArrayList<>();
-
-                    participantsList.forEach(participant -> {
-                        ListUsers listUser = new ListUsers();
-                        listUser.setUserId(participant);
-
-                        listUsers.add(listUser);
-                    });
-
-                    handlerMessageSender(event, listUsers);
-                } else {
-                    List<ListUsers> listUsers = listUsersRepository.findAllByGiveawayIdAndCreatedUserId(Long.parseLong(id), userIdLong);
-                    handlerMessageSender(event, listUsers);
-                }
+            if (stringBuilder.isEmpty()) {
+                String paginationNoParticipants = jsonParsers.getLocale("pagination_no_participants", guildId);
+                event.reply(paginationNoParticipants).queue();
             } else {
-                String slashStopNoHas = jsonParsers.getLocale("id_must_be_a_number", guildId);
-                event.getHook().sendMessage(slashStopNoHas).setEphemeral(true).queue();
+                Button button = Button.secondary("DOWNLOAD_".concat(id), "Скачать");
+                List<Button> buttons = new ArrayList<>();
+                buttons.add(button);
+
+                if (participantsPage.hasNext()) {
+                    Button nextButton = Button.secondary("NEXT_".concat(id).concat("_1"), Emoji.fromUnicode("➡️"));
+                    buttons.add(nextButton);
+                }
+
+                String paginationPage = jsonParsers.getLocale("pagination_page", guildId);
+                String paginationParticipantsCount = jsonParsers.getLocale("pagination_participants_count", guildId);
+
+                SelfUser selfUser = event.getJDA().getSelfUser();
+                String avatarUrl = selfUser.getAvatarUrl();
+                String name = selfUser.getName().concat(" ").concat("(").concat(paginationPage).concat("1/").concat(totalPages).concat(")");
+                Color userColor = GiveawayUtils.getUserColor(guildId);
+
+                EmbedBuilder embedBuilder = new EmbedBuilder();
+
+                embedBuilder.setColor(userColor);
+                embedBuilder.setAuthor(name, null, avatarUrl);
+                embedBuilder.setDescription(stringBuilder.toString());
+                embedBuilder.setFooter(paginationParticipantsCount + total);
+
+                event.replyEmbeds(embedBuilder.build()).setActionRow(buttons).queue();
             }
         } else {
-            event.getHook().sendMessage("Options is null").setEphemeral(true).queue();
+            event.reply("Options is null").queue();
         }
-    }
-
-    private void sendParticipants(@NotNull SlashCommandInteractionEvent event, String json) {
-        InputStream inputStream = getInputStream(json);
-        FileUpload fileUpload = FileUpload.fromData(inputStream, "participants.json");
-        event.getHook().sendFiles(fileUpload).setEphemeral(true).queue();
-    }
-
-    private void handlerMessageSender(@NotNull SlashCommandInteractionEvent event, List<ListUsers> listUsers) {
-        var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
-
-        StringBuilder stringBuilder = new StringBuilder();
-
-        if (listUsers.isEmpty()) {
-            String noAccessReroll = jsonParsers.getLocale("no_access_reroll", guildId);
-            event.getHook().sendMessage(noAccessReroll).setEphemeral(true).queue();
-            return;
-        }
-
-        for (ListUsers participants : listUsers) {
-            stringBuilder.append(stringBuilder.isEmpty() ? "<@" : ", <@").append(participants.getUserId()).append(">");
-        }
-
-        if (stringBuilder.length() > 1) {
-            sendParticipants(event, gson.toJson(listUsers));
-        } else {
-            String participants = jsonParsers.getLocale("participants", guildId);
-
-            EmbedBuilder list = new EmbedBuilder();
-            list.setColor(Color.GREEN);
-            list.setTitle(participants);
-            list.setDescription(stringBuilder);
-
-            event.getHook().sendMessageEmbeds(list.build()).setEphemeral(true).queue();
-        }
-    }
-
-    private InputStream getInputStream(@NotNull String text) {
-        return new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
     }
 }

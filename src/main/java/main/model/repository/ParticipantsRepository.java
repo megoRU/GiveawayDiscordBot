@@ -2,6 +2,8 @@ package main.model.repository;
 
 import main.model.entity.ActiveGiveaways;
 import main.model.entity.Participants;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -23,5 +25,10 @@ public interface ParticipantsRepository extends JpaRepository<Participants, Long
             "JOIN FETCH ag.participants p " +
             "WHERE ag.messageId = :messageId AND ag.createdUserId = :createdUserId")
     List<ActiveGiveaways> findActiveGiveawaysWithParticipants(@Param("messageId") Long messageId, @Param("createdUserId") Long createdUserId);
+
+    @Query("SELECT p FROM Participants p " +
+            "JOIN p.activeGiveaways ag " +
+            "WHERE ag.messageId = :messageId")
+    Page<Participants> findAllByMessageId(@Param("messageId") Long messageId, Pageable pageable);
 
 }

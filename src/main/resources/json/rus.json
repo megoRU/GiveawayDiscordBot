@@ -93,5 +93,8 @@
   "user_dont_has_permission": "У вас нет разрешения чтобы, использовать это взаимодействие!",
   "no_mentions_user_on_message": "Не смог найти @упомянутых пользователей у сообщения. Либо у вас нет доступа к получению списка пользователей к этому Giveaway",
   "participants": "Участники",
-  "reroll": "Перевыбрать:"
+  "reroll": "Перевыбрать:",
+  "pagination_page": "Страница ",
+  "pagination_no_participants": "Участников нет!",
+  "pagination_participants_count": "Колличество участников: "
 }

@@ -84,8 +84,8 @@ public class Giveaway {
         this.giveawayRepositoryService = giveawayRepositoryService;
     }
 
-    public Timestamp updateTime(final String time) {
-        if (time == null) return giveawayData.getEndGiveawayDate();
+    public void updateTime(final String time) {
+        if (time == null) return;
         ZoneOffset offset = ZoneOffset.UTC;
         LocalDateTime localDateTime;
 
@@ -98,8 +98,6 @@ public class Giveaway {
 
         long toEpochSecond = localDateTime.toEpochSecond(offset);
         giveawayData.setEndGiveawayDate(new Timestamp(toEpochSecond * 1000));
-
-        return giveawayData.getEndGiveawayDate();
     }
 
     //TODO: Возможно добавлять в колекцию тут
