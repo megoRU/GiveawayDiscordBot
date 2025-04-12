@@ -75,7 +75,9 @@ public class ParticipantsPaginationHandlerButton {
             buttons.add(nextButton);
         }
 
-        Button button = Button.secondary("DOWNLOAD_".concat(giveawayId), "Скачать");
+        String paginationDownload = jsonParsers.getLocale("pagination_download", guildId);
+
+        Button button = Button.secondary("DOWNLOAD_".concat(giveawayId), paginationDownload);
         buttons.add(button);
 
         if (paginationPage.hasNext()) {

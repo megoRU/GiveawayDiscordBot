@@ -67,7 +67,9 @@ public class ParticipantsCommand {
                 stringBuilder.append(i + 1).append(". ").append("<@!").append(userId).append("> ").append("\n");
             }
 
-            Button button = Button.secondary("DOWNLOAD_".concat(id), "Скачать");
+            String paginationDownload = jsonParsers.getLocale("pagination_download", guildId);
+
+            Button button = Button.secondary("DOWNLOAD_".concat(id), paginationDownload);
             List<Button> buttons = new ArrayList<>();
             buttons.add(button);
 
