@@ -1,6 +1,9 @@
 package main.model.repository;
 
 import main.model.entity.ListUsers;
+import main.model.entity.Participants;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -23,4 +26,7 @@ public interface ListUsersRepository extends JpaRepository<ListUsers, Long> {
     void saveAllParticipantsToUserList(@Param("messageId") Long messageId);
 
     List<ListUsers> findAllByGiveawayIdAndCreatedUserId(Long giveawayId, Long createdUserId);
+
+    @Query("SELECT l FROM ListUsers l WHERE l.giveawayId = :messageId AND l.createdUserId = :userId")
+    Page<ListUsers> findAllByMessageId(@Param("messageId") Long messageId, @Param("userId") Long userId, Pageable pageable);
 }

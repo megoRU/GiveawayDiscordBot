@@ -1,9 +1,15 @@
 package main.core.events;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import main.giveaway.Giveaway;
+import main.giveaway.GiveawayRegistry;
 import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
+import main.model.entity.ListUsers;
 import main.model.entity.Participants;
+import main.model.repository.ListUsersRepository;
 import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.SelfUser;
@@ -20,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -27,61 +34,109 @@ import java.util.List;
 public class ParticipantsCommand {
 
     private static final JSONParsers jsonParsers = new JSONParsers();
+    private final static GiveawayRegistry instance = GiveawayRegistry.getInstance();
+    private final ListUsersRepository listUsersRepository;
     private final ParticipantsRepository participantsRepository;
 
     @Transactional
     public void participants(@NotNull SlashCommandInteractionEvent event) {
         if (event.getGuild() == null) return;
         long guildId = event.getGuild().getIdLong();
+        long userIdLong = event.getInteraction().getUser().getIdLong();
         String id = event.getOption("giveaway-id", OptionMapping::getAsString);
 
         if (id != null) {
-            Pageable pageable = PageRequest.of(0, 10); // первая страница, 10 элементов
-            Page<Participants> participantsPage = participantsRepository.findAllByMessageId(Long.parseLong(id), pageable);
-            long total = participantsPage.getTotalElements();
-            String totalPages = String.valueOf(participantsPage.getTotalPages());
+            Pagination pagination = getParticipants(userIdLong, Long.parseLong(id), 0, participantsRepository, listUsersRepository);
+            Page<?> page = pagination.getPage();
+            List<String> participantsCollection = pagination.getParticipants();
+
+            if (page.isEmpty()) {
+                String paginationUserIdError = jsonParsers.getLocale("pagination_user_id_error", guildId);
+                event.reply(paginationUserIdError).setActionRow().queue();
+                return;
+            }
+
+            long total = page.getTotalElements();
+            String totalPages = String.valueOf(page.getTotalPages());
 
             StringBuilder stringBuilder = new StringBuilder();
-            List<Participants> content = participantsPage.getContent();
 
-            for (int i = 0; i < content.size(); i++) {
-                Participants participants = content.get(i);
-                Long userId = participants.getUserId();
+
+            for (int i = 0; i < participantsCollection.size(); i++) {
+                Long userId = Long.valueOf(participantsCollection.get(i));
                 stringBuilder.append(i + 1).append(". ").append("<@!").append(userId).append("> ").append("\n");
             }
 
-            if (stringBuilder.isEmpty()) {
-                String paginationNoParticipants = jsonParsers.getLocale("pagination_no_participants", guildId);
-                event.reply(paginationNoParticipants).queue();
-            } else {
-                Button button = Button.secondary("DOWNLOAD_".concat(id), "Скачать");
-                List<Button> buttons = new ArrayList<>();
-                buttons.add(button);
+            Button button = Button.secondary("DOWNLOAD_".concat(id), "Скачать");
+            List<Button> buttons = new ArrayList<>();
+            buttons.add(button);
 
-                if (participantsPage.hasNext()) {
-                    Button nextButton = Button.secondary("NEXT_".concat(id).concat("_1"), Emoji.fromUnicode("➡️"));
-                    buttons.add(nextButton);
-                }
-
-                String paginationPage = jsonParsers.getLocale("pagination_page", guildId);
-                String paginationParticipantsCount = jsonParsers.getLocale("pagination_participants_count", guildId);
-
-                SelfUser selfUser = event.getJDA().getSelfUser();
-                String avatarUrl = selfUser.getAvatarUrl();
-                String name = selfUser.getName().concat(" ").concat("(").concat(paginationPage).concat("1/").concat(totalPages).concat(")");
-                Color userColor = GiveawayUtils.getUserColor(guildId);
-
-                EmbedBuilder embedBuilder = new EmbedBuilder();
-
-                embedBuilder.setColor(userColor);
-                embedBuilder.setAuthor(name, null, avatarUrl);
-                embedBuilder.setDescription(stringBuilder.toString());
-                embedBuilder.setFooter(paginationParticipantsCount + total);
-
-                event.replyEmbeds(embedBuilder.build()).setActionRow(buttons).queue();
+            if (page.hasNext()) {
+                Button nextButton = Button.secondary("NEXT_".concat(id).concat("_1"), Emoji.fromUnicode("➡️"));
+                buttons.add(nextButton);
             }
+
+            String paginationPage = jsonParsers.getLocale("pagination_page", guildId);
+            String paginationParticipantsCount = jsonParsers.getLocale("pagination_participants_count", guildId);
+
+            SelfUser selfUser = event.getJDA().getSelfUser();
+            String avatarUrl = selfUser.getAvatarUrl();
+            String name = selfUser.getName().concat(" ").concat("(").concat(paginationPage).concat("1/").concat(totalPages).concat(")");
+            Color userColor = GiveawayUtils.getUserColor(guildId);
+
+            EmbedBuilder embedBuilder = new EmbedBuilder();
+
+            embedBuilder.setColor(userColor);
+            embedBuilder.setAuthor(name, null, avatarUrl);
+            embedBuilder.setDescription(stringBuilder.toString());
+            embedBuilder.setFooter(paginationParticipantsCount + total);
+
+            event.replyEmbeds(embedBuilder.build()).setActionRow(buttons).queue();
         } else {
             event.reply("Options is null").queue();
         }
+    }
+
+    public static Pagination getParticipants(long userIdLong, long giveawayId, int page,
+                                             ParticipantsRepository participantsRepository,
+                                             ListUsersRepository listUsersRepository) {
+        Giveaway giveaway = instance.getGiveaway(giveawayId);
+        Collection<String> collection = new ArrayList<>();
+
+        Pagination.PaginationBuilder builder = Pagination.builder();
+
+        Pageable pageable = PageRequest.of(page, 10); // первая страница, 10 элементов
+
+        if (giveaway != null) {
+            Page<Participants> participantsPage = participantsRepository.findAllByMessageId(giveawayId, userIdLong, pageable);
+
+            builder.page(participantsPage);
+
+            List<Participants> content = participantsPage.getContent();
+            for (Participants participants : content) {
+                Long userId = participants.getUserId();
+                collection.add(userId.toString());
+            }
+        } else {
+            Page<ListUsers> participantsPage = listUsersRepository.findAllByMessageId(giveawayId, userIdLong, pageable);
+            List<ListUsers> content = participantsPage.getContent();
+
+            builder.page(participantsPage);
+
+            for (ListUsers participants : content) {
+                Long userId = participants.getUserId();
+                collection.add(String.valueOf(userId));
+            }
+
+        }
+
+        return builder.participants(collection.stream().toList()).build();
+    }
+
+    @Builder
+    @Getter
+    public static class Pagination {
+        private Page<?> page;
+        private List<String> participants;
     }
 }

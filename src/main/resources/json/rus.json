@@ -96,5 +96,6 @@
   "reroll": "Перевыбрать:",
   "pagination_page": "Страница ",
   "pagination_no_participants": "Участников нет!",
-  "pagination_participants_count": "Колличество участников: "
+  "pagination_participants_count": "Колличество участников: ",
+  "pagination_user_id_error": "Не смог найти участников, либо у вас нет доступа к получению списка пользователей к этому Giveaway"
 }

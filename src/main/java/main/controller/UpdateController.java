@@ -149,7 +149,7 @@ public class UpdateController {
                 schedulingCommand.scheduling(event);
             }
             case "participants" -> {
-                ParticipantsCommand participantsCommand = new ParticipantsCommand(participantsRepository);
+                ParticipantsCommand participantsCommand = new ParticipantsCommand(listUsersRepository, participantsRepository);
                 participantsCommand.participants(event);
             }
             case "cancel" -> {
@@ -174,7 +174,7 @@ public class UpdateController {
             ParticipantsDownloadButton participantsDownloadButton = new ParticipantsDownloadButton(listUsersRepository);
             participantsDownloadButton.handle(event);
         } else if (idButton != null && idButton.contains("NEXT")) {
-            ParticipantsPaginationHandlerButton participantsPaginationHandlerButton = new ParticipantsPaginationHandlerButton(participantsRepository);
+            ParticipantsPaginationHandlerButton participantsPaginationHandlerButton = new ParticipantsPaginationHandlerButton(participantsRepository, listUsersRepository);
             participantsPaginationHandlerButton.handle(event);
         }
     }

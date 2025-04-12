@@ -96,5 +96,7 @@
   "reroll": "Reroll:",
   "pagination_page": "Page ",
   "pagination_no_participants": "No participants!",
-  "pagination_participants_count": "Total Participants: "
+  "pagination_participants_count": "Total Participants: ",
+  "pagination_user_id_error": "I couldn't find any participants, or you don't have access to get a list of users for this Giveaway."
+
 }

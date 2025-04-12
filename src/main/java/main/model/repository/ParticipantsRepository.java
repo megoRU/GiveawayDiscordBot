@@ -28,7 +28,7 @@ public interface ParticipantsRepository extends JpaRepository<Participants, Long
 
     @Query("SELECT p FROM Participants p " +
             "JOIN p.activeGiveaways ag " +
-            "WHERE ag.messageId = :messageId")
-    Page<Participants> findAllByMessageId(@Param("messageId") Long messageId, Pageable pageable);
+            "WHERE ag.messageId = :messageId AND ag.createdUserId = :userId")
+    Page<Participants> findAllByMessageId(@Param("messageId") Long messageId, @Param("userId") Long userId, Pageable pageable);
 
 }
