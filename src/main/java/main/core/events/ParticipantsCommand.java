@@ -52,7 +52,7 @@ public class ParticipantsCommand {
 
             if (page.isEmpty()) {
                 String paginationUserIdError = jsonParsers.getLocale("pagination_user_id_error", guildId);
-                event.reply(paginationUserIdError).setActionRow().queue();
+                event.reply(paginationUserIdError).setEphemeral(true).queue();
                 return;
             }
 

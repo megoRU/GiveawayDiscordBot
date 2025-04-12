@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -49,7 +51,8 @@ public class ParticipantsPaginationHandlerButton {
 
         if (paginationPage.isEmpty()) {
             String paginationUserIdError = jsonParsers.getLocale("pagination_user_id_error", guildId);
-            event.reply(paginationUserIdError).setActionRow().queue();
+            event.editButton(event.getButton().asDisabled()).queue();
+            event.getHook().sendMessage(paginationUserIdError).setEphemeral(true).queue();
             return;
         }
 

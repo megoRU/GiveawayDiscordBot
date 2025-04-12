@@ -72,7 +72,7 @@ public class UpdateController {
             LOGGER.info(slashCommandInteractionEvent.getName());
             slashEvent(slashCommandInteractionEvent);
         } else if (event instanceof ButtonInteractionEvent buttonInteractionEvent) {
-            LOGGER.info(buttonInteractionEvent.getInteraction().getButton().getLabel());
+            LOGGER.info(buttonInteractionEvent.getInteraction().getButton().getId());
             buttonEvent(buttonInteractionEvent);
         } else if (event instanceof GuildJoinEvent guildJoinEvent) {
             joinEvent(guildJoinEvent);
