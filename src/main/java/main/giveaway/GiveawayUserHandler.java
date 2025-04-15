@@ -34,7 +34,7 @@ public class GiveawayUserHandler {
 
             List<Participants> participantsList = new ArrayList<>(user.size() + 1);
             for (User users : user) {
-                LOGGER.info("Новый участник: Nick: {} UserID: {} Guild: {} MessageId {}", users.getName(), users.getId(), guildId, messageId);
+                LOGGER.info("Nick: {} UserID: {} Guild: {} MessageId {}", users.getName(), users.getId(), guildId, messageId);
 
                 Participants participants = new Participants();
                 participants.setUserId(users.getIdLong());
