@@ -3,6 +3,7 @@ package main.giveaway;
 import main.jsonparser.JSONParsers;
 import main.service.SlashService;
 import net.dv8tion.jda.api.EmbedBuilder;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.sql.Timestamp;
@@ -70,6 +71,7 @@ public class GiveawayEmbedUtils {
         return embedBuilder;
     }
 
+    @Nullable
     public static EmbedBuilder giveawayEnd(final String winners, int countWinners, final long guildId, long messageId) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
@@ -124,6 +126,6 @@ public class GiveawayEmbedUtils {
                 embedBuilder.setImage(giveawayData.getUrlImage());
             }
         }
-        return embedBuilder;
+        return null;
     }
 }
