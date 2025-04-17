@@ -123,6 +123,7 @@ public class GiveawayEnds {
             String winnersContent;
 
             EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId, messageId);
+            System.out.println(guildId + " embedBuilder: " + embedBuilder);
             if (embedBuilder == null) return;
             updateController.setView(embedBuilder.build(), guildId, textChannelId, messageId);
 
