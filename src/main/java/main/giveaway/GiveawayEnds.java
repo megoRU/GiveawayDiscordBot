@@ -105,13 +105,9 @@ public class GiveawayEnds {
                     List<Button> buttons = new ArrayList<>();
                     buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
                     updateController.setView(errors.build(), guildId, textChannelId, buttons);
-
-                    LOGGER.error(e.getMessage(), e);
-                    System.out.println(e.getMessage());
-                } else {
-                    LOGGER.error(e.getMessage(), e);
-                    System.out.println(e.getMessage());
                 }
+                LOGGER.error(e.getMessage(), e);
+                System.out.println(e.getMessage());
                 return;
             }
 
@@ -127,8 +123,13 @@ public class GiveawayEnds {
             String winnersContent;
 
             EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId, messageId);
-            System.out.println(guildId + " embedBuilder: " + embedBuilder);
-            if (embedBuilder == null) return;
+            GiveawayRegistry instance = GiveawayRegistry.getInstance();
+
+            if (embedBuilder == null) {
+                instance.removeGiveaway(messageId);
+                return;
+            }
+
             updateController.setView(embedBuilder.build(), guildId, textChannelId, messageId);
 
             if (guildText != null) {
@@ -145,7 +146,6 @@ public class GiveawayEnds {
 
             giveaway.setRemoved(true);
             //Удаляет данные из коллекций
-            GiveawayRegistry instance = GiveawayRegistry.getInstance();
             instance.removeGiveaway(messageId);
 
             giveawayRepositoryService.backupAllParticipants(messageId);
