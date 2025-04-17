@@ -125,7 +125,9 @@ public class GiveawayEmbedUtils {
             if (giveawayData.getUrlImage() != null) {
                 embedBuilder.setImage(giveawayData.getUrlImage());
             }
+            return embedBuilder;
+        } else {
+            return null;
         }
-        return null;
     }
 }
