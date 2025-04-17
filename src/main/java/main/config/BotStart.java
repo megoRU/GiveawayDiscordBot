@@ -113,7 +113,7 @@ public class BotStart {
             //Обновить команды
             slashService.updateSlash(jda);
 
-            System.out.println("DevMode: " + Config.isIsDev() + " Time Build: " + "11:56");
+            System.out.println("DevMode: " + Config.isIsDev() + " Time Build: " + "11:29");
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }
