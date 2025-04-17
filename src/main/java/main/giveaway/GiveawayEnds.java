@@ -108,6 +108,9 @@ public class GiveawayEnds {
 
                     LOGGER.error(e.getMessage(), e);
                     System.out.println(e.getMessage());
+                } else {
+                    LOGGER.error(e.getMessage(), e);
+                    System.out.println(e.getMessage());
                 }
                 return;
             }
