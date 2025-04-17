@@ -107,6 +107,7 @@ public class GiveawayEnds {
                     updateController.setView(errors.build(), guildId, textChannelId, buttons);
 
                     LOGGER.error(e.getMessage(), e);
+                    System.out.println(e.getMessage());
                 }
                 return;
             }
