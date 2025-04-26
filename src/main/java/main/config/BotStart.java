@@ -101,7 +101,7 @@ public class BotStart {
             jdaBuilder.setStatus(OnlineStatus.ONLINE);
             jdaBuilder.setActivity(Activity.playing("Starting..."));
             jdaBuilder.setBulkDeleteSplittingEnabled(false);
-            jdaBuilder.addEventListeners(new CoreBot(updateController));
+            jdaBuilder.addEventListeners(coreBot);
 
             jda = jdaBuilder.build();
             jda.awaitReady();
