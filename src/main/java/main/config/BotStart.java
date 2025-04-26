@@ -70,7 +70,6 @@ public class BotStart {
     public void startBot() {
         try {
             CoreBot coreBot = new CoreBot(updateController);
-            coreBot.init();
 
             //Устанавливаем языки
             setLanguages();

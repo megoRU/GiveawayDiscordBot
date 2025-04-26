@@ -1,7 +1,7 @@
 package main.controller;
 
 import lombok.Getter;
-import main.core.CoreBot;
+import main.core.MessageHandler;
 import main.core.events.*;
 import main.model.repository.*;
 import main.service.GiveawayRepositoryService;
@@ -37,11 +37,9 @@ public class UpdateController {
     private final SettingsRepository settingsRepository;
     private final GiveawayRepositoryService giveawayRepositoryService;
 
+    private final static MessageHandler messageHandler = new MessageHandler();
     //LOGGER
     private final static Logger LOGGER = LoggerFactory.getLogger(UpdateController.class.getName());
-
-    //CORE
-    private CoreBot coreBot;
 
     @Autowired
     public UpdateController(ActiveGiveawayRepository activeGiveawayRepository,
@@ -56,10 +54,6 @@ public class UpdateController {
         this.schedulingRepository = schedulingRepository;
         this.settingsRepository = settingsRepository;
         this.giveawayRepositoryService = giveawayRepositoryService;
-    }
-
-    public void registerBot(CoreBot coreBot) {
-        this.coreBot = coreBot;
     }
 
     @Transactional
@@ -195,18 +189,18 @@ public class UpdateController {
     }
 
     public void setView(MessageEmbed messageEmbed, long guildId, long textChannel, long messageId) {
-        coreBot.editMessage(messageEmbed, guildId, textChannel, messageId);
+        messageHandler.editMessage(this, messageEmbed, guildId, textChannel, messageId);
     }
 
     public void setView(JDA jda, String messageContent, Long guildId, Long textChannel) {
-        coreBot.sendMessage(jda, guildId, textChannel, messageContent);
+        messageHandler.sendMessage(jda, guildId, textChannel, messageContent);
     }
 
     public void setView(MessageEmbed embedBuilder, Long guildId, Long textChannel, List<Button> buttons) {
-        coreBot.sendMessage(embedBuilder, guildId, textChannel, buttons);
+        messageHandler.sendMessage(embedBuilder, guildId, textChannel, buttons);
     }
 
     public void setView(JDA jda, String userId, MessageEmbed messageEmbed) {
-        coreBot.sendMessage(jda, userId, messageEmbed);
+        messageHandler.sendMessage(jda, userId, messageEmbed);
     }
 }
