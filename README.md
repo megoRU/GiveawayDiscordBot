@@ -1,29 +1,74 @@
 # GiveawayDiscordBot
+
 [![CI/CD](https://github.com/megoRU/GiveawayDiscordBot/actions/workflows/ci_cd.yml/badge.svg?branch=main)](https://github.com/megoRU/GiveawayDiscordBot/actions/workflows/ci_cd.yml)
 [![Discord](https://img.shields.io/discord/779317239722672128?label=Discord)](https://discord.gg/UrWG3R683d)
-[![Docker Pulls](https://badgen.net/docker/pulls/megoru/giveaway?icon=docker&label=pulls)](https://hub.docker.com/r/megoru/giveaway)
-[![Docker Image Size](https://badgen.net/docker/size/megoru/giveaway?icon=docker&label=image%20size)](https://hub.docker.com/r/megoru/giveaway)
+[![Docker Pulls](https://badgen.net/docker/pulls/megoru/giveaway?icon=docker\&label=pulls)](https://hub.docker.com/r/megoru/giveaway)
+[![Docker Image Size](https://badgen.net/docker/size/megoru/giveaway?icon=docker\&label=image%20size)](https://hub.docker.com/r/megoru/giveaway)
 
-## LICENSE
+A Discord bot for managing giveaways with ease.
 
-This work is licensed under a [GNU GPL v3](https://www.gnu.org/licenses/gpl-3.0.en.html)
+---
 
-## Running on your server
+## ✨ Features
 
-1. Move `docker-compose.yml` at the root `/root` VPS server.
-2. Fill it with your data.
-3. Import tables to your MariaDB: `DiscordBotGiveaway.sql`
-4. Launch the container: `docker-compose up -d`
-5. If you need to update the repository: `docker-compose pull`
-6. If you need to stop: `docker-compose stop`
+* Create and manage giveaways via slash commands
+* Predefined giveaways
+* Scheduling giveaways
+* Persistent storage with MariaDB
+* Docker-ready for quick deployment
+* Built with JDA and Spring Boot
 
-## Add bot to your guild
-[Add Giveaway](https://discord.com/oauth2/authorize?client_id=808277484524011531)
+---
 
-## Copyright Notice
+## 🚀 Quick Start
 
-1.  The bot is made using the library: [JDA](https://github.com/DV8FromTheWorld/JDA)
+### Add the bot to your server
 
-## Privacy Policy
+[Click here to invite](https://discord.com/oauth2/authorize?client_id=808277484524011531)
 
-Here you can read more about what we store and how we store it. [Privacy Policy](https://github.com/megoRU/GiveawayDiscordBot/tree/main/.github/privacy.md)
+### Run with Docker
+
+1. Place `docker-compose.yml` on your VPS (`/root` or another directory).
+2. Configure it with your values (tokens, DB credentials, etc.).
+3. Import `DiscordBotGiveaway.sql` into your MariaDB instance.
+4. Start the container:
+
+```bash
+docker-compose up -d
+```
+
+5. Update to the latest image:
+
+```bash
+docker-compose pull && docker-compose up -d
+```
+
+6. Stop the bot:
+
+```bash
+docker-compose stop
+```
+
+---
+
+## 🛠 Tech Stack
+
+* Java 20
+* Spring Boot
+* Hibernate
+* MariaDB
+* Docker
+* Maven
+* [JDA](https://github.com/DV8FromTheWorld/JDA)
+
+---
+
+## 📄 License
+
+This project is licensed under the [GNU GPL v3](https://www.gnu.org/licenses/gpl-3.0.en.html).
+
+---
+
+## 🔒 Privacy
+
+Details on data handling are available in the [Privacy Policy](https://github.com/megoRU/GiveawayDiscordBot/tree/main/.github/privacy.md).
