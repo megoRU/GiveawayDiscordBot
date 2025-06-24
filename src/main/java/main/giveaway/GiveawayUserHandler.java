@@ -27,7 +27,6 @@ public class GiveawayUserHandler {
 
         GiveawayData giveawayData = giveaway.getGiveawayData();
 
-
         if (!removed && !user.isEmpty()) {
             ActiveGiveaways activeGiveaways = giveawayRepositoryService.getGiveaway(messageId);
             if (activeGiveaways == null) return;
