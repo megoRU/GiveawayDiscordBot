@@ -16,8 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Stream;
 
 @AllArgsConstructor
@@ -62,10 +62,7 @@ public class GiveawayEnds {
         GiveawayUpdateListUser giveawayUpdateListUser = new GiveawayUpdateListUser(giveawayRepositoryService);
         giveawayUpdateListUser.updateGiveawayByGuild(giveaway);
 
-        Collection<Long> values = giveawayData.getParticipantsList().values().stream()
-                .map(Long::valueOf)
-                .toList();
-
+        Set<Long> values = giveawayData.getParticipantsList();
         List<Long> participants = Stream.concat(values.stream(), giveawayRepositoryService.findAllParticipants(messageId)
                         .stream()
                         .map(Participants::getUserId))

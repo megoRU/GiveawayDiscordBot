@@ -6,6 +6,7 @@ import main.core.events.ReactionEvent;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayData;
 import main.giveaway.GiveawayRegistry;
+import main.giveaway.ParticipantDTO;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -61,7 +62,7 @@ public class GiveawayUpdateListUser {
                                             .complete(true)
                                             .stream()
                                             .filter(user -> !user.isBot())
-                                            .filter(user -> !giveawayData.participantContains(user.getId()))
+                                            .filter(user -> !giveawayData.participantContains(user.getIdLong()))
                                             .collect(Collectors.toMap(User::getId, user -> user));
 
                                     if (isForSpecificRole) {
@@ -96,7 +97,11 @@ public class GiveawayUpdateListUser {
 
                                     //Перебираем Users в реакциях
                                     if (instance.hasGiveaway(messageId)) {
-                                        giveaway.addUser(userList.values().stream().toList());
+                                        List<ParticipantDTO> participantDTOList = userList.values().stream()
+                                                .map(user -> new ParticipantDTO(user.getIdLong(), user.getName()))
+                                                .toList();
+
+                                        giveaway.addUser(participantDTOList);
                                     }
                                 }
                             }

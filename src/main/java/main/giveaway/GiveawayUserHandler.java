@@ -20,7 +20,7 @@ public class GiveawayUserHandler {
     private final GiveawayRepositoryService giveawayRepositoryService;
 
     @Transactional
-    public void saveUser(Giveaway giveaway, List<User> user) {
+    public void saveUser(Giveaway giveaway, List<ParticipantDTO> user) {
         long messageId = giveaway.getGiveawayData().getMessageId();
         long guildId = giveaway.getGuildId();
         boolean removed = giveaway.isRemoved();
@@ -32,16 +32,19 @@ public class GiveawayUserHandler {
             if (activeGiveaways == null) return;
 
             List<Participants> participantsList = new ArrayList<>(user.size() + 1);
-            for (User users : user) {
-                LOGGER.info("Nick: {} UserID: {} Guild: {} MessageId {}", users.getName(), users.getId(), guildId, messageId);
+            for (ParticipantDTO users : user) {
+                String nickname = users.getNickname();
+                long userId = users.getUserId();
+
+                LOGGER.info("Nick: {} UserID: {} Guild: {} MessageId {}", nickname, userId, guildId, messageId);
 
                 Participants participants = new Participants();
-                participants.setUserId(users.getIdLong());
-                participants.setNickName(users.getName());
+                participants.setUserId(userId);
+                participants.setNickName(nickname);
                 participants.setActiveGiveaways(activeGiveaways);
 
                 participantsList.add(participants);
-                giveawayData.addParticipant(users.getId());
+                giveawayData.addParticipant(userId);
             }
             giveawayRepositoryService.saveParticipants(participantsList);
         }
@@ -53,7 +56,7 @@ public class GiveawayUserHandler {
 
         if (!removed) {
             giveawayData.addUserToQueue(user);
-            giveawayData.addParticipant(user.getId());
+            giveawayData.addParticipant(user.getIdLong());
         }
     }
 }

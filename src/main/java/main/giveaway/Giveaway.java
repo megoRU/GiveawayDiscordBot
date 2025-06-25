@@ -161,7 +161,7 @@ public class Giveaway {
         giveawayRepositoryService.saveGiveaway(activeGiveaways);
     }
 
-    public synchronized void addUser(List<User> user) {
+    public synchronized void addUser(List<ParticipantDTO> user) {
         GiveawayUserHandler giveawayUserHandler = new GiveawayUserHandler(giveawayRepositoryService);
         giveawayUserHandler.saveUser(this, user);
     }

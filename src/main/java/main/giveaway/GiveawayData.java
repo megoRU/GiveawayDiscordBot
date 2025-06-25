@@ -8,8 +8,8 @@ import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.Timestamp;
-import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -19,8 +19,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 @NoArgsConstructor
 public class GiveawayData {
 
-    private final ConcurrentHashMap<String, String> participantsList = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<Long, ConcurrentLinkedQueue<User>> queueConcurrentHashMap = new ConcurrentHashMap<>();
+    private final Set<Long> participantsList = ConcurrentHashMap.newKeySet();
+    //messageId
+    private final ConcurrentHashMap<Long, ConcurrentLinkedQueue<ParticipantDTO>> queueConcurrentHashMap = new ConcurrentHashMap<>();
     private long messageId;
     private int countWinners;
     private Long roleId;
@@ -49,35 +50,39 @@ public class GiveawayData {
     }
 
     public void addUserToQueue(User user) {
-        ConcurrentLinkedQueue<User> users = queueConcurrentHashMap.get(messageId);
+        String name = user.getName();
+        long userIdLong = user.getIdLong();
+        ParticipantDTO participantDTO = new ParticipantDTO(userIdLong, name);
+
+        ConcurrentLinkedQueue<ParticipantDTO> users = queueConcurrentHashMap.get(messageId);
         if (users == null) {
             users = new ConcurrentLinkedQueue<>();
-            users.add(user);
+            users.add(participantDTO);
         } else {
-            users.add(user);
+            users.add(participantDTO);
         }
         queueConcurrentHashMap.put(messageId, users);
     }
 
     @Nullable
-    public ConcurrentLinkedQueue<User> getCollectionQueue() {
+    public ConcurrentLinkedQueue<ParticipantDTO> getCollectionQueue() {
         return queueConcurrentHashMap.get(messageId);
     }
 
-    public boolean participantContains(String user) {
-        return participantsList.containsKey(user);
+    public boolean participantContains(Long user) {
+        return participantsList.contains(user);
     }
 
     public int getParticipantSize() {
         return participantsList.size();
     }
 
-    public void addParticipant(String userId) {
-        participantsList.put(userId, userId);
+    public void addParticipant(Long userId) {
+        participantsList.add(userId);
     }
 
-    public void setParticipantsList(Map<String, String> participantsMap) {
-        participantsMap.forEach((userId, user) -> participantsList.put(userId, userId));
+    public void setParticipantsList(Set<Long> participantsMap) {
+        participantsList.addAll(participantsMap);
     }
 
     public void setMinParticipants(int minParticipants) {

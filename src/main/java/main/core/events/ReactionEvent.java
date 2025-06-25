@@ -39,7 +39,7 @@ public class ReactionEvent {
 
             if (giveaway != null) {
                 GiveawayData giveawayData = giveaway.getGiveawayData();
-                if (giveawayData.participantContains(user.getId())) return;
+                if (giveawayData.participantContains(user.getIdLong())) return;
                 if (emoji.equals(TADA)) {
                     //Проверяем event id message с Giveaway message id
                     long messageIdWithReaction = giveawayData.getMessageId();

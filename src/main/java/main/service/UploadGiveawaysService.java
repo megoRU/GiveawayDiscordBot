@@ -13,7 +13,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -43,14 +47,12 @@ public class UploadGiveawaysService {
                 Integer min_participants = activeGiveaways.getMinParticipants();
                 boolean finishGiveaway = activeGiveaways.isFinish();
 
-                Map<String, String> participantsMap = new HashMap<>();
-                Set<Participants> participantsList = activeGiveaways.getParticipants();
+                Set<Long> participantsList = activeGiveaways.getParticipants()
+                        .stream()
+                        .map(Participants::getUserId)
+                        .collect(Collectors.toSet());
 
-                participantsList.forEach(participants -> {
-                            String userIdAsString = participants.getUserIdAsString();
-                            participantsMap.put(userIdAsString, userIdAsString);
-                        }
-                );
+                System.out.println(Arrays.toString(participantsList.toArray()));
 
                 GiveawayData giveawayData = new GiveawayData(
                         message_id_long,
@@ -62,7 +64,7 @@ public class UploadGiveawaysService {
                         date_end_giveaway,
                         min_participants == null ? 1 : min_participants);
 
-                giveawayData.setParticipantsList(participantsMap);
+                giveawayData.setParticipantsList(participantsList);
 
                 Giveaway giveaway = new Giveaway(guild_long_id,
                         channel_long_id,

@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -50,7 +51,7 @@ public class ParticipantsDownloadButton {
 
             if (giveaway != null) {
                 GiveawayData giveawayData = giveaway.getGiveawayData();
-                List<Long> participantsList = giveawayData.getParticipantsList().values().stream().map(Long::valueOf).toList();
+                Set<Long> participantsList = giveawayData.getParticipantsList();
                 long creatorUserId = giveaway.getUserIdLong();
 
                 if (userIdLong != creatorUserId) {

@@ -1,10 +1,7 @@
 package main.service;
 
 import lombok.AllArgsConstructor;
-import main.giveaway.Giveaway;
-import main.giveaway.GiveawayData;
-import main.giveaway.GiveawayRegistry;
-import main.giveaway.GiveawayUserHandler;
+import main.giveaway.*;
 import net.dv8tion.jda.api.entities.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +28,10 @@ public class SaveUsersService {
         giveawayCollection.forEach(giveaway -> {
             try {
                 GiveawayData giveawayData = giveaway.getGiveawayData();
-                ConcurrentLinkedQueue<User> collectionQueue = giveawayData.getCollectionQueue();
+                ConcurrentLinkedQueue<ParticipantDTO> collectionQueue = giveawayData.getCollectionQueue();
 
                 if (collectionQueue != null && !collectionQueue.isEmpty()) {
-                    List<User> userList = new ArrayList<>();
+                    List<ParticipantDTO> userList = new ArrayList<>();
 
                     for (int i = 0; i < collectionQueue.size(); i++) {
                         userList.add(collectionQueue.poll());

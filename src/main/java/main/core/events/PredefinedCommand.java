@@ -4,11 +4,11 @@ import main.controller.UpdateController;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
 import main.giveaway.GiveawayUtils;
+import main.giveaway.ParticipantDTO;
 import main.jsonparser.JSONParsers;
 import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -120,16 +120,20 @@ public class PredefinedCommand {
                     }
 
                     if (role.getIdLong() == guildIdLong) {
-                        List<User> userList = members.stream()
+                        List<ParticipantDTO> userList = members.stream()
                                 .map(Member::getUser)
-                                .filter(user -> !user.isBot()).toList();
+                                .filter(user -> !user.isBot())
+                                .map(user -> new ParticipantDTO(user.getIdLong(), user.getName()))
+                                .toList();
 
                         giveaway.addUser(userList);
                     } else {
-                        List<User> userList = members.stream()
+                        List<ParticipantDTO> userList = members.stream()
                                 .filter(member -> member.getRoles().contains(role))
                                 .map(Member::getUser)
-                                .filter(user -> !user.isBot()).toList();
+                                .filter(user -> !user.isBot())
+                                .map(user -> new ParticipantDTO(user.getIdLong(), user.getName()))
+                                .toList();
 
                         giveaway.addUser(userList);
                     }
