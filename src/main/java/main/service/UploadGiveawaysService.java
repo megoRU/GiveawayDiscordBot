@@ -52,8 +52,6 @@ public class UploadGiveawaysService {
                         .map(Participants::getUserId)
                         .collect(Collectors.toSet());
 
-                System.out.println(Arrays.toString(participantsList.toArray()));
-
                 GiveawayData giveawayData = new GiveawayData(
                         message_id_long,
                         count_winners,
