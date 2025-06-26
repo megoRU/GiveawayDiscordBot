@@ -26,7 +26,6 @@ public class UploadGiveawaysService {
 
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final GiveawayRepositoryService giveawayRepositoryService;
-    private final GiveawayUpdateListUser updateGiveawayByGuild;
 
     public void uploadGiveaways(UpdateController updateController) {
         List<ActiveGiveaways> activeGiveawaysList = activeGiveawayRepository.findAll();
@@ -75,13 +74,12 @@ public class UploadGiveawaysService {
                 GiveawayRegistry instance = GiveawayRegistry.getInstance();
                 instance.putGift(message_id_long, giveaway);
 
-                updateGiveawayByGuild.updateGiveawayByGuild(giveaway);
+                //Снимаем блокировку
                 giveaway.setLocked(false);
 
                 if (finishGiveaway) {
                     giveaway.stopGiveaway(count_winners);
                 }
-                Thread.sleep(500);
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
             }

@@ -96,10 +96,6 @@ public class CancelCommand {
     }
 
     private void removeActiveGiveaway(@NotNull Giveaway giveaway) {
-        long messageId = giveaway.getGiveawayData().getMessageId();
-        instance.removeGiveaway(messageId);
-
-        activeGiveawayRepository.deleteByMessageId(messageId);
         giveaway.cancelGiveaway();
     }
 }

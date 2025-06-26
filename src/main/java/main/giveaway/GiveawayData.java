@@ -48,7 +48,6 @@ public class GiveawayData {
         this.urlImage = urlImage;
         this.title = title;
         if (endGiveawayDate == null) endGiveawayDate = Timestamp.from(Instant.now().plus(30, ChronoUnit.DAYS));
-        System.out.println(endGiveawayDate);
         this.endGiveawayDate = endGiveawayDate;
         this.minParticipants = minParticipants;
     }
