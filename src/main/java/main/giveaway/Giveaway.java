@@ -18,6 +18,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class Giveaway {
@@ -84,8 +85,10 @@ public class Giveaway {
         this.giveawayRepositoryService = giveawayRepositoryService;
     }
 
-    public void updateTime(final String time) {
-        if (time == null) return;
+    public void updateTime(String time) {
+        if (time == null) {
+            time = LocalDateTime.now().plusDays(30).format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm"));
+        }
         ZoneOffset offset = ZoneOffset.UTC;
         LocalDateTime localDateTime;
 
@@ -100,7 +103,7 @@ public class Giveaway {
         giveawayData.setEndGiveawayDate(new Timestamp(toEpochSecond * 1000));
     }
 
-    //TODO: Возможно добавлять в колекцию тут
+    //TODO: Возможно добавлять в коллекцию тут
     public void startGiveaway(GuildMessageChannel textChannel,
                               String title,
                               int countWinners,

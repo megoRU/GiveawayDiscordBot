@@ -15,6 +15,9 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -85,13 +88,15 @@ public class SchedulingCommand {
             }
             String salt = GiveawayUtils.getSalt(20);
 
+            Timestamp oneMoths = Timestamp.from(Instant.now().plus(30, ChronoUnit.DAYS));
+
             Scheduling scheduling = new Scheduling();
             scheduling.setIdSalt(salt);
             scheduling.setGuildId(guildId);
             scheduling.setChannelId(textChannel.getIdLong());
             scheduling.setCountWinners(winners);
             scheduling.setDateCreateGiveaway(timeProcessor(startTime));
-            scheduling.setDateEnd(timeProcessor(endTime) == null ? null : timeProcessor(endTime));
+            scheduling.setDateEnd(timeProcessor(endTime) == null ? oneMoths : timeProcessor(endTime));
             scheduling.setTitle(title);
             scheduling.setRoleId(role);
             scheduling.setIsForSpecificRole(isOnlyForSpecificRole);

@@ -8,6 +8,8 @@ import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,6 +47,8 @@ public class GiveawayData {
         this.isForSpecificRole = Optional.ofNullable(isForSpecificRole).orElse(false);
         this.urlImage = urlImage;
         this.title = title;
+        if (endGiveawayDate == null) endGiveawayDate = Timestamp.from(Instant.now().plus(30, ChronoUnit.DAYS));
+        System.out.println(endGiveawayDate);
         this.endGiveawayDate = endGiveawayDate;
         this.minParticipants = minParticipants;
     }
