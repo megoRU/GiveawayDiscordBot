@@ -160,6 +160,7 @@ public class BotStart {
         }
     }
 
+    @Deprecated(forRemoval = true)
     @Scheduled(fixedDelay = 150, initialDelay = 25, timeUnit = TimeUnit.SECONDS)
     public void updateUserList() {
         List<Giveaway> giveawayDataList = new LinkedList<>(instance.getAllGiveaway());
