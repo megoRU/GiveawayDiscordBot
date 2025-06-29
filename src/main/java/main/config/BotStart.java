@@ -12,7 +12,10 @@ import main.model.entity.Scheduling;
 import main.model.entity.Settings;
 import main.model.repository.SchedulingRepository;
 import main.model.repository.SettingsRepository;
-import main.service.*;
+import main.service.SaveUsersService;
+import main.service.ScheduleStartService;
+import main.service.SlashService;
+import main.service.UploadGiveawaysService;
 import main.threads.StopGiveawayHandler;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -57,8 +60,6 @@ public class BotStart {
     private final UpdateController updateController;
     private final SchedulingRepository schedulingRepository;
     private final SettingsRepository settingsRepository;
-
-    private final GiveawayUpdateListUser updateGiveawayByGuild;
 
     //Service
     private final SlashService slashService;
@@ -154,20 +155,6 @@ public class BotStart {
         for (Giveaway giveaway : giveawayDataList) {
             try {
                 stopGiveawayHandler.handleGiveaway(giveaway);
-            } catch (Exception e) {
-                LOGGER.error(e.getMessage(), e);
-            }
-        }
-    }
-
-    @Deprecated(forRemoval = true)
-    @Scheduled(fixedDelay = 150, initialDelay = 25, timeUnit = TimeUnit.SECONDS)
-    public void updateUserList() {
-        List<Giveaway> giveawayDataList = new LinkedList<>(instance.getAllGiveaway());
-        for (Giveaway giveaway : giveawayDataList) {
-            try {
-                updateGiveawayByGuild.updateGiveawayByGuild(giveaway);
-                Thread.sleep(1000);
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
             }
