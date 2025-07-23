@@ -81,7 +81,17 @@ public class UploadGiveawaysService {
                     giveaway.stopGiveaway(count_winners);
                 }
             } catch (Exception e) {
-                LOGGER.error(e.getMessage(), e);
+                String message = e.getMessage();
+                if (message.contains("10008: Unknown Message")
+                        || message.contains("Missing permission: MESSAGE_SEND")
+                        || message.contains("Missing permission: VIEW_CHANNEL")) {
+                    LOGGER.info("Delete Giveaway {}", activeGiveaways.getMessageId());
+                    updateController.getGiveawayRepositoryService().deleteGiveaway(activeGiveaways.getMessageId());
+                    GiveawayRegistry instance = GiveawayRegistry.getInstance();
+                    instance.removeGiveaway(activeGiveaways.getMessageId());
+                } else {
+                    LOGGER.error(e.getMessage(), e);
+                }
             }
         }
         System.out.println("uploadGiveaways()");
