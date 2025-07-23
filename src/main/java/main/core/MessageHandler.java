@@ -30,7 +30,9 @@ public class MessageHandler {
                         .editMessageEmbedsById(messageId, embedBuilder)
                         .queue(null, throwable -> {
                             String message = throwable.getMessage();
-                            if (message.contains("10008: Unknown Message") || message.contains("Missing permission: VIEW_CHANNEL")) {
+                            if (message.contains("10008: Unknown Message")
+                                    || message.contains("Missing permission: MESSAGE_SEND")
+                                    || message.contains("Missing permission: VIEW_CHANNEL")) {
                                 LOGGER.info("Delete Giveaway {}", messageId);
                                 updateController.getGiveawayRepositoryService().deleteGiveaway(messageId);
                                 GiveawayRegistry instance = GiveawayRegistry.getInstance();
