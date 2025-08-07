@@ -71,21 +71,21 @@ public class SlashService {
             //Scheduling Giveaway
             List<OptionData> optionsScheduling = new ArrayList<>();
 
-            optionsScheduling.add(new OptionData(STRING, "start-time", "Set start time in UTC ±0 form. Example usage: 2023.04.29 17:00")
+            optionsScheduling.add(new OptionData(STRING, "start-time", "Set start time in UTC ±0 form. Example usage: 29.04.2025 17:00")
                     .setName("start-time")
                     .setRequired(true)
                     .setNameLocalization(DiscordLocale.RUSSIAN, "время-начала")
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить время начала в формате UTC ±0. Пример использования: 2023.04.29 17:00"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить время начала в формате UTC ±0. Пример использования: 29.04.2025 17:00"));
 
             optionsScheduling.add(new OptionData(CHANNEL, "channel", "Установить канал для Giveaway. По умолчанию канал в котором была запущена команда")
                     .setName("text-channel")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "текстовый-канал")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "По умолчанию текстовый канал, в котором была выполнена команда."));
 
-            optionsScheduling.add(new OptionData(STRING, "end-time", "Set end time in UTC ±0 form. Example usage: 2023.04.29 17:00")
+            optionsScheduling.add(new OptionData(STRING, "end-time", "Set end time in UTC ±0 form. Example usage: 29.04.2025 17:00")
                     .setName("end-time")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "время-окончания")
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Укажите время окончания в формате UTC ±0. Пример использования: 2023.04.29 17:00"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Укажите время окончания в формате UTC ±0. Пример использования: 29.04.2025 17:00"));
 
             optionsScheduling.add(new OptionData(STRING, "title", "Title for Giveaway")
                     .setName("title")
@@ -137,10 +137,10 @@ public class SlashService {
                     .setNameLocalization(DiscordLocale.RUSSIAN, "победителей")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить количество победителей. По умолчанию 1"));
 
-            optionsStart.add(new OptionData(STRING, "duration", "Set the duration. Examples: 5s, 20m, 10h, 1d. Or: 2021.11.16 16:00. UTC ±0")
+            optionsStart.add(new OptionData(STRING, "duration", "Set the duration. Examples: 5s, 20m, 10h, 1d. Or: 29.04.2025 17:00. UTC ±0")
                     .setName("duration")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "продолжительность")
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить продолжительность. Примеры: 5s, 20m, 10h, 1d. Или: 2021.11.16 16:00. UTC ±0"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить продолжительность. Примеры: 5s, 20m, 10h, 1d. Или: 29.04.2025 17:00. UTC ±0"));
 
             optionsStart.add(new OptionData(ROLE, "mention", "Mentioning a specific @Role")
                     .setName("mention")
@@ -199,10 +199,10 @@ public class SlashService {
             //giveaway-edit
             List<OptionData> giveawayEditData = new ArrayList<>();
 
-            giveawayEditData.add(new OptionData(STRING, "duration", "Examples: 5s, 20m, 10h, 1d. Or: 2021.11.16 16:00. Only in this style and UTC ±0")
+            giveawayEditData.add(new OptionData(STRING, "duration", "Examples: 5s, 20m, 10h, 1d. Or: 29.04.2025 17:00. Only in this style and UTC ±0")
                     .setName("duration")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "продолжительность")
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: 5s, 20m, 10h, 1d. Или: 2021.11.16 16:00. Только в этом стиле и UTC ±0"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: 5s, 20m, 10h, 1d. Или: 29.04.2025 17:00. Только в этом стиле и UTC ±0"));
 
             giveawayEditData.add(new OptionData(INTEGER, "winners", "Set number of winners")
                     .setName("winners")

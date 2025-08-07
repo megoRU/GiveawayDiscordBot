@@ -87,7 +87,7 @@ public class Giveaway {
 
     public void updateTime(String time) {
         if (time == null) {
-            time = LocalDateTime.now().plusDays(30).format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm"));
+            time = LocalDateTime.now().plusDays(30).format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
         }
         ZoneOffset offset = ZoneOffset.UTC;
         LocalDateTime localDateTime;

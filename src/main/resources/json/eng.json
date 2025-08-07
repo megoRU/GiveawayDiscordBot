@@ -32,7 +32,7 @@
   "start_in_thread": "Bot does not work in threads!",
   "start_in_not_text_channels": "Giveaways can only be created in text channels!",
   "start_wrong_time": "Invalid time: `%s`\n %s",
-  "start_examples": "Time must be in one of these formats: `1h` | `1d` | `20m` | `30s` | `1h 30m 15s` | `2022.08.18 13:48`",
+  "start_examples": "Time must be in one of these formats: `1h` | `1d` | `20m` | `30s` | `1h 30m 15s` | `29.04.2025 17:00`",
   "wrong_date": "Invalid date",
   "no_access_reroll": "You likely do not have access or the Giveaway ID is incorrect.",
   "gift_ends_giveaway": "\nEnds: <t:%s:R> (<t:%s:f>)",

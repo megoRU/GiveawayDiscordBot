@@ -21,9 +21,16 @@ import static com.aventrix.jnanoid.jnanoid.NanoIdUtils.DEFAULT_NUMBER_GENERATOR;
 
 public class GiveawayUtils {
 
-    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
-    public static final String ISO_TIME_REGEX = "^\\d{4}.\\d{2}.\\d{2}\\s\\d{2}:\\d{2}$"; //2021.11.16 16:00
-    public static final String TIME_REGEX = "(\\d{4}.\\d{2}.\\d{2}\\s\\d{2}:\\d{2})|(\\d{1,2}[smhdсмдч]|\\s)+";
+    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+    // пример: 29.04.2025 15:00
+    public static final String ISO_TIME_REGEX = "^\\d{2}\\.\\d{2}\\.\\d{4}\\s\\d{2}:\\d{2}$";
+
+    //Что поддерживает:
+    //Дата/время в русском формате: 07.08.2025 15:00
+    //Интервалы: 5м, 10с, 2ч, 1д, 10m 2h, 5с 1м, и т.п.
+    //Поддерживает как кириллицу, так и латиницу для единиц измерения.
+    public static final String TIME_REGEX = "^(\\d{2}\\.\\d{2}\\.\\d{4}\\s\\d{2}:\\d{2})|((\\d{1,2}([смчдsmhd]))\\s*)+$";
+
     public static final JSONParsers jsonParsers = new JSONParsers();
     public static final char[] DEFAULT_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray();
 

@@ -32,7 +32,7 @@
   "start_in_thread": "Бот не работает в Thread!",
   "start_in_not_text_channels": "Можно создавать Giveaway только в TextChannels!",
   "start_wrong_time": "Вы неправильно задали время: `%s`\n %s",
-  "start_examples": "Должно быть что-то одно из: \n`1h`\n`1d`\n`20m`\n`30s`\n`1h 30m 15s`\n`2022.08.18 13:48`",
+  "start_examples": "Должно быть что-то одно из: \n`1h`\n`1d`\n`20m`\n`30s`\n`1h 30m 15s`\n`29.04.2025 17:00`",
   "wrong_date": "Неверная дата",
   "no_access_reroll": "Скорее всего у вас нет доступа либо Giveaway ID неверный",
   "gift_ends_giveaway": "\nЗакончится: <t:%s:R> (<t:%s:f>)",
