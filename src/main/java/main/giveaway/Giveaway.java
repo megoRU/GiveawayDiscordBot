@@ -90,15 +90,20 @@ public class Giveaway {
             time = LocalDateTime.now().plusDays(30).format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
         }
 
+        String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
+        ZoneOffset userOffset = ZoneOffset.of(zonesIdByUser);
+
         LocalDateTime localDateTime;
         if (time.matches(GiveawayUtils.ISO_TIME_REGEX)) {
             localDateTime = LocalDateTime.parse(time, GiveawayUtils.FORMATTER);
         } else {
             long seconds = GiveawayUtils.getSeconds(time);
-            localDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).plusSeconds(seconds);
+            localDateTime = LocalDateTime.now().plusSeconds(seconds);
         }
 
-        giveawayData.setEndGiveawayDate(Timestamp.valueOf(localDateTime));
+        OffsetDateTime odt = localDateTime.atOffset(userOffset);
+        Instant utcInstant = odt.toInstant();
+        giveawayData.setEndGiveawayDate(Timestamp.from(utcInstant));
     }
 
     //TODO: Возможно добавлять в коллекцию тут

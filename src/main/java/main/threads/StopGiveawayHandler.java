@@ -49,8 +49,14 @@ public final class StopGiveawayHandler {
         System.out.println("endLocalDateTime2: " + endLocalDateTime2);
         System.out.println("endGiveawayDate: " + endGiveawayDate);
 
-        // localTime должен быть тоже в UTC
-        return localTime.toInstant().atZone(zoneOffset).toInstant().isAfter(endGiveawayDate);
+
+        Instant endInstant = giveaway.getGiveawayData().getEndGiveawayDate().toInstant();
+        System.out.println();
+
+        System.out.println("Instant.now(): " + Instant.now());
+        System.out.println("endInstant: " + endInstant);
+
+        return Instant.now().isAfter(endInstant);
     }
 
     private void logError(Exception e) {
