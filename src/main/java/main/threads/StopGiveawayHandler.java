@@ -50,13 +50,13 @@ public final class StopGiveawayHandler {
         System.out.println("endGiveawayDate: " + endGiveawayDate);
 
 
-        Instant endInstant = giveaway.getGiveawayData().getEndGiveawayDate().toInstant().atOffset(zoneOffset).toInstant();
+        Instant endInstant = giveaway.getGiveawayData().getEndGiveawayDate().toInstant().atZone(zoneOffset).toInstant();
         System.out.println();
 
-        System.out.println("Instant.now(): " + Instant.now().atOffset(zoneOffset).toInstant());
+        System.out.println("Instant.now(): " + Instant.now().atZone(zoneOffset).toInstant());
         System.out.println("endInstant: " + endInstant);
 
-        return Instant.now().atOffset(zoneOffset).toInstant().isAfter(endInstant);
+        return Instant.now().atZone(zoneOffset).toInstant().isAfter(endInstant);
     }
 
     private void logError(Exception e) {
