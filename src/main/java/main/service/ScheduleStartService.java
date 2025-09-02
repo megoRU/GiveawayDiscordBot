@@ -17,7 +17,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -68,7 +71,10 @@ public class ScheduleStartService {
                             String formattedDate = null;
                             if (scheduling.getDateEnd() != null) {
                                 //TODO: ZoneOffset
-                                LocalDateTime dateEndGiveaway = LocalDateTime.ofInstant(scheduling.getDateEnd().toInstant(), ZoneOffset.UTC);
+                                Instant endInstant = scheduling.getDateEnd().toInstant();
+                                // Переводим в LocalDateTime пользователя
+                                LocalDateTime dateEndGiveaway = endInstant.atOffset(offset).toLocalDateTime();
+                                // Форматируем
                                 formattedDate = dateEndGiveaway.format(GiveawayUtils.FORMATTER);
                             }
 
