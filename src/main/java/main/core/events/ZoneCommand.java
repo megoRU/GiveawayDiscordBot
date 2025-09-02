@@ -32,8 +32,6 @@ public class ZoneCommand {
                 zone = sign + String.format("%02d", number);
             }
 
-            System.out.println(zone);
-
             UserZoneId userZoneId = userZoneIdRepository.findByUserId(userId);
             if (userZoneId == null) {
                 userZoneId = new UserZoneId();
