@@ -80,6 +80,7 @@ public class BotStart {
             //Устанавливаем языки
             setLanguages();
             getLocalizationFromDB();
+            getUserZoneIdFromDB();
 
             List<GatewayIntent> intents = Arrays.asList(
                     GatewayIntent.GUILD_MEMBERS,
@@ -236,6 +237,6 @@ public class BotStart {
 
     public static String getZonesIdByUser(long userId) {
         String zoneId = mapZonesId.get(userId);
-        return Objects.requireNonNullElse(zoneId, "UTC+0");
+        return Objects.requireNonNullElse(zoneId, "UTC+00");
     }
 }

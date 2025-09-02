@@ -36,12 +36,13 @@ public final class StopGiveawayHandler {
         if (giveaway.isFinishGiveaway()) return true;
         long userIdLong = giveaway.getUserIdLong();
         Instant endGiveawayDate = giveaway.getGiveawayData().getEndGiveawayDate().toInstant();
-
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
+        System.out.println(zonesIdByUser.replace("UTC", ""));
         ZoneOffset zoneOffset = ZoneOffset.of(zonesIdByUser.replace("UTC", ""));
 
-        System.out.println(localTime.toInstant().atZone(ZoneId.systemDefault()).toInstant().atOffset(zoneOffset).toLocalDateTime());
-        System.out.println(endGiveawayDate);
+        System.out.println(localTime.toInstant().atOffset(zoneOffset).toLocalDateTime());
+        System.out.println(endGiveawayDate.atOffset(zoneOffset).toLocalDateTime());
+        System.out.println("endGiveawayDate: " + endGiveawayDate);
 
         // localTime должен быть тоже в UTC
         return localTime.toInstant().atZone(ZoneId.systemDefault()).toInstant().atOffset(zoneOffset).toInstant()
