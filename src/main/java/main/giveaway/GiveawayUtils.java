@@ -14,6 +14,7 @@ import java.awt.*;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
@@ -66,12 +67,15 @@ public class GiveawayUtils {
     //TODO: ZoneOffset
     public static Timestamp timeProcessor(String time, long userIdLong) {
         if (time == null) return null;
+
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
-        ZoneOffset offset = ZoneOffset.of(zonesIdByUser);
+        ZoneOffset userOffset = ZoneOffset.of(zonesIdByUser);
 
         LocalDateTime localDateTime = LocalDateTime.parse(time, GiveawayUtils.FORMATTER);
-        long toEpochSecond = localDateTime.toEpochSecond(offset);
-        return new Timestamp(toEpochSecond * 1000);
+
+        OffsetDateTime odt = localDateTime.atOffset(userOffset);
+        Instant utcInstant = odt.toInstant();
+        return Timestamp.from(utcInstant);
     }
 
     public static Color getUserColor(long guildId) {
