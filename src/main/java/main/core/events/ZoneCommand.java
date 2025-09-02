@@ -1,6 +1,7 @@
 package main.core.events;
 
 import lombok.AllArgsConstructor;
+import main.config.BotStart;
 import main.jsonparser.JSONParsers;
 import main.model.entity.UserZoneId;
 import main.model.repository.UserZoneIdRepository;
@@ -40,6 +41,8 @@ public class ZoneCommand {
 
             userZoneId.setZoneId(zone);
             userZoneIdRepository.save(userZoneId);
+
+            BotStart.setTimeZone(userId, zone);
 
             String zoneEdit = String.format(jsonParsers.getLocale("zone_edit", guildId), zoneFinal);
             event.reply(zoneEdit).queue();

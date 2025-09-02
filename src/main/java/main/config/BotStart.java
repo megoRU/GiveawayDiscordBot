@@ -235,6 +235,10 @@ public class BotStart {
         return mapLanguages;
     }
 
+    public static void setTimeZone(long userId, String timeZone) {
+        mapZonesId.put(userId, timeZone);
+    }
+
     public static String getZonesIdByUser(long userId) {
         String zoneId = mapZonesId.get(userId);
 
