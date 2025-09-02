@@ -1,13 +1,15 @@
 package main.giveaway;
 
+import main.config.BotStart;
 import main.jsonparser.JSONParsers;
 import main.service.SlashService;
 import net.dv8tion.jda.api.EmbedBuilder;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
-import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 public class GiveawayEmbedUtils {
 
@@ -16,7 +18,7 @@ public class GiveawayEmbedUtils {
     public static EmbedBuilder giveawayPattern(GiveawayData giveawayData, Giveaway giveaway) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         long guildId = giveaway.getGuildId();
-
+        long userIdLong = giveaway.getUserIdLong();
         Color userColor = GiveawayUtils.getUserColor(guildId);
 
         String title = giveawayData.getTitle();
@@ -27,6 +29,11 @@ public class GiveawayEmbedUtils {
         Long role = giveawayData.getRoleId();
         boolean isForSpecificRole = giveawayData.isForSpecificRole();
         Instant endGiveaway = giveaway.getGiveawayData().getEndGiveawayDate().toInstant();
+
+        String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
+        ZoneOffset userOffset = ZoneOffset.of(zonesIdByUser);
+
+        LocalDateTime userTime = endGiveaway.atOffset(userOffset).toLocalDateTime();
 
         //Title
         embedBuilder.setTitle(title);
@@ -52,10 +59,9 @@ public class GiveawayEmbedUtils {
         }
 
         //EndGiveaway
-        if (endGiveaway != null) {
-            long endTime = endGiveaway.getEpochSecond();
-            String endTimeFormat =
-                    String.format(jsonParsers.getLocale("gift_ends_giveaway", guildId), endTime, endTime);
+        if (userTime != null) {
+            long endTime = userTime.toEpochSecond(userOffset);
+            String endTimeFormat = String.format(jsonParsers.getLocale("gift_ends_giveaway", guildId), endTime, endTime);
             embedBuilder.appendDescription(endTimeFormat);
         }
 

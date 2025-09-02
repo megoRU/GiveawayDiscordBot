@@ -35,8 +35,8 @@ public final class StopGiveawayHandler {
         long userIdLong = giveaway.getUserIdLong();
         Instant endGiveawayDate = giveaway.getGiveawayData().getEndGiveawayDate().toInstant();
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
-        System.out.println(zonesIdByUser.replace("UTC", ""));
-        ZoneOffset zoneOffset = ZoneOffset.of(zonesIdByUser.replace("UTC", ""));
+        System.out.println(zonesIdByUser);
+        ZoneOffset zoneOffset = ZoneOffset.of(zonesIdByUser);
 
         LocalDateTime localDateTime = localTime.toInstant().atOffset(zoneOffset).toLocalDateTime();
 
@@ -50,13 +50,13 @@ public final class StopGiveawayHandler {
         System.out.println("endGiveawayDate: " + endGiveawayDate);
 
 
-        Instant endInstant = giveaway.getGiveawayData().getEndGiveawayDate().toInstant();
+        Instant endInstant = giveaway.getGiveawayData().getEndGiveawayDate().toInstant().atOffset(zoneOffset).toInstant();
         System.out.println();
 
-        System.out.println("Instant.now(): " + Instant.now());
+        System.out.println("Instant.now(): " + Instant.now().atOffset(zoneOffset).toInstant());
         System.out.println("endInstant: " + endInstant);
 
-        return Instant.now().isAfter(endInstant);
+        return Instant.now().atOffset(zoneOffset).toInstant().isAfter(endInstant);
     }
 
     private void logError(Exception e) {
