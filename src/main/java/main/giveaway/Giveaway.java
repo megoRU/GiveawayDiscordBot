@@ -87,7 +87,7 @@ public class Giveaway {
     //TODO: ZoneOffset
     public void updateTime(String time) {
         if (time == null) {
-            time = LocalDateTime.now().plusDays(30).format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+            time = LocalDateTime.now(ZoneOffset.UTC).plusDays(30).format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
         }
 
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
@@ -98,7 +98,7 @@ public class Giveaway {
             localDateTime = LocalDateTime.parse(time, GiveawayUtils.FORMATTER);
         } else {
             long seconds = GiveawayUtils.getSeconds(time);
-            localDateTime = LocalDateTime.now().plusSeconds(seconds);
+            localDateTime = LocalDateTime.ofInstant(Instant.now(), userOffset).plusSeconds(seconds);
         }
 
         OffsetDateTime odt = localDateTime.atOffset(userOffset);
