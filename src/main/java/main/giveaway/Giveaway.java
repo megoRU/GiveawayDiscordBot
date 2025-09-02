@@ -101,7 +101,7 @@ public class Giveaway {
             localDateTime = LocalDateTime.ofInstant(Instant.now(), userOffset).plusSeconds(seconds);
         }
 
-        OffsetDateTime odt = localDateTime.atOffset(userOffset);
+        ZonedDateTime odt = localDateTime.atZone(userOffset);
         Instant utcInstant = odt.toInstant();
         giveawayData.setEndGiveawayDate(Timestamp.from(utcInstant));
     }

@@ -50,7 +50,7 @@ public final class StopGiveawayHandler {
         System.out.println("endGiveawayDate: " + endGiveawayDate);
 
 
-        ZonedDateTime endInstant = giveaway.getGiveawayData().getEndGiveawayDate().toInstant().atZone(zoneOffset);
+        ZonedDateTime endInstant = giveaway.getGiveawayData().getEndGiveawayDate().toLocalDateTime().atZone(zoneOffset);
         System.out.println();
 
         System.out.println("Instant.now(): " + Instant.now().atZone(zoneOffset));
