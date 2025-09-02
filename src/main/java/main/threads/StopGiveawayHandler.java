@@ -6,6 +6,7 @@ import main.giveaway.GiveawayData;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.logging.Level;
@@ -40,14 +41,14 @@ public final class StopGiveawayHandler {
         System.out.println(zonesIdByUser.replace("UTC", ""));
         ZoneOffset zoneOffset = ZoneOffset.of(zonesIdByUser.replace("UTC", ""));
 
-        System.out.println(localTime.toInstant().atOffset(zoneOffset).toLocalDateTime());
-        System.out.println(endGiveawayDate.atOffset(zoneOffset).toLocalDateTime());
+        LocalDateTime localDateTime = localTime.toInstant().atOffset(zoneOffset).toLocalDateTime();
+        LocalDateTime endLocalDateTime = endGiveawayDate.atZone(zoneOffset).toLocalDateTime();
+        System.out.println("localDateTime: " + localDateTime);
+        System.out.println("endLocalDateTime: " + endLocalDateTime);
         System.out.println("endGiveawayDate: " + endGiveawayDate);
 
         // localTime должен быть тоже в UTC
-        return localTime.toInstant().atOffset(zoneOffset).toLocalDateTime()
-
-                .isAfter(endGiveawayDate.atZone(zoneOffset).toLocalDateTime());
+        return localDateTime.isAfter(endLocalDateTime);
     }
 
     private void logError(Exception e) {
