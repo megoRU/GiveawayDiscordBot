@@ -33,7 +33,7 @@ public class GiveawayEmbedUtils {
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
         ZoneOffset userOffset = ZoneOffset.of(zonesIdByUser);
 
-        LocalDateTime userTime = endGiveaway.atOffset(userOffset).toLocalDateTime();
+        LocalDateTime userTime = endGiveaway.atZone(userOffset).toLocalDateTime();
 
         //Title
         embedBuilder.setTitle(title);
