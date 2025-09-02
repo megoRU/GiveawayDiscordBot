@@ -259,6 +259,13 @@ public class SlashService {
                     .setNameLocalization(DiscordLocale.RUSSIAN, "id-розыгрыша")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway ID"));
 
+            List<OptionData> zoneData = new ArrayList<>();
+            zoneData.add(new OptionData(STRING, "time-zone", "Examples: +3, +11, -11")
+                    .setName("zone")
+                    .setNameLocalization(DiscordLocale.RUSSIAN, "часовой-пояс")
+                    .setRequired(true)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: +3, +11, -11"));
+
             /*
              * Команды
              */
@@ -333,6 +340,11 @@ public class SlashService {
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER))
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Отменить Giveaway");
 
+            CommandData zoneCommand = Commands.slash("zone", "Setup time zone")
+                    .addOptions(zoneData)
+                    .setContexts(InteractionContextType.GUILD)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить часовой пояс");
+
             commands.addCommands(
                             listCommand,
                             checkCommand,
@@ -346,7 +358,8 @@ public class SlashService {
                             rerollCommand,
                             giveawayEdit,
                             predefinedCommand,
-                            cancelCommand)
+                            cancelCommand,
+                            zoneCommand)
                     .queue();
 
             jda.retrieveCommands().queue(

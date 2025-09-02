@@ -5,7 +5,6 @@ import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
 import main.jsonparser.JSONParsers;
 import main.model.entity.Scheduling;
-import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.SchedulingRepository;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -19,7 +18,6 @@ import java.util.List;
 public class CancelCommand {
 
     private final SchedulingRepository schedulingRepository;
-    private final ActiveGiveawayRepository activeGiveawayRepository;
     private static final JSONParsers jsonParsers = new JSONParsers();
     private static final GiveawayRegistry instance = GiveawayRegistry.getInstance();
 

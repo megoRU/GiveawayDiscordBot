@@ -36,6 +36,7 @@ public class UpdateController {
     private final SchedulingRepository schedulingRepository;
     private final SettingsRepository settingsRepository;
     private final GiveawayRepositoryService giveawayRepositoryService;
+    private final UserZoneIdRepository userZoneIdRepository;
 
     private final static MessageHandler messageHandler = new MessageHandler();
     //LOGGER
@@ -47,13 +48,15 @@ public class UpdateController {
                             ListUsersRepository listUsersRepository,
                             SchedulingRepository schedulingRepository,
                             SettingsRepository settingsRepository,
-                            GiveawayRepositoryService giveawayRepositoryService) {
+                            GiveawayRepositoryService giveawayRepositoryService,
+                            UserZoneIdRepository userZoneIdRepository) {
         this.activeGiveawayRepository = activeGiveawayRepository;
         this.participantsRepository = participantsRepository;
         this.listUsersRepository = listUsersRepository;
         this.schedulingRepository = schedulingRepository;
         this.settingsRepository = settingsRepository;
         this.giveawayRepositoryService = giveawayRepositoryService;
+        this.userZoneIdRepository = userZoneIdRepository;
     }
 
     @Transactional
@@ -147,8 +150,12 @@ public class UpdateController {
                 participantsCommand.participants(event);
             }
             case "cancel" -> {
-                CancelCommand cancelCommand = new CancelCommand(schedulingRepository, activeGiveawayRepository);
+                CancelCommand cancelCommand = new CancelCommand(schedulingRepository);
                 cancelCommand.cancel(event);
+            }
+            case "zone" -> {
+                ZoneCommand zoneCommand = new ZoneCommand(userZoneIdRepository);
+                zoneCommand.update(event);
             }
             case "check" -> {
                 CheckPermissions checkPermissions = new CheckPermissions();
