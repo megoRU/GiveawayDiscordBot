@@ -241,11 +241,6 @@ public class BotStart {
 
     public static String getZonesIdByUser(long userId) {
         String zoneId = mapZonesId.get(userId);
-
-        if (zoneId != null) {
-            return zoneId.replace("UTC", "");
-        } else {
-            return "+00";
-        }
+        return Objects.requireNonNullElse(zoneId, "+00");
     }
 }
