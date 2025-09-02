@@ -26,7 +26,7 @@ public class GiveawayEmbedUtils {
         String imageUrl = giveawayData.getUrlImage();
         Long role = giveawayData.getRoleId();
         boolean isForSpecificRole = giveawayData.isForSpecificRole();
-        Timestamp endGiveaway = giveawayData.getEndGiveawayDate();
+        Instant endGiveaway = giveaway.getGiveawayData().getEndGiveawayDate().toInstant();
 
         //Title
         embedBuilder.setTitle(title);
@@ -53,7 +53,7 @@ public class GiveawayEmbedUtils {
 
         //EndGiveaway
         if (endGiveaway != null) {
-            long endTime = endGiveaway.getTime() / 1000;
+            long endTime = endGiveaway.getEpochSecond();
             String endTimeFormat =
                     String.format(jsonParsers.getLocale("gift_ends_giveaway", guildId), endTime, endTime);
             embedBuilder.appendDescription(endTimeFormat);

@@ -42,13 +42,17 @@ public final class StopGiveawayHandler {
         ZoneOffset zoneOffset = ZoneOffset.of(zonesIdByUser.replace("UTC", ""));
 
         LocalDateTime localDateTime = localTime.toInstant().atOffset(zoneOffset).toLocalDateTime();
+
         LocalDateTime endLocalDateTime = endGiveawayDate.atZone(zoneOffset).toLocalDateTime();
+        LocalDateTime endLocalDateTime2 = endGiveawayDate.atOffset(zoneOffset).toLocalDateTime();
+
         System.out.println("localDateTime: " + localDateTime);
         System.out.println("endLocalDateTime: " + endLocalDateTime);
+        System.out.println("endLocalDateTime2: " + endLocalDateTime2);
         System.out.println("endGiveawayDate: " + endGiveawayDate);
 
         // localTime должен быть тоже в UTC
-        return localDateTime.isAfter(endLocalDateTime);
+        return localDateTime.isAfter(endLocalDateTime2);
     }
 
     private void logError(Exception e) {
