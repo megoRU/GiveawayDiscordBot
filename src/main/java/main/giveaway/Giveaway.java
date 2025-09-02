@@ -91,17 +91,17 @@ public class Giveaway {
         }
 
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
-        ZoneOffset userOffset = ZoneOffset.of(zonesIdByUser);
+        ZoneId zoneId = ZoneId.of(zonesIdByUser);
 
         LocalDateTime localDateTime;
         if (time.matches(GiveawayUtils.ISO_TIME_REGEX)) {
             localDateTime = LocalDateTime.parse(time, GiveawayUtils.FORMATTER);
         } else {
             long seconds = GiveawayUtils.getSeconds(time);
-            localDateTime = LocalDateTime.ofInstant(Instant.now(), userOffset).plusSeconds(seconds);
+            localDateTime = LocalDateTime.ofInstant(Instant.now(), zoneId).plusSeconds(seconds);
         }
 
-        ZonedDateTime odt = localDateTime.atZone(userOffset);
+        ZonedDateTime odt = localDateTime.atZone(zoneId);
         Instant utcInstant = odt.toInstant();
         giveawayData.setEndGiveawayDate(Timestamp.from(utcInstant));
     }

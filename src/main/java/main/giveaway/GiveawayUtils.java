@@ -12,10 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 
 import static com.aventrix.jnanoid.jnanoid.NanoIdUtils.DEFAULT_NUMBER_GENERATOR;
@@ -69,11 +66,11 @@ public class GiveawayUtils {
         if (time == null) return null;
 
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
-        ZoneOffset userOffset = ZoneOffset.of(zonesIdByUser);
+        ZoneId userOffset = ZoneId.of(zonesIdByUser);
 
         LocalDateTime localDateTime = LocalDateTime.parse(time, GiveawayUtils.FORMATTER);
 
-        OffsetDateTime odt = localDateTime.atOffset(userOffset);
+        ZonedDateTime odt = localDateTime.atZone(userOffset);
         Instant utcInstant = odt.toInstant();
         return Timestamp.from(utcInstant);
     }
@@ -113,10 +110,10 @@ public class GiveawayUtils {
     //TODO: ZoneOffset
     public static boolean isTimeBefore(String time, long userIdLong) {
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
-        ZoneOffset offset = ZoneOffset.of(zonesIdByUser);
+        ZoneId offset = ZoneId.of(zonesIdByUser);
 
         LocalDateTime localDateTime = LocalDateTime.parse(time, FORMATTER);
-        LocalDateTime now = Instant.now().atOffset(offset).toLocalDateTime();
+        LocalDateTime now = Instant.now().atZone(offset).toLocalDateTime();
         return localDateTime.isBefore(now);
     }
 

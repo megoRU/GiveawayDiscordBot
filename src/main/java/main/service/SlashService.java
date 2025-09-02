@@ -260,11 +260,11 @@ public class SlashService {
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway ID"));
 
             List<OptionData> zoneData = new ArrayList<>();
-            zoneData.add(new OptionData(STRING, "time-zone", "Examples: +3, +11, -11")
+            zoneData.add(new OptionData(STRING, "time-zone", "Examples: Europe/London, Europe/Berlin, etc.")
                     .setName("zone")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "часовой-пояс")
                     .setRequired(true)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: +3, +11, -11"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: Europe/Moscow, Europe/Samara, и т. д."));
 
             /*
              * Команды
@@ -340,10 +340,11 @@ public class SlashService {
                     .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER))
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Отменить Giveaway");
 
-            CommandData zoneCommand = Commands.slash("zone", "Setup time zone")
+            //https://webbrowsertools.com/timezone/
+            CommandData zoneCommand = Commands.slash("zone", "Setup time zone. Look: /help")
                     .addOptions(zoneData)
                     .setContexts(InteractionContextType.GUILD)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить часовой пояс");
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить часовой пояс. Смотри: /help");
 
             commands.addCommands(
                             listCommand,

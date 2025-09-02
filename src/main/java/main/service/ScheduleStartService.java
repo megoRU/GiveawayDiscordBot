@@ -17,10 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -43,8 +40,8 @@ public class ScheduleStartService {
             Long createdUserId = scheduling.getCreatedUserId();
             String zonesIdByUser = BotStart.getZonesIdByUser(createdUserId);
 
-            ZoneOffset offset = ZoneOffset.of(zonesIdByUser);
-            OffsetDateTime odt = Instant.now().atOffset(offset);
+            ZoneId offset = ZoneId.of(zonesIdByUser);
+            ZonedDateTime odt = Instant.now().atZone(offset);
             Timestamp localTime = Timestamp.from(odt.toInstant());
 
             if (localTime.after(scheduling.getDateCreateGiveaway())) {
@@ -73,7 +70,7 @@ public class ScheduleStartService {
                                 //TODO: ZoneOffset
                                 Instant endInstant = scheduling.getDateEnd().toInstant();
                                 // Переводим в LocalDateTime пользователя
-                                LocalDateTime dateEndGiveaway = endInstant.atOffset(offset).toLocalDateTime();
+                                LocalDateTime dateEndGiveaway = endInstant.atZone(offset).toLocalDateTime();
                                 // Форматируем
                                 formattedDate = dateEndGiveaway.format(GiveawayUtils.FORMATTER);
                             }

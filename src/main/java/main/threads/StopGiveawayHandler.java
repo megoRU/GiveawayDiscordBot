@@ -33,30 +33,16 @@ public final class StopGiveawayHandler {
         if (giveaway.isLocked()) return false;
         if (giveaway.isFinishGiveaway()) return true;
         long userIdLong = giveaway.getUserIdLong();
-        Instant endGiveawayDate = giveaway.getGiveawayData().getEndGiveawayDate().toInstant();
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
+
         System.out.println(zonesIdByUser);
-        ZoneOffset zoneOffset = ZoneOffset.of(zonesIdByUser);
-
-        LocalDateTime localDateTime = localTime.toInstant().atOffset(zoneOffset).toLocalDateTime();
-
-        LocalDateTime endLocalDateTime = endGiveawayDate.atZone(zoneOffset).toLocalDateTime();
-        ZonedDateTime endLocalDateTime2 = endGiveawayDate.atOffset(zoneOffset).toZonedDateTime();
-
-        System.out.println("localTime.toInstant: " + localTime.toInstant().atZone(zoneOffset).toInstant());
-        System.out.println("localDateTime: " + localDateTime);
-        System.out.println("endLocalDateTime: " + endLocalDateTime);
-        System.out.println("endLocalDateTime2: " + endLocalDateTime2);
-        System.out.println("endGiveawayDate: " + endGiveawayDate);
-
+        ZoneId zoneOffset = ZoneId.of(zonesIdByUser);
 
         ZonedDateTime endInstant = giveaway.getGiveawayData().getEndGiveawayDate().toInstant().atZone(zoneOffset);
         System.out.println();
 
         System.out.println("Instant.now(): " + Instant.now().atZone(zoneOffset));
         System.out.println("endInstant: " + endInstant);
-
-
 
         return Instant.now().atZone(zoneOffset).isAfter(endInstant);
     }

@@ -23,16 +23,8 @@ public class ZoneCommand {
         var guildId = event.getGuild().getIdLong();
 
         String zone = event.getOption("zone", OptionMapping::getAsString);
-        final String zoneFinal = event.getOption("zone", OptionMapping::getAsString);
 
-        if (zone != null && zoneFinal != null && zone.matches("^[+-][0-9]{1,2}$")) {
-            // Преобразуем однозначные числа в двухзначные
-            String sign = zone.substring(0, 1);
-            int number = Integer.parseInt(zone.substring(1));
-            if (number >= 0 && number <= 9) {
-                zone = sign + String.format("%02d", number);
-            }
-
+        if (zone != null && zone.matches("[A-Za-z]+(/[A-Za-z_]+)+")) {
             UserZoneId userZoneId = userZoneIdRepository.findByUserId(userId);
             if (userZoneId == null) {
                 userZoneId = new UserZoneId();
@@ -44,7 +36,7 @@ public class ZoneCommand {
 
             BotStart.setTimeZone(userId, zone);
 
-            String zoneEdit = String.format(jsonParsers.getLocale("zone_edit", guildId), zoneFinal);
+            String zoneEdit = String.format(jsonParsers.getLocale("zone_edit", guildId), zone);
             event.reply(zoneEdit).queue();
         } else {
             String slashErrors = String.format(jsonParsers.getLocale("slash_errors", guildId), zone);

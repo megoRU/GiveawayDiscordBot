@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import java.awt.*;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 
 public class GiveawayEmbedUtils {
@@ -31,7 +32,7 @@ public class GiveawayEmbedUtils {
         Instant endGiveaway = giveaway.getGiveawayData().getEndGiveawayDate().toInstant();
 
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
-        ZoneOffset userOffset = ZoneOffset.of(zonesIdByUser);
+        ZoneId userOffset = ZoneId.of(zonesIdByUser);
 
         LocalDateTime userTime = endGiveaway.atZone(userOffset).toLocalDateTime();
 
@@ -60,7 +61,7 @@ public class GiveawayEmbedUtils {
 
         //EndGiveaway
         if (userTime != null) {
-            long endTime = userTime.toEpochSecond(userOffset);
+            long endTime = userTime.atZone(userOffset).toEpochSecond();
             String endTimeFormat = String.format(jsonParsers.getLocale("gift_ends_giveaway", guildId), endTime, endTime);
             embedBuilder.appendDescription(endTimeFormat);
         }
