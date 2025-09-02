@@ -41,7 +41,7 @@ public final class StopGiveawayHandler {
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
         ZoneOffset zoneOffset = ZoneOffset.of(zonesIdByUser.replace("UTC", ""));
 
-        System.out.println(localTime.toInstant().atZone(zoneOffset).toLocalDateTime());
+        System.out.println(localTime.toInstant().atOffset(zoneOffset).toLocalDateTime());
         System.out.println(endGiveawayDate);
 
         // localTime должен быть тоже в UTC
