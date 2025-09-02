@@ -96,8 +96,8 @@ public class SchedulingCommand {
             scheduling.setGuildId(guildId);
             scheduling.setChannelId(textChannel.getIdLong());
             scheduling.setCountWinners(winners);
-            scheduling.setDateCreateGiveaway(timeProcessor(startTime));
-            scheduling.setDateEnd(timeProcessor(endTime) == null ? oneMoths : timeProcessor(endTime));
+            scheduling.setDateCreateGiveaway(timeProcessor(startTime, userId));
+            scheduling.setDateEnd(timeProcessor(endTime, userId) == null ? oneMoths : timeProcessor(endTime, userId));
             scheduling.setTitle(title);
             scheduling.setRoleId(role);
             scheduling.setIsForSpecificRole(isOnlyForSpecificRole);
@@ -111,9 +111,9 @@ public class SchedulingCommand {
             instance.putScheduling(salt, scheduling);
 
             String scheduleEnd = jsonParsers.getLocale("schedule_end", guildId);
-            long timeStart = Objects.requireNonNull(timeProcessor(startTime)).getTime() / 1000;
+            long timeStart = Objects.requireNonNull(timeProcessor(startTime, userId)).getTime() / 1000;
             if (endTime != null) {
-                long timeEnd = Objects.requireNonNull(timeProcessor(endTime)).getTime() / 1000;
+                long timeEnd = Objects.requireNonNull(timeProcessor(endTime, userId)).getTime() / 1000;
                 if (timeEnd != 0) {
                     scheduleEnd = String.format("<t:%s:R> (<t:%s:f>)", timeEnd, timeEnd);
                 }

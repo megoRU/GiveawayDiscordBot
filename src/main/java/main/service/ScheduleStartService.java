@@ -1,6 +1,7 @@
 package main.service;
 
 import lombok.AllArgsConstructor;
+import main.config.BotStart;
 import main.controller.UpdateController;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
@@ -16,8 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -36,7 +36,13 @@ public class ScheduleStartService {
         Collection<Scheduling> scheduledGiveaways = instance.getScheduledGiveaways();
 
         for (Scheduling scheduling : scheduledGiveaways) {
-            Timestamp localTime = new Timestamp(System.currentTimeMillis());
+            //TODO: ZoneOffset
+            Long createdUserId = scheduling.getCreatedUserId();
+            String zonesIdByUser = BotStart.getZonesIdByUser(createdUserId);
+
+            ZoneOffset offset = ZoneOffset.of(zonesIdByUser);
+            OffsetDateTime odt = Instant.now().atOffset(offset);
+            Timestamp localTime = Timestamp.from(odt.toInstant());
 
             if (localTime.after(scheduling.getDateCreateGiveaway())) {
                 try {
@@ -61,6 +67,7 @@ public class ScheduleStartService {
 
                             String formattedDate = null;
                             if (scheduling.getDateEnd() != null) {
+                                //TODO: ZoneOffset
                                 LocalDateTime dateEndGiveaway = LocalDateTime.ofInstant(scheduling.getDateEnd().toInstant(), ZoneOffset.UTC);
                                 formattedDate = dateEndGiveaway.format(GiveawayUtils.FORMATTER);
                             }

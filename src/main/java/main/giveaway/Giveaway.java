@@ -2,6 +2,7 @@ package main.giveaway;
 
 import lombok.Getter;
 import lombok.Setter;
+import main.config.BotStart;
 import main.controller.UpdateController;
 import main.core.events.ReactionEvent;
 import main.model.entity.ActiveGiveaways;
@@ -15,9 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -85,13 +84,13 @@ public class Giveaway {
         this.giveawayRepositoryService = giveawayRepositoryService;
     }
 
+    //TODO: ZoneOffset
     public void updateTime(String time) {
         if (time == null) {
             time = LocalDateTime.now().plusDays(30).format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
         }
-        ZoneOffset offset = ZoneOffset.UTC;
-        LocalDateTime localDateTime;
 
+        LocalDateTime localDateTime;
         if (time.matches(GiveawayUtils.ISO_TIME_REGEX)) {
             localDateTime = LocalDateTime.parse(time, GiveawayUtils.FORMATTER);
         } else {
@@ -99,8 +98,7 @@ public class Giveaway {
             localDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).plusSeconds(seconds);
         }
 
-        long toEpochSecond = localDateTime.toEpochSecond(offset);
-        giveawayData.setEndGiveawayDate(new Timestamp(toEpochSecond * 1000));
+        giveawayData.setEndGiveawayDate(Timestamp.valueOf(localDateTime));
     }
 
     //TODO: Возможно добавлять в коллекцию тут

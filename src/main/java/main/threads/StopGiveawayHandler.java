@@ -1,10 +1,14 @@
 package main.threads;
 
+import main.config.BotStart;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayData;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,17 +33,19 @@ public final class StopGiveawayHandler {
     }
 
     private boolean shouldFinishGiveaway(Giveaway giveaway, Timestamp localTime) {
-        GiveawayData giveawayData = giveaway.getGiveawayData();
+        if (giveaway.isLocked()) return false;
+        if (giveaway.isFinishGiveaway()) return true;
+        long userIdLong = giveaway.getUserIdLong();
+        Instant endGiveawayDate = giveaway.getGiveawayData().getEndGiveawayDate().toInstant();
 
-        Timestamp endGiveawayDate = giveawayData.getEndGiveawayDate();
-        if (giveaway.isLocked()) {
-            return false;
-        } else if (giveaway.isFinishGiveaway()) {
-            return true;
-        } else if (endGiveawayDate == null) {
-            return false;
-        }
-        return localTime.after(endGiveawayDate);
+        String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
+        ZoneOffset zoneOffset = ZoneOffset.of(zonesIdByUser.replace("UTC", ""));
+
+        System.out.println(localTime.toInstant().atZone(zoneOffset).toLocalDateTime());
+        System.out.println(endGiveawayDate);
+
+        // localTime должен быть тоже в UTC
+        return localTime.toInstant().atZone(zoneOffset).toInstant().isAfter(endGiveawayDate);
     }
 
     private void logError(Exception e) {

@@ -10,8 +10,10 @@ import main.giveaway.GiveawayRegistry;
 import main.jsonparser.ParserClass;
 import main.model.entity.Scheduling;
 import main.model.entity.Settings;
+import main.model.entity.UserZoneId;
 import main.model.repository.SchedulingRepository;
 import main.model.repository.SettingsRepository;
+import main.model.repository.UserZoneIdRepository;
 import main.service.SaveUsersService;
 import main.service.ScheduleStartService;
 import main.service.SlashService;
@@ -50,6 +52,8 @@ public class BotStart {
     public static final String activity = "/start | ";
     //String - guildLongId
     private static final ConcurrentMap<Long, Settings> mapLanguages = new ConcurrentHashMap<>();
+    //Long - userId
+    private static final ConcurrentMap<Long, String> mapZonesId = new ConcurrentHashMap<>();
 
     @Getter
     private static JDA jda;
@@ -60,6 +64,7 @@ public class BotStart {
     private final UpdateController updateController;
     private final SchedulingRepository schedulingRepository;
     private final SettingsRepository settingsRepository;
+    private final UserZoneIdRepository userZoneIdRepository;
 
     //Service
     private final SlashService slashService;
@@ -214,7 +219,23 @@ public class BotStart {
         }
     }
 
+    private void getUserZoneIdFromDB() {
+        try {
+            List<UserZoneId> userZoneIdList = userZoneIdRepository.findAll();
+            for (UserZoneId userZoneId : userZoneIdList) {
+                mapZonesId.put(userZoneId.getUserId(), userZoneId.getZoneId());
+            }
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+    }
+
     public static Map<Long, Settings> getMapLanguages() {
         return mapLanguages;
+    }
+
+    public static String getZonesIdByUser(long userId) {
+        String zoneId = mapZonesId.get(userId);
+        return Objects.requireNonNullElse(zoneId, "UTC+0");
     }
 }

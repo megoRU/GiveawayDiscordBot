@@ -63,9 +63,12 @@ public class GiveawayUtils {
         return seconds;
     }
 
-    public static Timestamp timeProcessor(String time) {
+    //TODO: ZoneOffset
+    public static Timestamp timeProcessor(String time, long userIdLong) {
         if (time == null) return null;
-        ZoneOffset offset = ZoneOffset.UTC;
+        String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
+        ZoneOffset offset = ZoneOffset.of(zonesIdByUser);
+
         LocalDateTime localDateTime = LocalDateTime.parse(time, GiveawayUtils.FORMATTER);
         long toEpochSecond = localDateTime.toEpochSecond(offset);
         return new Timestamp(toEpochSecond * 1000);
@@ -103,9 +106,13 @@ public class GiveawayUtils {
         return time.matches(GiveawayUtils.TIME_REGEX);
     }
 
-    public static boolean isTimeBefore(String time) {
+    //TODO: ZoneOffset
+    public static boolean isTimeBefore(String time, long userIdLong) {
+        String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
+        ZoneOffset offset = ZoneOffset.of(zonesIdByUser);
+
         LocalDateTime localDateTime = LocalDateTime.parse(time, FORMATTER);
-        LocalDateTime now = Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime();
+        LocalDateTime now = Instant.now().atOffset(offset).toLocalDateTime();
         return localDateTime.isBefore(now);
     }
 
