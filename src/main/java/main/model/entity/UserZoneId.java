@@ -23,8 +23,4 @@ public class UserZoneId {
 
     @Column(name = "zone_id")
     private String zoneId;
-
-    public void setZoneId(String zoneId) {
-        this.zoneId = "UTC".concat(zoneId);
-    }
 }
