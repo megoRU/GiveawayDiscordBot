@@ -1,12 +1,12 @@
 package main.core.events;
 
 import lombok.AllArgsConstructor;
+import main.config.BotStart;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayData;
 import main.giveaway.GiveawayRegistry;
 import main.jsonparser.JSONParsers;
 import main.model.entity.Scheduling;
-import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.SchedulingRepository;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
@@ -18,6 +18,9 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Objects;
 
@@ -26,7 +29,6 @@ import java.util.Objects;
 public class SelectMenuInteraction {
 
     private static final JSONParsers jsonParsers = new JSONParsers();
-    private final ActiveGiveawayRepository activeGiveawayRepository;
     private final SchedulingRepository schedulingRepository;
 
     public void handle(@NotNull StringSelectInteractionEvent event) {
@@ -154,10 +156,11 @@ public class SelectMenuInteraction {
     private String formatGiveawayMessage(Giveaway giveaway, long guildId) {
         GiveawayData giveawayData = giveaway.getGiveawayData();
         String title = giveawayData.getTitle();
+        long userIdLong = giveawayData.getUserIdLong();
         Long roleId = giveawayData.getRoleId();
         int countWinners = giveawayData.getCountWinners();
         int minParticipants = giveawayData.getMinParticipants();
-        Timestamp endGiveawayDate = giveawayData.getEndGiveawayDate();
+        Instant endGiveawayDate = giveawayData.getEndGiveawayDate().toInstant();
         String urlImage = giveawayData.getUrlImage();
 
         String giveawayEditTitle = jsonParsers.getLocale("giveaway_edit_title", guildId);
@@ -170,7 +173,7 @@ public class SelectMenuInteraction {
                 giveawayEditWinners + " " + countWinners + "\n" +
                 (roleId != null ? giftOnlyFor + "\n" : "") +
                 listMenuParticipants + minParticipants + "\n" +
-                getDateTranslation(endGiveawayDate, guildId) + "\n" +
+                getDateTranslation(endGiveawayDate, guildId, userIdLong) + "\n" +
                 (urlImage != null ? urlImage : "");
     }
 
@@ -178,7 +181,8 @@ public class SelectMenuInteraction {
         Long roleId = scheduling.getRoleId();
         String title = scheduling.getTitle();
         int countWinners = scheduling.getCountWinners();
-        Timestamp dateEnd = scheduling.getDateEnd();
+        Long createdUserId = scheduling.getCreatedUserId();
+        Instant dateEnd = scheduling.getDateEnd().toInstant();
         String urlImage = scheduling.getUrlImage();
         Timestamp dateCreateGiveaway = scheduling.getDateCreateGiveaway();
 
@@ -190,7 +194,7 @@ public class SelectMenuInteraction {
                 giveawayEditTitle + " " + title + "\n" +
                 giveawayEditWinners + " " + countWinners + "\n" +
                 (roleId != null ? giftOnlyFor + "\n" : "") +
-                getDateTranslation(dateEnd, guildId) + "\n" +
+                getDateTranslation(dateEnd, guildId, createdUserId) + "\n" +
                 getDateStartTranslation(dateCreateGiveaway, guildId) + "\n" +
                 (urlImage != null ? urlImage : "");
     }
@@ -220,13 +224,13 @@ public class SelectMenuInteraction {
                 .build();
     }
 
-    private String getDateTranslation(Timestamp timestamp, long guildId) {
-        if (timestamp == null) {
-            return jsonParsers.getLocale("giveaway_edit_ends", guildId) + " N/A";
-        } else {
-            long time = timestamp.getTime() / 1000;
-            return String.format(jsonParsers.getLocale("giveaway_data_end", guildId), time, time);
-        }
+    private String getDateTranslation(Instant endGiveawayDate, long guildId, long userId) {
+        String zonesIdByUser = BotStart.getZonesIdByUser(userId);
+        ZoneId zoneId = ZoneId.of(zonesIdByUser);
+        LocalDateTime userTime = endGiveawayDate.atZone(zoneId).toLocalDateTime();
+
+        long time = userTime.atZone(zoneId).toEpochSecond();
+        return String.format(jsonParsers.getLocale("giveaway_data_end", guildId), time, time);
     }
 
     private String getDateStartTranslation(Timestamp timestamp, long guildId) {
