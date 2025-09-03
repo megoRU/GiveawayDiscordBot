@@ -32,6 +32,7 @@ public class GiveawayData {
     private String title;
     private Timestamp endGiveawayDate;
     private int minParticipants = 1;
+    private long userIdLong;
 
     public GiveawayData(long messageId,
                         int countWinners,
@@ -40,7 +41,8 @@ public class GiveawayData {
                         String urlImage,
                         String title,
                         Timestamp endGiveawayDate,
-                        int minParticipants) {
+                        int minParticipants,
+                        long userIdLong) {
         this.messageId = messageId;
         this.countWinners = countWinners;
         this.roleId = roleId;
@@ -50,6 +52,7 @@ public class GiveawayData {
         if (endGiveawayDate == null) endGiveawayDate = Timestamp.from(Instant.now().plus(30, ChronoUnit.DAYS));
         this.endGiveawayDate = endGiveawayDate;
         this.minParticipants = minParticipants;
+        this.userIdLong = userIdLong;
     }
 
     public void addUserToQueue(User user) {

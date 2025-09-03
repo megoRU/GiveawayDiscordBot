@@ -154,7 +154,7 @@ public class UpdateController {
                 cancelCommand.cancel(event);
             }
             case "zone" -> {
-                ZoneCommand zoneCommand = new ZoneCommand(userZoneIdRepository);
+                ZoneCommand zoneCommand = new ZoneCommand(userZoneIdRepository, activeGiveawayRepository, schedulingRepository);
                 zoneCommand.update(event);
             }
             case "check" -> {

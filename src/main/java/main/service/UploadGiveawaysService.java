@@ -58,7 +58,8 @@ public class UploadGiveawaysService {
                         url_image,
                         giveaway_title == null ? "Giveaway" : giveaway_title,
                         date_end_giveaway,
-                        min_participants == null ? 1 : min_participants);
+                        min_participants == null ? 1 : min_participants,
+                        id_user_who_create_giveaway);
 
                 giveawayData.setParticipantsList(participantsList);
 

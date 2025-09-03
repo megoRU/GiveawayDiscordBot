@@ -125,6 +125,7 @@ public class Giveaway {
         giveawayData.setUrlImage(urlImage);
         giveawayData.setForSpecificRole(isOnlyForSpecificRole);
         giveawayData.setMinParticipants(minParticipants);
+        giveawayData.setUserIdLong(userIdLong);
         updateTime(time); //Обновляем время
 
         EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayPattern(giveawayData, this);

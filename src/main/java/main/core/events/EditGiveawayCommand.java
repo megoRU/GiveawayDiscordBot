@@ -1,6 +1,7 @@
 package main.core.events;
 
 import lombok.AllArgsConstructor;
+import main.config.BotStart;
 import main.controller.UpdateController;
 import main.giveaway.*;
 import main.jsonparser.JSONParsers;
@@ -15,6 +16,9 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -54,12 +58,18 @@ public class EditGiveawayCommand {
 
         int minParticipants = giveawayData.getMinParticipants();
 
-        Timestamp endGiveawayDate = giveawayData.getEndGiveawayDate();
+        Instant endGiveaway = giveawayData.getEndGiveawayDate().toInstant();
+        long userIdLong = giveawayData.getUserIdLong();
+
+        String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
+        ZoneId userOffset = ZoneId.of(zonesIdByUser);
+
+        LocalDateTime userTime = endGiveaway.atZone(userOffset).toLocalDateTime();
 
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setColor(GiveawayUtils.getUserColor(guildId));
 
-        if (endGiveawayDate == null) {
+        if (userTime == null) {
             embedBuilder.setFooter(giveawayEdit);
             embedBuilder.setDescription(String.format("""
                             %s `%s`
@@ -72,7 +82,7 @@ public class EditGiveawayCommand {
             ));
 
         } else {
-            long endTime = endGiveawayDate.getTime() / 1000;
+            long endTime = userTime.atZone(userOffset).toEpochSecond();
             embedBuilder.setFooter(giveawayEdit);
             embedBuilder.setDescription(String.format("""
                             
