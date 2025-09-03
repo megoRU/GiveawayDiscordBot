@@ -15,6 +15,7 @@
 ##### • Giveaway ends time
 ##### • Giveaway Role IDs
 ##### • Language
+##### • User time zone
 
 ### 2. Who can access the data?
 ##### • The Bot developer (me)
@@ -29,4 +30,4 @@
 #### Feel free to join my [Discord server](https://discord.gg/UrWG3R683d)
 
 ### Please note, that we can change this policy without any warning at any given time.
-#### **Last changed:** `03.04.2022`
+#### **Last changed:** `03.09.2025`
