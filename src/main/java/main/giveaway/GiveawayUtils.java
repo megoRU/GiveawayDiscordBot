@@ -61,7 +61,6 @@ public class GiveawayUtils {
         return seconds;
     }
 
-    //TODO: ZoneOffset
     public static Timestamp timeProcessor(String time, long userIdLong) {
         if (time == null) return null;
 
@@ -107,7 +106,6 @@ public class GiveawayUtils {
         return time.matches(GiveawayUtils.TIME_REGEX);
     }
 
-    //TODO: ZoneOffset
     public static boolean isTimeBefore(String time, long userIdLong) {
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
         ZoneId offset = ZoneId.of(zonesIdByUser);

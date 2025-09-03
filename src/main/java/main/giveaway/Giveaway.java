@@ -84,14 +84,13 @@ public class Giveaway {
         this.giveawayRepositoryService = giveawayRepositoryService;
     }
 
-    //TODO: ZoneOffset
     public void updateTime(String time) {
-        if (time == null) {
-            time = LocalDateTime.now(ZoneOffset.UTC).plusDays(30).format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
-        }
-
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
         ZoneId zoneId = ZoneId.of(zonesIdByUser);
+
+        if (time == null) {
+            time = LocalDateTime.now(zoneId).plusDays(30).format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+        }
 
         LocalDateTime localDateTime;
         if (time.matches(GiveawayUtils.ISO_TIME_REGEX)) {

@@ -260,11 +260,11 @@ public class SlashService {
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway ID"));
 
             List<OptionData> zoneData = new ArrayList<>();
-            zoneData.add(new OptionData(STRING, "time-zone", "Examples: Europe/London, Europe/Berlin, etc.")
+            zoneData.add(new OptionData(STRING, "time-zone", "Examples: Europe/London, Europe/Berlin, UTC, etc.")
                     .setName("zone")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "часовой-пояс")
                     .setRequired(true)
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: Europe/Moscow, Europe/Samara, и т. д."));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: Europe/Moscow, Europe/Samara, UTC, и т. д."));
 
             /*
              * Команды

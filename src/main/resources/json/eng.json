@@ -99,5 +99,7 @@
   "pagination_participants_count": "Total Participants: ",
   "pagination_user_id_error": "I couldn't find any participants, or you don't have access to get a list of users for this Giveaway.",
   "pagination_download": "Download",
-  "zone_edit": "You have changed the time zone to: `%s`"
+  "zone_edit": "You have changed the time zone to: `%s`",
+  "helpZone": "Set your own time zone. [Site for obtaining a zone](https://webbrowsertools.com/timezone)",
+  "zone_error": "You cannot change or set the time zone if there are active or scheduled Giveaway!"
 }

@@ -24,6 +24,8 @@ public interface SchedulingRepository extends JpaRepository<Scheduling, Long> {
     @Nullable
     Scheduling findByIdSalt(String idSalt);
 
+    List<Scheduling> findSchedulingByCreatedUserId(Long createdUserId);
+
     @Nullable
     Scheduling findByCreatedUserIdAndGuildId(Long createdUserId, Long guildLongId);
 

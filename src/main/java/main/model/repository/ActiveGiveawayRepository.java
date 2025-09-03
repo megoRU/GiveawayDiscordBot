@@ -26,6 +26,8 @@ public interface ActiveGiveawayRepository extends JpaRepository<ActiveGiveaways,
     @EntityGraph(attributePaths = {"participants"})
     List<ActiveGiveaways> findAll();
 
+    List<ActiveGiveaways> findActiveGiveawaysByCreatedUserId(Long createdUserId);
+
     @Nullable
     List<ActiveGiveaways> findByGuildId(Long guildLongId);
 

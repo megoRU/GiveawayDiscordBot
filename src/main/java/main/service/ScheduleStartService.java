@@ -36,7 +36,6 @@ public class ScheduleStartService {
         Collection<Scheduling> scheduledGiveaways = instance.getScheduledGiveaways();
 
         for (Scheduling scheduling : scheduledGiveaways) {
-            //TODO: ZoneOffset
             Long createdUserId = scheduling.getCreatedUserId();
             String zonesIdByUser = BotStart.getZonesIdByUser(createdUserId);
 
@@ -44,6 +43,7 @@ public class ScheduleStartService {
             ZonedDateTime odt = Instant.now().atZone(offset);
             Timestamp localTime = Timestamp.from(odt.toInstant());
 
+            //TODO: проверить, надо еще перевести дату окончания в atZone
             if (localTime.after(scheduling.getDateCreateGiveaway())) {
                 try {
                     Long channelIdLong = scheduling.getChannelId();
@@ -67,11 +67,9 @@ public class ScheduleStartService {
 
                             String formattedDate = null;
                             if (scheduling.getDateEnd() != null) {
-                                //TODO: ZoneOffset
+                                //TODO: возможно нужно сначала atZone и не делать toInstant
                                 Instant endInstant = scheduling.getDateEnd().toInstant();
-                                // Переводим в LocalDateTime пользователя
                                 LocalDateTime dateEndGiveaway = endInstant.atZone(offset).toLocalDateTime();
-                                // Форматируем
                                 formattedDate = dateEndGiveaway.format(GiveawayUtils.FORMATTER);
                             }
 
