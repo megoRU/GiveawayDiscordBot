@@ -4,7 +4,6 @@ import main.config.BotStart;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayData;
 
-import java.sql.Timestamp;
 import java.time.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,9 +18,7 @@ public final class StopGiveawayHandler {
             GiveawayData giveawayData = giveaway.getGiveawayData();
             int countWinners = giveawayData.getCountWinners();
 
-            Timestamp localTime = Timestamp.from(Instant.now());
-
-            if (shouldFinishGiveaway(giveaway, localTime)) {
+            if (shouldFinishGiveaway(giveaway)) {
                 giveaway.stopGiveaway(countWinners);
             }
         } catch (Exception e) {
@@ -29,20 +26,15 @@ public final class StopGiveawayHandler {
         }
     }
 
-    private boolean shouldFinishGiveaway(Giveaway giveaway, Timestamp localTime) {
+    private boolean shouldFinishGiveaway(Giveaway giveaway) {
         if (giveaway.isLocked()) return false;
         if (giveaway.isFinishGiveaway()) return true;
+
         long userIdLong = giveaway.getUserIdLong();
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
 
-        System.out.println(zonesIdByUser);
         ZoneId zoneOffset = ZoneId.of(zonesIdByUser);
-
         ZonedDateTime endInstant = giveaway.getGiveawayData().getEndGiveawayDate().toInstant().atZone(zoneOffset);
-        System.out.println();
-
-        System.out.println("Instant.now(): " + Instant.now().atZone(zoneOffset));
-        System.out.println("endInstant: " + endInstant);
 
         return Instant.now().atZone(zoneOffset).isAfter(endInstant);
     }

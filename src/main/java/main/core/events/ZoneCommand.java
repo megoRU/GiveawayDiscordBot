@@ -45,6 +45,7 @@ public class ZoneCommand {
 
         if (zone != null && zone.matches("[A-Za-z]+(/[A-Za-z_]+)+|UTC")) {
             UserZoneId userZoneId = userZoneIdRepository.findByUserId(userId);
+
             if (userZoneId == null) {
                 userZoneId = new UserZoneId();
                 userZoneId.setUserId(userId);
