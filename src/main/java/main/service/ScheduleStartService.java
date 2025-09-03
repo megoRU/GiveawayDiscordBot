@@ -9,6 +9,7 @@ import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.model.entity.Scheduling;
 import main.model.repository.SchedulingRepository;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -16,8 +17,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
 import java.sql.Timestamp;
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.zone.ZoneRulesException;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -58,48 +64,62 @@ public class ScheduleStartService {
                             Long guildId = scheduling.getGuildId();
                             String idSalt = scheduling.getIdSalt();
 
-                            Giveaway giveaway = new Giveaway(
-                                    scheduling.getGuildId(),
-                                    textChannelById.getIdLong(),
-                                    scheduling.getCreatedUserId(),
-                                    giveawayRepositoryService,
-                                    updateController);
 
-                            String formattedDate = null;
-                            if (scheduling.getDateEnd() != null) {
-                                //TODO: возможно нужно сначала atZone и не делать toInstant
-                                Instant endInstant = scheduling.getDateEnd().toInstant();
-                                LocalDateTime dateEndGiveaway = endInstant.atZone(offset).toLocalDateTime();
-                                formattedDate = dateEndGiveaway.format(GiveawayUtils.FORMATTER);
-                            }
+                            try {
+                                Giveaway giveaway = new Giveaway(
+                                        scheduling.getGuildId(),
+                                        textChannelById.getIdLong(),
+                                        scheduling.getCreatedUserId(),
+                                        giveawayRepositoryService,
+                                        updateController);
 
-                            if (role != null && isOnlyForSpecificRole) {
-                                String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guildId), role);
-                                if (Objects.equals(role, guildIdLong)) {
-                                    giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_everyone", guildId), "@everyone");
-                                    textChannelById.sendMessage(giftNotificationForThisRole).queue();
-                                } else {
-                                    textChannelById.sendMessage(giftNotificationForThisRole).queue();
+                                String formattedDate = null;
+                                if (scheduling.getDateEnd() != null) {
+                                    //TODO: возможно нужно сначала atZone и не делать toInstant
+                                    Instant endInstant = scheduling.getDateEnd().toInstant();
+                                    LocalDateTime dateEndGiveaway = endInstant.atZone(offset).toLocalDateTime();
+                                    formattedDate = dateEndGiveaway.format(GiveawayUtils.FORMATTER);
                                 }
+
+                                if (role != null && isOnlyForSpecificRole) {
+                                    String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guildId), role);
+                                    if (Objects.equals(role, guildIdLong)) {
+                                        giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_everyone", guildId), "@everyone");
+                                        textChannelById.sendMessage(giftNotificationForThisRole).queue();
+                                    } else {
+                                        textChannelById.sendMessage(giftNotificationForThisRole).queue();
+                                    }
+                                }
+
+                                giveaway.startGiveaway(
+                                        textChannelById,
+                                        scheduling.getTitle(),
+                                        scheduling.getCountWinners(),
+                                        formattedDate,
+                                        scheduling.getRoleId(),
+                                        scheduling.getIsForSpecificRole(),
+                                        scheduling.getUrlImage(),
+                                        false,
+                                        scheduling.getMinParticipants());
+
+                                long messageId = giveaway.getGiveawayData().getMessageId();
+
+                                instance.removeScheduling(idSalt); //Чтобы не моросил
+                                instance.putGift(messageId, giveaway);
+
+                                schedulingRepository.deleteByIdSalt(idSalt);
+                            } catch (ZoneRulesException z) {
+                                LOGGER.error(z.getMessage(), z);
+
+                                String startWithBrokenZone = jsonParsers.getLocale("start_with_broken_zone", guildId);
+
+                                EmbedBuilder errors = new EmbedBuilder();
+                                errors.setColor(Color.GREEN);
+                                errors.setDescription(startWithBrokenZone);
+
+                                textChannelById.sendMessageEmbeds(errors.build()).queue();
+                                return;
                             }
-
-                            giveaway.startGiveaway(
-                                    textChannelById,
-                                    scheduling.getTitle(),
-                                    scheduling.getCountWinners(),
-                                    formattedDate,
-                                    scheduling.getRoleId(),
-                                    scheduling.getIsForSpecificRole(),
-                                    scheduling.getUrlImage(),
-                                    false,
-                                    scheduling.getMinParticipants());
-
-                            long messageId = giveaway.getGiveawayData().getMessageId();
-
-                            instance.removeScheduling(idSalt); //Чтобы не моросил
-                            instance.putGift(messageId, giveaway);
-
-                            schedulingRepository.deleteByIdSalt(idSalt);
                         }
                     }
                 } catch (Exception e) {

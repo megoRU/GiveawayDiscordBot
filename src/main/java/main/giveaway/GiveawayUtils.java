@@ -14,6 +14,7 @@ import java.awt.*;
 import java.sql.Timestamp;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.zone.ZoneRulesException;
 
 import static com.aventrix.jnanoid.jnanoid.NanoIdUtils.DEFAULT_NUMBER_GENERATOR;
 
@@ -61,7 +62,7 @@ public class GiveawayUtils {
         return seconds;
     }
 
-    public static Timestamp timeProcessor(String time, long userIdLong) {
+    public static Timestamp timeProcessor(String time, long userIdLong) throws ZoneRulesException {
         if (time == null) return null;
 
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
@@ -106,7 +107,7 @@ public class GiveawayUtils {
         return time.matches(GiveawayUtils.TIME_REGEX);
     }
 
-    public static boolean isTimeBefore(String time, long userIdLong) {
+    public static boolean isTimeBefore(String time, long userIdLong) throws ZoneRulesException  {
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
         ZoneId offset = ZoneId.of(zonesIdByUser);
 

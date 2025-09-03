@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.Timestamp;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.zone.ZoneRulesException;
 import java.util.List;
 
 public class Giveaway {
@@ -84,7 +85,7 @@ public class Giveaway {
         this.giveawayRepositoryService = giveawayRepositoryService;
     }
 
-    public void updateTime(String time) {
+    public void updateTime(String time) throws ZoneRulesException {
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
         ZoneId zoneId = ZoneId.of(zonesIdByUser);
 

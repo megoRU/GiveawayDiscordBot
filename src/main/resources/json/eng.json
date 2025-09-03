@@ -101,5 +101,6 @@
   "pagination_download": "Download",
   "zone_edit": "You have changed the time zone to: `%s`",
   "help_zone": "Set your own time zone. [Site for obtaining a zone](https://webbrowsertools.com/timezone)",
-  "zone_error": "You cannot change or set the time zone if there are active or scheduled Giveaway!"
+  "zone_error": "You cannot change or set the time zone if there are active or scheduled Giveaway!",
+  "start_with_broken_zone": "You have set the wrong time zone. Use: `/zone`"
 }
