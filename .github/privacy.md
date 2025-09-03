@@ -15,6 +15,7 @@
 ##### • Giveaway ends time
 ##### • Giveaway Role IDs
 ##### • Language
+##### • User time zone
 
 ### 2. Who can access the data?
 ##### • The Bot developer (me)

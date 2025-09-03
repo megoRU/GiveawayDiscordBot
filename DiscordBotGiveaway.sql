@@ -24,6 +24,12 @@ CREATE TABLE `list_users`
     `nick_name`       varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE user_zone_id
+(
+    user_id BIGINT NOT NULL PRIMARY KEY,
+    zone_id VARCHAR(255)
+);
+
 CREATE TABLE `notification`
 (
     `user_id_long`        varchar(255) NOT NULL,

@@ -14,6 +14,7 @@ A Discord bot for managing giveaways with ease.
 * Create and manage giveaways via slash commands
 * Predefined giveaways
 * Scheduling giveaways
+* Support ZoneId
 * Persistent storage with MariaDB
 * Docker-ready for quick deployment
 * Built with JDA and Spring Boot
@@ -53,7 +54,7 @@ docker-compose stop
 
 ## 🛠 Tech Stack
 
-* Java 20
+* Java 21
 * Spring Boot
 * Hibernate
 * MariaDB
