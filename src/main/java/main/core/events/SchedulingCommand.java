@@ -130,6 +130,7 @@ public class SchedulingCommand {
 
             String scheduleEnd = jsonParsers.getLocale("schedule_end", guildId);
             long timeStart = Objects.requireNonNull(timeProcessor(startTime, userId)).getTime() / 1000;
+
             if (endTime != null) {
                 long timeEnd = Objects.requireNonNull(timeProcessor(endTime, userId)).getTime() / 1000;
                 if (timeEnd != 0) {
