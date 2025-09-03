@@ -195,7 +195,7 @@ public class SelectMenuInteraction {
                 giveawayEditWinners + " " + countWinners + "\n" +
                 (roleId != null ? giftOnlyFor + "\n" : "") +
                 getDateTranslation(dateEnd, guildId, createdUserId) + "\n" +
-                getDateStartTranslation(dateCreateGiveaway, guildId) + "\n" +
+                getDateStartTranslation(dateCreateGiveaway, guildId, createdUserId) + "\n" +
                 (urlImage != null ? urlImage : "");
     }
 
@@ -233,11 +233,17 @@ public class SelectMenuInteraction {
         return String.format(jsonParsers.getLocale("giveaway_data_end", guildId), time, time);
     }
 
-    private String getDateStartTranslation(Timestamp timestamp, long guildId) {
+    private String getDateStartTranslation(Timestamp timestamp, long guildId, long userId) {
         if (timestamp == null) {
             return jsonParsers.getLocale("giveaway_edit_start", guildId) + " N/A";
         } else {
-            long time = timestamp.getTime() / 1000;
+            Instant instant = timestamp.toInstant();
+
+            String zonesIdByUser = BotStart.getZonesIdByUser(userId);
+            ZoneId zoneId = ZoneId.of(zonesIdByUser);
+            LocalDateTime userTime = instant.atZone(zoneId).toLocalDateTime();
+
+            long time = userTime.atZone(zoneId).toEpochSecond();
             return String.format(jsonParsers.getLocale("giveaway_data_start", guildId), time, time);
         }
     }
