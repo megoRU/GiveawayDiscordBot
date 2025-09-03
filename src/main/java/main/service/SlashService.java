@@ -199,10 +199,10 @@ public class SlashService {
             //giveaway-edit
             List<OptionData> giveawayEditData = new ArrayList<>();
 
-            giveawayEditData.add(new OptionData(STRING, "duration", "Examples: 5s, 20m, 10h, 1d. Or: 29.04.2025 17:00. Only in this style and UTC ±0")
+            giveawayEditData.add(new OptionData(STRING, "duration", "Examples: 5s, 20m, 10h, 1d. Or: 29.04.2025 17:00. By default: UTC ±0 or /zone")
                     .setName("duration")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "продолжительность")
-                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: 5s, 20m, 10h, 1d. Или: 29.04.2025 17:00. Только в этом стиле и UTC ±0"));
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Примеры: 5s, 20m, 10h, 1d. Или: 29.04.2025 17:00. По умолчанию: UTC ±0 или /zone"));
 
             giveawayEditData.add(new OptionData(INTEGER, "winners", "Set number of winners")
                     .setName("winners")
