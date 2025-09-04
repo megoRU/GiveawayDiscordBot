@@ -17,7 +17,7 @@ import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
@@ -157,7 +157,7 @@ public class SelectMenuInteraction {
         Long roleId = giveawayData.getRoleId();
         int countWinners = giveawayData.getCountWinners();
         int minParticipants = giveawayData.getMinParticipants();
-        LocalDateTime endGiveawayDate = giveawayData.getEndGiveawayDate().toLocalDateTime();
+        Instant endGiveawayDate = giveawayData.getEndGiveawayDate();
         String urlImage = giveawayData.getUrlImage();
 
         String giveawayEditTitle = jsonParsers.getLocale("giveaway_edit_title", guildId);
@@ -179,9 +179,9 @@ public class SelectMenuInteraction {
         String title = scheduling.getTitle();
         int countWinners = scheduling.getCountWinners();
         Long createdUserId = scheduling.getCreatedUserId();
-        LocalDateTime dateEnd = scheduling.getDateEnd().toLocalDateTime();
+        Instant dateEnd = scheduling.getDateEndGiveaway();
         String urlImage = scheduling.getUrlImage();
-        LocalDateTime dateCreateGiveaway = scheduling.getDateCreateGiveaway().toLocalDateTime();
+        Instant dateCreateGiveaway = scheduling.getDateCreateGiveaway();
 
         String giveawayEditTitle = jsonParsers.getLocale("giveaway_edit_title", guildId);
         String giveawayEditWinners = jsonParsers.getLocale("giveaway_edit_winners", guildId);
@@ -221,12 +221,12 @@ public class SelectMenuInteraction {
                 .build();
     }
 
-    private String getDateTranslation(LocalDateTime endGiveawayDate, long guildId, long userId) {
+    private String getDateTranslation(Instant endGiveawayDate, long guildId, long userId) {
         long time = GiveawayUtils.getEpochSecond(endGiveawayDate, userId);
         return String.format(jsonParsers.getLocale("giveaway_data_end", guildId), time, time);
     }
 
-    private String getDateStartTranslation(LocalDateTime localDateTime, long guildId, long userId) {
+    private String getDateStartTranslation(Instant localDateTime, long guildId, long userId) {
         if (localDateTime == null) {
             return jsonParsers.getLocale("giveaway_edit_start", guildId) + " N/A";
         } else {

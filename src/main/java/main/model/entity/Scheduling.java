@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 
 @Getter
 @Setter
@@ -33,10 +34,10 @@ public class Scheduling {
     private int countWinners;
 
     @Column(name = "create_giveaway", nullable = false)
-    private Timestamp dateCreateGiveaway;
+    private Instant dateCreateGiveaway;
 
     @Column(name = "date_end", nullable = false)
-    private Timestamp dateEnd;
+    private Instant dateEndGiveaway;
 
     @Column(name = "title")
     private String title;

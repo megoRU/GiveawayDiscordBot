@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -47,10 +46,12 @@ public class ScheduleStartService {
 
             ZoneId offset = ZoneId.of(zonesIdByUser);
             ZonedDateTime odt = Instant.now().atZone(offset);
-            Timestamp localTime = Timestamp.from(odt.toInstant());
+            Instant instant = odt.toInstant();
+
+            Instant dateCreateGiveaway = scheduling.getDateCreateGiveaway();
 
             //TODO: проверить, надо еще перевести дату окончания в atZone
-            if (localTime.after(scheduling.getDateCreateGiveaway())) {
+            if (instant.isAfter(dateCreateGiveaway)) {
                 try {
                     Long channelIdLong = scheduling.getChannelId();
                     Guild guildById = jda.getGuildById(scheduling.getGuildId());
@@ -64,7 +65,6 @@ public class ScheduleStartService {
                             Long guildId = scheduling.getGuildId();
                             String idSalt = scheduling.getIdSalt();
 
-
                             try {
                                 Giveaway giveaway = new Giveaway(
                                         scheduling.getGuildId(),
@@ -73,13 +73,10 @@ public class ScheduleStartService {
                                         giveawayRepositoryService,
                                         updateController);
 
-                                String formattedDate = null;
-                                if (scheduling.getDateEnd() != null) {
-                                    //TODO: возможно нужно сначала atZone и не делать toInstant
-                                    Instant endInstant = scheduling.getDateEnd().toInstant();
-                                    LocalDateTime dateEndGiveaway = endInstant.atZone(offset).toLocalDateTime();
-                                    formattedDate = dateEndGiveaway.format(GiveawayUtils.FORMATTER);
-                                }
+                                //TODO: возможно нужно сначала atZone и не делать toInstant
+                                Instant endInstant = scheduling.getDateEndGiveaway();
+                                LocalDateTime dateEndGiveaway = endInstant.atZone(offset).toLocalDateTime();
+                                String formattedDate = dateEndGiveaway.format(GiveawayUtils.FORMATTER);
 
                                 if (role != null && isOnlyForSpecificRole) {
                                     String giftNotificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_this_role", guildId), role);

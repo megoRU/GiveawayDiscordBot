@@ -8,10 +8,8 @@ import main.config.BotStart;
 import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.Nullable;
 
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,7 +30,7 @@ public class GiveawayData {
     private boolean isForSpecificRole;
     private String urlImage;
     private String title;
-    private Timestamp endGiveawayDate;
+    private Instant endGiveawayDate;
     private int minParticipants = 1;
     private long userIdLong;
 
@@ -42,7 +40,7 @@ public class GiveawayData {
                         Boolean isForSpecificRole,
                         String urlImage,
                         String title,
-                        Timestamp endGiveawayDate,
+                        Instant endGiveawayDate,
                         int minParticipants,
                         long userIdLong) {
         this.messageId = messageId;
@@ -55,7 +53,7 @@ public class GiveawayData {
         if (endGiveawayDate == null) {
             String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
             ZoneId zoneId = ZoneId.of(zonesIdByUser);
-            endGiveawayDate = Timestamp.from(Instant.now().atZone(zoneId).toInstant().plus(30, ChronoUnit.DAYS));
+            endGiveawayDate = Instant.now().atZone(zoneId).plusDays(30).toInstant();
         }
         this.endGiveawayDate = endGiveawayDate;
         this.minParticipants = minParticipants;

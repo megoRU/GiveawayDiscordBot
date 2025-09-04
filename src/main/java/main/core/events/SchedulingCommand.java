@@ -19,11 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
-import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.time.zone.ZoneRulesException;
 import java.util.Objects;
 import java.util.Optional;
@@ -100,7 +97,7 @@ public class SchedulingCommand {
             String zonesId = BotStart.getZonesIdByUser(userId);
             ZoneId zoneId = ZoneId.of(zonesId);
 
-            Timestamp oneMoths = Timestamp.from(Instant.now().atZone(zoneId).toInstant().plus(30, ChronoUnit.DAYS));
+            Instant oneMoths = Instant.now().atZone(zoneId).plusDays(30).toInstant();
 
             Scheduling scheduling = new Scheduling();
             try {
@@ -110,7 +107,7 @@ public class SchedulingCommand {
                 scheduling.setChannelId(textChannel.getIdLong());
                 scheduling.setCountWinners(winners);
                 scheduling.setDateCreateGiveaway(timeProcessor(startTime, userId));
-                scheduling.setDateEnd(timeProcessor(endTime, userId) == null ? oneMoths : timeProcessor(endTime, userId));
+                scheduling.setDateEndGiveaway(timeProcessor(endTime, userId) == null ? oneMoths : timeProcessor(endTime, userId));
                 scheduling.setTitle(title);
                 scheduling.setRoleId(role);
                 scheduling.setIsForSpecificRole(isOnlyForSpecificRole);
@@ -136,8 +133,8 @@ public class SchedulingCommand {
                 return;
             }
 
-            LocalDateTime giveawayCreateTime = scheduling.getDateCreateGiveaway().toLocalDateTime();
-            LocalDateTime giveawayEndTime = scheduling.getDateEnd().toLocalDateTime();
+            Instant giveawayCreateTime = scheduling.getDateCreateGiveaway();
+            Instant giveawayEndTime = scheduling.getDateEndGiveaway();
 
             long timeStart = getEpochSecond(giveawayCreateTime, userId);
             long timeEnd = getEpochSecond(giveawayEndTime, userId);

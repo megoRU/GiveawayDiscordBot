@@ -15,7 +15,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -58,7 +57,7 @@ public class EditGiveawayCommand {
 
         int minParticipants = giveawayData.getMinParticipants();
 
-        Instant endGiveaway = giveawayData.getEndGiveawayDate().toInstant();
+        Instant endGiveaway = giveawayData.getEndGiveawayDate();
         long userIdLong = giveawayData.getUserIdLong();
 
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
@@ -190,7 +189,7 @@ public class EditGiveawayCommand {
     private void updateGiveaway(Giveaway giveaway) {
         long messageId = giveaway.getGiveawayData().getMessageId();
         String title = giveaway.getGiveawayData().getTitle();
-        Timestamp endGiveawayDate = giveaway.getGiveawayData().getEndGiveawayDate();
+        Instant endGiveawayDate = giveaway.getGiveawayData().getEndGiveawayDate();
         long textChannelId = giveaway.getTextChannelId();
         int countWinners = giveaway.getGiveawayData().getCountWinners();
         long guildId = giveaway.getGuildId();
@@ -209,7 +208,7 @@ public class EditGiveawayCommand {
         activeGiveaways.setFinish(false);
         activeGiveaways.setIsForSpecificRole(forSpecificRole);
         activeGiveaways.setMinParticipants(minParticipants);
-        activeGiveaways.setDateEnd(endGiveawayDate);
+        activeGiveaways.setEndGiveawayDate(endGiveawayDate);
         activeGiveaways.setRoleId(roleId);
         activeGiveaways.setUrlImage(urlImage);
         activeGiveaways.setCreatedUserId(userIdLong);
@@ -240,7 +239,7 @@ public class EditGiveawayCommand {
         }
 
         if (time != null) {
-            scheduling.setDateEnd(Timestamp.valueOf(time));
+            scheduling.setDateEndGiveaway(Instant.parse(time));
         }
 
         if (urlImage != null) {
@@ -257,7 +256,7 @@ public class EditGiveawayCommand {
         return GiveawayData.builder()
                 .title(scheduling.getTitle())
                 .countWinners(scheduling.getCountWinners())
-                .endGiveawayDate(scheduling.getDateEnd())
+                .endGiveawayDate(scheduling.getDateEndGiveaway())
                 .build();
     }
 

@@ -62,20 +62,19 @@ public class GiveawayUtils {
         return seconds;
     }
 
-    public static Timestamp timeProcessor(String time, long userIdLong) throws ZoneRulesException {
+    public static Instant timeProcessor(String time, long userIdLong) throws ZoneRulesException {
         if (time == null) return null;
 
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
-        ZoneId userOffset = ZoneId.of(zonesIdByUser);
+        ZoneId zoneId = ZoneId.of(zonesIdByUser);
 
         LocalDateTime localDateTime = LocalDateTime.parse(time, GiveawayUtils.FORMATTER);
 
-        ZonedDateTime odt = localDateTime.atZone(userOffset);
-        Instant utcInstant = odt.toInstant();
-        return Timestamp.from(utcInstant);
+        ZonedDateTime odt = localDateTime.atZone(zoneId);
+        return odt.toInstant();
     }
 
-    public static long getEpochSecond(LocalDateTime time, long userIdLong) throws ZoneRulesException {
+    public static long getEpochSecond(Instant time, long userIdLong) throws ZoneRulesException {
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
         ZoneId userOffset = ZoneId.of(zonesIdByUser);
 

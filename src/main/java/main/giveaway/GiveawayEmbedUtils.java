@@ -26,7 +26,7 @@ public class GiveawayEmbedUtils {
         String imageUrl = giveawayData.getUrlImage();
         Long role = giveawayData.getRoleId();
         boolean isForSpecificRole = giveawayData.isForSpecificRole();
-        LocalDateTime endGiveaway = giveaway.getGiveawayData().getEndGiveawayDate().toLocalDateTime();
+        Instant endGiveaway = giveaway.getGiveawayData().getEndGiveawayDate();
 
         //Title
         embedBuilder.setTitle(title);

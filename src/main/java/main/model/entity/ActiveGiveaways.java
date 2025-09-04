@@ -6,8 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.sql.Timestamp;
-import java.util.HashSet;
+import java.time.Instant;
 import java.util.Set;
 
 @Getter
@@ -29,7 +28,7 @@ public class ActiveGiveaways {
     private int countWinners;
 
     @Column(name = "date_end", nullable = false)
-    private Timestamp dateEnd;
+    private Instant endGiveawayDate;
 
     @Column(name = "title")
     private String title;

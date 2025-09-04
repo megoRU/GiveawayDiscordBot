@@ -34,7 +34,7 @@ public final class StopGiveawayHandler {
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
 
         ZoneId zoneOffset = ZoneId.of(zonesIdByUser);
-        ZonedDateTime endInstant = giveaway.getGiveawayData().getEndGiveawayDate().toInstant().atZone(zoneOffset);
+        ZonedDateTime endInstant = giveaway.getGiveawayData().getEndGiveawayDate().atZone(zoneOffset);
 
         return Instant.now().atZone(zoneOffset).isAfter(endInstant);
     }
