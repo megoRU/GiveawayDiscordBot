@@ -53,6 +53,7 @@ public class GiveawayEmbedUtils {
 
         //EndGiveaway
         long endTime = GiveawayUtils.getEpochSecond(endGiveaway, userIdLong);
+
         String endTimeFormat = String.format(jsonParsers.getLocale("gift_ends_giveaway", guildId), endTime, endTime);
         embedBuilder.appendDescription(endTimeFormat);
 

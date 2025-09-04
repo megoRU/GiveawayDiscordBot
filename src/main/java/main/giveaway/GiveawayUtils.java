@@ -79,7 +79,7 @@ public class GiveawayUtils {
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
         ZoneId userOffset = ZoneId.of(zonesIdByUser);
         LocalDateTime userTime = time.atZone(userOffset).toLocalDateTime();
-        return userTime.atZone(userOffset).toEpochSecond();
+        return userTime.atZone(userOffset).toInstant().getEpochSecond();
     }
 
     public static Color getUserColor(long guildId) {
