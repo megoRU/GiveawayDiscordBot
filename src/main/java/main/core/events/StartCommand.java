@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
+import java.time.zone.ZoneRulesException;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -134,12 +135,26 @@ public class StartCommand {
             long messageId = giveaway.getGiveawayData().getMessageId();
             instance.putGift(messageId, giveaway);
 
+        } catch (ZoneRulesException z) {
+            LOGGER.error(z.getMessage(), z);
+
+            String startWithBrokenZone = jsonParsers.getLocale("start_with_broken_zone", guildId);
+
+            EmbedBuilder errors = new EmbedBuilder();
+            errors.setColor(Color.GREEN);
+            errors.setDescription(startWithBrokenZone);
+
+            if (event.isAcknowledged()) event.getHook().editOriginalEmbeds(errors.build()).queue();
+            else event.replyEmbeds(errors.build()).queue();
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
+
             String slashErrors = jsonParsers.getLocale("slash_errors", guildId);
+
             EmbedBuilder errors = new EmbedBuilder();
             errors.setColor(Color.GREEN);
             errors.setDescription(slashErrors);
+
             if (event.isAcknowledged()) event.getHook().editOriginalEmbeds(errors.build()).queue();
             else event.replyEmbeds(errors.build()).queue();
         }

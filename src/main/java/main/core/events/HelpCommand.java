@@ -33,6 +33,7 @@ public class HelpCommand {
         String helpPermissions = jsonParsers.getLocale("help_permissions", guildId);
         String helpEdit = jsonParsers.getLocale("help_edit", guildId);
         String helpEndMessage = jsonParsers.getLocale("help_end_message", guildId);
+        String helpZone = jsonParsers.getLocale("help_zone", guildId);
 
         Long check = SlashService.getCommandId("check");
         Long start = SlashService.getCommandId("start");
@@ -46,6 +47,7 @@ public class HelpCommand {
         Long participants = SlashService.getCommandId("participants");
         Long edit = SlashService.getCommandId("edit");
         Long endMessage = SlashService.getCommandId("endmessage");
+        Long zone = SlashService.getCommandId("zone");
 
         EmbedBuilder info = new EmbedBuilder();
         info.setColor(Color.GREEN);
@@ -64,6 +66,7 @@ public class HelpCommand {
                                 </check:%s> - %s
                                 </edit:%s> - %s
                                 </endmessage:%s> - %s
+                                </zone:%s> - %s
                                 """,
                         start, helpStart,
                         stop, helpStop,
@@ -76,7 +79,8 @@ public class HelpCommand {
                         participants, helpParticipants,
                         check, helpPermissions,
                         edit, helpEdit,
-                        endMessage, helpEndMessage), false);
+                        endMessage, helpEndMessage,
+                        zone, helpZone), false);
         String messagesEventsLinks = jsonParsers.getLocale("messages_events_links", guildId);
         String messagesEventsSite = jsonParsers.getLocale("messages_events_site", guildId);
         String messagesEventsAddMeToOtherGuilds = jsonParsers.getLocale("messages_events_add_me_to_other_guilds", guildId);

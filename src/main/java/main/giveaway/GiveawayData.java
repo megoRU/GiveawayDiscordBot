@@ -4,12 +4,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import main.config.BotStart;
 import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.Nullable;
 
-import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.time.ZoneId;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,8 +30,9 @@ public class GiveawayData {
     private boolean isForSpecificRole;
     private String urlImage;
     private String title;
-    private Timestamp endGiveawayDate;
+    private Instant endGiveawayDate;
     private int minParticipants = 1;
+    private long userIdLong;
 
     public GiveawayData(long messageId,
                         int countWinners,
@@ -39,17 +40,24 @@ public class GiveawayData {
                         Boolean isForSpecificRole,
                         String urlImage,
                         String title,
-                        Timestamp endGiveawayDate,
-                        int minParticipants) {
+                        Instant endGiveawayDate,
+                        int minParticipants,
+                        long userIdLong) {
         this.messageId = messageId;
         this.countWinners = countWinners;
         this.roleId = roleId;
         this.isForSpecificRole = Optional.ofNullable(isForSpecificRole).orElse(false);
         this.urlImage = urlImage;
         this.title = title;
-        if (endGiveawayDate == null) endGiveawayDate = Timestamp.from(Instant.now().plus(30, ChronoUnit.DAYS));
+
+        if (endGiveawayDate == null) {
+            String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
+            ZoneId zoneId = ZoneId.of(zonesIdByUser);
+            endGiveawayDate = Instant.now().atZone(zoneId).plusDays(30).toInstant();
+        }
         this.endGiveawayDate = endGiveawayDate;
         this.minParticipants = minParticipants;
+        this.userIdLong = userIdLong;
     }
 
     public void addUserToQueue(User user) {

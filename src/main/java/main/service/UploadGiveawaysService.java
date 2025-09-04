@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -37,7 +38,7 @@ public class UploadGiveawaysService {
                 int count_winners = activeGiveaways.getCountWinners();
                 long message_id_long = activeGiveaways.getMessageId();
                 String giveaway_title = activeGiveaways.getTitle();
-                Timestamp date_end_giveaway = activeGiveaways.getDateEnd();
+                Instant date_end_giveaway = activeGiveaways.getEndGiveawayDate();
                 Long role_id_long = activeGiveaways.getRoleId();
                 boolean is_for_specific_role = Optional.ofNullable(activeGiveaways.getIsForSpecificRole()).orElse(false);
                 String url_image = activeGiveaways.getUrlImage();
@@ -58,7 +59,8 @@ public class UploadGiveawaysService {
                         url_image,
                         giveaway_title == null ? "Giveaway" : giveaway_title,
                         date_end_giveaway,
-                        min_participants == null ? 1 : min_participants);
+                        min_participants == null ? 1 : min_participants,
+                        id_user_who_create_giveaway);
 
                 giveawayData.setParticipantsList(participantsList);
 

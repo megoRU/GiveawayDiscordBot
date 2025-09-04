@@ -2,6 +2,7 @@ package main.giveaway;
 
 import lombok.Getter;
 import lombok.Setter;
+import main.config.BotStart;
 import main.controller.UpdateController;
 import main.core.events.ReactionEvent;
 import main.model.entity.ActiveGiveaways;
@@ -14,11 +15,11 @@ import net.dv8tion.jda.api.entities.emoji.Emoji;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.zone.ZoneRulesException;
 import java.util.List;
 
 public class Giveaway {
@@ -85,22 +86,35 @@ public class Giveaway {
         this.giveawayRepositoryService = giveawayRepositoryService;
     }
 
-    public void updateTime(String time) {
-        if (time == null) {
-            time = LocalDateTime.now().plusDays(30).format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
-        }
-        ZoneOffset offset = ZoneOffset.UTC;
+    public void updateTime(String time) throws ZoneRulesException {
+        // Получаем таймзону пользователя
+        String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
+        ZoneId zoneId = ZoneId.of(zonesIdByUser);
+
         LocalDateTime localDateTime;
 
-        if (time.matches(GiveawayUtils.ISO_TIME_REGEX)) {
+        if (time == null) {
+            // если время не задано, ставим через 30 дней от текущего локального времени пользователя
+            localDateTime = LocalDateTime.now(zoneId).plusDays(30);
+        } else if (time.matches(GiveawayUtils.ISO_TIME_REGEX)) {
+            // если пришла дата в формате dd.MM.yyyy HH:mm
             localDateTime = LocalDateTime.parse(time, GiveawayUtils.FORMATTER);
         } else {
+            // если пришли секунды
             long seconds = GiveawayUtils.getSeconds(time);
-            localDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).plusSeconds(seconds);
+            localDateTime = LocalDateTime.now(zoneId).plusSeconds(seconds);
         }
 
-        long toEpochSecond = localDateTime.toEpochSecond(offset);
-        giveawayData.setEndGiveawayDate(new Timestamp(toEpochSecond * 1000));
+        // Привязываем локальное время пользователя к его зоне
+        ZonedDateTime zonedDateTime = localDateTime.atZone(zoneId);
+
+        // Переводим в Instant (UTC)
+        Instant utcInstant = zonedDateTime.toInstant();
+
+        System.out.println(utcInstant); //2025-09-04T20:30:00Z правильно
+
+        // Сохраняем в MariaDB TIMESTAMP правильно, чтобы не было сдвига
+        giveawayData.setEndGiveawayDate(utcInstant); //почему то 2025-09-04T23:30:00
     }
 
     //TODO: Возможно добавлять в коллекцию тут
@@ -123,6 +137,7 @@ public class Giveaway {
         giveawayData.setUrlImage(urlImage);
         giveawayData.setForSpecificRole(isOnlyForSpecificRole);
         giveawayData.setMinParticipants(minParticipants);
+        giveawayData.setUserIdLong(userIdLong);
         updateTime(time); //Обновляем время
 
         EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayPattern(giveawayData, this);
@@ -159,7 +174,7 @@ public class Giveaway {
         activeGiveaways.setIsForSpecificRole(giveawayData.isForSpecificRole());
         activeGiveaways.setUrlImage(giveawayData.getUrlImage());
         activeGiveaways.setCreatedUserId(userIdLong);
-        activeGiveaways.setDateEnd(giveawayData.getEndGiveawayDate());
+        activeGiveaways.setEndGiveawayDate(giveawayData.getEndGiveawayDate());
 
         giveawayRepositoryService.saveGiveaway(activeGiveaways);
     }

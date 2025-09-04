@@ -1,5 +1,6 @@
 package main.core.events;
 
+import main.config.BotStart;
 import main.giveaway.GiveawayRegistry;
 import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
@@ -12,22 +13,26 @@ import net.dv8tion.jda.api.entities.channel.unions.GuildChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
-import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.time.ZoneId;
+import java.time.zone.ZoneRulesException;
 import java.util.Objects;
 import java.util.Optional;
 
+import static main.giveaway.GiveawayUtils.getEpochSecond;
 import static main.giveaway.GiveawayUtils.timeProcessor;
 
 @Service
 public class SchedulingCommand {
 
     private final SchedulingRepository schedulingRepository;
+    private final static Logger LOGGER = LoggerFactory.getLogger(SchedulingCommand.class.getName());
 
     private static final JSONParsers jsonParsers = new JSONParsers();
 
@@ -89,36 +94,52 @@ public class SchedulingCommand {
             }
             String salt = GiveawayUtils.getSalt(20);
 
-            Timestamp oneMoths = Timestamp.from(Instant.now().plus(30, ChronoUnit.DAYS));
+            String zonesId = BotStart.getZonesIdByUser(userId);
+            ZoneId zoneId = ZoneId.of(zonesId);
+
+            Instant oneMoths = Instant.now().atZone(zoneId).plusDays(30).toInstant();
 
             Scheduling scheduling = new Scheduling();
-            scheduling.setIdSalt(salt);
-            scheduling.setGuildId(guildId);
-            scheduling.setChannelId(textChannel.getIdLong());
-            scheduling.setCountWinners(winners);
-            scheduling.setDateCreateGiveaway(timeProcessor(startTime));
-            scheduling.setDateEnd(timeProcessor(endTime) == null ? oneMoths : timeProcessor(endTime));
-            scheduling.setTitle(title);
-            scheduling.setRoleId(role);
-            scheduling.setIsForSpecificRole(isOnlyForSpecificRole);
-            scheduling.setCreatedUserId(userId);
-            scheduling.setUrlImage(urlImage);
-            scheduling.setMinParticipants(minParticipants);
+            try {
 
-            schedulingRepository.save(scheduling);
+                scheduling.setIdSalt(salt);
+                scheduling.setGuildId(guildId);
+                scheduling.setChannelId(textChannel.getIdLong());
+                scheduling.setCountWinners(winners);
+                scheduling.setDateCreateGiveaway(timeProcessor(startTime, userId));
+                scheduling.setDateEndGiveaway(timeProcessor(endTime, userId) == null ? oneMoths : timeProcessor(endTime, userId));
+                scheduling.setTitle(title);
+                scheduling.setRoleId(role);
+                scheduling.setIsForSpecificRole(isOnlyForSpecificRole);
+                scheduling.setCreatedUserId(userId);
+                scheduling.setUrlImage(urlImage);
+                scheduling.setMinParticipants(minParticipants);
 
-            GiveawayRegistry instance = GiveawayRegistry.getInstance();
-            instance.putScheduling(salt, scheduling);
+                schedulingRepository.save(scheduling);
 
-            String scheduleEnd = jsonParsers.getLocale("schedule_end", guildId);
-            long timeStart = Objects.requireNonNull(timeProcessor(startTime)).getTime() / 1000;
-            if (endTime != null) {
-                long timeEnd = Objects.requireNonNull(timeProcessor(endTime)).getTime() / 1000;
-                if (timeEnd != 0) {
-                    scheduleEnd = String.format("<t:%s:R> (<t:%s:f>)", timeEnd, timeEnd);
-                }
+                GiveawayRegistry instance = GiveawayRegistry.getInstance();
+                instance.putScheduling(salt, scheduling);
+            } catch (ZoneRulesException z) {
+                LOGGER.error(z.getMessage(), z);
+                String startWithBrokenZone = jsonParsers.getLocale("start_with_broken_zone", guildId);
+
+                EmbedBuilder errors = new EmbedBuilder();
+                errors.setColor(Color.GREEN);
+                errors.setDescription(startWithBrokenZone);
+
+                if (event.isAcknowledged()) event.getHook().editOriginalEmbeds(errors.build()).queue();
+                else event.replyEmbeds(errors.build()).queue();
+
+                return;
             }
 
+            Instant giveawayCreateTime = scheduling.getDateCreateGiveaway();
+            Instant giveawayEndTime = scheduling.getDateEndGiveaway();
+
+            long timeStart = getEpochSecond(giveawayCreateTime, userId);
+            long timeEnd = getEpochSecond(giveawayEndTime, userId);
+
+            String scheduleEnd = String.format("<t:%s:R> (<t:%s:f>)", timeEnd, timeEnd);
             String scheduleRole = jsonParsers.getLocale("schedule_end", guildId);
 
             String scheduleStart = String.format(jsonParsers.getLocale("schedule_start", guildId),

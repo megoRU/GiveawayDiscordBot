@@ -12,10 +12,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.zone.ZoneRulesException;
 
 import static com.aventrix.jnanoid.jnanoid.NanoIdUtils.DEFAULT_NUMBER_GENERATOR;
 
@@ -63,12 +62,23 @@ public class GiveawayUtils {
         return seconds;
     }
 
-    public static Timestamp timeProcessor(String time) {
+    public static Instant timeProcessor(String time, long userIdLong) throws ZoneRulesException {
         if (time == null) return null;
-        ZoneOffset offset = ZoneOffset.UTC;
+
+        String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
+        ZoneId zoneId = ZoneId.of(zonesIdByUser);
+
         LocalDateTime localDateTime = LocalDateTime.parse(time, GiveawayUtils.FORMATTER);
-        long toEpochSecond = localDateTime.toEpochSecond(offset);
-        return new Timestamp(toEpochSecond * 1000);
+
+        ZonedDateTime odt = localDateTime.atZone(zoneId);
+        return odt.toInstant();
+    }
+
+    public static long getEpochSecond(Instant time, long userIdLong) throws ZoneRulesException {
+        String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
+        ZoneId userOffset = ZoneId.of(zonesIdByUser);
+
+        return time.atZone(userOffset).toInstant().getEpochSecond();
     }
 
     public static Color getUserColor(long guildId) {
@@ -103,9 +113,12 @@ public class GiveawayUtils {
         return time.matches(GiveawayUtils.TIME_REGEX);
     }
 
-    public static boolean isTimeBefore(String time) {
+    public static boolean isTimeBefore(String time, long userIdLong) throws ZoneRulesException  {
+        String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
+        ZoneId offset = ZoneId.of(zonesIdByUser);
+
         LocalDateTime localDateTime = LocalDateTime.parse(time, FORMATTER);
-        LocalDateTime now = Instant.now().atOffset(ZoneOffset.UTC).toLocalDateTime();
+        LocalDateTime now = Instant.now().atZone(offset).toLocalDateTime();
         return localDateTime.isBefore(now);
     }
 

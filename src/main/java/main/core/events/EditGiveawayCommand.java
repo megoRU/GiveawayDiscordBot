@@ -1,6 +1,7 @@
 package main.core.events;
 
 import lombok.AllArgsConstructor;
+import main.config.BotStart;
 import main.controller.UpdateController;
 import main.giveaway.*;
 import main.jsonparser.JSONParsers;
@@ -14,7 +15,9 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -54,12 +57,18 @@ public class EditGiveawayCommand {
 
         int minParticipants = giveawayData.getMinParticipants();
 
-        Timestamp endGiveawayDate = giveawayData.getEndGiveawayDate();
+        Instant endGiveaway = giveawayData.getEndGiveawayDate();
+        long userIdLong = giveawayData.getUserIdLong();
+
+        String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
+        ZoneId userOffset = ZoneId.of(zonesIdByUser);
+
+        LocalDateTime userTime = endGiveaway.atZone(userOffset).toLocalDateTime();
 
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setColor(GiveawayUtils.getUserColor(guildId));
 
-        if (endGiveawayDate == null) {
+        if (userTime == null) {
             embedBuilder.setFooter(giveawayEdit);
             embedBuilder.setDescription(String.format("""
                             %s `%s`
@@ -72,7 +81,7 @@ public class EditGiveawayCommand {
             ));
 
         } else {
-            long endTime = endGiveawayDate.getTime() / 1000;
+            long endTime = userTime.atZone(userOffset).toEpochSecond();
             embedBuilder.setFooter(giveawayEdit);
             embedBuilder.setDescription(String.format("""
                             
@@ -180,7 +189,7 @@ public class EditGiveawayCommand {
     private void updateGiveaway(Giveaway giveaway) {
         long messageId = giveaway.getGiveawayData().getMessageId();
         String title = giveaway.getGiveawayData().getTitle();
-        Timestamp endGiveawayDate = giveaway.getGiveawayData().getEndGiveawayDate();
+        Instant endGiveawayDate = giveaway.getGiveawayData().getEndGiveawayDate();
         long textChannelId = giveaway.getTextChannelId();
         int countWinners = giveaway.getGiveawayData().getCountWinners();
         long guildId = giveaway.getGuildId();
@@ -199,7 +208,7 @@ public class EditGiveawayCommand {
         activeGiveaways.setFinish(false);
         activeGiveaways.setIsForSpecificRole(forSpecificRole);
         activeGiveaways.setMinParticipants(minParticipants);
-        activeGiveaways.setDateEnd(endGiveawayDate);
+        activeGiveaways.setEndGiveawayDate(endGiveawayDate);
         activeGiveaways.setRoleId(roleId);
         activeGiveaways.setUrlImage(urlImage);
         activeGiveaways.setCreatedUserId(userIdLong);
@@ -230,7 +239,7 @@ public class EditGiveawayCommand {
         }
 
         if (time != null) {
-            scheduling.setDateEnd(Timestamp.valueOf(time));
+            scheduling.setDateEndGiveaway(Instant.parse(time));
         }
 
         if (urlImage != null) {
@@ -247,7 +256,7 @@ public class EditGiveawayCommand {
         return GiveawayData.builder()
                 .title(scheduling.getTitle())
                 .countWinners(scheduling.getCountWinners())
-                .endGiveawayDate(scheduling.getDateEnd())
+                .endGiveawayDate(scheduling.getDateEndGiveaway())
                 .build();
     }
 
