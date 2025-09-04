@@ -83,7 +83,9 @@ public class GiveawayUtils {
         System.out.println(time.toEpochSecond(ZoneOffset.UTC));
         System.out.println(time.atZone(userOffset).toInstant().getEpochSecond());
 
-        return time.atZone(userOffset).toInstant().getEpochSecond();
+        ZoneOffset offset = ZoneOffset.of(zonesIdByUser);
+
+        return time.toInstant(offset).getEpochSecond();
     }
 
     public static Color getUserColor(long guildId) {
