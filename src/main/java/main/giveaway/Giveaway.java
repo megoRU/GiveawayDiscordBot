@@ -90,7 +90,7 @@ public class Giveaway {
         ZoneId zoneId = ZoneId.of(zonesIdByUser);
 
         if (time == null) {
-            time = LocalDateTime.now(zoneId).plusDays(30).format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+            time = LocalDateTime.now().plusDays(30).format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
         }
 
         LocalDateTime localDateTime;
@@ -98,7 +98,7 @@ public class Giveaway {
             localDateTime = LocalDateTime.parse(time, GiveawayUtils.FORMATTER);
         } else {
             long seconds = GiveawayUtils.getSeconds(time);
-            localDateTime = LocalDateTime.ofInstant(Instant.now(), zoneId).plusSeconds(seconds);
+            localDateTime = LocalDateTime.now().plusSeconds(seconds);
         }
 
         ZonedDateTime odt = localDateTime.atZone(zoneId);

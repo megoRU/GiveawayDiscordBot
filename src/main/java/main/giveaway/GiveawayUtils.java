@@ -78,9 +78,8 @@ public class GiveawayUtils {
     public static long getEpochSecond(LocalDateTime time, long userIdLong) throws ZoneRulesException {
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
         ZoneId userOffset = ZoneId.of(zonesIdByUser);
-        LocalDateTime userTime = time.atZone(userOffset).toLocalDateTime();
 
-        return time.toEpochSecond(ZoneOffset.UTC);
+        return time.atZone(userOffset).toInstant().getEpochSecond();
     }
 
     public static Color getUserColor(long guildId) {
