@@ -35,7 +35,7 @@ public class Scheduling {
     @Column(name = "create_giveaway", nullable = false)
     private Timestamp dateCreateGiveaway;
 
-    @Column(name = "date_end")
+    @Column(name = "date_end", nullable = false)
     private Timestamp dateEnd;
 
     @Column(name = "title")

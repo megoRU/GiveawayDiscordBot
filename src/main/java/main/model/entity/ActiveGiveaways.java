@@ -28,7 +28,7 @@ public class ActiveGiveaways {
     @Column(name = "count_winners")
     private int countWinners;
 
-    @Column(name = "date_end")
+    @Column(name = "date_end", nullable = false)
     private Timestamp dateEnd;
 
     @Column(name = "title")

@@ -1,5 +1,6 @@
 package main.core.events;
 
+import main.config.BotStart;
 import main.giveaway.GiveawayRegistry;
 import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
@@ -20,11 +21,14 @@ import org.springframework.stereotype.Service;
 import java.awt.*;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.time.zone.ZoneRulesException;
 import java.util.Objects;
 import java.util.Optional;
 
+import static main.giveaway.GiveawayUtils.getEpochSecond;
 import static main.giveaway.GiveawayUtils.timeProcessor;
 
 @Service
@@ -93,10 +97,14 @@ public class SchedulingCommand {
             }
             String salt = GiveawayUtils.getSalt(20);
 
-            Timestamp oneMoths = Timestamp.from(Instant.now().plus(30, ChronoUnit.DAYS));
+            String zonesId = BotStart.getZonesIdByUser(userId);
+            ZoneId zoneId = ZoneId.of(zonesId);
 
+            Timestamp oneMoths = Timestamp.from(Instant.now().atZone(zoneId).toInstant().plus(30, ChronoUnit.DAYS));
+
+            Scheduling scheduling = new Scheduling();
             try {
-                Scheduling scheduling = new Scheduling();
+
                 scheduling.setIdSalt(salt);
                 scheduling.setGuildId(guildId);
                 scheduling.setChannelId(textChannel.getIdLong());
@@ -128,16 +136,13 @@ public class SchedulingCommand {
                 return;
             }
 
-            String scheduleEnd = jsonParsers.getLocale("schedule_end", guildId);
-            long timeStart = Objects.requireNonNull(timeProcessor(startTime, userId)).getTime() / 1000;
+            LocalDateTime giveawayCreateTime = scheduling.getDateCreateGiveaway().toLocalDateTime();
+            LocalDateTime giveawayEndTime = scheduling.getDateEnd().toLocalDateTime();
 
-            if (endTime != null) {
-                long timeEnd = Objects.requireNonNull(timeProcessor(endTime, userId)).getTime() / 1000;
-                if (timeEnd != 0) {
-                    scheduleEnd = String.format("<t:%s:R> (<t:%s:f>)", timeEnd, timeEnd);
-                }
-            }
+            long timeStart = getEpochSecond(giveawayCreateTime, userId);
+            long timeEnd = getEpochSecond(giveawayEndTime, userId);
 
+            String scheduleEnd = String.format("<t:%s:R> (<t:%s:f>)", timeEnd, timeEnd);
             String scheduleRole = jsonParsers.getLocale("schedule_end", guildId);
 
             String scheduleStart = String.format(jsonParsers.getLocale("schedule_start", guildId),
