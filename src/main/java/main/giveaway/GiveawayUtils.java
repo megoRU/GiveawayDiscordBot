@@ -80,7 +80,7 @@ public class GiveawayUtils {
         ZoneId userOffset = ZoneId.of(zonesIdByUser);
         LocalDateTime userTime = time.atZone(userOffset).toLocalDateTime();
 
-        return userTime.atZone(userOffset).toEpochSecond();
+        return time.toEpochSecond(ZoneOffset.UTC);
     }
 
     public static Color getUserColor(long guildId) {
