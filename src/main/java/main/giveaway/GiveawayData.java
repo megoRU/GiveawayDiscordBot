@@ -4,11 +4,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import main.config.BotStart;
 import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.Set;
@@ -49,7 +51,12 @@ public class GiveawayData {
         this.isForSpecificRole = Optional.ofNullable(isForSpecificRole).orElse(false);
         this.urlImage = urlImage;
         this.title = title;
-        if (endGiveawayDate == null) endGiveawayDate = Timestamp.from(Instant.now().plus(30, ChronoUnit.DAYS));
+
+        if (endGiveawayDate == null) {
+            String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
+            ZoneId zoneId = ZoneId.of(zonesIdByUser);
+            endGiveawayDate = Timestamp.from(Instant.now().atZone(zoneId).toInstant().plus(30, ChronoUnit.DAYS));
+        }
         this.endGiveawayDate = endGiveawayDate;
         this.minParticipants = minParticipants;
         this.userIdLong = userIdLong;
