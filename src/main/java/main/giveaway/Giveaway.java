@@ -111,8 +111,6 @@ public class Giveaway {
         // Переводим в Instant (UTC)
         Instant utcInstant = zonedDateTime.toInstant();
 
-        System.out.println(utcInstant); //2025-09-04T20:30:00Z правильно
-
         // Сохраняем в MariaDB TIMESTAMP правильно, чтобы не было сдвига
         giveawayData.setEndGiveawayDate(utcInstant); //почему то 2025-09-04T23:30:00
     }

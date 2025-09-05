@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -222,6 +223,7 @@ public class EditGiveawayCommand {
     private GiveawayData updateSchedulingGiveaway(@NotNull SlashCommandInteractionEvent event, @NotNull Scheduling scheduling) {
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
 
+        long userId = event.getUser().getIdLong();
         String time = event.getOption("duration", OptionMapping::getAsString);
         int winners = Optional.ofNullable(event.getOption("winners", OptionMapping::getAsInt)).orElse(-1);
         String title = event.getOption("title", OptionMapping::getAsString);
@@ -239,7 +241,26 @@ public class EditGiveawayCommand {
         }
 
         if (time != null) {
-            scheduling.setDateEndGiveaway(Instant.parse(time));
+            LocalDateTime localDateTime;
+
+            String zonesIdByUser = BotStart.getZonesIdByUser(userId);
+            ZoneId zoneId = ZoneId.of(zonesIdByUser);
+
+            if (time.matches(GiveawayUtils.ISO_TIME_REGEX)) {
+                localDateTime = LocalDateTime.parse(time, GiveawayUtils.FORMATTER);
+            } else {
+
+                long seconds = GiveawayUtils.getSeconds(time);
+                localDateTime = LocalDateTime.now(zoneId).plusSeconds(seconds);
+            }
+
+            // Привязываем локальное время пользователя к его зоне
+            ZonedDateTime zonedDateTime = localDateTime.atZone(zoneId);
+
+            // Переводим в Instant (UTC)
+            Instant utcInstant = zonedDateTime.toInstant();
+
+            scheduling.setDateEndGiveaway(utcInstant);
         }
 
         if (urlImage != null) {
