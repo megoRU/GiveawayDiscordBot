@@ -249,7 +249,6 @@ public class EditGiveawayCommand {
             if (time.matches(GiveawayUtils.ISO_TIME_REGEX)) {
                 localDateTime = LocalDateTime.parse(time, GiveawayUtils.FORMATTER);
             } else {
-
                 long seconds = GiveawayUtils.getSeconds(time);
                 localDateTime = LocalDateTime.now(zoneId).plusSeconds(seconds);
             }
