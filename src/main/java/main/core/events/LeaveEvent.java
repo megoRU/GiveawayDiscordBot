@@ -33,6 +33,8 @@ public class LeaveEvent {
 
             Map<Long, Settings> mapLanguages = BotStart.getMapLanguages();
             mapLanguages.remove(guildId);
+
+            BotStart.updateActivity();
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }

@@ -1,5 +1,6 @@
 package main.core.events;
 
+import main.config.BotStart;
 import main.service.SlashService;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -56,5 +57,7 @@ public class JoinEvent {
                 }
             }
         }
+
+        BotStart.updateActivity();
     }
 }

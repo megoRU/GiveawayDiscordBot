@@ -119,6 +119,8 @@ public class BotStart {
             //Обновить команды
             slashService.updateSlash(jda);
 
+            updateActivity();
+
             System.out.println("DevMode: " + Config.isIsDev() + " Time Build: " + "11:29");
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
@@ -134,8 +136,7 @@ public class BotStart {
         }
     }
 
-    @Scheduled(fixedDelay = 120, initialDelay = 8, timeUnit = TimeUnit.SECONDS)
-    private void updateActivity() {
+    public static void updateActivity() {
         if (!Config.isIsDev()) {
             int serverCount = BotStart.jda.getGuilds().size();
             BotStart.jda.getPresence().setActivity(Activity.playing(BotStart.activity + serverCount + " guilds"));
