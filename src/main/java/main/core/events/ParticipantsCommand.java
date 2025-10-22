@@ -12,11 +12,12 @@ import main.model.entity.Participants;
 import main.model.repository.ListUsersRepository;
 import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.SelfUser;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -93,7 +94,7 @@ public class ParticipantsCommand {
             embedBuilder.setDescription(stringBuilder.toString());
             embedBuilder.setFooter(paginationParticipantsCount + total);
 
-            event.replyEmbeds(embedBuilder.build()).setActionRow(buttons).queue();
+            event.replyEmbeds(embedBuilder.build()).setComponents(ActionRow.of(buttons)).queue();
         } else {
             event.reply("Options is null").queue();
         }

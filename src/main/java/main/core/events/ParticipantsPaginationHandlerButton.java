@@ -6,18 +6,17 @@ import main.jsonparser.JSONParsers;
 import main.model.repository.ListUsersRepository;
 import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.SelfUser;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -33,13 +32,13 @@ public class ParticipantsPaginationHandlerButton {
         long guildId = event.getGuild().getIdLong();
         long userIdLong = event.getInteraction().getUser().getIdLong();
 
-        if (event.getButton().getId() == null) {
+        if (event.getButton().getCustomId() == null) {
             event.editMessage("Options is null").queue();
             return;
         }
 
         //[NEXT, 1359511082565238914, 1]
-        String[] split = event.getButton().getId().split("_");
+        String[] split = event.getButton().getCustomId().split("_");
 
         long giveawayIdLong = Long.parseLong(split[1]);
         String giveawayId = split[1];
@@ -103,6 +102,6 @@ public class ParticipantsPaginationHandlerButton {
         embedBuilder.setDescription(stringBuilder.toString());
         embedBuilder.setFooter(paginationParticipantsCount.concat(String.valueOf(total)));
 
-        event.editMessageEmbeds(embedBuilder.build()).setActionRow(buttons).queue();
+        event.editMessageEmbeds(embedBuilder.build()).setComponents(ActionRow.of(buttons)).queue();
     }
 }

@@ -4,11 +4,12 @@ import main.config.BotStart;
 import main.controller.UpdateController;
 import main.giveaway.GiveawayRegistry;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.RestAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +54,7 @@ public class MessageHandler {
             if (textChannelById != null) {
                 textChannelById
                         .sendMessageEmbeds(embedBuilder)
-                        .setActionRow(buttons)
+                        .setComponents(ActionRow.of(buttons))
                         .queue(null, throwable -> LOGGER.error(throwable.getMessage(), throwable));
             }
         }

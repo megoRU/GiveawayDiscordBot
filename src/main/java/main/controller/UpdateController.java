@@ -6,6 +6,7 @@ import main.core.events.*;
 import main.model.repository.*;
 import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
@@ -14,7 +15,6 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +69,7 @@ public class UpdateController {
             LOGGER.info(slashCommandInteractionEvent.getName());
             slashEvent(slashCommandInteractionEvent);
         } else if (event instanceof ButtonInteractionEvent buttonInteractionEvent) {
-            LOGGER.info(buttonInteractionEvent.getInteraction().getButton().getId());
+            LOGGER.info(buttonInteractionEvent.getInteraction().getButton().getCustomId());
             buttonEvent(buttonInteractionEvent);
         } else if (event instanceof GuildJoinEvent guildJoinEvent) {
             joinEvent(guildJoinEvent);
@@ -166,7 +166,7 @@ public class UpdateController {
 
     private void buttonEvent(@NotNull ButtonInteractionEvent event) {
         if (event.getGuild() == null) return;
-        String idButton = event.getButton().getId();
+        String idButton = event.getButton().getCustomId();
 
         if (Objects.equals(idButton, event.getGuild().getId() + ":" + ButtonChangeLanguage.CHANGE_LANGUAGE)) {
             ButtonChangeLanguage buttonChangeLanguage = new ButtonChangeLanguage(settingsRepository);

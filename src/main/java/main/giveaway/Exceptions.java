@@ -2,8 +2,9 @@ package main.giveaway;
 
 import api.megoru.ru.entity.exceptions.UnsuccessfulHttpException;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +29,7 @@ public class Exceptions {
 
                 List<Button> buttons = new ArrayList<>();
                 buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
-                hook.sendMessageEmbeds(errors.build()).addActionRow(buttons).queue();
+                hook.sendMessageEmbeds(errors.build()).setComponents(ActionRow.of(buttons)).queue();
                 LOGGER.info(uhe.getMessage(), uhe);
             }
         } else {

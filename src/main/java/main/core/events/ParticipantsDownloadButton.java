@@ -36,12 +36,12 @@ public class ParticipantsDownloadButton {
 
         event.deferReply().setEphemeral(true).queue();
 
-        if (event.getButton().getId() == null) {
+        if (event.getButton().getCustomId() == null) {
             event.getHook().sendMessage("Options is null").setEphemeral(true).queue();
             return;
         }
 
-        String id = event.getButton().getId().replaceAll("DOWNLOAD_", "");
+        String id = event.getButton().getCustomId().replaceAll("DOWNLOAD_", "");
 
         if (id.matches("[0-9]+")) {
             long giveawayId = Long.parseLong(id);

@@ -4,12 +4,13 @@ import main.config.BotStart;
 import main.service.SlashService;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.unions.DefaultGuildChannelUnion;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
@@ -53,7 +54,7 @@ public class JoinEvent {
             if (defaultChannel.getType() == ChannelType.TEXT) {
                 TextChannel textChannel = defaultChannel.asTextChannel();
                 if (selfMember.hasPermission(textChannel, Permission.MESSAGE_SEND, Permission.VIEW_CHANNEL, Permission.MESSAGE_EMBED_LINKS)) {
-                    textChannel.sendMessageEmbeds(welcome.build()).setActionRow(buttons).queue();
+                    textChannel.sendMessageEmbeds(welcome.build()).setComponents(ActionRow.of(buttons)).queue();
                 }
             }
         }

@@ -3,8 +3,9 @@ package main.core.events;
 import main.jsonparser.JSONParsers;
 import main.service.SlashService;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
@@ -90,6 +91,6 @@ public class HelpCommand {
         List<Button> buttons = new ArrayList<>();
         buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
 
-        event.replyEmbeds(info.build()).setEphemeral(true).addActionRow(buttons).queue();
+        event.replyEmbeds(info.build()).setEphemeral(true).setComponents(ActionRow.of(buttons)).queue();
     }
 }
