@@ -5,8 +5,6 @@ import main.model.entity.ActiveGiveaways;
 import main.model.entity.Participants;
 import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.entities.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -15,14 +13,11 @@ import java.util.List;
 @AllArgsConstructor
 public class GiveawayUserHandler {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(GiveawayUserHandler.class.getName());
-
     private final GiveawayRepositoryService giveawayRepositoryService;
 
     @Transactional
     public void saveUser(Giveaway giveaway, List<ParticipantDTO> user) {
         long messageId = giveaway.getGiveawayData().getMessageId();
-        long guildId = giveaway.getGuildId();
         boolean removed = giveaway.isRemoved();
 
         GiveawayData giveawayData = giveaway.getGiveawayData();
@@ -35,8 +30,6 @@ public class GiveawayUserHandler {
             for (ParticipantDTO users : user) {
                 String nickname = users.getNickname();
                 long userId = users.getUserId();
-
-                LOGGER.info("Nick: {} UserID: {} Guild: {} MessageId {}", nickname, userId, guildId, messageId);
 
                 Participants participants = new Participants();
                 participants.setUserId(userId);
