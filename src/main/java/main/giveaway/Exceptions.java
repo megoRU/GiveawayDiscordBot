@@ -28,7 +28,7 @@ public class Exceptions {
                 errors.setDescription("Repeat later. Or write to us about it.");
 
                 List<Button> buttons = new ArrayList<>();
-                buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
+                buttons.add(Button.link("https://discord.gg/MhEzJNDf", "Support"));
                 hook.sendMessageEmbeds(errors.build()).setComponents(ActionRow.of(buttons)).queue();
                 LOGGER.info(uhe.getMessage(), uhe);
             }

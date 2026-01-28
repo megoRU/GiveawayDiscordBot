@@ -80,7 +80,7 @@ public class StopCommand {
             errorsAgain.setTitle(errorsWithApi);
             errorsAgain.setDescription(errorsDescriptionsAgain);
             List<Button> buttons = new ArrayList<>();
-            buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
+            buttons.add(Button.link("https://discord.gg/MhEzJNDf", "Support"));
             event.replyEmbeds(errorsAgain.build()).setComponents(ActionRow.of(buttons)).setEphemeral(true).queue();
             return;
         }

@@ -103,7 +103,7 @@ public class GiveawayEnds {
                     errors.setTitle(errorsWithApi);
                     errors.setDescription(errorsDescriptions);
                     List<Button> buttons = new ArrayList<>();
-                    buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
+                    buttons.add(Button.link("https://discord.gg/MhEzJNDf", "Support"));
                     updateController.setView(errors.build(), guildId, textChannelId, buttons);
                 }
                 LOGGER.error(e.getMessage(), e);

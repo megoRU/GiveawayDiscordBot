@@ -40,13 +40,13 @@ public class JoinEvent {
         welcome.addField("Reroll Winner", String.format("Use: </reroll:%s>", reroll), false);
         welcome.addField("Stop Giveaway manually", String.format("Use: </stop:%s> (Permission Manage server)", stop), false);
         welcome.addField("List of commands", String.format("Use: </help:%s>", help), false);
-        welcome.addField("Support server", ":helmet_with_cross: [Discord server](https://discord.com/invite/UrWG3R683d)\n", false);
+        welcome.addField("Support server", ":helmet_with_cross: [Discord server](https://discord.com/invite/MhEzJNDf)\n", false);
         welcome.addField("Information", "Our bot supports recovery of any Giveaway, upon request in support. " +
                 "Also, the bot automatically checks the lists of participants, even if the bot is turned off or there are problems in recording while working, " +
                 "it will automatically restore everything. This gives a 100% guarantee that each participant will be recorded.", false);
 
         List<Button> buttons = new ArrayList<>();
-        buttons.add(Button.link("https://discord.gg/UrWG3R683d", "Support"));
+        buttons.add(Button.link("https://discord.gg/MhEzJNDf", "Support"));
 
         DefaultGuildChannelUnion defaultChannel = event.getGuild().getDefaultChannel();
 
