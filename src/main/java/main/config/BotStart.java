@@ -47,7 +47,7 @@ import java.util.concurrent.TimeUnit;
 @AllArgsConstructor
 public class BotStart {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(BotStart.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(BotStart.class.getName());
 
     public static final String activity = "/start | ";
     //String - guildLongId
@@ -58,7 +58,7 @@ public class BotStart {
     @Getter
     private static JDA jda;
     private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
-    private final static GiveawayRegistry instance = GiveawayRegistry.getInstance();
+    private static final GiveawayRegistry instance = GiveawayRegistry.getInstance();
 
     //REPOSITORY
     private final UpdateController updateController;
