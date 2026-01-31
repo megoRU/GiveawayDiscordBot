@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class GiveawayUpdateListUser {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(GiveawayUpdateListUser.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(GiveawayUpdateListUser.class.getName());
 
     private final GiveawayRepositoryService giveawayRepositoryService;
 

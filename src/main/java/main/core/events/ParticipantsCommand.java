@@ -35,7 +35,7 @@ import java.util.List;
 public class ParticipantsCommand {
 
     private static final JSONParsers jsonParsers = new JSONParsers();
-    private final static GiveawayRegistry instance = GiveawayRegistry.getInstance();
+    private static final GiveawayRegistry instance = GiveawayRegistry.getInstance();
     private final ListUsersRepository listUsersRepository;
     private final ParticipantsRepository participantsRepository;
 

@@ -16,9 +16,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 @AllArgsConstructor
 public class SaveUsersService {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(SaveUsersService.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(SaveUsersService.class.getName());
 
-    private final static GiveawayRegistry giveawayRegistry = GiveawayRegistry.getInstance();
+    private static final GiveawayRegistry giveawayRegistry = GiveawayRegistry.getInstance();
     private final GiveawayRepositoryService giveawayRepositoryService;
 
     public void saveParticipants() {

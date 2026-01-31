@@ -27,7 +27,7 @@ import java.util.Set;
 public class ParticipantsDownloadButton {
 
     private final ListUsersRepository listUsersRepository;
-    private final static Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     public void handle(@NotNull ButtonInteractionEvent event) {

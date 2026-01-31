@@ -25,8 +25,8 @@ import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
 @Service
 public class SlashService {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(SlashService.class.getName());
-    private final static Map<String, Long> commandMap = new HashMap<>();
+    private static final Logger LOGGER = LoggerFactory.getLogger(SlashService.class.getName());
+    private static final Map<String, Long> commandMap = new HashMap<>();
 
     public void updateSlash(JDA jda) {
         try {

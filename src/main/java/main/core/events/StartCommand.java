@@ -27,7 +27,7 @@ import java.util.Optional;
 @AllArgsConstructor
 public class StartCommand {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(StartCommand.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(StartCommand.class.getName());
     private final GiveawayRepositoryService giveawayRepositoryService;
 
     private static final JSONParsers jsonParsers = new JSONParsers();

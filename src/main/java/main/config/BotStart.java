@@ -159,6 +159,7 @@ public class BotStart {
     private void stopGiveawayTimer() {
         List<Giveaway> giveawayDataList = new LinkedList<>(instance.getAllGiveaway());
         StopGiveawayHandler stopGiveawayHandler = new StopGiveawayHandler();
+
         for (Giveaway giveaway : giveawayDataList) {
             try {
                 stopGiveawayHandler.handleGiveaway(giveaway);

@@ -17,7 +17,7 @@ import java.util.Objects;
 @Service
 public class HelpCommand {
 
-    private final static JSONParsers jsonParsers = new JSONParsers();
+    private static final JSONParsers jsonParsers = new JSONParsers();
 
     public void help(@NotNull SlashCommandInteractionEvent event) {
         var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();

@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class UploadGiveawaysService {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(UploadGiveawaysService.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(UploadGiveawaysService.class.getName());
 
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final GiveawayRepositoryService giveawayRepositoryService;

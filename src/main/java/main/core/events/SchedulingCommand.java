@@ -32,7 +32,7 @@ import static main.giveaway.GiveawayUtils.timeProcessor;
 public class SchedulingCommand {
 
     private final SchedulingRepository schedulingRepository;
-    private final static Logger LOGGER = LoggerFactory.getLogger(SchedulingCommand.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(SchedulingCommand.class.getName());
 
     private static final JSONParsers jsonParsers = new JSONParsers();
 

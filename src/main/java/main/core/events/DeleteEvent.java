@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 public class DeleteEvent {
 
     private final GiveawayRepositoryService giveawayRepositoryService;
-    private final static Logger LOGGER = LoggerFactory.getLogger(DeleteEvent.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(DeleteEvent.class.getName());
 
     public void handle(@NotNull MessageDeleteEvent event) {
         var messageId = event.getMessageIdLong();

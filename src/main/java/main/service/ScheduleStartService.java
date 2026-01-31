@@ -31,11 +31,11 @@ import java.util.Objects;
 public class ScheduleStartService {
 
     private static final JSONParsers jsonParsers = new JSONParsers();
-    private final static Logger LOGGER = LoggerFactory.getLogger(ScheduleStartService.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScheduleStartService.class.getName());
 
     private final GiveawayRepositoryService giveawayRepositoryService;
     private final SchedulingRepository schedulingRepository;
-    private final static GiveawayRegistry instance = GiveawayRegistry.getInstance();
+    private static final GiveawayRegistry instance = GiveawayRegistry.getInstance();
 
     public void scheduleStart(UpdateController updateController, JDA jda) {
         Collection<Scheduling> scheduledGiveaways = instance.getScheduledGiveaways();

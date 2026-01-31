@@ -27,9 +27,9 @@ import java.util.List;
 @AllArgsConstructor
 public class RerollCommand {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(RerollCommand.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(RerollCommand.class.getName());
     private static final JSONParsers jsonParsers = new JSONParsers();
-    private final static MegoruAPI api = new MegoruAPI.Builder().build();
+    private static final MegoruAPI api = new MegoruAPI.Builder().build();
 
     private final ListUsersRepository listUsersRepository;
 

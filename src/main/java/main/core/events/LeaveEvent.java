@@ -18,7 +18,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class LeaveEvent {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(LeaveEvent.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(LeaveEvent.class.getName());
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final SchedulingRepository schedulingRepository;
     private final SettingsRepository settingsRepository;
