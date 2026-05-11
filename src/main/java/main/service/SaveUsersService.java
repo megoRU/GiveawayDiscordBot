@@ -33,7 +33,7 @@ public class SaveUsersService {
                 if (collectionQueue != null && !collectionQueue.isEmpty()) {
                     List<ParticipantDTO> userList = new ArrayList<>();
 
-                    for (int i = 0; i < collectionQueue.size(); i++) {
+                    while (!collectionQueue.isEmpty()) {
                         userList.add(collectionQueue.poll());
                     }
 

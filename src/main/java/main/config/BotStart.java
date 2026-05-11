@@ -203,7 +203,6 @@ public class BotStart {
                 }
                 reader.close();
                 inputStream.close();
-                reader.close();
             }
             System.out.println("setLanguages()");
         } catch (Exception e) {

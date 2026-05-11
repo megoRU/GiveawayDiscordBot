@@ -28,7 +28,7 @@ public class GiveawayUtils {
     //Дата/время в русском формате: 07.08.2025 15:00
     //Интервалы: 5м, 10с, 2ч, 1д, 10m 2h, 5с 1м, и т.п.
     //Поддерживает как кириллицу, так и латиницу для единиц измерения.
-    public static final String TIME_REGEX = "^(\\d{2}\\.\\d{2}\\.\\d{4}\\s\\d{2}:\\d{2})|((\\d{1,2}([смчдsmhd]))\\s*)+$";
+    public static final String TIME_REGEX = "^(\\d{2}\\.\\d{2}\\.\\d{4}\\s\\d{2}:\\d{2})|((\\d+([смчдsmhd]))\\s*)+$";
 
     public static final JSONParsers jsonParsers = new JSONParsers();
     public static final char[] DEFAULT_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray();
