@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,62 +47,59 @@ public class GiveawayUpdateListUser {
                     if (guildById != null) {
                         TextChannel textChannelById = guildById.getTextChannelById(channelId);
                         if (textChannelById != null) {
-                            List<MessageReaction> reactions = textChannelById
-                                    .retrieveMessageById(messageId)
-                                    .complete(true)
-                                    .getReactions()
+                            Message message = textChannelById.retrieveMessageById(messageId).complete(true);
+                            List<MessageReaction> reactions = message.getReactions()
                                     .stream()
                                     .filter(messageReaction -> messageReaction.getEmoji().getName().equals(ReactionEvent.TADA))
                                     .toList();
 
-                            //-1 because one Bot
-                            if (!reactions.isEmpty() && reactions.getFirst().getCount() - 1 != giveawayData.getParticipantSize()) {
-                                for (MessageReaction reaction : reactions) {
-                                    Map<String, User> userList = reaction
-                                            .retrieveUsers()
-                                            .complete(true)
-                                            .stream()
-                                            .filter(user -> !user.isBot())
-                                            .filter(user -> !giveawayData.participantContains(user.getIdLong()))
-                                            .collect(Collectors.toMap(User::getId, user -> user));
+                            if (!reactions.isEmpty()) {
+                                MessageReaction reaction = reactions.getFirst();
+                                int count = reaction.getCount();
+                                if (reaction.isSelf()) {
+                                    count--;
+                                }
+
+                                if (count != giveawayData.getParticipantSize()) {
+                                    List<User> users = new ArrayList<>();
+                                    reaction.retrieveUsers().forEach(users::add);
 
                                     if (isForSpecificRole) {
-                                        try {
-                                            Map<String, User> localUserMap = new HashMap<>(userList); //bad practice but it`s work
-                                            Role roleGiveaway = jda.getRoleById(giveawayData.getRoleId());
-                                            for (Map.Entry<String, User> entry : localUserMap.entrySet()) {
-                                                Guild guild = jda.getGuildById(guildId);
-                                                if (guild != null) {
-                                                    try {
-                                                        Member member = guild.retrieveMemberById(entry.getKey()).complete(true);
-                                                        if (member != null) {
-                                                            boolean contains = member.getRoles().contains(roleGiveaway);
-                                                            if (!contains) {
-                                                                userList.remove(entry.getKey());
-                                                            }
-                                                        }
-                                                    } catch (Exception e) {
-                                                        //Если пользователя нет в Гильдии удаляем из списка
-                                                        if (e.getMessage().contains("10007: Unknown Member")) {
-                                                            userList.remove(entry.getKey());
-                                                        } else {
-                                                            LOGGER.error(e.getMessage(), e);
-                                                        }
+                                        Role roleGiveaway = jda.getRoleById(giveawayData.getRoleId());
+                                        if (roleGiveaway != null && guildById != null) {
+                                            List<Long> userIds = users.stream()
+                                                    .filter(user -> !user.isBot())
+                                                    .filter(user -> !giveawayData.participantContains(user.getIdLong()))
+                                                    .map(User::getIdLong)
+                                                    .toList();
+                                            List<ParticipantDTO> participantDTOList = new ArrayList<>();
+
+                                            for (Long userId : userIds) {
+                                                try {
+                                                    Member member = guildById.retrieveMemberById(userId).complete();
+                                                    if (member != null && member.getRoles().contains(roleGiveaway)) {
+                                                        participantDTOList.add(new ParticipantDTO(member.getIdLong(), member.getUser().getName()));
                                                     }
+                                                } catch (Exception e) {
+                                                    LOGGER.error("Error retrieving member " + userId + ": " + e.getMessage());
                                                 }
                                             }
-                                        } catch (Exception e) {
-                                            LOGGER.error(e.getMessage(), e);
+                                            if (instance.hasGiveaway(messageId) && !participantDTOList.isEmpty()) {
+                                                giveaway.addUser(participantDTOList);
+                                            }
                                         }
-                                    }
+                                    } else {
+                                        if (instance.hasGiveaway(messageId)) {
+                                            List<ParticipantDTO> participantDTOList = users.stream()
+                                                    .filter(user -> !user.isBot())
+                                                    .filter(user -> !giveawayData.participantContains(user.getIdLong()))
+                                                    .map(user -> new ParticipantDTO(user.getIdLong(), user.getName()))
+                                                    .toList();
 
-                                    //Перебираем Users в реакциях
-                                    if (instance.hasGiveaway(messageId)) {
-                                        List<ParticipantDTO> participantDTOList = userList.values().stream()
-                                                .map(user -> new ParticipantDTO(user.getIdLong(), user.getName()))
-                                                .toList();
-
-                                        giveaway.addUser(participantDTOList);
+                                            if (!participantDTOList.isEmpty()) {
+                                                giveaway.addUser(participantDTOList);
+                                            }
+                                        }
                                     }
                                 }
                             }

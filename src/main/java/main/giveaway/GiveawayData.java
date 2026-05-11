@@ -65,14 +65,7 @@ public class GiveawayData {
         long userIdLong = user.getIdLong();
         ParticipantDTO participantDTO = new ParticipantDTO(userIdLong, name);
 
-        ConcurrentLinkedQueue<ParticipantDTO> users = queueConcurrentHashMap.get(messageId);
-        if (users == null) {
-            users = new ConcurrentLinkedQueue<>();
-            users.add(participantDTO);
-        } else {
-            users.add(participantDTO);
-        }
-        queueConcurrentHashMap.put(messageId, users);
+        queueConcurrentHashMap.computeIfAbsent(messageId, k -> new ConcurrentLinkedQueue<>()).add(participantDTO);
     }
 
     @Nullable

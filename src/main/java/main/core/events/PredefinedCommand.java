@@ -48,6 +48,8 @@ public class PredefinedCommand {
             return;
         }
 
+        event.deferReply().setEphemeral(true).queue();
+
         ChannelType channelType = event.getChannelType();
         GuildMessageChannel textChannel;
 
@@ -56,7 +58,7 @@ public class PredefinedCommand {
         } else if (channelType == ChannelType.TEXT) {
             textChannel = event.getChannel().asTextChannel();
         } else {
-            event.reply("It`s not a TextChannel!").queue();
+            event.getHook().editOriginal("It`s not a TextChannel!").queue();
             return;
         }
 
@@ -67,19 +69,19 @@ public class PredefinedCommand {
         if (role != null) {
             if (role.getIdLong() == guildId) {
                 String notificationForThisRole = String.format(jsonParsers.getLocale("gift_notification_for_everyone", guildId), "@everyone");
-                event.reply(notificationForThisRole).queue();
+                event.getHook().editOriginal(notificationForThisRole).queue();
             }
         } else {
-            event.reply("Role is Null").queue();
+            event.getHook().editOriginal("Role is Null").queue();
             return;
         }
 
         if (winners == null) {
-            event.reply("Count is Null").queue();
+            event.getHook().editOriginal("Count is Null").queue();
             return;
         } else {
             if (!winners.matches("[0-9]+")) {
-                event.reply("Count not a number").queue();
+                event.getHook().editOriginal("Count not a number").queue();
                 return;
             }
         }
@@ -109,13 +111,11 @@ public class PredefinedCommand {
         Task<List<Member>> listTask = event.getGuild().loadMembers()
                 .onSuccess(members -> {
                     try {
-                        if (!event.isAcknowledged()) {
-                            String sendSlashMessage = String.format(jsonParsers.getLocale("send_slash_message", guildId), event.getChannel().getId());
-                            event.reply(sendSlashMessage)
-                                    .delay(5, TimeUnit.SECONDS)
-                                    .flatMap(InteractionHook::deleteOriginal)
-                                    .queue();
-                        }
+                        String sendSlashMessage = String.format(jsonParsers.getLocale("send_slash_message", guildId), event.getChannel().getId());
+                        event.getHook().editOriginal(sendSlashMessage)
+                                .delay(5, TimeUnit.SECONDS)
+                                .flatMap(message -> event.getHook().deleteOriginal())
+                                .queue();
                     } catch (Exception ignored) {
                     }
 
