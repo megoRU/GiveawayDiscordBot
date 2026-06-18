@@ -1,6 +1,5 @@
 package main.model.entity;
 
-import com.google.gson.annotations.Expose;
 import jakarta.persistence.*;
 import lombok.*;
 
