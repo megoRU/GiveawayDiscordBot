@@ -164,7 +164,11 @@ public class GiveawayEnds {
                                     );
                         }
                     },
-                    throwable -> LOGGER.warn("Не удалось обновить embed Giveaway", throwable)
+                    throwable -> {
+                        giveaway.setFinishGiveaway(true);
+                        giveawayRepositoryService.setFinishGiveaway(messageId);
+                        LOGGER.warn("Не удалось обновить embed Giveaway", throwable);
+                    }
             );
         } else if (participants.isEmpty()) {
             cancel(giveaway, updateController);
