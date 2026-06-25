@@ -7,6 +7,7 @@ import main.model.repository.*;
 import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.components.buttons.Button;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
@@ -15,6 +16,7 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
+import net.dv8tion.jda.api.requests.RestAction;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -195,12 +197,16 @@ public class UpdateController {
         reactionEvent.reaction(event, this);
     }
 
-    public void setView(MessageEmbed messageEmbed, long guildId, long textChannel, long messageId) {
-        messageHandler.editMessage(this, messageEmbed, guildId, textChannel, messageId);
+    public RestAction<Message> setViewRest(MessageEmbed messageEmbed, long guildId, long textChannel, long messageId) {
+        return messageHandler.editMessage(messageEmbed, guildId, textChannel, messageId);
     }
 
-    public void setView(JDA jda, String messageContent, Long guildId, Long textChannel) {
-        messageHandler.sendMessage(jda, guildId, textChannel, messageContent);
+    public void setView(MessageEmbed messageEmbed, long guildId, long textChannel, long messageId) {
+        messageHandler.editMessage(messageEmbed, guildId, textChannel, messageId).queue();
+    }
+
+    public RestAction<Message> setViewRest(JDA jda, String messageContent, Long guildId, Long textChannel) {
+       return messageHandler.sendMessage(jda, guildId, textChannel, messageContent);
     }
 
     public void setView(MessageEmbed embedBuilder, Long guildId, Long textChannel, List<Button> buttons) {

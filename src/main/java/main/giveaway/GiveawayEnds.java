@@ -40,8 +40,6 @@ public class GiveawayEnds {
 
         Color userColor = GiveawayUtils.getUserColor(guildId);
 
-        instance.removeGiveaway(messageId);
-        giveawayRepositoryService.deleteGiveaway(messageId);
 
         String giveawayWasCanceled = jsonParsers.getLocale("giveaway_was_canceled", guildId);
         String giftGiveawayDeleted = jsonParsers.getLocale("gift_giveaway_deleted", guildId);
@@ -51,7 +49,12 @@ public class GiveawayEnds {
         cancel.setTitle(giveawayWasCanceled);
         cancel.setDescription(giftGiveawayDeleted);
 
-        updateController.setView(cancel.build(), guildId, textChannelId, messageId);
+        updateController.setViewRest(cancel.build(), guildId, textChannelId, messageId).queue(
+                _ -> {
+                    instance.removeGiveaway(messageId);
+                    giveawayRepositoryService.deleteGiveaway(messageId);
+                },
+                throwable -> LOGGER.warn("Не удалось отправить сообщение", throwable));
     }
 
     public void stop(Giveaway giveaway, int countWinner, UpdateController updateController) {
@@ -104,6 +107,7 @@ public class GiveawayEnds {
                     errors.setDescription(errorsDescriptions);
                     List<Button> buttons = new ArrayList<>();
                     buttons.add(Button.link("https://discord.gg/MhEzJNDf", "Support"));
+
                     updateController.setView(errors.build(), guildId, textChannelId, buttons);
                 }
                 LOGGER.error(e.getMessage(), e);
@@ -115,11 +119,9 @@ public class GiveawayEnds {
 
             String winnerArray = Arrays.toString(uniqueWinners.toArray())
                     .replaceAll("\\[", "")
-                    .replaceAll("]", "");
+                    .replace("]", "");
 
             JDA jda = BotStart.getJda();
-
-            String winnersContent;
 
             EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId, messageId);
             GiveawayRegistry instance = GiveawayRegistry.getInstance();
@@ -129,26 +131,41 @@ public class GiveawayEnds {
                 return;
             }
 
-            updateController.setView(embedBuilder.build(), guildId, textChannelId, messageId);
+            updateController.setViewRest(embedBuilder.build(), guildId, textChannelId, messageId).queue(
+                    _ -> {
+                        if (guildText != null) {
+                            String string = guildText.replaceAll("@winner", winnerArray)
+                                    .replaceAll("@link", giftUrl);
 
-            if (guildText != null) {
-                String string = guildText.replaceAll("@winner", winnerArray).replaceAll("@link", giftUrl);
-                updateController.setView(jda, string, guildId, textChannelId);
-            } else {
-                if (uniqueWinners.size() == 1) {
-                    winnersContent = String.format(jsonParsers.getLocale("gift_congratulations", guildId), winnerArray, giftUrl);
-                } else {
-                    winnersContent = String.format(jsonParsers.getLocale("gift_congratulations_many", guildId), winnerArray, giftUrl);
-                }
-                updateController.setView(jda, winnersContent, guildId, textChannelId);
-            }
+                            updateController.setViewRest(jda, string, guildId, textChannelId)
+                                    .queue(
+                                            _ -> {
+                                                giveaway.setRemoved(true);
+                                                instance.removeGiveaway(messageId);
+                                                giveawayRepositoryService.backupAllParticipants(messageId);
+                                                giveawayRepositoryService.deleteGiveaway(messageId);
+                                            },
+                                            throwable -> LOGGER.warn("Не удалось отправить сообщение", throwable)
+                                    );
+                        } else {
+                            String winnersContent = uniqueWinners.size() == 1
+                                    ? String.format(jsonParsers.getLocale("gift_congratulations", guildId), winnerArray, giftUrl)
+                                    : String.format(jsonParsers.getLocale("gift_congratulations_many", guildId), winnerArray, giftUrl);
 
-            giveaway.setRemoved(true);
-            //Удаляет данные из коллекций
-            instance.removeGiveaway(messageId);
-
-            giveawayRepositoryService.backupAllParticipants(messageId);
-            giveawayRepositoryService.deleteGiveaway(messageId);
+                            updateController.setViewRest(jda, winnersContent, guildId, textChannelId)
+                                    .queue(
+                                            _ -> {
+                                                giveaway.setRemoved(true);
+                                                instance.removeGiveaway(messageId);
+                                                giveawayRepositoryService.backupAllParticipants(messageId);
+                                                giveawayRepositoryService.deleteGiveaway(messageId);
+                                            },
+                                            throwable -> LOGGER.warn("Не удалось отправить сообщение", throwable)
+                                    );
+                        }
+                    },
+                    throwable -> LOGGER.warn("Не удалось обновить embed Giveaway", throwable)
+            );
         } else if (participants.isEmpty()) {
             cancel(giveaway, updateController);
         } else {
@@ -162,11 +179,14 @@ public class GiveawayEnds {
                 notEnoughUsers.setDescription(giftGiveawayDeleted);
 
                 //Отправляет сообщение
-                updateController.setView(notEnoughUsers.build(), guildId, textChannelId, messageId);
-
-                giveawayRepositoryService.deleteGiveaway(messageId);
-                GiveawayRegistry instance = GiveawayRegistry.getInstance();
-                instance.removeGiveaway(messageId);
+                updateController.setViewRest(notEnoughUsers.build(), guildId, textChannelId, messageId).queue(
+                        _ -> {
+                            giveawayRepositoryService.deleteGiveaway(messageId);
+                            GiveawayRegistry instance = GiveawayRegistry.getInstance();
+                            instance.removeGiveaway(messageId);
+                        },
+                        throwable -> LOGGER.warn("Не удалось отправить сообщение", throwable)
+                );
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
             }

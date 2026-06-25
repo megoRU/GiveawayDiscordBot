@@ -10,16 +10,15 @@ import main.giveaway.ParticipantDTO;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.requests.ErrorResponse;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -44,7 +43,11 @@ public class GiveawayUpdateListUser {
             if (instance.hasGiveaway(messageId)) {
                 try {
                     Guild guildById = jda.getGuildById(guildId);
-                    if (guildById != null) {
+
+                    if (guildById == null) {
+                        giveawayRepositoryService.deleteGiveaway(messageId);
+                        instance.removeGiveaway(messageId);
+                    } else {
                         TextChannel textChannelById = guildById.getTextChannelById(channelId);
                         if (textChannelById != null) {
                             Message message = textChannelById.retrieveMessageById(messageId).complete(true);
@@ -66,11 +69,11 @@ public class GiveawayUpdateListUser {
 
                                     if (isForSpecificRole) {
                                         Role roleGiveaway = jda.getRoleById(giveawayData.getRoleId());
-                                        if (roleGiveaway != null && guildById != null) {
+                                        if (roleGiveaway != null) {
                                             List<Long> userIds = users.stream()
                                                     .filter(user -> !user.isBot())
-                                                    .filter(user -> !giveawayData.participantContains(user.getIdLong()))
                                                     .map(User::getIdLong)
+                                                    .filter(idLong -> !giveawayData.participantContains(idLong))
                                                     .toList();
                                             List<ParticipantDTO> participantDTOList = new ArrayList<>();
 
@@ -81,7 +84,7 @@ public class GiveawayUpdateListUser {
                                                         participantDTOList.add(new ParticipantDTO(member.getIdLong(), member.getUser().getName()));
                                                     }
                                                 } catch (Exception e) {
-                                                    LOGGER.error("Error retrieving member " + userId + ": " + e.getMessage());
+                                                    LOGGER.error("Error retrieving member {}: {}", userId, e.getMessage());
                                                 }
                                             }
                                             if (instance.hasGiveaway(messageId) && !participantDTOList.isEmpty()) {
@@ -106,15 +109,22 @@ public class GiveawayUpdateListUser {
                         }
                     }
                 } catch (Exception e) {
-                    if (e.getMessage() != null &&
-                            e.getMessage().contains("10008: Unknown Message") ||
-                            e.getMessage().contains("Missing permission: VIEW_CHANNEL")) {
-                        LOGGER.info("GiveawayUpdateList: {} удаляем", e.getMessage());
-                        giveawayRepositoryService.deleteGiveaway(messageId);
-                        instance.removeGiveaway(messageId);
-                    } else {
-                        LOGGER.error(e.getMessage(), e);
+                    if (e instanceof ErrorResponseException ex) {
+                        ErrorResponse error = ex.getErrorResponse();
+
+                        if (error == ErrorResponse.UNKNOWN_MESSAGE ||
+                                error == ErrorResponse.MISSING_ACCESS ||
+                                error == ErrorResponse.MISSING_PERMISSIONS ||
+                                error == ErrorResponse.UNKNOWN_CHANNEL) {
+
+                            LOGGER.info("GiveawayUpdateList: {} удаляем", error);
+                            giveawayRepositoryService.deleteGiveaway(messageId);
+                            instance.removeGiveaway(messageId);
+                            return;
+                        }
                     }
+
+                    LOGGER.warn("Не удалось обновить участников Giveaway, повторим позже", e);
                 }
             }
         }

@@ -116,19 +116,8 @@ public class Giveaway {
     }
 
     //TODO: Возможно добавлять в коллекцию тут
-    public void startGiveaway(GuildMessageChannel textChannel,
-                              String title,
-                              int countWinners,
-                              String time,
-                              Long role,
-                              Boolean isOnlyForSpecificRole,
-                              String urlImage,
-                              boolean predefined,
-                              int minParticipants) {
-        //Записываем данные:
-        LOGGER.info("GuildId: {} Title: {} predefined: {} Winners: {} Time: {} Role: {} isOnlyForSpecificRole: {}",
-                guildId, title, predefined, countWinners, time, role, isOnlyForSpecificRole);
-
+    public void startGiveaway(GuildMessageChannel textChannel, String title, int countWinners, String time, Long role,
+                              Boolean isOnlyForSpecificRole, String urlImage, boolean predefined, int minParticipants) {
         giveawayData.setTitle(title);
         giveawayData.setCountWinners(countWinners);
         giveawayData.setRoleId(role);
@@ -148,6 +137,13 @@ public class Giveaway {
                 message.addReaction(Emoji.fromUnicode(ReactionEvent.TADA)).queue();
                 updateCollections(message);
             }
+
+            long channelId = message.getChannel().getIdLong();
+            long messageIdLong = message.getIdLong();
+
+            //Записываем данные:
+            LOGGER.info("GuildId: {} ChannelId: {} MessageId: {} Title: {} predefined: {} Winners: {} Time: {} Role: {} isOnlyForSpecificRole: {}",
+                    guildId, channelId, messageIdLong, title, predefined, countWinners, time, role, isOnlyForSpecificRole);
         } catch (Exception e) {
             LOGGER.error("Error updating collections", e);
         }
