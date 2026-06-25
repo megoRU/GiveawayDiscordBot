@@ -111,6 +111,10 @@ public class UpdateController {
                 HelpCommand helpCommand = new HelpCommand();
                 helpCommand.help(event);
             }
+            case "recovery" -> {
+                RecoveryGiveaway recoveryGiveaway = new RecoveryGiveaway(activeGiveawayRepository);
+                recoveryGiveaway.recoveryGiveaway(event);
+            }
             case "list" -> {
                 ListCommand listCommand = new ListCommand();
                 listCommand.handle(event);

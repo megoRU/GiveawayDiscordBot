@@ -40,6 +40,14 @@ public class SlashService {
                     .setNameLocalization(DiscordLocale.RUSSIAN, "id-розыгрыша")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Giveaway ID"));
 
+            //recovery
+            List<OptionData> recovery = new ArrayList<>();
+            recovery.add(new OptionData(STRING, "message-id", "Message ID")
+                    .setName("message-id")
+                    .setRequired(true)
+                    .setNameLocalization(DiscordLocale.RUSSIAN, "id-сообщения")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "ID сообщения"));
+
             //Stop
             List<OptionData> optionsStop = new ArrayList<>();
             optionsStop.add(new OptionData(INTEGER, "winners", "Set number of winners, if not set defaults to value set at start of Giveaway")
@@ -67,6 +75,14 @@ public class SlashService {
                     .setName("color")
                     .setNameLocalization(DiscordLocale.RUSSIAN, "цвет")
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить цвет embed. Пример использования: #ff00ff"));
+
+            //Recovery Giveaway
+            List<OptionData> optionsRecovery = new ArrayList<>();
+            optionsRecovery.add(new OptionData(STRING, "message-id", "Message id Giveaway")
+                    .setName("message-id")
+                    .setRequired(true)
+                    .setNameLocalization(DiscordLocale.RUSSIAN, "id-сообщения")
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "ID сообщения розыгрыша"));
 
             //Scheduling Giveaway
             List<OptionData> optionsScheduling = new ArrayList<>();
@@ -271,6 +287,11 @@ public class SlashService {
              * Команды
              */
 
+            CommandData recoveryCommand = Commands.slash("recovery", "Recovery Giveaway")
+                    .addOptions(recovery)
+                    .setContexts(InteractionContextType.GUILD)
+                    .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Восстановить Giveaway");
+
             CommandData checkCommand = Commands.slash("check", "Check permissions of bot")
                     .addOptions(botPermissions)
                     .setContexts(InteractionContextType.GUILD)
@@ -348,6 +369,7 @@ public class SlashService {
                     .setDescriptionLocalization(DiscordLocale.RUSSIAN, "Установить часовой пояс. Смотри: /help");
 
             commands.addCommands(
+                            recoveryCommand,
                             listCommand,
                             checkCommand,
                             endMessage,

@@ -6,6 +6,8 @@ import main.model.entity.Settings;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static main.giveaway.GiveawayUtils.jsonParsers;
+
 public class JSONParsers {
 
     private final static Logger LOGGER = Logger.getLogger(JSONParsers.class.getName());
@@ -18,5 +20,12 @@ public class JSONParsers {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
         return "NO_FOUND_LOCALIZATION";
+    }
+
+    public static String getLanguage(long guildId) {
+        Settings settings = BotStart.getMapLanguages().get(guildId);
+
+        if (settings != null) return settings.getLanguage();
+        return "eng";
     }
 }
