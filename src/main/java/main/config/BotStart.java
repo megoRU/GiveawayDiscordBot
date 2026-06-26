@@ -26,6 +26,8 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.slf4j.Logger;
@@ -115,11 +117,6 @@ public class BotStart {
             if (Config.IS_PROXY) {
                 System.setProperty("socksProxyHost", Config.PROXY_IP);
                 System.setProperty("socksProxyPort", "10808");
-
-                Proxy proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(Config.PROXY_IP, 10808));
-                OkHttpClient client = new OkHttpClient.Builder().proxy(proxy).build();
-
-                jdaBuilder.setHttpClient(client);
             }
 
             jda = jdaBuilder.build();
