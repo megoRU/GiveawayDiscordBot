@@ -58,13 +58,7 @@
         <dependency>
             <groupId>com.github.megoRU</groupId>
             <artifactId>api.megoru.ru-wrapper</artifactId>
-            <version>5.1.1</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.squareup.okhttp3</groupId>
-                    <artifactId>okhttp</artifactId>
-                </exclusion>
-            </exclusions>
+            <version>5.1.2</version>
         </dependency>
 
     </dependencies>
