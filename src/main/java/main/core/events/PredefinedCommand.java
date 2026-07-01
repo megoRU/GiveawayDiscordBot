@@ -12,7 +12,6 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.utils.concurrent.Task;
 import org.jetbrains.annotations.NotNull;
@@ -114,7 +113,7 @@ public class PredefinedCommand {
                         String sendSlashMessage = String.format(jsonParsers.getLocale("send_slash_message", guildId), event.getChannel().getId());
                         event.getHook().editOriginal(sendSlashMessage)
                                 .delay(5, TimeUnit.SECONDS)
-                                .flatMap(message -> event.getHook().deleteOriginal())
+                                .flatMap(_ -> event.getHook().deleteOriginal())
                                 .queue();
                     } catch (Exception ignored) {
                     }

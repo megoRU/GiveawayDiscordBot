@@ -1,8 +1,6 @@
 package main.core;
 
 import main.config.BotStart;
-import main.controller.UpdateController;
-import main.giveaway.GiveawayRegistry;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.buttons.Button;
@@ -23,17 +21,11 @@ public class MessageHandler {
 
     public RestAction<Message> editMessage(MessageEmbed embedBuilder, long guildId, long textChannel, long messageId) {
         Guild guildById = BotStart.getJda().getGuildById(guildId);
-
-        if (guildById == null) {
-            return null;
-        }
+        if (guildById == null) return null;
 
         GuildMessageChannel textChannelById = guildById.getTextChannelById(textChannel);
         if (textChannelById == null) textChannelById = guildById.getNewsChannelById(textChannel);
-
-        if (textChannelById == null) {
-            return null;
-        }
+        if (textChannelById == null) return null;
 
         return textChannelById.editMessageEmbedsById(messageId, embedBuilder);
     }
@@ -56,18 +48,12 @@ public class MessageHandler {
 
     public RestAction<Message> sendMessage(JDA jda, Long guildId, Long textChannel, String text) {
         Guild guildById = jda.getGuildById(guildId);
-
-        if (guildById == null) {
-            return null;
-        }
+        if (guildById == null) return null;
 
         GuildMessageChannel textChannelById = guildById.getTextChannelById(textChannel);
         if (textChannelById == null) textChannelById = guildById.getNewsChannelById(textChannel);
         if (textChannelById == null) textChannelById = guildById.getThreadChannelById(textChannel);
-
-        if (textChannelById == null) {
-            return null;
-        }
+        if (textChannelById == null) return null;
 
         return textChannelById.sendMessage(text);
     }

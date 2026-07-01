@@ -71,12 +71,11 @@ public class BotStart {
     private final ScheduleStartService scheduleStartService;
     private final UploadGiveawaysService uploadGiveawaysService;
     private final SaveUsersService saveUsersService;
+    private final CoreBot coreBot;
 
     @PostConstruct
     public void startBot() {
         try {
-            CoreBot coreBot = new CoreBot(updateController);
-
             //Устанавливаем языки
             setLanguages();
             getLocalizationFromDB();

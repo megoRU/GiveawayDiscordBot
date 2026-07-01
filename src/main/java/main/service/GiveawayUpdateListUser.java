@@ -49,7 +49,11 @@ public class GiveawayUpdateListUser {
                         instance.removeGiveaway(messageId);
                     } else {
                         TextChannel textChannelById = guildById.getTextChannelById(channelId);
-                        if (textChannelById != null) {
+
+                        if (textChannelById == null) {
+                            giveawayRepositoryService.deleteGiveaway(messageId);
+                            instance.removeGiveaway(messageId);
+                        } else {
                             Message message = textChannelById.retrieveMessageById(messageId).complete(true);
                             List<MessageReaction> reactions = message.getReactions()
                                     .stream()
@@ -58,6 +62,7 @@ public class GiveawayUpdateListUser {
 
                             if (!reactions.isEmpty()) {
                                 MessageReaction reaction = reactions.getFirst();
+
                                 int count = reaction.getCount();
                                 if (reaction.isSelf()) {
                                     count--;

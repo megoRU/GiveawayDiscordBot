@@ -86,7 +86,7 @@ public class RerollCommand {
 
             String winnerList = Arrays.toString(uniqueWinners.toArray())
                     .replaceAll("\\[", "")
-                    .replaceAll("]", "");
+                    .replace("]", "");
 
             Color userColor = GiveawayUtils.getUserColor(guildId);
             String guildText = GiveawayUtils.getGuildText(guildId);

@@ -52,7 +52,7 @@ public class StartCommand {
         String title = event.getOption("title", OptionMapping::getAsString);
         int winners = Optional.ofNullable(event.getOption("winners", OptionMapping::getAsInt)).orElse(1);
         String time = event.getOption("duration", OptionMapping::getAsString);
-        if (time != null) time = time.replaceAll("-", ".");
+        if (time != null) time = time.replace("-", ".");
         Long role = event.getOption("mention", OptionMapping::getAsLong);
         var image = event.getOption("image", OptionMapping::getAsAttachment);
         int minParticipants = Optional.ofNullable(event.getOption("min-participants", OptionMapping::getAsInt)).orElse(1);

@@ -41,7 +41,7 @@ public class ParticipantsDownloadButton {
             return;
         }
 
-        String id = event.getButton().getCustomId().replaceAll("DOWNLOAD_", "");
+        String id = event.getButton().getCustomId().replace("DOWNLOAD_", "");
 
         if (id.matches("[0-9]+")) {
             long giveawayId = Long.parseLong(id);

@@ -124,7 +124,7 @@ public class SelectMenuInteraction {
     }
 
     private void handleCancelSelection(StringSelectInteractionEvent event, String selectedValue, long guildId, GiveawayRegistry instance) {
-        String messageId = selectedValue.replaceAll("cancel_", "");
+        String messageId = selectedValue.replace("cancel_", "");
 
         if (messageId.matches("[0-9]+")) {
             long messageIdLong = Long.parseLong(messageId);

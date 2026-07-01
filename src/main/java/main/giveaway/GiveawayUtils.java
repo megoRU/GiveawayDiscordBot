@@ -11,8 +11,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
-import java.sql.Timestamp;
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.zone.ZoneRulesException;
 
@@ -113,7 +115,7 @@ public class GiveawayUtils {
         return time.matches(GiveawayUtils.TIME_REGEX);
     }
 
-    public static boolean isTimeBefore(String time, long userIdLong) throws ZoneRulesException  {
+    public static boolean isTimeBefore(String time, long userIdLong) throws ZoneRulesException {
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
         ZoneId offset = ZoneId.of(zonesIdByUser);
 

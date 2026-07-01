@@ -87,7 +87,7 @@ public class Giveaway {
     }
 
     public void updateTime(String time) throws ZoneRulesException {
-        // Получаем таймзону пользователя
+        // Получаем тайм зону пользователя
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
         ZoneId zoneId = ZoneId.of(zonesIdByUser);
 
@@ -112,7 +112,7 @@ public class Giveaway {
         Instant utcInstant = zonedDateTime.toInstant();
 
         // Сохраняем в MariaDB TIMESTAMP правильно, чтобы не было сдвига
-        giveawayData.setEndGiveawayDate(utcInstant); //почему то 2025-09-04T23:30:00
+        giveawayData.setEndGiveawayDate(utcInstant); //почему-то 2025-09-04T23:30:00
     }
 
     //TODO: Возможно добавлять в коллекцию тут
