@@ -1,6 +1,5 @@
 package main.config;
 
-import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import main.controller.UpdateController;
@@ -29,10 +28,11 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -42,10 +42,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
-@Configuration
+@Component
 @EnableScheduling
 @AllArgsConstructor
-public class BotStart {
+public class BotStart implements CommandLineRunner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BotStart.class.getName());
 
@@ -57,7 +57,6 @@ public class BotStart {
 
     @Getter
     private static JDA jda;
-    private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
     private static final GiveawayRegistry instance = GiveawayRegistry.getInstance();
 
     //REPOSITORY
@@ -73,13 +72,27 @@ public class BotStart {
     private final SaveUsersService saveUsersService;
     private final CoreBot coreBot;
 
-    @PostConstruct
+    @Override
+    public void run(String... args) {
+        startBot();
+    }
+
     public void startBot() {
         try {
             //Устанавливаем языки
             setLanguages();
             getLocalizationFromDB();
             getUserZoneIdFromDB();
+
+            if (Config.IS_PROXY) {
+                LOGGER.info("Setting system SOCKS proxy: {}:10808", Config.PROXY_IP);
+                System.setProperty("socksProxyHost", Config.PROXY_IP);
+                System.setProperty("socksProxyPort", "10808");
+                // Avoid proxying local connections (like MariaDB if it's on localhost or in the same docker network by name)
+                System.setProperty("http.nonProxyHosts", "localhost|127.0.0.1|mariadb|database");
+            }
+
+            JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
 
             List<GatewayIntent> intents = Arrays.asList(
                     GatewayIntent.GUILD_MEMBERS,
@@ -107,11 +120,6 @@ public class BotStart {
             jdaBuilder.setActivity(Activity.playing("Starting..."));
             jdaBuilder.setBulkDeleteSplittingEnabled(false);
             jdaBuilder.addEventListeners(coreBot);
-
-            if (Config.IS_PROXY) {
-                System.setProperty("socksProxyHost", Config.PROXY_IP);
-                System.setProperty("socksProxyPort", "10808");
-            }
 
             jda = jdaBuilder.build();
             jda.awaitReady();
@@ -141,6 +149,7 @@ public class BotStart {
     }
 
     public static void updateActivity() {
+        if (BotStart.jda == null) return;
         if (!Config.isIsDev()) {
             int serverCount = BotStart.jda.getGuilds().size();
             BotStart.jda.getPresence().setActivity(Activity.playing(BotStart.activity + serverCount + " guilds"));
@@ -152,6 +161,7 @@ public class BotStart {
     @Scheduled(fixedDelay = 5, initialDelay = 1, timeUnit = TimeUnit.SECONDS)
     private void schStartGiveaway() {
         try {
+            if (jda == null) return;
             scheduleStartService.scheduleStart(updateController, jda);
         } catch (Exception e) {
             System.out.println(e.getMessage());

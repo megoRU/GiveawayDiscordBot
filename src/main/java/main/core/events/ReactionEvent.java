@@ -25,8 +25,17 @@ public class ReactionEvent {
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     public void reaction(@NotNull MessageReactionAddEvent event, UpdateController updateController) {
+        User user = event.getUser();
+        if (user == null) {
+            event.retrieveUser().queue(u -> handleReaction(event, u, updateController),
+                    e -> LOGGER.error("Failed to retrieve user for reaction event", e));
+        } else {
+            handleReaction(event, user, updateController);
+        }
+    }
+
+    private void handleReaction(@NotNull MessageReactionAddEvent event, User user, UpdateController updateController) {
         try {
-            User user = event.retrieveUser().complete();
             Member member = event.getMember();
 
             if (member == null || user.isBot()) return;
@@ -51,7 +60,7 @@ public class ReactionEvent {
                         Role roleById = event.getGuild().getRoleById(roleId);
                         boolean isForSpecificRole = giveawayData.isForSpecificRole();
 
-                        if (isForSpecificRole && !event.getMember().getRoles().contains(roleById)) {
+                        if (isForSpecificRole && !member.getRoles().contains(roleById)) {
                             String url = GiveawayUtils.getDiscordUrlMessage(guildIdLong, event.getGuildChannel().getIdLong(), messageId);
                             LOGGER.info("Нажал на эмодзи, но у него нет доступа к розыгрышу: {}", user.getId());
                             //Получаем ссылку на Giveaway
