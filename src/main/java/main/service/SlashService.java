@@ -1,5 +1,6 @@
 package main.service;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.interactions.DiscordLocale;
@@ -11,8 +12,6 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,9 +22,9 @@ import java.util.Map;
 import static net.dv8tion.jda.api.interactions.commands.OptionType.*;
 
 @Service
+@Slf4j
 public class SlashService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SlashService.class.getName());
     private static final Map<String, Long> commandMap = new HashMap<>();
 
     public void updateSlash(JDA jda) {
@@ -377,7 +376,7 @@ public class SlashService {
 
             System.out.println("Готово");
         } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
