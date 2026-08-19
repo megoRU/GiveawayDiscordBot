@@ -154,12 +154,11 @@ public class BotStart {
         try {
             scheduleStartService.scheduleStart(updateController, jda);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             LOGGER.error(e.getMessage(), e);
         }
     }
 
-    @Scheduled(fixedDelay = 2, initialDelay = 1, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = 5, initialDelay = 1, timeUnit = TimeUnit.SECONDS)
     private void stopGiveawayTimer() {
         List<Giveaway> giveawayDataList = new LinkedList<>(instance.getAllGiveaway());
         StopGiveawayHandler stopGiveawayHandler = new StopGiveawayHandler();

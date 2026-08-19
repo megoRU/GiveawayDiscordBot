@@ -5,24 +5,36 @@ import main.giveaway.Giveaway;
 import main.giveaway.GiveawayData;
 
 import java.time.*;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class StopGiveawayHandler {
 
     private static final Logger LOGGER = Logger.getLogger(StopGiveawayHandler.class.getName());
+    private static final Set<Long> startingStopGiveaways = ConcurrentHashMap.newKeySet();
 
     public void handleGiveaway(Giveaway giveaway) {
-        try {
-            if (giveaway == null) return;
+        if (giveaway != null) {
             GiveawayData giveawayData = giveaway.getGiveawayData();
-            int countWinners = giveawayData.getCountWinners();
+            long messageId = giveawayData.getMessageId();
 
-            if (shouldFinishGiveaway(giveaway)) {
-                giveaway.stopGiveaway(countWinners);
+            try {
+                int countWinners = giveawayData.getCountWinners();
+
+                if (!startingStopGiveaways.add(messageId)) {
+                    return;
+                }
+
+                if (shouldFinishGiveaway(giveaway)) {
+                    giveaway.stopGiveaway(countWinners);
+                }
+            } catch (Exception e) {
+                logError(e);
+            } finally {
+                startingStopGiveaways.remove(messageId);
             }
-        } catch (Exception e) {
-            logError(e);
         }
     }
 
