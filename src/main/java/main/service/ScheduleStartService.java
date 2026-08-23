@@ -65,7 +65,6 @@ public class ScheduleStartService {
 
             try {
                 instance.removeScheduling(idSalt);
-                schedulingRepository.deleteByIdSalt(idSalt);
 
                 Long channelIdLong = scheduling.getChannelId();
                 Guild guildById = jda.getGuildById(scheduling.getGuildId());
@@ -121,6 +120,7 @@ public class ScheduleStartService {
                             long messageId = giveaway.getGiveawayData().getMessageId();
 
                             instance.putGift(messageId, giveaway);
+                            schedulingRepository.deleteByIdSalt(idSalt);
                         } catch (ZoneRulesException z) {
                             LOGGER.error(z.getMessage(), z);
 
@@ -131,12 +131,19 @@ public class ScheduleStartService {
                             errors.setDescription(startWithBrokenZone);
 
                             textChannelById.sendMessageEmbeds(errors.build()).queue();
+                            schedulingRepository.deleteByIdSalt(idSalt);
                             return;
                         }
+                    } else {
+                        schedulingRepository.deleteByIdSalt(idSalt);
                     }
+                } else {
+                    schedulingRepository.deleteByIdSalt(idSalt);
                 }
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
+                // В случае ошибки восстанавливаем scheduling в instance, чтобы он мог повториться
+                instance.putScheduling(idSalt, scheduling);
             } finally {
                 startingGiveaways.remove(idSalt);
             }
