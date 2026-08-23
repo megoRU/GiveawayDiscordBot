@@ -50,7 +50,7 @@ public class GiveawayEnds {
         cancel.setDescription(giftGiveawayDeleted);
 
         updateController.setViewRest(cancel.build(), guildId, textChannelId, messageId).queue(
-                _ -> {
+                unused -> {
                     instance.removeGiveaway(messageId);
                     giveawayRepositoryService.deleteGiveaway(messageId);
                 },
@@ -132,14 +132,14 @@ public class GiveawayEnds {
             }
 
             updateController.setViewRest(embedBuilder.build(), guildId, textChannelId, messageId).queue(
-                    _ -> {
+                    unused -> {
                         if (guildText != null) {
                             String string = guildText.replaceAll("@winner", winnerArray)
                                     .replaceAll("@link", giftUrl);
 
                             updateController.setViewRest(jda, string, guildId, textChannelId)
                                     .queue(
-                                            _ -> {
+                                            unusedInner -> {
                                                 giveaway.setRemoved(true);
                                                 instance.removeGiveaway(messageId);
                                                 giveawayRepositoryService.backupAllParticipants(messageId);
@@ -154,7 +154,7 @@ public class GiveawayEnds {
 
                             updateController.setViewRest(jda, winnersContent, guildId, textChannelId)
                                     .queue(
-                                            _ -> {
+                                            unusedInner -> {
                                                 giveaway.setRemoved(true);
                                                 instance.removeGiveaway(messageId);
                                                 giveawayRepositoryService.backupAllParticipants(messageId);
@@ -184,7 +184,7 @@ public class GiveawayEnds {
 
                 //Отправляет сообщение
                 updateController.setViewRest(notEnoughUsers.build(), guildId, textChannelId, messageId).queue(
-                        _ -> {
+                        unused -> {
                             giveawayRepositoryService.deleteGiveaway(messageId);
                             GiveawayRegistry instance = GiveawayRegistry.getInstance();
                             instance.removeGiveaway(messageId);

@@ -64,6 +64,9 @@ public class ScheduleStartService {
             }
 
             try {
+                instance.removeScheduling(idSalt);
+                schedulingRepository.deleteByIdSalt(idSalt);
+
                 Long channelIdLong = scheduling.getChannelId();
                 Guild guildById = jda.getGuildById(scheduling.getGuildId());
 
@@ -117,10 +120,7 @@ public class ScheduleStartService {
 
                             long messageId = giveaway.getGiveawayData().getMessageId();
 
-                            instance.removeScheduling(idSalt);
                             instance.putGift(messageId, giveaway);
-
-                            schedulingRepository.deleteByIdSalt(idSalt);
                         } catch (ZoneRulesException z) {
                             LOGGER.error(z.getMessage(), z);
 
