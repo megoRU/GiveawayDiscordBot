@@ -108,6 +108,23 @@ public class GiveawayUtils {
         }
     }
 
+    public static Instant calculateEndGiveawayDate(long userIdLong, String time) throws ZoneRulesException {
+        String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
+        ZoneId zoneId = ZoneId.of(zonesIdByUser);
+
+        LocalDateTime localDateTime;
+
+        if (time == null) {
+            localDateTime = LocalDateTime.now(zoneId).plusDays(30);
+        } else if (time.matches(GiveawayUtils.ISO_TIME_REGEX)) {
+            localDateTime = LocalDateTime.parse(time, GiveawayUtils.FORMATTER);
+        } else {
+            localDateTime = LocalDateTime.now(zoneId).plusSeconds(GiveawayUtils.getSeconds(time));
+        }
+
+        return localDateTime.atZone(zoneId).toInstant();
+    }
+
     public static boolean isISOTimeCorrect(@NotNull String time) {
         return time.matches(GiveawayUtils.ISO_TIME_REGEX);
     }

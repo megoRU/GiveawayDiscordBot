@@ -1,6 +1,5 @@
 package main.giveaway;
 
-import main.config.BotStart;
 import main.controller.UpdateController;
 import main.model.entity.ActiveGiveaways;
 import main.service.GiveawayRepositoryService;
@@ -13,9 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.zone.ZoneRulesException;
 
 @Component
 public class Giveaway {
@@ -31,18 +27,18 @@ public class Giveaway {
     }
 
     public ActiveGiveaways startGiveaway(GuildMessageChannel textChannel,
-                                       Long userIdLong,
-                                       Long guildId,
-                                       String title,
-                                       int countWinners,
-                                       String time,
-                                       Long role,
-                                       Boolean isOnlyForSpecificRole,
-                                       String urlImage,
-                                       boolean isPredefined,
-                                       int minParticipants) {
+                                         Long userIdLong,
+                                         Long guildId,
+                                         String title,
+                                         int countWinners,
+                                         String time,
+                                         Long role,
+                                         Boolean isOnlyForSpecificRole,
+                                         String urlImage,
+                                         boolean isPredefined,
+                                         int minParticipants) {
 
-        Instant endGiveawayDate = calculateEndGiveawayDate(userIdLong, time);
+        Instant endGiveawayDate = GiveawayUtils.calculateEndGiveawayDate(userIdLong, time);
 
         title = title == null ? "Giveaway" : title;
         minParticipants = minParticipants == 0 ? 1 : minParticipants;
@@ -112,16 +108,16 @@ public class Giveaway {
     }
 
     private ActiveGiveaways updateOrCreateGiveaway(Message message,
-                                                 long guildId,
-                                                 long userIdLong,
-                                                 String title,
-                                                 int countWinners,
-                                                 Long roleId,
-                                                 Boolean isForSpecificRole,
-                                                 String urlImage,
-                                                 Instant endGiveawayDate,
-                                                 int minParticipants,
-                                                 boolean isPredefined) {
+                                                   long guildId,
+                                                   long userIdLong,
+                                                   String title,
+                                                   int countWinners,
+                                                   Long roleId,
+                                                   Boolean isForSpecificRole,
+                                                   String urlImage,
+                                                   Instant endGiveawayDate,
+                                                   int minParticipants,
+                                                   boolean isPredefined) {
         ActiveGiveaways activeGiveaways = new ActiveGiveaways();
 
         activeGiveaways.setMessageId(message.getIdLong());
@@ -139,23 +135,6 @@ public class Giveaway {
 
         giveawayRepositoryService.saveGiveaway(activeGiveaways);
         return activeGiveaways;
-    }
-
-    private Instant calculateEndGiveawayDate(long userIdLong, String time) throws ZoneRulesException {
-        String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
-        ZoneId zoneId = ZoneId.of(zonesIdByUser);
-
-        LocalDateTime localDateTime;
-
-        if (time == null) {
-            localDateTime = LocalDateTime.now(zoneId).plusDays(30);
-        } else if (time.matches(GiveawayUtils.ISO_TIME_REGEX)) {
-            localDateTime = LocalDateTime.parse(time, GiveawayUtils.FORMATTER);
-        } else {
-            localDateTime = LocalDateTime.now(zoneId).plusSeconds(GiveawayUtils.getSeconds(time));
-        }
-
-        return localDateTime.atZone(zoneId).toInstant();
     }
 
     public void stopGiveaway(ActiveGiveaways activeGiveaways, int countWinner) {
