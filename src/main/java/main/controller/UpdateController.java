@@ -149,7 +149,7 @@ public class UpdateController {
                 participantsCommand.participants(event);
             }
             case "cancel" -> {
-                CancelCommand cancelCommand = new CancelCommand(activeGiveawayRepository, giveawayRepositoryService, schedulingRepository, this);
+                CancelCommand cancelCommand = new CancelCommand(activeGiveawayRepository, giveawayRepositoryService, schedulingRepository);
                 cancelCommand.cancel(event);
             }
             case "zone" -> {

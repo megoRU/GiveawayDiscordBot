@@ -109,28 +109,8 @@ public class SelectMenuInteraction {
         ActiveGiveaways activeGiveaways = activeGiveawayRepository.findByMessageId(Long.parseLong(messageId));
 
         if (activeGiveaways != null && activeGiveaways.getGuildId().equals(guildId)) {
-            Set<Long> participantsList = activeGiveaways.getParticipants() != null ? activeGiveaways.getParticipants()
-                    .stream()
-                    .map(Participants::getUserId)
-                    .collect(Collectors.toSet()) : Collections.emptySet();
 
-            Giveaway giveaway = new Giveaway(
-                    activeGiveaways.getGuildId(),
-                    activeGiveaways.getChannelId(),
-                    activeGiveaways.getCreatedUserId(),
-                    activeGiveaways.isFinish(),
-                    activeGiveaways.getMessageId(),
-                    activeGiveaways.getCountWinners(),
-                    activeGiveaways.getRoleId(),
-                    activeGiveaways.getIsForSpecificRole(),
-                    activeGiveaways.getUrlImage(),
-                    activeGiveaways.getTitle(),
-                    activeGiveaways.getEndGiveawayDate(),
-                    activeGiveaways.getMinParticipants() == null ? 1 : activeGiveaways.getMinParticipants(),
-                    giveawayRepositoryService,
-                    updateController
-            );
-            giveaway.setParticipantsList(participantsList);
+
 
             giveaway.stopGiveaway(giveaway.getCountWinners());
             handleBackSelection(event, guildId);
@@ -273,28 +253,8 @@ public class SelectMenuInteraction {
     }
 
     private void removeActiveGiveaway(ActiveGiveaways activeGiveaways) {
-        Set<Long> participantsList = activeGiveaways.getParticipants() != null ? activeGiveaways.getParticipants()
-                .stream()
-                .map(Participants::getUserId)
-                .collect(Collectors.toSet()) : Collections.emptySet();
 
-        Giveaway giveaway = new Giveaway(
-                activeGiveaways.getGuildId(),
-                activeGiveaways.getChannelId(),
-                activeGiveaways.getCreatedUserId(),
-                activeGiveaways.isFinish(),
-                activeGiveaways.getMessageId(),
-                activeGiveaways.getCountWinners(),
-                activeGiveaways.getRoleId(),
-                activeGiveaways.getIsForSpecificRole(),
-                activeGiveaways.getUrlImage(),
-                activeGiveaways.getTitle(),
-                activeGiveaways.getEndGiveawayDate(),
-                activeGiveaways.getMinParticipants() == null ? 1 : activeGiveaways.getMinParticipants(),
-                giveawayRepositoryService,
-                updateController
-        );
-        giveaway.setParticipantsList(participantsList);
+
         giveaway.cancelGiveaway();
     }
 }

@@ -1,11 +1,8 @@
 package main.core.events;
 
 import lombok.AllArgsConstructor;
-import main.controller.UpdateController;
-import main.giveaway.Giveaway;
 import main.jsonparser.JSONParsers;
 import main.model.entity.ActiveGiveaways;
-import main.model.entity.Participants;
 import main.model.entity.Scheduling;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.SchedulingRepository;
@@ -16,10 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -28,7 +22,6 @@ public class CancelCommand {
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final GiveawayRepositoryService giveawayRepositoryService;
     private final SchedulingRepository schedulingRepository;
-    private final UpdateController updateController;
     private static final JSONParsers jsonParsers = new JSONParsers();
 
     @Transactional
@@ -103,28 +96,7 @@ public class CancelCommand {
     }
 
     private void removeActiveGiveaway(@NotNull ActiveGiveaways activeGiveaways) {
-        Set<Long> participantsList = activeGiveaways.getParticipants() != null ? activeGiveaways.getParticipants()
-                .stream()
-                .map(Participants::getUserId)
-                .collect(Collectors.toSet()) : Collections.emptySet();
-
-        Giveaway giveaway = new Giveaway(
-                activeGiveaways.getGuildId(),
-                activeGiveaways.getChannelId(),
-                activeGiveaways.getCreatedUserId(),
-                activeGiveaways.isFinish(),
-                activeGiveaways.getMessageId(),
-                activeGiveaways.getCountWinners(),
-                activeGiveaways.getRoleId(),
-                activeGiveaways.getIsForSpecificRole(),
-                activeGiveaways.getUrlImage(),
-                activeGiveaways.getTitle(),
-                activeGiveaways.getEndGiveawayDate(),
-                activeGiveaways.getMinParticipants() == null ? 1 : activeGiveaways.getMinParticipants(),
-                giveawayRepositoryService,
-                updateController
-        );
-        giveaway.setParticipantsList(participantsList);
-        giveaway.cancelGiveaway(activeGiveaways);
+        Long messageId = activeGiveaways.getMessageId();
+        giveawayRepositoryService.deleteGiveaway(messageId);
     }
 }
