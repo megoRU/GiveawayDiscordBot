@@ -1,197 +1,174 @@
 package main.giveaway;
 
-import lombok.Getter;
-import lombok.Setter;
 import main.config.BotStart;
 import main.controller.UpdateController;
-import main.core.events.ReactionEvent;
 import main.model.entity.ActiveGiveaways;
 import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.zone.ZoneRulesException;
-import java.util.List;
 
+@Component
 public class Giveaway {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(Giveaway.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(Giveaway.class.getName());
 
-    //USER DATA
-    @Getter
-    private final long guildId;
-    @Getter
-    private final long textChannelId;
-    @Getter
-    private final long userIdLong;
-
-    //GiveawayData
-    @Getter
-    private final GiveawayData giveawayData;
-
+    private final GiveawayRepositoryService giveawayRepositoryService;
     private final UpdateController updateController;
 
-    @Getter
-    @Setter
-    private volatile boolean isFinishGiveaway;
-
-    @Getter
-    @Setter
-    private volatile boolean isLocked;
-
-    @Getter
-    @Setter
-    private volatile boolean isRemoved;
-
-    //REPO
-    private final GiveawayRepositoryService giveawayRepositoryService;
-
-    public Giveaway(long guildId,
-                    long textChannelId,
-                    long userIdLong,
-                    GiveawayRepositoryService giveawayRepositoryService,
-                    UpdateController updateController) {
-        this.guildId = guildId;
-        this.textChannelId = textChannelId;
-        this.userIdLong = userIdLong;
-        this.giveawayData = new GiveawayData();
-        this.updateController = updateController;
+    public Giveaway(GiveawayRepositoryService giveawayRepositoryService, UpdateController updateController) {
         this.giveawayRepositoryService = giveawayRepositoryService;
+        this.updateController = updateController;
     }
 
-    public Giveaway(long guildId,
-                    long textChannelId,
-                    long userIdLong,
-                    boolean isFinishGiveaway,
-                    boolean isLocked,
-                    GiveawayData giveawayData,
-                    GiveawayRepositoryService giveawayRepositoryService,
-                    UpdateController updateController) {
-        this.guildId = guildId;
-        this.textChannelId = textChannelId;
-        this.userIdLong = userIdLong;
-        this.giveawayData = giveawayData;
-        this.isFinishGiveaway = isFinishGiveaway;
-        this.isLocked = isLocked;
-        this.updateController = updateController;
-        this.giveawayRepositoryService = giveawayRepositoryService;
+    public ActiveGiveaways startGiveaway(GuildMessageChannel textChannel,
+                                       Long userIdLong,
+                                       Long guildId,
+                                       String title,
+                                       int countWinners,
+                                       String time,
+                                       Long role,
+                                       Boolean isOnlyForSpecificRole,
+                                       String urlImage,
+                                       boolean isPredefined,
+                                       int minParticipants) {
+
+        Instant endGiveawayDate = calculateEndGiveawayDate(userIdLong, time);
+
+        title = title == null ? "Giveaway" : title;
+        minParticipants = minParticipants == 0 ? 1 : minParticipants;
+
+        try {
+            //Чисто по рофлу
+            ActiveGiveaways activeGiveaways = new ActiveGiveaways();
+
+            activeGiveaways.setGuildId(guildId);
+            activeGiveaways.setCreatedUserId(userIdLong);
+            activeGiveaways.setTitle(title);
+            activeGiveaways.setCountWinners(countWinners);
+            activeGiveaways.setEndGiveawayDate(endGiveawayDate);
+            activeGiveaways.setRoleId(role);
+            activeGiveaways.setIsForSpecificRole(isOnlyForSpecificRole);
+            activeGiveaways.setUrlImage(urlImage);
+            activeGiveaways.setMinParticipants(minParticipants);
+            activeGiveaways.setChannelId(textChannel.getIdLong());
+            activeGiveaways.setFinish(false);
+            activeGiveaways.setPredefined(isPredefined);
+
+            EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayPattern(activeGiveaways);
+
+            Message message = textChannel
+                    .sendMessageEmbeds(embedBuilder.build())
+                    .submit()
+                    .get();
+
+            if (!isPredefined) {
+                message.addReaction(Emoji.fromUnicode(GiveawayUtils.TADA))
+                        .submit()
+                        .get();
+            }
+
+            ActiveGiveaways savedGiveaway = updateOrCreateGiveaway(
+                    message,
+                    guildId,
+                    userIdLong,
+                    title,
+                    countWinners,
+                    role,
+                    isOnlyForSpecificRole,
+                    urlImage,
+                    endGiveawayDate,
+                    minParticipants,
+                    isPredefined
+            );
+
+            LOGGER.info(
+                    "GuildId: {} ChannelId: {} MessageId: {} Title: {} predefined: {} Winners: {} Time: {} Role: {} isOnlyForSpecificRole: {}",
+                    guildId,
+                    message.getChannel().getIdLong(),
+                    message.getIdLong(),
+                    title,
+                    isPredefined,
+                    countWinners,
+                    time,
+                    role,
+                    isOnlyForSpecificRole
+            );
+
+            return savedGiveaway;
+        } catch (Exception e) {
+            LOGGER.error("Error creating giveaway", e);
+            return null;
+        }
     }
 
-    public void updateTime(String time) throws ZoneRulesException {
-        // Получаем тайм зону пользователя
+    private ActiveGiveaways updateOrCreateGiveaway(Message message,
+                                                 long guildId,
+                                                 long userIdLong,
+                                                 String title,
+                                                 int countWinners,
+                                                 Long roleId,
+                                                 Boolean isForSpecificRole,
+                                                 String urlImage,
+                                                 Instant endGiveawayDate,
+                                                 int minParticipants,
+                                                 boolean isPredefined) {
+        ActiveGiveaways activeGiveaways = new ActiveGiveaways();
+
+        activeGiveaways.setMessageId(message.getIdLong());
+        activeGiveaways.setGuildId(guildId);
+        activeGiveaways.setChannelId(message.getChannel().getIdLong());
+        activeGiveaways.setCountWinners(countWinners);
+        activeGiveaways.setTitle(title);
+        activeGiveaways.setMinParticipants(minParticipants);
+        activeGiveaways.setRoleId(roleId == null || roleId == 0 ? null : roleId);
+        activeGiveaways.setIsForSpecificRole(isForSpecificRole != null && isForSpecificRole);
+        activeGiveaways.setUrlImage(urlImage);
+        activeGiveaways.setCreatedUserId(userIdLong);
+        activeGiveaways.setEndGiveawayDate(endGiveawayDate);
+        activeGiveaways.setPredefined(isPredefined);
+
+        giveawayRepositoryService.saveGiveaway(activeGiveaways);
+        return activeGiveaways;
+    }
+
+    private Instant calculateEndGiveawayDate(long userIdLong, String time) throws ZoneRulesException {
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
         ZoneId zoneId = ZoneId.of(zonesIdByUser);
 
         LocalDateTime localDateTime;
 
         if (time == null) {
-            // если время не задано, ставим через 30 дней от текущего локального времени пользователя
             localDateTime = LocalDateTime.now(zoneId).plusDays(30);
         } else if (time.matches(GiveawayUtils.ISO_TIME_REGEX)) {
-            // если пришла дата в формате dd.MM.yyyy HH:mm
             localDateTime = LocalDateTime.parse(time, GiveawayUtils.FORMATTER);
         } else {
-            // если пришли секунды
-            long seconds = GiveawayUtils.getSeconds(time);
-            localDateTime = LocalDateTime.now(zoneId).plusSeconds(seconds);
+            localDateTime = LocalDateTime.now(zoneId).plusSeconds(GiveawayUtils.getSeconds(time));
         }
 
-        // Привязываем локальное время пользователя к его зоне
-        ZonedDateTime zonedDateTime = localDateTime.atZone(zoneId);
-
-        // Переводим в Instant (UTC)
-        Instant utcInstant = zonedDateTime.toInstant();
-
-        // Сохраняем в MariaDB TIMESTAMP правильно, чтобы не было сдвига
-        giveawayData.setEndGiveawayDate(utcInstant); //почему-то 2025-09-04T23:30:00
+        return localDateTime.atZone(zoneId).toInstant();
     }
 
-    //TODO: Возможно добавлять в коллекцию тут
-    public void startGiveaway(GuildMessageChannel textChannel, String title, int countWinners, String time, Long role,
-                              Boolean isOnlyForSpecificRole, String urlImage, boolean predefined, int minParticipants) {
-        giveawayData.setTitle(title);
-        giveawayData.setCountWinners(countWinners);
-        giveawayData.setRoleId(role);
-        giveawayData.setUrlImage(urlImage);
-        giveawayData.setForSpecificRole(isOnlyForSpecificRole);
-        giveawayData.setMinParticipants(minParticipants);
-        giveawayData.setUserIdLong(userIdLong);
-        updateTime(time); //Обновляем время
+    public void stopGiveaway(ActiveGiveaways activeGiveaways, int countWinner) {
+        LOGGER.info("stopGiveaway: GuildID: {}, CountWinners: {}", activeGiveaways.getGuildId(), countWinner);
 
-        EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayPattern(giveawayData, this);
-        try {
-            //Отправка сообщения
-            Message message = textChannel.sendMessageEmbeds(embedBuilder.build()).submit().get();
-            if (predefined) {
-                updateCollections(message);
-            } else {
-                message.addReaction(Emoji.fromUnicode(ReactionEvent.TADA)).submit().get();
-                updateCollections(message);
-            }
-
-            long channelId = message.getChannel().getIdLong();
-            long messageIdLong = message.getIdLong();
-
-            //Записываем данные:
-            LOGGER.info("GuildId: {} ChannelId: {} MessageId: {} Title: {} predefined: {} Winners: {} Time: {} Role: {} isOnlyForSpecificRole: {}",
-                    guildId, channelId, messageIdLong, title, predefined, countWinners, time, role, isOnlyForSpecificRole);
-        } catch (Exception e) {
-            LOGGER.error("Error updating collections", e);
-        }
-    }
-
-    private void updateCollections(Message message) {
-        giveawayData.setMessageId(message.getIdLong());
-
-        ActiveGiveaways activeGiveaways = new ActiveGiveaways();
-        activeGiveaways.setMessageId(message.getIdLong());
-        activeGiveaways.setGuildId(guildId);
-        activeGiveaways.setChannelId(message.getChannel().getIdLong());
-        activeGiveaways.setCountWinners(giveawayData.getCountWinners());
-        activeGiveaways.setTitle(giveawayData.getTitle());
-        activeGiveaways.setMinParticipants(giveawayData.getMinParticipants());
-
-        if (giveawayData.getRoleId() == null || giveawayData.getRoleId() == 0) {
-            activeGiveaways.setRoleId(null);
-        } else {
-            activeGiveaways.setRoleId(giveawayData.getRoleId());
-        }
-        activeGiveaways.setIsForSpecificRole(giveawayData.isForSpecificRole());
-        activeGiveaways.setUrlImage(giveawayData.getUrlImage());
-        activeGiveaways.setCreatedUserId(userIdLong);
-        activeGiveaways.setEndGiveawayDate(giveawayData.getEndGiveawayDate());
-
-        giveawayRepositoryService.saveGiveaway(activeGiveaways);
-    }
-
-    public synchronized void addUser(List<ParticipantDTO> user) {
-        GiveawayUserHandler giveawayUserHandler = new GiveawayUserHandler(giveawayRepositoryService);
-        giveawayUserHandler.saveUser(this, user);
-    }
-
-    public synchronized void addUser(User user) {
-        GiveawayUserHandler giveawayUserHandler = new GiveawayUserHandler(giveawayRepositoryService);
-        giveawayUserHandler.preSaveUser(this, user);
-    }
-
-    public synchronized void stopGiveaway(final int countWinner) {
-        LOGGER.info("stopGiveaway: GuildID: {}, ListUsersSize: {}, CountWinners: {}", guildId, giveawayData.getParticipantSize(), countWinner);
         GiveawayEnds giveawayEnds = new GiveawayEnds(giveawayRepositoryService);
-        giveawayEnds.stop(this, countWinner, updateController);
+        giveawayEnds.stop(activeGiveaways, countWinner, updateController);
     }
 
-    public synchronized void cancelGiveaway() {
-        LOGGER.info("cancelGiveaway: GuildID: {} GiveawayId: {}", guildId, giveawayData.getMessageId());
+    public void cancelGiveaway(ActiveGiveaways activeGiveaways) {
+        LOGGER.info("cancelGiveaway: GuildID: {}, GiveawayId: {}", activeGiveaways.getGuildId(), activeGiveaways.getMessageId());
+
         GiveawayEnds giveawayEnds = new GiveawayEnds(giveawayRepositoryService);
-        giveawayEnds.cancel(this, updateController);
+        giveawayEnds.cancel(activeGiveaways, updateController);
     }
 }

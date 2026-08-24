@@ -3,7 +3,6 @@ package main.core.events;
 import lombok.AllArgsConstructor;
 import main.controller.UpdateController;
 import main.giveaway.Giveaway;
-import main.giveaway.GiveawayRegistry;
 import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.service.GiveawayRepositoryService;
@@ -105,13 +104,7 @@ public class StartCommand {
                 event.reply(giftNotificationForThisRole).queue();
             }
 
-            Giveaway giveaway = new Giveaway(guildIdLong,
-                    event.getChannel().getIdLong(),
-                    userIdLong,
-                    giveawayRepositoryService,
-                    updateController);
-
-            GiveawayRegistry instance = GiveawayRegistry.getInstance();
+            Giveaway giveaway = new Giveaway(giveawayRepositoryService, updateController);
 
             if (!event.getInteraction().isAcknowledged()) {
                 try {
@@ -123,6 +116,8 @@ public class StartCommand {
 
             giveaway.startGiveaway(
                     event.getGuildChannel(),
+                    userIdLong,
+                    guildId,
                     title,
                     winners,
                     time,
@@ -131,9 +126,6 @@ public class StartCommand {
                     urlImage,
                     false,
                     minParticipants);
-
-            long messageId = giveaway.getGiveawayData().getMessageId();
-            instance.putGift(messageId, giveaway);
 
         } catch (ZoneRulesException z) {
             LOGGER.error(z.getMessage(), z);

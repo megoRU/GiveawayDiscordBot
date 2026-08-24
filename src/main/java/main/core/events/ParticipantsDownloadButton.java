@@ -3,11 +3,11 @@ package main.core.events;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.AllArgsConstructor;
-import main.giveaway.Giveaway;
-import main.giveaway.GiveawayData;
-import main.giveaway.GiveawayRegistry;
 import main.jsonparser.JSONParsers;
+import main.model.entity.ActiveGiveaways;
 import main.model.entity.ListUsers;
+import main.model.entity.Participants;
+import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.ListUsersRepository;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.utils.FileUpload;
@@ -21,11 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class ParticipantsDownloadButton {
 
+    private final ActiveGiveawayRepository activeGiveawayRepository;
     private final ListUsersRepository listUsersRepository;
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private static final JSONParsers jsonParsers = new JSONParsers();
@@ -46,13 +48,14 @@ public class ParticipantsDownloadButton {
         if (id.matches("[0-9]+")) {
             long giveawayId = Long.parseLong(id);
 
-            GiveawayRegistry instance = GiveawayRegistry.getInstance();
-            Giveaway giveaway = instance.getGiveaway(giveawayId);
+            ActiveGiveaways activeGiveaway = activeGiveawayRepository.findByMessageId(giveawayId);
 
-            if (giveaway != null) {
-                GiveawayData giveawayData = giveaway.getGiveawayData();
-                Set<Long> participantsList = giveawayData.getParticipantsList();
-                long creatorUserId = giveaway.getUserIdLong();
+            if (activeGiveaway != null) {
+                Set<Long> participantsList = activeGiveaway.getParticipants() != null ? activeGiveaway.getParticipants()
+                        .stream()
+                        .map(Participants::getUserId)
+                        .collect(Collectors.toSet()) : Set.of();
+                long creatorUserId = activeGiveaway.getCreatedUserId();
 
                 if (userIdLong != creatorUserId) {
                     String noAccessReroll = jsonParsers.getLocale("no_access_reroll", guildId);

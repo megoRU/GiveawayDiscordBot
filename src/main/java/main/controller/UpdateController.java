@@ -15,7 +15,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
-import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.requests.RestAction;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -75,8 +74,6 @@ public class UpdateController {
             buttonEvent(buttonInteractionEvent);
         } else if (event instanceof GuildJoinEvent guildJoinEvent) {
             joinEvent(guildJoinEvent);
-        } else if (event instanceof MessageReactionAddEvent messageReactionAddEvent) {
-            reactionEvent(messageReactionAddEvent);
         } else if (event instanceof StringSelectInteractionEvent stringSelectInteractionEvent) {
             selectMenuEvent(stringSelectInteractionEvent);
         } else if (event instanceof GuildLeaveEvent guildLeaveEvent) {
@@ -88,7 +85,7 @@ public class UpdateController {
     }
 
     private void selectMenuEvent(StringSelectInteractionEvent stringSelectInteractionEvent) {
-        SelectMenuInteraction selectMenuInteraction = new SelectMenuInteraction(schedulingRepository);
+        SelectMenuInteraction selectMenuInteraction = new SelectMenuInteraction(activeGiveawayRepository, schedulingRepository, giveawayRepositoryService, this);
         selectMenuInteraction.handle(stringSelectInteractionEvent);
     }
 
@@ -112,7 +109,7 @@ public class UpdateController {
                 helpCommand.help(event);
             }
             case "list" -> {
-                ListCommand listCommand = new ListCommand(schedulingRepository);
+                ListCommand listCommand = new ListCommand(activeGiveawayRepository, schedulingRepository);
                 listCommand.handle(event);
             }
             case "endmessage" -> {
@@ -124,7 +121,7 @@ public class UpdateController {
                 startCommand.start(event, this);
             }
             case "stop" -> {
-                StopCommand stopCommand = new StopCommand();
+                StopCommand stopCommand = new StopCommand(activeGiveawayRepository, giveawayRepositoryService, this);
                 stopCommand.stop(event);
             }
             case "predefined" -> {
@@ -148,11 +145,11 @@ public class UpdateController {
                 schedulingCommand.scheduling(event);
             }
             case "participants" -> {
-                ParticipantsCommand participantsCommand = new ParticipantsCommand(listUsersRepository, participantsRepository);
+                ParticipantsCommand participantsCommand = new ParticipantsCommand(activeGiveawayRepository, listUsersRepository, participantsRepository);
                 participantsCommand.participants(event);
             }
             case "cancel" -> {
-                CancelCommand cancelCommand = new CancelCommand(schedulingRepository);
+                CancelCommand cancelCommand = new CancelCommand(activeGiveawayRepository, giveawayRepositoryService, schedulingRepository);
                 cancelCommand.cancel(event);
             }
             case "zone" -> {
@@ -174,10 +171,10 @@ public class UpdateController {
             ButtonChangeLanguage buttonChangeLanguage = new ButtonChangeLanguage(settingsRepository);
             buttonChangeLanguage.change(event);
         } else if (idButton != null && idButton.contains("DOWNLOAD")) {
-            ParticipantsDownloadButton participantsDownloadButton = new ParticipantsDownloadButton(listUsersRepository);
+            ParticipantsDownloadButton participantsDownloadButton = new ParticipantsDownloadButton(activeGiveawayRepository, listUsersRepository);
             participantsDownloadButton.handle(event);
         } else if (idButton != null && idButton.contains("NEXT")) {
-            ParticipantsPaginationHandlerButton participantsPaginationHandlerButton = new ParticipantsPaginationHandlerButton(participantsRepository, listUsersRepository);
+            ParticipantsPaginationHandlerButton participantsPaginationHandlerButton = new ParticipantsPaginationHandlerButton(activeGiveawayRepository, participantsRepository, listUsersRepository);
             participantsPaginationHandlerButton.handle(event);
         }
     }
@@ -192,11 +189,6 @@ public class UpdateController {
         leaveEvent.leave(event);
     }
 
-    private void reactionEvent(@NotNull MessageReactionAddEvent event) {
-        ReactionEvent reactionEvent = new ReactionEvent();
-        reactionEvent.reaction(event, this);
-    }
-
     public RestAction<Message> setViewRest(MessageEmbed messageEmbed, long guildId, long textChannel, long messageId) {
         return messageHandler.editMessage(messageEmbed, guildId, textChannel, messageId);
     }
@@ -206,7 +198,7 @@ public class UpdateController {
     }
 
     public RestAction<Message> setViewRest(JDA jda, String messageContent, Long guildId, Long textChannel) {
-       return messageHandler.sendMessage(jda, guildId, textChannel, messageContent);
+        return messageHandler.sendMessage(jda, guildId, textChannel, messageContent);
     }
 
     public void setView(MessageEmbed embedBuilder, Long guildId, Long textChannel, List<Button> buttons) {

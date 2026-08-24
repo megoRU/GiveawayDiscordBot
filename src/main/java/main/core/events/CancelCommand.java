@@ -1,11 +1,12 @@
 package main.core.events;
 
 import lombok.AllArgsConstructor;
-import main.giveaway.Giveaway;
-import main.giveaway.GiveawayRegistry;
 import main.jsonparser.JSONParsers;
+import main.model.entity.ActiveGiveaways;
 import main.model.entity.Scheduling;
+import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.SchedulingRepository;
+import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
@@ -18,9 +19,10 @@ import java.util.List;
 @AllArgsConstructor
 public class CancelCommand {
 
+    private final ActiveGiveawayRepository activeGiveawayRepository;
+    private final GiveawayRepositoryService giveawayRepositoryService;
     private final SchedulingRepository schedulingRepository;
     private static final JSONParsers jsonParsers = new JSONParsers();
-    private static final GiveawayRegistry instance = GiveawayRegistry.getInstance();
 
     @Transactional
     public void cancel(@NotNull SlashCommandInteractionEvent event) {
@@ -33,13 +35,13 @@ public class CancelCommand {
         if (giveawayId != null) {
             if (giveawayId.matches("[0-9]+")) {
                 long giveawayIdLong = Long.parseLong(giveawayId);
-                Giveaway giveaway = instance.getGiveaway(giveawayIdLong);
+                ActiveGiveaways activeGiveaways = activeGiveawayRepository.findByMessageId(giveawayIdLong);
 
-                if (giveaway == null) {
+                if (activeGiveaways == null || !activeGiveaways.getGuildId().equals(guildId)) {
                     String giveawayNotFound = jsonParsers.getLocale("giveaway_not_found", guildId);
                     event.getHook().sendMessage(giveawayNotFound).setEphemeral(true).queue();
                 } else {
-                    removeActiveGiveaway(giveaway);
+                    removeActiveGiveaway(activeGiveaways);
 
                     String cancelGiveaway = jsonParsers.getLocale("cancel_giveaway", guildId);
                     event.getHook().sendMessage(cancelGiveaway).setEphemeral(true).queue();
@@ -58,7 +60,7 @@ public class CancelCommand {
                 }
             }
         } else {
-            List<Giveaway> giveawayList = instance.getGiveawaysByGuild(guildId);
+            List<ActiveGiveaways> giveawayList = activeGiveawayRepository.findByGuildId(guildId);
             List<Scheduling> schedulingList = schedulingRepository.findByGuildId(guildId);
 
             if (giveawayList != null && giveawayList.size() > 1) {
@@ -69,10 +71,10 @@ public class CancelCommand {
                 event.getHook().sendMessage(moreSchedulingForCancel).setEphemeral(true).queue();
             } else {
                 if (giveawayList != null && giveawayList.size() == 1) {
-                    Giveaway giveaway = giveawayList.getFirst();
+                    ActiveGiveaways activeGiveaways = giveawayList.getFirst();
                     String cancelGiveaway = jsonParsers.getLocale("cancel_giveaway", guildId);
 
-                    removeActiveGiveaway(giveaway);
+                    removeActiveGiveaway(activeGiveaways);
                     event.getHook().sendMessage(cancelGiveaway).setEphemeral(true).queue();
                 } else if (schedulingList.size() == 1) {
                     Scheduling scheduling = schedulingList.getFirst();
@@ -93,7 +95,8 @@ public class CancelCommand {
         schedulingRepository.deleteByIdSalt(idSalt);
     }
 
-    private void removeActiveGiveaway(@NotNull Giveaway giveaway) {
-        giveaway.cancelGiveaway();
+    private void removeActiveGiveaway(@NotNull ActiveGiveaways activeGiveaways) {
+        Long messageId = activeGiveaways.getMessageId();
+        giveawayRepositoryService.deleteGiveaway(messageId);
     }
 }

@@ -5,19 +5,18 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import main.controller.UpdateController;
 import main.core.CoreBot;
-import main.giveaway.Giveaway;
-import main.giveaway.GiveawayRegistry;
 import main.jsonparser.ParserClass;
+import main.model.entity.ActiveGiveaways;
 import main.model.entity.Scheduling;
 import main.model.entity.Settings;
 import main.model.entity.UserZoneId;
+import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.SchedulingRepository;
 import main.model.repository.SettingsRepository;
 import main.model.repository.UserZoneIdRepository;
-import main.service.SaveUsersService;
+import main.service.GiveawayRepositoryService;
 import main.service.ScheduleStartService;
 import main.service.SlashService;
-import main.service.UploadGiveawaysService;
 import main.threads.StopGiveawayHandler;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -61,21 +60,20 @@ public class BotStart {
     @Getter
     private static JDA jda;
     private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
-    private static final GiveawayRegistry instance = GiveawayRegistry.getInstance();
 
     //COMPONENT
     private final UpdateController updateController;
 
     //REPOSITORY
+    private final ActiveGiveawayRepository activeGiveawayRepository;
     private final SchedulingRepository schedulingRepository;
     private final SettingsRepository settingsRepository;
     private final UserZoneIdRepository userZoneIdRepository;
 
     //Service
+    private final GiveawayRepositoryService giveawayRepositoryService;
     private final SlashService slashService;
     private final ScheduleStartService scheduleStartService;
-    private final UploadGiveawaysService uploadGiveawaysService;
-    private final SaveUsersService saveUsersService;
     private final CoreBot coreBot;
 
     @PostConstruct
@@ -121,24 +119,12 @@ public class BotStart {
             jda = jdaBuilder.build();
             jda.awaitReady();
 
-            //Получаем Giveaway и пользователей. Устанавливаем данные
-            uploadGiveawaysService.uploadGiveaways(updateController);
-
             //Обновить команды
             slashService.updateSlash(jda);
 
             updateActivity();
 
             System.out.println("DevMode: " + Config.isIsDev() + " Time Build: " + "11:29");
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-    }
-
-    @Scheduled(fixedDelay = 60, initialDelay = 5, timeUnit = TimeUnit.SECONDS)
-    private void saveUsers() {
-        try {
-            saveUsersService.saveParticipants();
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }
@@ -153,7 +139,7 @@ public class BotStart {
         }
     }
 
-    @Scheduled(fixedDelay = 60, initialDelay = 60, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = 30, initialDelay = 60, timeUnit = TimeUnit.SECONDS)
     private void schStartGiveaway() {
         try {
             List<Scheduling> schedulingList = schedulingRepository.findAll();
@@ -181,17 +167,17 @@ public class BotStart {
         }
     }
 
-    @Scheduled(fixedDelay = 60, initialDelay = 60, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = 30, initialDelay = 60, timeUnit = TimeUnit.SECONDS)
     private void stopGiveawayTimer() {
-        List<Giveaway> giveawayDataList = new LinkedList<>(instance.getAllGiveaway());
+        try {
+            List<ActiveGiveaways> activeGiveawaysList = activeGiveawayRepository.findAll();
 
-        for (Giveaway giveaway : giveawayDataList) {
-            try {
-                StopGiveawayHandler stopGiveawayHandler = new StopGiveawayHandler();
-                stopGiveawayHandler.handleGiveaway(giveaway);
-            } catch (Exception e) {
-                LOGGER.error(e.getMessage(), e);
+            for (ActiveGiveaways activeGiveaways : activeGiveawaysList) {
+                StopGiveawayHandler stopGiveawayHandler = new StopGiveawayHandler(giveawayRepositoryService, updateController);
+                stopGiveawayHandler.handleGiveaway(activeGiveaways);
             }
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
         }
     }
 

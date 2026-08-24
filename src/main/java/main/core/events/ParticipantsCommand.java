@@ -3,12 +3,12 @@ package main.core.events;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import main.giveaway.Giveaway;
-import main.giveaway.GiveawayRegistry;
 import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
+import main.model.entity.ActiveGiveaways;
 import main.model.entity.ListUsers;
 import main.model.entity.Participants;
+import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.ListUsersRepository;
 import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -35,7 +35,7 @@ import java.util.List;
 public class ParticipantsCommand {
 
     private static final JSONParsers jsonParsers = new JSONParsers();
-    private static final GiveawayRegistry instance = GiveawayRegistry.getInstance();
+    private final ActiveGiveawayRepository activeGiveawayRepository;
     private final ListUsersRepository listUsersRepository;
     private final ParticipantsRepository participantsRepository;
 
@@ -47,7 +47,7 @@ public class ParticipantsCommand {
         String id = event.getOption("giveaway-id", OptionMapping::getAsString);
 
         if (id != null) {
-            Pagination pagination = getParticipants(userIdLong, Long.parseLong(id), 0, participantsRepository, listUsersRepository);
+            Pagination pagination = getParticipants(userIdLong, Long.parseLong(id), 0, activeGiveawayRepository, participantsRepository, listUsersRepository);
             Page<?> page = pagination.getPage();
             List<String> participantsCollection = pagination.getParticipants();
 
@@ -101,9 +101,10 @@ public class ParticipantsCommand {
     }
 
     public static Pagination getParticipants(long userIdLong, long giveawayId, int page,
+                                             ActiveGiveawayRepository activeGiveawayRepository,
                                              ParticipantsRepository participantsRepository,
                                              ListUsersRepository listUsersRepository) {
-        Giveaway giveaway = instance.getGiveaway(giveawayId);
+        ActiveGiveaways giveaway = activeGiveawayRepository.findByMessageId(giveawayId);
         Collection<String> collection = new ArrayList<>();
 
         Pagination.PaginationBuilder builder = Pagination.builder();

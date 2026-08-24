@@ -3,6 +3,7 @@ package main.core.events;
 import lombok.AllArgsConstructor;
 import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
+import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.ListUsersRepository;
 import main.model.repository.ParticipantsRepository;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -23,6 +24,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ParticipantsPaginationHandlerButton {
 
+    private final ActiveGiveawayRepository activeGiveawayRepository;
     private final ParticipantsRepository participantsRepository;
     private final ListUsersRepository listUsersRepository;
     private static final JSONParsers jsonParsers = new JSONParsers();
@@ -44,7 +46,7 @@ public class ParticipantsPaginationHandlerButton {
         String giveawayId = split[1];
         int page = Integer.parseInt(split[2]);
 
-        ParticipantsCommand.Pagination pagination = ParticipantsCommand.getParticipants(userIdLong, giveawayIdLong, page, participantsRepository, listUsersRepository);
+        ParticipantsCommand.Pagination pagination = ParticipantsCommand.getParticipants(userIdLong, giveawayIdLong, page, activeGiveawayRepository, participantsRepository, listUsersRepository);
         Page<?> paginationPage = pagination.getPage();
         List<String> participantsCollection = pagination.getParticipants();
 

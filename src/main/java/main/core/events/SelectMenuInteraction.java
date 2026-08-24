@@ -1,13 +1,15 @@
 package main.core.events;
 
 import lombok.AllArgsConstructor;
+import main.controller.UpdateController;
 import main.giveaway.Giveaway;
-import main.giveaway.GiveawayData;
-import main.giveaway.GiveawayRegistry;
 import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
+import main.model.entity.ActiveGiveaways;
 import main.model.entity.Scheduling;
+import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.SchedulingRepository;
+import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.selections.StringSelectMenu;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -27,7 +30,10 @@ import java.util.Objects;
 public class SelectMenuInteraction {
 
     private static final JSONParsers jsonParsers = new JSONParsers();
+    private final ActiveGiveawayRepository activeGiveawayRepository;
     private final SchedulingRepository schedulingRepository;
+    private final GiveawayRepositoryService giveawayRepositoryService;
+    private final UpdateController updateController;
 
     @Transactional
     public void handle(@NotNull StringSelectInteractionEvent event) {
@@ -50,31 +56,30 @@ public class SelectMenuInteraction {
         }
 
         String selectedValue = event.getSelectedOptions().getFirst().getValue();
-        GiveawayRegistry instance = GiveawayRegistry.getInstance();
 
         if (selectedValue.startsWith("giveaway_")) {
-            handleGiveawaySelection(event, selectedValue, guildId, instance);
+            handleGiveawaySelection(event, selectedValue, guildId);
         } else if (selectedValue.startsWith("scheduling_")) {
             handleSchedulingSelection(event, selectedValue, guildId);
         } else if (selectedValue.startsWith("stop_")) {
-            handleStopGiveaway(event, selectedValue, guildId, instance);
+            handleStopGiveaway(event, selectedValue, guildId);
         } else if (selectedValue.startsWith("back_")) {
-            handleBackSelection(event, guildId, instance);
+            handleBackSelection(event, guildId);
         } else if (selectedValue.startsWith("cancel_")) {
-            handleCancelSelection(event, selectedValue, guildId, instance);
+            handleCancelSelection(event, selectedValue, guildId);
         } else {
             String selectMenuError = jsonParsers.getLocale("select_menu_error", guildId);
             event.reply(selectMenuError).queue();
         }
     }
 
-    private void handleGiveawaySelection(StringSelectInteractionEvent event, String selectedValue, long guildId, GiveawayRegistry instance) {
+    private void handleGiveawaySelection(StringSelectInteractionEvent event, String selectedValue, long guildId) {
         String messageId = selectedValue.replace("giveaway_", "");
-        Giveaway giveaway = instance.getGiveaway(Long.parseLong(messageId));
+        ActiveGiveaways activeGiveaway = activeGiveawayRepository.findByMessageId(Long.parseLong(messageId));
 
-        if (giveaway != null) {
-            String message = formatGiveawayMessage(giveaway, guildId);
-            var menu = createGiveawayMenu(giveaway);
+        if (activeGiveaway != null && activeGiveaway.getGuildId().equals(guildId)) {
+            String message = formatGiveawayMessage(activeGiveaway, guildId);
+            var menu = createGiveawayMenu(activeGiveaway);
             event.editMessage(message).setComponents(ActionRow.of(menu)).queue();
         } else {
             String selectMenuGiveawayNotFound = jsonParsers.getLocale("select_menu_giveaway_not_found", guildId);
@@ -86,7 +91,7 @@ public class SelectMenuInteraction {
         String messageId = selectedValue.replace("scheduling_", "");
         Scheduling scheduling = schedulingRepository.findByIdSalt(messageId);
 
-        if (scheduling != null) {
+        if (scheduling != null && scheduling.getGuildId().equals(guildId)) {
             String message = formatSchedulingMessage(scheduling, guildId);
             var menu = createSchedulingMenu(scheduling);
             event.editMessage(message).setComponents(ActionRow.of(menu)).queue();
@@ -96,21 +101,26 @@ public class SelectMenuInteraction {
         }
     }
 
-    private void handleStopGiveaway(StringSelectInteractionEvent event, String selectedValue, long guildId, GiveawayRegistry instance) {
+    private void handleStopGiveaway(StringSelectInteractionEvent event, String selectedValue, long guildId) {
         String messageId = selectedValue.replace("stop_", "");
-        Giveaway giveaway = instance.getGiveaway(Long.parseLong(messageId));
+        ActiveGiveaways activeGiveaways = activeGiveawayRepository.findByMessageId(Long.parseLong(messageId));
 
-        if (giveaway != null) {
-            giveaway.stopGiveaway(giveaway.getGiveawayData().getCountWinners());
-            handleBackSelection(event, guildId, instance);
+        if (activeGiveaways != null && activeGiveaways.getGuildId().equals(guildId)) {
+            int countWinners = activeGiveaways.getCountWinners();
+            Giveaway giveaway = new Giveaway(giveawayRepositoryService, updateController);
+
+            giveaway.stopGiveaway(activeGiveaways, countWinners);
+
+            handleBackSelection(event, guildId);
         } else {
             event.editMessage(jsonParsers.getLocale("giveaway_not_found_by_id", guildId)).queue();
         }
     }
 
-    private void handleBackSelection(StringSelectInteractionEvent event, long guildId, GiveawayRegistry instance) {
+    private void handleBackSelection(StringSelectInteractionEvent event, long guildId) {
         List<Scheduling> schedulingList = schedulingRepository.findByGuildId(guildId);
-        List<Giveaway> giveawayList = instance.getGiveawaysByGuild(guildId);
+        List<ActiveGiveaways> giveawayList = activeGiveawayRepository.findByGuildId(guildId);
+        if (giveawayList == null) giveawayList = Collections.emptyList();
 
         // Формируем сообщение
         String formatListMessage = ListCommand.formatListMessage(schedulingList, giveawayList, guildId);
@@ -125,42 +135,41 @@ public class SelectMenuInteraction {
         }
     }
 
-    private void handleCancelSelection(StringSelectInteractionEvent event, String selectedValue, long guildId, GiveawayRegistry instance) {
+    private void handleCancelSelection(StringSelectInteractionEvent event, String selectedValue, long guildId) {
         String messageId = selectedValue.replace("cancel_", "");
 
         if (messageId.matches("[0-9]+")) {
             long messageIdLong = Long.parseLong(messageId);
-            Giveaway giveaway = instance.getGiveaway(messageIdLong);
+            ActiveGiveaways activeGiveaways = activeGiveawayRepository.findByMessageId(messageIdLong);
 
-            if (giveaway == null) {
+            if (activeGiveaways == null || !activeGiveaways.getGuildId().equals(guildId)) {
                 String giveawayNotFoundById = jsonParsers.getLocale("giveaway_not_found_by_id", guildId);
                 event.editMessage(giveawayNotFoundById).setComponents().queue();
             } else {
-                removeActiveGiveaway(messageIdLong);
-                handleBackSelection(event, guildId, instance);
+                removeActiveGiveaway(activeGiveaways);
+                handleBackSelection(event, guildId);
             }
         } else {
             Scheduling scheduling = schedulingRepository.findByIdSalt(messageId);
 
-            if (scheduling == null) {
+            if (scheduling == null || !scheduling.getGuildId().equals(guildId)) {
                 String giveawayNotFoundById = jsonParsers.getLocale("giveaway_not_found_by_id", guildId);
                 event.editMessage(giveawayNotFoundById).setComponents().queue();
             } else {
                 removeScheduling(messageId);
-                handleBackSelection(event, guildId, instance);
+                handleBackSelection(event, guildId);
             }
         }
     }
 
-    private String formatGiveawayMessage(Giveaway giveaway, long guildId) {
-        GiveawayData giveawayData = giveaway.getGiveawayData();
-        String title = giveawayData.getTitle();
-        long userIdLong = giveawayData.getUserIdLong();
-        Long roleId = giveawayData.getRoleId();
-        int countWinners = giveawayData.getCountWinners();
-        int minParticipants = giveawayData.getMinParticipants();
-        Instant endGiveawayDate = giveawayData.getEndGiveawayDate();
-        String urlImage = giveawayData.getUrlImage();
+    private String formatGiveawayMessage(ActiveGiveaways activeGiveaways, long guildId) {
+        String title = activeGiveaways.getTitle() == null ? "Giveaway" : activeGiveaways.getTitle();
+        long userIdLong = activeGiveaways.getCreatedUserId();
+        Long roleId = activeGiveaways.getRoleId();
+        int countWinners = activeGiveaways.getCountWinners();
+        int minParticipants = activeGiveaways.getMinParticipants() == null ? 1 : activeGiveaways.getMinParticipants();
+        Instant endGiveawayDate = activeGiveaways.getEndGiveawayDate();
+        String urlImage = activeGiveaways.getUrlImage();
 
         String giveawayEditTitle = jsonParsers.getLocale("giveaway_edit_title", guildId);
         String giveawayEditWinners = jsonParsers.getLocale("giveaway_edit_winners", guildId);
@@ -198,17 +207,17 @@ public class SelectMenuInteraction {
                 (urlImage != null ? urlImage : "");
     }
 
-    private StringSelectMenu createGiveawayMenu(Giveaway giveaway) {
-        long guildId = giveaway.getGuildId();
+    private StringSelectMenu createGiveawayMenu(ActiveGiveaways activeGiveaways) {
+        long guildId = activeGiveaways.getGuildId();
 
         String selectMenuBack = jsonParsers.getLocale("select_menu_back", guildId);
         String selectMenuCancel = jsonParsers.getLocale("select_menu_cancel", guildId);
         String selectMenuStop = jsonParsers.getLocale("select_menu_stop", guildId);
 
         return StringSelectMenu.create("select_action")
-                .addOption(selectMenuStop, "stop_" + giveaway.getGiveawayData().getMessageId(), Emoji.fromUnicode("🎉"))
-                .addOption(selectMenuCancel, "cancel_" + giveaway.getGiveawayData().getMessageId(), Emoji.fromUnicode("❌"))
-                .addOption(selectMenuBack, "back_" + giveaway.getGiveawayData().getMessageId(), Emoji.fromUnicode("⬅️"))
+                .addOption(selectMenuStop, "stop_" + activeGiveaways.getMessageId(), Emoji.fromUnicode("🎉"))
+                .addOption(selectMenuCancel, "cancel_" + activeGiveaways.getMessageId(), Emoji.fromUnicode("❌"))
+                .addOption(selectMenuBack, "back_" + activeGiveaways.getMessageId(), Emoji.fromUnicode("⬅️"))
                 .build();
     }
 
@@ -241,9 +250,8 @@ public class SelectMenuInteraction {
         schedulingRepository.deleteByIdSalt(giveawayId);
     }
 
-    private void removeActiveGiveaway(long messageId) {
-        GiveawayRegistry instance = GiveawayRegistry.getInstance();
-        Giveaway giveaway = instance.getGiveaway(messageId);
-        if (giveaway != null) giveaway.cancelGiveaway();
+    private void removeActiveGiveaway(ActiveGiveaways activeGiveaways) {
+        Giveaway giveaway = new Giveaway(giveawayRepositoryService, updateController);
+        giveaway.cancelGiveaway(activeGiveaways);
     }
 }
