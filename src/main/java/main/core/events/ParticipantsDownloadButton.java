@@ -3,7 +3,6 @@ package main.core.events;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.AllArgsConstructor;
-import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.model.entity.ActiveGiveaways;
 import main.model.entity.ListUsers;

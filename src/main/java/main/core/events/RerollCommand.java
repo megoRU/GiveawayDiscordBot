@@ -33,6 +33,7 @@ public class RerollCommand {
 
     private final ListUsersRepository listUsersRepository;
 
+    //TODO вообще не из базы берет :)
     public void reroll(@NotNull SlashCommandInteractionEvent event) {
         var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
         var channel = Objects.requireNonNull(event.getChannel());

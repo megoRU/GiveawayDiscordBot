@@ -1,26 +1,35 @@
 package main.threads;
 
+import lombok.AllArgsConstructor;
 import main.config.BotStart;
-import main.giveaway.Giveaway;
+import main.controller.UpdateController;
+import main.giveaway.GiveawayEnds;
+import main.model.entity.ActiveGiveaways;
+import main.service.GiveawayRepositoryService;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.*;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@AllArgsConstructor
 public class StopGiveawayHandler {
 
     private static final Logger LOGGER = Logger.getLogger(StopGiveawayHandler.class.getName());
+    private final GiveawayRepositoryService giveawayRepositoryService;
+    private final UpdateController updateController;
 
     @Transactional
-    public void handleGiveaway(Giveaway giveaway) {
-        if (giveaway != null) {
-
+    public void handleGiveaway(ActiveGiveaways activeGiveaways) {
+        if (activeGiveaways != null) {
             try {
-                int countWinners = giveaway.getCountWinners();
+                int countWinners = activeGiveaways.getCountWinners();
 
-                if (shouldFinishGiveaway(giveaway)) {
-                    giveaway.stopGiveaway(countWinners);
+                if (shouldFinishGiveaway(activeGiveaways)) {
+                    GiveawayEnds giveawayEnds = new GiveawayEnds(giveawayRepositoryService);
+                    giveawayEnds.stop(activeGiveaways, countWinners, updateController);
                 }
             } catch (Exception e) {
                 logError(e);
@@ -28,15 +37,14 @@ public class StopGiveawayHandler {
         }
     }
 
-    private boolean shouldFinishGiveaway(Giveaway giveaway) {
-        if (giveaway.isLocked()) return false;
-        if (giveaway.isFinishGiveaway()) return true;
+    private boolean shouldFinishGiveaway(ActiveGiveaways activeGiveaways) {
+        if (activeGiveaways.isFinish()) return true;
 
-        long userIdLong = giveaway.getUserIdLong();
+        long userIdLong = activeGiveaways.getCreatedUserId();
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
 
         ZoneId zoneOffset = ZoneId.of(zonesIdByUser);
-        ZonedDateTime endInstant = giveaway.getEndGiveawayDate().atZone(zoneOffset);
+        ZonedDateTime endInstant = activeGiveaways.getEndGiveawayDate().atZone(zoneOffset);
 
         return Instant.now().atZone(zoneOffset).isAfter(endInstant);
     }

@@ -174,7 +174,6 @@ public class EditGiveawayCommand {
                 activeGiveaways.getChannelId(),
                 activeGiveaways.getCreatedUserId(),
                 activeGiveaways.isFinish(),
-                false,
                 activeGiveaways.getMessageId(),
                 activeGiveaways.getCountWinners(),
                 activeGiveaways.getRoleId(),

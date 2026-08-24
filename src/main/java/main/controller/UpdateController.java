@@ -15,7 +15,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
-import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.requests.RestAction;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -75,8 +74,6 @@ public class UpdateController {
             buttonEvent(buttonInteractionEvent);
         } else if (event instanceof GuildJoinEvent guildJoinEvent) {
             joinEvent(guildJoinEvent);
-        } else if (event instanceof MessageReactionAddEvent messageReactionAddEvent) {
-            reactionEvent(messageReactionAddEvent);
         } else if (event instanceof StringSelectInteractionEvent stringSelectInteractionEvent) {
             selectMenuEvent(stringSelectInteractionEvent);
         } else if (event instanceof GuildLeaveEvent guildLeaveEvent) {
@@ -192,11 +189,6 @@ public class UpdateController {
         leaveEvent.leave(event);
     }
 
-    private void reactionEvent(@NotNull MessageReactionAddEvent event) {
-        ReactionEvent reactionEvent = new ReactionEvent();
-        reactionEvent.reaction(event, this);
-    }
-
     public RestAction<Message> setViewRest(MessageEmbed messageEmbed, long guildId, long textChannel, long messageId) {
         return messageHandler.editMessage(messageEmbed, guildId, textChannel, messageId);
     }
@@ -206,7 +198,7 @@ public class UpdateController {
     }
 
     public RestAction<Message> setViewRest(JDA jda, String messageContent, Long guildId, Long textChannel) {
-       return messageHandler.sendMessage(jda, guildId, textChannel, messageContent);
+        return messageHandler.sendMessage(jda, guildId, textChannel, messageContent);
     }
 
     public void setView(MessageEmbed embedBuilder, Long guildId, Long textChannel, List<Button> buttons) {

@@ -33,6 +33,7 @@ public class PredefinedCommand {
         this.giveawayRepositoryService = giveawayRepositoryService;
     }
 
+    //TODO не работает
     public void predefined(@NotNull SlashCommandInteractionEvent event, UpdateController updateController) {
         var guildIdLong = Objects.requireNonNull(event.getGuild()).getIdLong();
         var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
@@ -120,7 +121,7 @@ public class PredefinedCommand {
                                 .map(user -> new ParticipantDTO(user.getIdLong(), user.getName()))
                                 .toList();
 
-                        giveaway.addUser(userList);
+//                        giveaway.addUser(userList);
                     } else {
                         List<ParticipantDTO> userList = members.stream()
                                 .filter(member -> member.getRoles().contains(role))
@@ -129,7 +130,7 @@ public class PredefinedCommand {
                                 .map(user -> new ParticipantDTO(user.getIdLong(), user.getName()))
                                 .toList();
 
-                        giveaway.addUser(userList);
+//                        giveaway.addUser(userList);
                     }
                 });
         listTask.isStarted();

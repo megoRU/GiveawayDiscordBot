@@ -22,6 +22,7 @@ import static com.aventrix.jnanoid.jnanoid.NanoIdUtils.DEFAULT_NUMBER_GENERATOR;
 
 public class GiveawayUtils {
 
+    public static final String TADA = "\uD83C\uDF89";
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
     // пример: 29.04.2025 15:00
     public static final String ISO_TIME_REGEX = "^\\d{2}\\.\\d{2}\\.\\d{4}\\s\\d{2}:\\d{2}$";

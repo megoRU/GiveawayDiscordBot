@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import main.config.BotStart;
 import main.controller.UpdateController;
-import main.core.events.ReactionEvent;
 import main.model.entity.ActiveGiveaways;
 import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -12,7 +11,6 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,66 +19,43 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.zone.ZoneRulesException;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+@Getter
+@Setter
 public class Giveaway {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Giveaway.class.getName());
 
     //USER DATA
-    @Getter
     private final long guildId;
-    @Getter
     private final long textChannelId;
-    @Getter
     private long userIdLong;
 
     //Giveaway properties previously in GiveawayData
-    @Getter
     private final Set<Long> participantsList = ConcurrentHashMap.newKeySet();
     private final ConcurrentHashMap<Long, ConcurrentLinkedQueue<ParticipantDTO>> queueConcurrentHashMap = new ConcurrentHashMap<>();
-    @Getter
-    @Setter
     private long messageId;
-    @Getter
-    @Setter
     private int countWinners;
-    @Getter
-    @Setter
     private Long roleId;
-    @Getter
     private boolean isForSpecificRole;
-    @Getter
-    @Setter
     private String urlImage;
-    @Getter
     private String title;
-    @Getter
-    @Setter
     private Instant endGiveawayDate;
-    @Getter
     private int minParticipants = 1;
 
-    private final UpdateController updateController;
-
-    @Getter
-    @Setter
+    //
     private volatile boolean isFinishGiveaway;
-
-    @Getter
-    @Setter
-    private volatile boolean isLocked;
-
-    @Getter
-    @Setter
     private volatile boolean isRemoved;
 
     //REPO
     private final GiveawayRepositoryService giveawayRepositoryService;
+
+    //CORE
+    private final UpdateController updateController;
 
     public Giveaway(long guildId,
                     long textChannelId,
@@ -98,7 +73,6 @@ public class Giveaway {
                     long textChannelId,
                     long userIdLong,
                     boolean isFinishGiveaway,
-                    boolean isLocked,
                     long messageId,
                     int countWinners,
                     Long roleId,
@@ -113,7 +87,6 @@ public class Giveaway {
         this.textChannelId = textChannelId;
         this.userIdLong = userIdLong;
         this.isFinishGiveaway = isFinishGiveaway;
-        this.isLocked = isLocked;
         this.messageId = messageId;
         this.countWinners = countWinners;
         this.roleId = roleId;
@@ -133,14 +106,6 @@ public class Giveaway {
         this.giveawayRepositoryService = giveawayRepositoryService;
     }
 
-    public void setUserIdLong(long userIdLong) {
-        this.userIdLong = userIdLong;
-    }
-
-    public void setForSpecificRole(boolean forSpecificRole) {
-        isForSpecificRole = forSpecificRole;
-    }
-
     public void setTitle(String title) {
         if (title == null) this.title = "Giveaway";
         else this.title = title;
@@ -156,24 +121,11 @@ public class Giveaway {
         long userIdLong = user.getIdLong();
         ParticipantDTO participantDTO = new ParticipantDTO(userIdLong, name);
 
-        queueConcurrentHashMap.computeIfAbsent(messageId, k -> new ConcurrentLinkedQueue<>()).add(participantDTO);
-    }
-
-    @Nullable
-    public ConcurrentLinkedQueue<ParticipantDTO> getCollectionQueue() {
-        return queueConcurrentHashMap.get(messageId);
-    }
-
-    public boolean participantContains(Long user) {
-        return participantsList.contains(user);
+        queueConcurrentHashMap.computeIfAbsent(messageId, _ -> new ConcurrentLinkedQueue<>()).add(participantDTO);
     }
 
     public int getParticipantSize() {
         return participantsList.size();
-    }
-
-    public void addParticipant(Long userId) {
-        participantsList.add(userId);
     }
 
     public void setParticipantsList(Set<Long> participantsMap) {
@@ -226,10 +178,10 @@ public class Giveaway {
             //Отправка сообщения
             Message message = textChannel.sendMessageEmbeds(embedBuilder.build()).submit().get();
             if (predefined) {
-                updateCollections(message);
+                updateOrCreateGiveaway(message);
             } else {
-                message.addReaction(Emoji.fromUnicode(ReactionEvent.TADA)).submit().get();
-                updateCollections(message);
+                message.addReaction(Emoji.fromUnicode(GiveawayUtils.TADA)).submit().get();
+                updateOrCreateGiveaway(message);
             }
 
             long channelId = message.getChannel().getIdLong();
@@ -243,9 +195,7 @@ public class Giveaway {
         }
     }
 
-    private void updateCollections(Message message) {
-        setMessageId(message.getIdLong());
-
+    private void updateOrCreateGiveaway(Message message) {
         ActiveGiveaways activeGiveaways = new ActiveGiveaways();
         activeGiveaways.setMessageId(message.getIdLong());
         activeGiveaways.setGuildId(guildId);
@@ -267,25 +217,15 @@ public class Giveaway {
         giveawayRepositoryService.saveGiveaway(activeGiveaways);
     }
 
-    public synchronized void addUser(List<ParticipantDTO> user) {
-        GiveawayUserHandler giveawayUserHandler = new GiveawayUserHandler(giveawayRepositoryService);
-        giveawayUserHandler.saveUser(this, user);
-    }
-
-    public synchronized void addUser(User user) {
-        GiveawayUserHandler giveawayUserHandler = new GiveawayUserHandler(giveawayRepositoryService);
-        giveawayUserHandler.preSaveUser(this, user);
-    }
-
-    public synchronized void stopGiveaway(final int countWinner) {
+    public synchronized void stopGiveaway(final int countWinner, ActiveGiveaways activeGiveaways) {
         LOGGER.info("stopGiveaway: GuildID: {}, ListUsersSize: {}, CountWinners: {}", guildId, getParticipantSize(), countWinner);
         GiveawayEnds giveawayEnds = new GiveawayEnds(giveawayRepositoryService);
-        giveawayEnds.stop(this, countWinner, updateController);
+        giveawayEnds.stop(activeGiveaways, countWinner, updateController);
     }
 
-    public synchronized void cancelGiveaway() {
+    public synchronized void cancelGiveaway(ActiveGiveaways activeGiveaways) {
         LOGGER.info("cancelGiveaway: GuildID: {} GiveawayId: {}", guildId, getMessageId());
         GiveawayEnds giveawayEnds = new GiveawayEnds(giveawayRepositoryService);
-        giveawayEnds.cancel(this, updateController);
+        giveawayEnds.cancel(activeGiveaways, updateController);
     }
 }

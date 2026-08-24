@@ -113,7 +113,6 @@ public class CancelCommand {
                 activeGiveaways.getChannelId(),
                 activeGiveaways.getCreatedUserId(),
                 activeGiveaways.isFinish(),
-                false,
                 activeGiveaways.getMessageId(),
                 activeGiveaways.getCountWinners(),
                 activeGiveaways.getRoleId(),
@@ -126,6 +125,6 @@ public class CancelCommand {
                 updateController
         );
         giveaway.setParticipantsList(participantsList);
-        giveaway.cancelGiveaway();
+        giveaway.cancelGiveaway(activeGiveaways);
     }
 }
