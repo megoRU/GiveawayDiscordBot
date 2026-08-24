@@ -3,7 +3,6 @@ package main.core.events;
 import lombok.AllArgsConstructor;
 import main.controller.UpdateController;
 import main.giveaway.Giveaway;
-import main.giveaway.GiveawayRegistry;
 import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.service.GiveawayRepositoryService;
@@ -111,8 +110,6 @@ public class StartCommand {
                     giveawayRepositoryService,
                     updateController);
 
-            GiveawayRegistry instance = GiveawayRegistry.getInstance();
-
             if (!event.getInteraction().isAcknowledged()) {
                 try {
                     String sendSlashMessage = String.format(jsonParsers.getLocale("send_slash_message", guildId), event.getChannel().getId());
@@ -131,9 +128,6 @@ public class StartCommand {
                     urlImage,
                     false,
                     minParticipants);
-
-            long messageId = giveaway.getGiveawayData().getMessageId();
-            instance.putGift(messageId, giveaway);
 
         } catch (ZoneRulesException z) {
             LOGGER.error(z.getMessage(), z);

@@ -17,10 +17,8 @@ public class GiveawayUserHandler {
 
     @Transactional
     public void saveUser(Giveaway giveaway, List<ParticipantDTO> user) {
-        long messageId = giveaway.getGiveawayData().getMessageId();
+        long messageId = giveaway.getMessageId();
         boolean removed = giveaway.isRemoved();
-
-        GiveawayData giveawayData = giveaway.getGiveawayData();
 
         if (!removed && !user.isEmpty()) {
             ActiveGiveaways activeGiveaways = giveawayRepositoryService.getGiveaway(messageId);
@@ -37,7 +35,7 @@ public class GiveawayUserHandler {
                 participants.setActiveGiveaways(activeGiveaways);
 
                 participantsList.add(participants);
-                giveawayData.addParticipant(userId);
+                giveaway.addParticipant(userId);
             }
             giveawayRepositoryService.saveParticipants(participantsList);
         }
@@ -45,11 +43,10 @@ public class GiveawayUserHandler {
 
     public void preSaveUser(Giveaway giveaway, User user) {
         boolean removed = giveaway.isRemoved();
-        GiveawayData giveawayData = giveaway.getGiveawayData();
 
         if (!removed) {
-            giveawayData.addUserToQueue(user);
-            giveawayData.addParticipant(user.getIdLong());
+            giveaway.addUserToQueue(user);
+            giveaway.addParticipant(user.getIdLong());
         }
     }
 }

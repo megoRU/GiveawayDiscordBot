@@ -2,7 +2,6 @@ package main.core.events;
 
 import main.controller.UpdateController;
 import main.giveaway.Giveaway;
-import main.giveaway.GiveawayRegistry;
 import main.giveaway.GiveawayUtils;
 import main.giveaway.ParticipantDTO;
 import main.jsonparser.JSONParsers;
@@ -84,7 +83,6 @@ public class PredefinedCommand {
                 return;
             }
         }
-        GiveawayRegistry instance = GiveawayRegistry.getInstance();
 
         Giveaway giveaway = new Giveaway(guildIdLong,
                 textChannel.getIdLong(),
@@ -104,16 +102,13 @@ public class PredefinedCommand {
                 true,
                 1);
 
-        long messageId = giveaway.getGiveawayData().getMessageId();
-        instance.putGift(messageId, giveaway);
-
         Task<List<Member>> listTask = event.getGuild().loadMembers()
                 .onSuccess(members -> {
                     try {
                         String sendSlashMessage = String.format(jsonParsers.getLocale("send_slash_message", guildId), event.getChannel().getId());
                         event.getHook().editOriginal(sendSlashMessage)
                                 .delay(5, TimeUnit.SECONDS)
-                                .flatMap(_ -> event.getHook().deleteOriginal())
+                                .flatMap(unused -> event.getHook().deleteOriginal())
                                 .queue();
                     } catch (Exception ignored) {
                     }

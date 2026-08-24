@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +22,10 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.zone.ZoneRulesException;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Giveaway {
 
@@ -32,11 +37,33 @@ public class Giveaway {
     @Getter
     private final long textChannelId;
     @Getter
-    private final long userIdLong;
+    private long userIdLong;
 
-    //GiveawayData
+    //Giveaway properties previously in GiveawayData
     @Getter
-    private final GiveawayData giveawayData;
+    private final Set<Long> participantsList = ConcurrentHashMap.newKeySet();
+    private final ConcurrentHashMap<Long, ConcurrentLinkedQueue<ParticipantDTO>> queueConcurrentHashMap = new ConcurrentHashMap<>();
+    @Getter
+    @Setter
+    private long messageId;
+    @Getter
+    @Setter
+    private int countWinners;
+    @Getter
+    @Setter
+    private Long roleId;
+    @Getter
+    private boolean isForSpecificRole;
+    @Getter
+    @Setter
+    private String urlImage;
+    @Getter
+    private String title;
+    @Getter
+    @Setter
+    private Instant endGiveawayDate;
+    @Getter
+    private int minParticipants = 1;
 
     private final UpdateController updateController;
 
@@ -63,7 +90,6 @@ public class Giveaway {
         this.guildId = guildId;
         this.textChannelId = textChannelId;
         this.userIdLong = userIdLong;
-        this.giveawayData = new GiveawayData();
         this.updateController = updateController;
         this.giveawayRepositoryService = giveawayRepositoryService;
     }
@@ -73,17 +99,85 @@ public class Giveaway {
                     long userIdLong,
                     boolean isFinishGiveaway,
                     boolean isLocked,
-                    GiveawayData giveawayData,
+                    long messageId,
+                    int countWinners,
+                    Long roleId,
+                    Boolean isForSpecificRole,
+                    String urlImage,
+                    String title,
+                    Instant endGiveawayDate,
+                    int minParticipants,
                     GiveawayRepositoryService giveawayRepositoryService,
                     UpdateController updateController) {
         this.guildId = guildId;
         this.textChannelId = textChannelId;
         this.userIdLong = userIdLong;
-        this.giveawayData = giveawayData;
         this.isFinishGiveaway = isFinishGiveaway;
         this.isLocked = isLocked;
+        this.messageId = messageId;
+        this.countWinners = countWinners;
+        this.roleId = roleId;
+        this.isForSpecificRole = Optional.ofNullable(isForSpecificRole).orElse(false);
+        this.urlImage = urlImage;
+        setTitle(title);
+        this.minParticipants = minParticipants == 0 ? 1 : minParticipants;
+
+        if (endGiveawayDate == null) {
+            String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
+            ZoneId zoneId = ZoneId.of(zonesIdByUser);
+            endGiveawayDate = Instant.now().atZone(zoneId).plusDays(30).toInstant();
+        }
+        this.endGiveawayDate = endGiveawayDate;
+
         this.updateController = updateController;
         this.giveawayRepositoryService = giveawayRepositoryService;
+    }
+
+    public void setUserIdLong(long userIdLong) {
+        this.userIdLong = userIdLong;
+    }
+
+    public void setForSpecificRole(boolean forSpecificRole) {
+        isForSpecificRole = forSpecificRole;
+    }
+
+    public void setTitle(String title) {
+        if (title == null) this.title = "Giveaway";
+        else this.title = title;
+    }
+
+    public void setMinParticipants(int minParticipants) {
+        if (minParticipants == 0) this.minParticipants = 1;
+        else this.minParticipants = minParticipants;
+    }
+
+    public void addUserToQueue(User user) {
+        String name = user.getName();
+        long userIdLong = user.getIdLong();
+        ParticipantDTO participantDTO = new ParticipantDTO(userIdLong, name);
+
+        queueConcurrentHashMap.computeIfAbsent(messageId, k -> new ConcurrentLinkedQueue<>()).add(participantDTO);
+    }
+
+    @Nullable
+    public ConcurrentLinkedQueue<ParticipantDTO> getCollectionQueue() {
+        return queueConcurrentHashMap.get(messageId);
+    }
+
+    public boolean participantContains(Long user) {
+        return participantsList.contains(user);
+    }
+
+    public int getParticipantSize() {
+        return participantsList.size();
+    }
+
+    public void addParticipant(Long userId) {
+        participantsList.add(userId);
+    }
+
+    public void setParticipantsList(Set<Long> participantsMap) {
+        participantsList.addAll(participantsMap);
     }
 
     public void updateTime(String time) throws ZoneRulesException {
@@ -112,22 +206,22 @@ public class Giveaway {
         Instant utcInstant = zonedDateTime.toInstant();
 
         // Сохраняем в MariaDB TIMESTAMP правильно, чтобы не было сдвига
-        giveawayData.setEndGiveawayDate(utcInstant); //почему-то 2025-09-04T23:30:00
+        setEndGiveawayDate(utcInstant); //почему-то 2025-09-04T23:30:00
     }
 
     //TODO: Возможно добавлять в коллекцию тут
     public void startGiveaway(GuildMessageChannel textChannel, String title, int countWinners, String time, Long role,
                               Boolean isOnlyForSpecificRole, String urlImage, boolean predefined, int minParticipants) {
-        giveawayData.setTitle(title);
-        giveawayData.setCountWinners(countWinners);
-        giveawayData.setRoleId(role);
-        giveawayData.setUrlImage(urlImage);
-        giveawayData.setForSpecificRole(isOnlyForSpecificRole);
-        giveawayData.setMinParticipants(minParticipants);
-        giveawayData.setUserIdLong(userIdLong);
+        setTitle(title);
+        setCountWinners(countWinners);
+        setRoleId(role);
+        setUrlImage(urlImage);
+        setForSpecificRole(isOnlyForSpecificRole != null && isOnlyForSpecificRole);
+        setMinParticipants(minParticipants);
+        setUserIdLong(userIdLong);
         updateTime(time); //Обновляем время
 
-        EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayPattern(giveawayData, this);
+        EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayPattern(this);
         try {
             //Отправка сообщения
             Message message = textChannel.sendMessageEmbeds(embedBuilder.build()).submit().get();
@@ -150,25 +244,25 @@ public class Giveaway {
     }
 
     private void updateCollections(Message message) {
-        giveawayData.setMessageId(message.getIdLong());
+        setMessageId(message.getIdLong());
 
         ActiveGiveaways activeGiveaways = new ActiveGiveaways();
         activeGiveaways.setMessageId(message.getIdLong());
         activeGiveaways.setGuildId(guildId);
         activeGiveaways.setChannelId(message.getChannel().getIdLong());
-        activeGiveaways.setCountWinners(giveawayData.getCountWinners());
-        activeGiveaways.setTitle(giveawayData.getTitle());
-        activeGiveaways.setMinParticipants(giveawayData.getMinParticipants());
+        activeGiveaways.setCountWinners(getCountWinners());
+        activeGiveaways.setTitle(getTitle());
+        activeGiveaways.setMinParticipants(getMinParticipants());
 
-        if (giveawayData.getRoleId() == null || giveawayData.getRoleId() == 0) {
+        if (getRoleId() == null || getRoleId() == 0) {
             activeGiveaways.setRoleId(null);
         } else {
-            activeGiveaways.setRoleId(giveawayData.getRoleId());
+            activeGiveaways.setRoleId(getRoleId());
         }
-        activeGiveaways.setIsForSpecificRole(giveawayData.isForSpecificRole());
-        activeGiveaways.setUrlImage(giveawayData.getUrlImage());
+        activeGiveaways.setIsForSpecificRole(isForSpecificRole());
+        activeGiveaways.setUrlImage(getUrlImage());
         activeGiveaways.setCreatedUserId(userIdLong);
-        activeGiveaways.setEndGiveawayDate(giveawayData.getEndGiveawayDate());
+        activeGiveaways.setEndGiveawayDate(getEndGiveawayDate());
 
         giveawayRepositoryService.saveGiveaway(activeGiveaways);
     }
@@ -184,13 +278,13 @@ public class Giveaway {
     }
 
     public synchronized void stopGiveaway(final int countWinner) {
-        LOGGER.info("stopGiveaway: GuildID: {}, ListUsersSize: {}, CountWinners: {}", guildId, giveawayData.getParticipantSize(), countWinner);
+        LOGGER.info("stopGiveaway: GuildID: {}, ListUsersSize: {}, CountWinners: {}", guildId, getParticipantSize(), countWinner);
         GiveawayEnds giveawayEnds = new GiveawayEnds(giveawayRepositoryService);
         giveawayEnds.stop(this, countWinner, updateController);
     }
 
     public synchronized void cancelGiveaway() {
-        LOGGER.info("cancelGiveaway: GuildID: {} GiveawayId: {}", guildId, giveawayData.getMessageId());
+        LOGGER.info("cancelGiveaway: GuildID: {} GiveawayId: {}", guildId, getMessageId());
         GiveawayEnds giveawayEnds = new GiveawayEnds(giveawayRepositoryService);
         giveawayEnds.cancel(this, updateController);
     }

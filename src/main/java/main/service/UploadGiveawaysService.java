@@ -3,8 +3,6 @@ package main.service;
 import lombok.AllArgsConstructor;
 import main.controller.UpdateController;
 import main.giveaway.Giveaway;
-import main.giveaway.GiveawayData;
-import main.giveaway.GiveawayRegistry;
 import main.model.entity.ActiveGiveaways;
 import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
@@ -12,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -51,7 +48,11 @@ public class UploadGiveawaysService {
                         .map(Participants::getUserId)
                         .collect(Collectors.toSet());
 
-                GiveawayData giveawayData = new GiveawayData(
+                Giveaway giveaway = new Giveaway(guild_long_id,
+                        channel_long_id,
+                        id_user_who_create_giveaway,
+                        finishGiveaway,
+                        true,
                         message_id_long,
                         count_winners,
                         role_id_long,
@@ -60,21 +61,10 @@ public class UploadGiveawaysService {
                         giveaway_title == null ? "Giveaway" : giveaway_title,
                         date_end_giveaway,
                         min_participants == null ? 1 : min_participants,
-                        id_user_who_create_giveaway);
-
-                giveawayData.setParticipantsList(participantsList);
-
-                Giveaway giveaway = new Giveaway(guild_long_id,
-                        channel_long_id,
-                        id_user_who_create_giveaway,
-                        finishGiveaway,
-                        true,
-                        giveawayData,
                         giveawayRepositoryService,
                         updateController);
 
-                GiveawayRegistry instance = GiveawayRegistry.getInstance();
-                instance.putGift(message_id_long, giveaway);
+                giveaway.setParticipantsList(participantsList);
 
                 //Снимаем блокировку
                 giveaway.setLocked(false);
@@ -84,15 +74,13 @@ public class UploadGiveawaysService {
                 }
             } catch (Exception e) {
                 String message = e.getMessage();
-                if (message.contains("10008: Unknown Message")
+                if (message != null && (message.contains("10008: Unknown Message")
                         || message.contains("Missing permission: MESSAGE_SEND")
-                        || message.contains("Missing permission: VIEW_CHANNEL")) {
+                        || message.contains("Missing permission: VIEW_CHANNEL"))) {
                     LOGGER.info("Delete Giveaway {}", activeGiveaways.getMessageId());
                     updateController.getGiveawayRepositoryService().deleteGiveaway(activeGiveaways.getMessageId());
-                    GiveawayRegistry instance = GiveawayRegistry.getInstance();
-                    instance.removeGiveaway(activeGiveaways.getMessageId());
                 } else {
-                    LOGGER.error(e.getMessage(), e);
+                    LOGGER.error(e != null ? e.getMessage() : "Error uploading giveaway", e);
                 }
             }
         }

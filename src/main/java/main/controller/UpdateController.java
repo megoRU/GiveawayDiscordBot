@@ -88,7 +88,7 @@ public class UpdateController {
     }
 
     private void selectMenuEvent(StringSelectInteractionEvent stringSelectInteractionEvent) {
-        SelectMenuInteraction selectMenuInteraction = new SelectMenuInteraction(schedulingRepository);
+        SelectMenuInteraction selectMenuInteraction = new SelectMenuInteraction(activeGiveawayRepository, schedulingRepository, giveawayRepositoryService, this);
         selectMenuInteraction.handle(stringSelectInteractionEvent);
     }
 
@@ -112,7 +112,7 @@ public class UpdateController {
                 helpCommand.help(event);
             }
             case "list" -> {
-                ListCommand listCommand = new ListCommand(schedulingRepository);
+                ListCommand listCommand = new ListCommand(activeGiveawayRepository, schedulingRepository);
                 listCommand.handle(event);
             }
             case "endmessage" -> {
@@ -124,7 +124,7 @@ public class UpdateController {
                 startCommand.start(event, this);
             }
             case "stop" -> {
-                StopCommand stopCommand = new StopCommand();
+                StopCommand stopCommand = new StopCommand(activeGiveawayRepository, giveawayRepositoryService, this);
                 stopCommand.stop(event);
             }
             case "predefined" -> {
@@ -140,7 +140,7 @@ public class UpdateController {
                 rerollCommand.reroll(event);
             }
             case "edit" -> {
-                EditGiveawayCommand editGiveawayCommand = new EditGiveawayCommand(activeGiveawayRepository, schedulingRepository, this);
+                EditGiveawayCommand editGiveawayCommand = new EditGiveawayCommand(activeGiveawayRepository, schedulingRepository, giveawayRepositoryService, this);
                 editGiveawayCommand.editGiveaway(event);
             }
             case "scheduling" -> {
@@ -148,11 +148,11 @@ public class UpdateController {
                 schedulingCommand.scheduling(event);
             }
             case "participants" -> {
-                ParticipantsCommand participantsCommand = new ParticipantsCommand(listUsersRepository, participantsRepository);
+                ParticipantsCommand participantsCommand = new ParticipantsCommand(activeGiveawayRepository, listUsersRepository, participantsRepository);
                 participantsCommand.participants(event);
             }
             case "cancel" -> {
-                CancelCommand cancelCommand = new CancelCommand(schedulingRepository);
+                CancelCommand cancelCommand = new CancelCommand(activeGiveawayRepository, giveawayRepositoryService, schedulingRepository, this);
                 cancelCommand.cancel(event);
             }
             case "zone" -> {
@@ -174,10 +174,10 @@ public class UpdateController {
             ButtonChangeLanguage buttonChangeLanguage = new ButtonChangeLanguage(settingsRepository);
             buttonChangeLanguage.change(event);
         } else if (idButton != null && idButton.contains("DOWNLOAD")) {
-            ParticipantsDownloadButton participantsDownloadButton = new ParticipantsDownloadButton(listUsersRepository);
+            ParticipantsDownloadButton participantsDownloadButton = new ParticipantsDownloadButton(activeGiveawayRepository, listUsersRepository);
             participantsDownloadButton.handle(event);
         } else if (idButton != null && idButton.contains("NEXT")) {
-            ParticipantsPaginationHandlerButton participantsPaginationHandlerButton = new ParticipantsPaginationHandlerButton(participantsRepository, listUsersRepository);
+            ParticipantsPaginationHandlerButton participantsPaginationHandlerButton = new ParticipantsPaginationHandlerButton(activeGiveawayRepository, participantsRepository, listUsersRepository);
             participantsPaginationHandlerButton.handle(event);
         }
     }

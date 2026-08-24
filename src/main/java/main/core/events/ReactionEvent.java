@@ -2,10 +2,11 @@ package main.core.events;
 
 import main.controller.UpdateController;
 import main.giveaway.Giveaway;
-import main.giveaway.GiveawayData;
-import main.giveaway.GiveawayRegistry;
 import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
+import main.model.entity.ActiveGiveaways;
+import main.model.entity.Participants;
+import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
@@ -16,6 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
+import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ReactionEvent {
 
@@ -34,27 +38,49 @@ public class ReactionEvent {
             String emoji = event.getEmoji().getName();
             long messageId = event.getMessageIdLong();
             long guildIdLong = event.getGuild().getIdLong();
-            GiveawayRegistry instance = GiveawayRegistry.getInstance();
-            Giveaway giveaway = instance.getGiveaway(messageId);
 
-            if (giveaway != null) {
-                GiveawayData giveawayData = giveaway.getGiveawayData();
-                if (giveawayData.participantContains(user.getIdLong())) return;
+            GiveawayRepositoryService giveawayRepositoryService = updateController.getGiveawayRepositoryService();
+            ActiveGiveaways activeGiveaways = giveawayRepositoryService.getGiveaway(messageId);
+
+            if (activeGiveaways != null) {
+                Set<Long> participantsList = activeGiveaways.getParticipants() != null ? activeGiveaways.getParticipants()
+                        .stream()
+                        .map(Participants::getUserId)
+                        .collect(Collectors.toSet()) : Collections.emptySet();
+
+                Giveaway giveaway = new Giveaway(
+                        activeGiveaways.getGuildId(),
+                        activeGiveaways.getChannelId(),
+                        activeGiveaways.getCreatedUserId(),
+                        activeGiveaways.isFinish(),
+                        false,
+                        activeGiveaways.getMessageId(),
+                        activeGiveaways.getCountWinners(),
+                        activeGiveaways.getRoleId(),
+                        activeGiveaways.getIsForSpecificRole(),
+                        activeGiveaways.getUrlImage(),
+                        activeGiveaways.getTitle(),
+                        activeGiveaways.getEndGiveawayDate(),
+                        activeGiveaways.getMinParticipants() == null ? 1 : activeGiveaways.getMinParticipants(),
+                        giveawayRepositoryService,
+                        updateController
+                );
+                giveaway.setParticipantsList(participantsList);
+
+                if (giveaway.participantContains(user.getIdLong())) return;
                 if (emoji.equals(TADA)) {
-                    //Проверяем event id message с Giveaway message id
-                    long messageIdWithReaction = giveawayData.getMessageId();
+                    long messageIdWithReaction = giveaway.getMessageId();
 
                     if (messageId != messageIdWithReaction) return;
-                    Long roleId = giveawayData.getRoleId(); // null
+                    Long roleId = giveaway.getRoleId();
 
                     if (roleId != null) {
                         Role roleById = event.getGuild().getRoleById(roleId);
-                        boolean isForSpecificRole = giveawayData.isForSpecificRole();
+                        boolean isForSpecificRole = giveaway.isForSpecificRole();
 
-                        if (isForSpecificRole && !event.getMember().getRoles().contains(roleById)) {
+                        if (isForSpecificRole && roleById != null && !event.getMember().getRoles().contains(roleById)) {
                             String url = GiveawayUtils.getDiscordUrlMessage(guildIdLong, event.getGuildChannel().getIdLong(), messageId);
                             LOGGER.info("Нажал на эмодзи, но у него нет доступа к розыгрышу: {}", user.getId());
-                            //Получаем ссылку на Giveaway
 
                             String buttonGiveawayNotAccess = String.format(jsonParsers.getLocale("button_giveaway_not_access", event.getGuild().getIdLong()), url);
                             EmbedBuilder embedBuilder = new EmbedBuilder();

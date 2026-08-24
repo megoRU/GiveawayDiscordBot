@@ -1,10 +1,10 @@
 package main.core.events;
 
 import lombok.AllArgsConstructor;
-import main.giveaway.Giveaway;
-import main.giveaway.GiveawayRegistry;
 import main.jsonparser.JSONParsers;
+import main.model.entity.ActiveGiveaways;
 import main.model.entity.Scheduling;
+import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.SchedulingRepository;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.selections.StringSelectMenu;
@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -21,15 +22,16 @@ import java.util.stream.Collectors;
 public class ListCommand {
 
     private static final JSONParsers jsonParsers = new JSONParsers();
+    private final ActiveGiveawayRepository activeGiveawayRepository;
     private final SchedulingRepository schedulingRepository;
 
     public void handle(@NotNull SlashCommandInteractionEvent event) {
         var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
         event.deferReply().queue();
 
-        GiveawayRegistry instance = GiveawayRegistry.getInstance();
         List<Scheduling> schedulingList = schedulingRepository.findByGuildId(guildId);
-        List<Giveaway> giveawayList = instance.getGiveawaysByGuild(guildId);
+        List<ActiveGiveaways> giveawayList = activeGiveawayRepository.findByGuildId(guildId);
+        if (giveawayList == null) giveawayList = Collections.emptyList();
 
         // Формируем сообщение
         String formatListMessage = formatListMessage(schedulingList, giveawayList, guildId);
@@ -46,19 +48,19 @@ public class ListCommand {
 
     public static String formatTitle(String title) {
         if (title == null || title.length() <= 30) {
-            return title;
+            return title == null ? "Giveaway" : title;
         }
         return title.substring(0, 30) + "...";
     }
 
-    public static String formatListMessage(List<Scheduling> schedulingList, List<Giveaway> giveawayList, long guildId) {
+    public static String formatListMessage(List<Scheduling> schedulingList, List<ActiveGiveaways> giveawayList, long guildId) {
         // Формируем сообщение
         String listNoActiveGiveaway = jsonParsers.getLocale("list_no_active_giveaway", guildId);
         String listNoSchedulingGiveaway = jsonParsers.getLocale("list_no_scheduling_giveaway", guildId);
 
         String message = jsonParsers.getLocale("list_active_giveaway", guildId);
         message += giveawayList.isEmpty() ? listNoActiveGiveaway : giveawayList.stream()
-                .map(g -> "- " + formatTitle(g.getGiveawayData().getTitle()) + " | `" + g.getGiveawayData().getMessageId() + "`")
+                .map(g -> "- " + formatTitle(g.getTitle()) + " | `" + g.getMessageId() + "`")
                 .collect(Collectors.joining("\n")) + "\n";
 
         message += jsonParsers.getLocale("list_scheduling_giveaway", guildId);
@@ -69,15 +71,15 @@ public class ListCommand {
         return message;
     }
 
-    public static StringSelectMenu.Builder formatListMenuMessage(List<Scheduling> schedulingList, List<Giveaway> giveawayList, long guildId) {
+    public static StringSelectMenu.Builder formatListMenuMessage(List<Scheduling> schedulingList, List<ActiveGiveaways> giveawayList, long guildId) {
         var menuBuilder = StringSelectMenu.create("select_action");
         String listMenuViewer = jsonParsers.getLocale("list_menu_viewer", guildId);
 
         giveawayList.forEach(g ->
                 menuBuilder.addOption(
-                        formatTitle(g.getGiveawayData().getTitle()),
-                        "giveaway_" + g.getGiveawayData().getMessageId(),
-                        listMenuViewer + g.getGiveawayData().getMessageId()
+                        formatTitle(g.getTitle()),
+                        "giveaway_" + g.getMessageId(),
+                        listMenuViewer + g.getMessageId()
 
                 )
         );

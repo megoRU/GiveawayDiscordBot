@@ -32,11 +32,9 @@ public class GiveawayEnds {
     private final GiveawayRepositoryService giveawayRepositoryService;
 
     public void cancel(Giveaway giveaway, UpdateController updateController) {
-        GiveawayRegistry instance = GiveawayRegistry.getInstance();
         long guildId = giveaway.getGuildId();
         long textChannelId = giveaway.getTextChannelId();
-        GiveawayData giveawayData = giveaway.getGiveawayData();
-        long messageId = giveawayData.getMessageId();
+        long messageId = giveaway.getMessageId();
 
         Color userColor = GiveawayUtils.getUserColor(guildId);
 
@@ -50,10 +48,7 @@ public class GiveawayEnds {
         cancel.setDescription(giftGiveawayDeleted);
 
         updateController.setViewRest(cancel.build(), guildId, textChannelId, messageId).queue(
-                _ -> {
-                    instance.removeGiveaway(messageId);
-                    giveawayRepositoryService.deleteGiveaway(messageId);
-                },
+                unused -> giveawayRepositoryService.deleteGiveaway(messageId),
                 throwable -> LOGGER.warn("Не удалось отправить сообщение", throwable));
     }
 
@@ -61,14 +56,13 @@ public class GiveawayEnds {
         long guildId = giveaway.getGuildId();
         long textChannelId = giveaway.getTextChannelId();
         boolean finishGiveaway = giveaway.isFinishGiveaway();
-        GiveawayData giveawayData = giveaway.getGiveawayData();
-        long messageId = giveawayData.getMessageId();
-        int minParticipants = giveawayData.getMinParticipants();
+        long messageId = giveaway.getMessageId();
+        int minParticipants = giveaway.getMinParticipants();
 
         GiveawayUpdateListUser giveawayUpdateListUser = new GiveawayUpdateListUser(giveawayRepositoryService);
         giveawayUpdateListUser.updateGiveawayByGuild(giveaway);
 
-        Set<Long> values = giveawayData.getParticipantsList();
+        Set<Long> values = giveaway.getParticipantsList();
         List<Long> participants = Stream.concat(values.stream(), giveawayRepositoryService.findAllParticipants(messageId)
                         .stream()
                         .map(Participants::getUserId))
@@ -114,7 +108,7 @@ public class GiveawayEnds {
                 return;
             }
 
-            String url = GiveawayUtils.getDiscordUrlMessage(guildId, textChannelId, giveawayData.getMessageId());
+            String url = GiveawayUtils.getDiscordUrlMessage(guildId, textChannelId, giveaway.getMessageId());
             String giftUrl = String.format(jsonParsers.getLocale("gift_url", guildId), url);
 
             String winnerArray = Arrays.toString(uniqueWinners.toArray())
@@ -123,25 +117,23 @@ public class GiveawayEnds {
 
             JDA jda = BotStart.getJda();
 
-            EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId, messageId);
-            GiveawayRegistry instance = GiveawayRegistry.getInstance();
+            EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId, messageId, giveaway);
 
             if (embedBuilder == null) {
-                instance.removeGiveaway(messageId);
+                giveawayRepositoryService.deleteGiveaway(messageId);
                 return;
             }
 
             updateController.setViewRest(embedBuilder.build(), guildId, textChannelId, messageId).queue(
-                    _ -> {
+                    unused -> {
                         if (guildText != null) {
                             String string = guildText.replaceAll("@winner", winnerArray)
                                     .replaceAll("@link", giftUrl);
 
                             updateController.setViewRest(jda, string, guildId, textChannelId)
                                     .queue(
-                                            _ -> {
+                                            unusedInner -> {
                                                 giveaway.setRemoved(true);
-                                                instance.removeGiveaway(messageId);
                                                 giveawayRepositoryService.backupAllParticipants(messageId);
                                                 giveawayRepositoryService.deleteGiveaway(messageId);
                                             },
@@ -154,9 +146,8 @@ public class GiveawayEnds {
 
                             updateController.setViewRest(jda, winnersContent, guildId, textChannelId)
                                     .queue(
-                                            _ -> {
+                                            unusedInner -> {
                                                 giveaway.setRemoved(true);
-                                                instance.removeGiveaway(messageId);
                                                 giveawayRepositoryService.backupAllParticipants(messageId);
                                                 giveawayRepositoryService.deleteGiveaway(messageId);
                                             },
@@ -184,11 +175,7 @@ public class GiveawayEnds {
 
                 //Отправляет сообщение
                 updateController.setViewRest(notEnoughUsers.build(), guildId, textChannelId, messageId).queue(
-                        _ -> {
-                            giveawayRepositoryService.deleteGiveaway(messageId);
-                            GiveawayRegistry instance = GiveawayRegistry.getInstance();
-                            instance.removeGiveaway(messageId);
-                        },
+                        unused -> giveawayRepositoryService.deleteGiveaway(messageId),
                         throwable -> LOGGER.warn("Не удалось отправить сообщение", throwable)
                 );
             } catch (Exception e) {

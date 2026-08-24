@@ -1,8 +1,7 @@
 package main.core.events;
 
 import lombok.AllArgsConstructor;
-import main.giveaway.Giveaway;
-import main.giveaway.GiveawayRegistry;
+import main.model.entity.ActiveGiveaways;
 import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import org.jetbrains.annotations.NotNull;
@@ -22,11 +21,10 @@ public class DeleteEvent {
         boolean fromGuild = event.isFromGuild();
 
         if (fromGuild) {
-            GiveawayRegistry instance = GiveawayRegistry.getInstance();
-            Giveaway giveaway = instance.getGiveaway(messageId);
+            ActiveGiveaways giveaway = giveawayRepositoryService.getGiveaway(messageId);
 
             if (giveaway != null) {
-                if (giveaway.getGiveawayData().getMessageId() == messageId) {
+                if (giveaway.getMessageId() == messageId) {
                     giveawayRepositoryService.deleteGiveaway(messageId);
                     LOGGER.info("DeleteEvent: {}", messageId);
                 }

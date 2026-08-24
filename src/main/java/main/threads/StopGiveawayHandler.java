@@ -2,7 +2,6 @@ package main.threads;
 
 import main.config.BotStart;
 import main.giveaway.Giveaway;
-import main.giveaway.GiveawayData;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.*;
@@ -17,10 +16,8 @@ public class StopGiveawayHandler {
     public void handleGiveaway(Giveaway giveaway) {
         if (giveaway != null) {
 
-            GiveawayData giveawayData = giveaway.getGiveawayData();
-
             try {
-                int countWinners = giveawayData.getCountWinners();
+                int countWinners = giveaway.getCountWinners();
 
                 if (shouldFinishGiveaway(giveaway)) {
                     giveaway.stopGiveaway(countWinners);
@@ -39,7 +36,7 @@ public class StopGiveawayHandler {
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
 
         ZoneId zoneOffset = ZoneId.of(zonesIdByUser);
-        ZonedDateTime endInstant = giveaway.getGiveawayData().getEndGiveawayDate().atZone(zoneOffset);
+        ZonedDateTime endInstant = giveaway.getEndGiveawayDate().atZone(zoneOffset);
 
         return Instant.now().atZone(zoneOffset).isAfter(endInstant);
     }

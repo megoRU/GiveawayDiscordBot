@@ -6,14 +6,17 @@ import lombok.Getter;
 import main.controller.UpdateController;
 import main.core.CoreBot;
 import main.giveaway.Giveaway;
-import main.giveaway.GiveawayRegistry;
 import main.jsonparser.ParserClass;
+import main.model.entity.ActiveGiveaways;
+import main.model.entity.Participants;
 import main.model.entity.Scheduling;
 import main.model.entity.Settings;
 import main.model.entity.UserZoneId;
+import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.SchedulingRepository;
 import main.model.repository.SettingsRepository;
 import main.model.repository.UserZoneIdRepository;
+import main.service.GiveawayRepositoryService;
 import main.service.SaveUsersService;
 import main.service.ScheduleStartService;
 import main.service.SlashService;
@@ -44,6 +47,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Configuration
 @EnableScheduling
@@ -61,17 +65,18 @@ public class BotStart {
     @Getter
     private static JDA jda;
     private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
-    private static final GiveawayRegistry instance = GiveawayRegistry.getInstance();
 
     //COMPONENT
     private final UpdateController updateController;
 
     //REPOSITORY
+    private final ActiveGiveawayRepository activeGiveawayRepository;
     private final SchedulingRepository schedulingRepository;
     private final SettingsRepository settingsRepository;
     private final UserZoneIdRepository userZoneIdRepository;
 
     //Service
+    private final GiveawayRepositoryService giveawayRepositoryService;
     private final SlashService slashService;
     private final ScheduleStartService scheduleStartService;
     private final UploadGiveawaysService uploadGiveawaysService;
@@ -183,10 +188,34 @@ public class BotStart {
 
     @Scheduled(fixedDelay = 60, initialDelay = 60, timeUnit = TimeUnit.SECONDS)
     private void stopGiveawayTimer() {
-        List<Giveaway> giveawayDataList = new LinkedList<>(instance.getAllGiveaway());
+        List<ActiveGiveaways> activeGiveawaysList = activeGiveawayRepository.findAll();
 
-        for (Giveaway giveaway : giveawayDataList) {
+        for (ActiveGiveaways activeGiveaways : activeGiveawaysList) {
             try {
+                Set<Long> participantsList = activeGiveaways.getParticipants() != null ? activeGiveaways.getParticipants()
+                        .stream()
+                        .map(Participants::getUserId)
+                        .collect(Collectors.toSet()) : Collections.emptySet();
+
+                Giveaway giveaway = new Giveaway(
+                        activeGiveaways.getGuildId(),
+                        activeGiveaways.getChannelId(),
+                        activeGiveaways.getCreatedUserId(),
+                        activeGiveaways.isFinish(),
+                        false,
+                        activeGiveaways.getMessageId(),
+                        activeGiveaways.getCountWinners(),
+                        activeGiveaways.getRoleId(),
+                        activeGiveaways.getIsForSpecificRole(),
+                        activeGiveaways.getUrlImage(),
+                        activeGiveaways.getTitle(),
+                        activeGiveaways.getEndGiveawayDate(),
+                        activeGiveaways.getMinParticipants() == null ? 1 : activeGiveaways.getMinParticipants(),
+                        giveawayRepositoryService,
+                        updateController
+                );
+                giveaway.setParticipantsList(participantsList);
+
                 StopGiveawayHandler stopGiveawayHandler = new StopGiveawayHandler();
                 stopGiveawayHandler.handleGiveaway(giveaway);
             } catch (Exception e) {

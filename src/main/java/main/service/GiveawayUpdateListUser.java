@@ -4,9 +4,8 @@ import lombok.AllArgsConstructor;
 import main.config.BotStart;
 import main.core.events.ReactionEvent;
 import main.giveaway.Giveaway;
-import main.giveaway.GiveawayData;
-import main.giveaway.GiveawayRegistry;
 import main.giveaway.ParticipantDTO;
+import main.model.entity.ActiveGiveaways;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -29,30 +28,26 @@ public class GiveawayUpdateListUser {
     private final GiveawayRepositoryService giveawayRepositoryService;
 
     public void updateGiveawayByGuild(@NotNull Giveaway giveaway) {
-        GiveawayData giveawayData = giveaway.getGiveawayData();
-
         long guildId = giveaway.getGuildId();
         long channelId = giveaway.getTextChannelId();
-        boolean isForSpecificRole = giveawayData.isForSpecificRole();
-        long messageId = giveawayData.getMessageId();
+        boolean isForSpecificRole = giveaway.isForSpecificRole();
+        long messageId = giveaway.getMessageId();
 
-        GiveawayRegistry instance = GiveawayRegistry.getInstance();
         JDA jda = BotStart.getJda();
 
         if (jda != null) {
-            if (instance.hasGiveaway(messageId)) {
+            ActiveGiveaways activeGiveaway = giveawayRepositoryService.getGiveaway(messageId);
+            if (activeGiveaway != null) {
                 try {
                     Guild guildById = jda.getGuildById(guildId);
 
                     if (guildById == null) {
                         giveawayRepositoryService.deleteGiveaway(messageId);
-                        instance.removeGiveaway(messageId);
                     } else {
                         TextChannel textChannelById = guildById.getTextChannelById(channelId);
 
                         if (textChannelById == null) {
                             giveawayRepositoryService.deleteGiveaway(messageId);
-                            instance.removeGiveaway(messageId);
                         } else {
                             Message message = textChannelById.retrieveMessageById(messageId).complete(true);
                             List<MessageReaction> reactions = message.getReactions()
@@ -68,17 +63,17 @@ public class GiveawayUpdateListUser {
                                     count--;
                                 }
 
-                                if (count != giveawayData.getParticipantSize()) {
+                                if (count != giveaway.getParticipantSize()) {
                                     List<User> users = new ArrayList<>();
                                     reaction.retrieveUsers().forEach(users::add);
 
                                     if (isForSpecificRole) {
-                                        Role roleGiveaway = jda.getRoleById(giveawayData.getRoleId());
+                                        Role roleGiveaway = jda.getRoleById(giveaway.getRoleId());
                                         if (roleGiveaway != null) {
                                             List<Long> userIds = users.stream()
                                                     .filter(user -> !user.isBot())
                                                     .map(User::getIdLong)
-                                                    .filter(idLong -> !giveawayData.participantContains(idLong))
+                                                    .filter(idLong -> !giveaway.participantContains(idLong))
                                                     .toList();
                                             List<ParticipantDTO> participantDTOList = new ArrayList<>();
 
@@ -92,21 +87,19 @@ public class GiveawayUpdateListUser {
                                                     LOGGER.error("Error retrieving member {}: {}", userId, e.getMessage());
                                                 }
                                             }
-                                            if (instance.hasGiveaway(messageId) && !participantDTOList.isEmpty()) {
+                                            if (!participantDTOList.isEmpty()) {
                                                 giveaway.addUser(participantDTOList);
                                             }
                                         }
                                     } else {
-                                        if (instance.hasGiveaway(messageId)) {
-                                            List<ParticipantDTO> participantDTOList = users.stream()
-                                                    .filter(user -> !user.isBot())
-                                                    .filter(user -> !giveawayData.participantContains(user.getIdLong()))
-                                                    .map(user -> new ParticipantDTO(user.getIdLong(), user.getName()))
-                                                    .toList();
+                                        List<ParticipantDTO> participantDTOList = users.stream()
+                                                .filter(user -> !user.isBot())
+                                                .filter(user -> !giveaway.participantContains(user.getIdLong()))
+                                                .map(user -> new ParticipantDTO(user.getIdLong(), user.getName()))
+                                                .toList();
 
-                                            if (!participantDTOList.isEmpty()) {
-                                                giveaway.addUser(participantDTOList);
-                                            }
+                                        if (!participantDTOList.isEmpty()) {
+                                            giveaway.addUser(participantDTOList);
                                         }
                                     }
                                 }
@@ -124,7 +117,6 @@ public class GiveawayUpdateListUser {
 
                             LOGGER.info("GiveawayUpdateList: {} удаляем", error);
                             giveawayRepositoryService.deleteGiveaway(messageId);
-                            instance.removeGiveaway(messageId);
                             return;
                         }
                     }
