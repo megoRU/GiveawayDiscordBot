@@ -11,7 +11,8 @@ CREATE TABLE `active_giveaways`
     `message_id`           bigint(20) NOT NULL,
     `role_id`              bigint(20) DEFAULT NULL,
     `title`                varchar(255) DEFAULT NULL,
-    `url_image`            varchar(255) DEFAULT NULL
+    `url_image`            varchar(255) DEFAULT NULL,
+    `is_predefined`        bit(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `list_users`
