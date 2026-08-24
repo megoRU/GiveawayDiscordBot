@@ -13,12 +13,14 @@ import main.service.ParticipantsGrabber;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.components.buttons.Button;
+import net.dv8tion.jda.api.entities.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -47,10 +49,15 @@ public class GiveawayEnds {
         cancel.setTitle(giveawayWasCanceled);
         cancel.setDescription(giftGiveawayDeleted);
 
-        updateController
-                .setViewRest(cancel.build(), guildId, textChannelId, messageId)
-                .queue(_ -> giveawayRepositoryService.deleteGiveaway(messageId)
-                        , throwable -> LOGGER.warn("Не удалось отправить сообщение", throwable));
+        giveawayRepositoryService.deleteGiveaway(messageId);
+
+        try {
+            CompletableFuture<Message> ignored = updateController
+                    .setViewRest(cancel.build(), guildId, textChannelId, messageId)
+                    .submit();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+        }
     }
 
     public void stop(ActiveGiveaways activeGiveaways, int countWinner, UpdateController updateController) {
