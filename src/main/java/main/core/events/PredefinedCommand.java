@@ -2,9 +2,11 @@ package main.core.events;
 
 import main.controller.UpdateController;
 import main.giveaway.Giveaway;
+import main.giveaway.GiveawayUserHandler;
 import main.giveaway.GiveawayUtils;
 import main.giveaway.ParticipantDTO;
 import main.jsonparser.JSONParsers;
+import main.model.entity.ActiveGiveaways;
 import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
@@ -33,7 +35,6 @@ public class PredefinedCommand {
         this.giveawayRepositoryService = giveawayRepositoryService;
     }
 
-    //TODO не работает
     public void predefined(@NotNull SlashCommandInteractionEvent event, UpdateController updateController) {
         var guildIdLong = Objects.requireNonNull(event.getGuild()).getIdLong();
         var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
@@ -88,7 +89,7 @@ public class PredefinedCommand {
         Giveaway giveaway = new Giveaway(giveawayRepositoryService, updateController);
 
         //TODO: Возможно будет проблема когда Guild слишком большая
-        giveaway.startGiveaway(
+        ActiveGiveaways activeGiveaways = giveaway.startGiveaway(
                 textChannel,
                 userIdLong,
                 guildId,
@@ -100,6 +101,12 @@ public class PredefinedCommand {
                 null,
                 true,
                 1);
+
+        if (activeGiveaways == null) {
+            return;
+        }
+
+        GiveawayUserHandler giveawayUserHandler = new GiveawayUserHandler(giveawayRepositoryService);
 
         Task<List<Member>> listTask = event.getGuild().loadMembers()
                 .onSuccess(members -> {
@@ -119,7 +126,7 @@ public class PredefinedCommand {
                                 .map(user -> new ParticipantDTO(user.getIdLong(), user.getName()))
                                 .toList();
 
-//                        giveaway.addUser(userList);
+                        giveawayUserHandler.saveUser(activeGiveaways, userList);
                     } else {
                         List<ParticipantDTO> userList = members.stream()
                                 .filter(member -> member.getRoles().contains(role))
@@ -128,7 +135,7 @@ public class PredefinedCommand {
                                 .map(user -> new ParticipantDTO(user.getIdLong(), user.getName()))
                                 .toList();
 
-//                        giveaway.addUser(userList);
+                        giveawayUserHandler.saveUser(activeGiveaways, userList);
                     }
                 });
         listTask.isStarted();

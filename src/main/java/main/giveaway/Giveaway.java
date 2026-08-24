@@ -30,17 +30,17 @@ public class Giveaway {
         this.updateController = updateController;
     }
 
-    public void startGiveaway(GuildMessageChannel textChannel,
-                              Long userIdLong,
-                              Long guildId,
-                              String title,
-                              int countWinners,
-                              String time,
-                              Long role,
-                              Boolean isOnlyForSpecificRole,
-                              String urlImage,
-                              boolean predefined,
-                              int minParticipants) {
+    public ActiveGiveaways startGiveaway(GuildMessageChannel textChannel,
+                                       Long userIdLong,
+                                       Long guildId,
+                                       String title,
+                                       int countWinners,
+                                       String time,
+                                       Long role,
+                                       Boolean isOnlyForSpecificRole,
+                                       String urlImage,
+                                       boolean isPredefined,
+                                       int minParticipants) {
 
         Instant endGiveawayDate = calculateEndGiveawayDate(userIdLong, time);
 
@@ -62,6 +62,7 @@ public class Giveaway {
             activeGiveaways.setMinParticipants(minParticipants);
             activeGiveaways.setChannelId(textChannel.getIdLong());
             activeGiveaways.setFinish(false);
+            activeGiveaways.setPredefined(isPredefined);
 
             EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayPattern(activeGiveaways);
 
@@ -70,13 +71,13 @@ public class Giveaway {
                     .submit()
                     .get();
 
-            if (!predefined) {
+            if (!isPredefined) {
                 message.addReaction(Emoji.fromUnicode(GiveawayUtils.TADA))
                         .submit()
                         .get();
             }
 
-            updateOrCreateGiveaway(
+            ActiveGiveaways savedGiveaway = updateOrCreateGiveaway(
                     message,
                     guildId,
                     userIdLong,
@@ -86,7 +87,8 @@ public class Giveaway {
                     isOnlyForSpecificRole,
                     urlImage,
                     endGiveawayDate,
-                    minParticipants
+                    minParticipants,
+                    isPredefined
             );
 
             LOGGER.info(
@@ -95,28 +97,31 @@ public class Giveaway {
                     message.getChannel().getIdLong(),
                     message.getIdLong(),
                     title,
-                    predefined,
+                    isPredefined,
                     countWinners,
                     time,
                     role,
                     isOnlyForSpecificRole
             );
+
+            return savedGiveaway;
         } catch (Exception e) {
             LOGGER.error("Error creating giveaway", e);
+            return null;
         }
     }
 
-    private void updateOrCreateGiveaway(Message message,
-                                        long guildId,
-                                        long userIdLong,
-                                        String title,
-                                        int countWinners,
-                                        Long roleId,
-                                        Boolean isForSpecificRole,
-                                        String urlImage,
-                                        Instant endGiveawayDate,
-                                        int minParticipants) {
-
+    private ActiveGiveaways updateOrCreateGiveaway(Message message,
+                                                 long guildId,
+                                                 long userIdLong,
+                                                 String title,
+                                                 int countWinners,
+                                                 Long roleId,
+                                                 Boolean isForSpecificRole,
+                                                 String urlImage,
+                                                 Instant endGiveawayDate,
+                                                 int minParticipants,
+                                                 boolean isPredefined) {
         ActiveGiveaways activeGiveaways = new ActiveGiveaways();
 
         activeGiveaways.setMessageId(message.getIdLong());
@@ -130,8 +135,10 @@ public class Giveaway {
         activeGiveaways.setUrlImage(urlImage);
         activeGiveaways.setCreatedUserId(userIdLong);
         activeGiveaways.setEndGiveawayDate(endGiveawayDate);
+        activeGiveaways.setPredefined(isPredefined);
 
         giveawayRepositoryService.saveGiveaway(activeGiveaways);
+        return activeGiveaways;
     }
 
     private Instant calculateEndGiveawayDate(long userIdLong, String time) throws ZoneRulesException {

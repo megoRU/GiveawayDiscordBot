@@ -7,17 +7,21 @@ import main.config.BotStart;
 import main.controller.UpdateController;
 import main.jsonparser.JSONParsers;
 import main.model.entity.ActiveGiveaways;
+import main.model.entity.Participants;
 import main.service.GiveawayRepositoryService;
 import main.service.ParticipantsGrabber;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.components.buttons.Button;
+import net.dv8tion.jda.api.entities.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 public class GiveawayEnds {
@@ -45,10 +49,15 @@ public class GiveawayEnds {
         cancel.setTitle(giveawayWasCanceled);
         cancel.setDescription(giftGiveawayDeleted);
 
-        updateController
-                .setViewRest(cancel.build(), guildId, textChannelId, messageId)
-                .queue(_ -> giveawayRepositoryService.deleteGiveaway(messageId)
-                        , throwable -> LOGGER.warn("Не удалось отправить сообщение", throwable));
+        giveawayRepositoryService.deleteGiveaway(messageId);
+
+        try {
+            CompletableFuture<Message> ignored = updateController
+                    .setViewRest(cancel.build(), guildId, textChannelId, messageId)
+                    .submit();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+        }
     }
 
     public void stop(ActiveGiveaways activeGiveaways, int countWinner, UpdateController updateController) {
@@ -57,13 +66,23 @@ public class GiveawayEnds {
         boolean finishGiveaway = activeGiveaways.isFinish();
         long messageId = activeGiveaways.getMessageId();
         int minParticipants = activeGiveaways.getMinParticipants();
+        boolean predefined = activeGiveaways.isPredefined();
 
         try {
-            ParticipantsGrabber participantsGrabber = new ParticipantsGrabber(giveawayRepositoryService);
-            Set<ParticipantDTO> participantSet = participantsGrabber.get(activeGiveaways);
-
-            //Сохраняем
             GiveawayUserHandler giveawayUserHandler = new GiveawayUserHandler(giveawayRepositoryService);
+            Set<ParticipantDTO> participantSet;
+
+            if (predefined) {
+                List<Participants> participants = giveawayRepositoryService.findAllParticipants(messageId);
+
+                participantSet = participants
+                        .stream()
+                        .map(p -> new ParticipantDTO(p.getUserId(), p.getNickName()))
+                        .collect(Collectors.toSet());
+            } else {
+                ParticipantsGrabber participantsGrabber = new ParticipantsGrabber(giveawayRepositoryService);
+                participantSet = participantsGrabber.get(activeGiveaways);
+            }
 
             List<Long> participants = participantSet
                     .stream()
