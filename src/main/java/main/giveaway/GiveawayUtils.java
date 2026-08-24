@@ -142,4 +142,30 @@ public class GiveawayUtils {
     public static String getDiscordUrlMessage(final long guildIdLong, final long textChannelId, final long messageIdLong) {
         return String.format("https://discord.com/channels/%s/%s/%s", guildIdLong, textChannelId, messageIdLong);
     }
+
+    public static Instant updateTime(String time, long userIdLong) throws ZoneRulesException {
+        // Получаем тайм зону пользователя
+        String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
+        ZoneId zoneId = ZoneId.of(zonesIdByUser);
+
+        LocalDateTime localDateTime;
+
+        if (time == null) {
+            // если время не задано, ставим через 30 дней от текущего локального времени пользователя
+            localDateTime = LocalDateTime.now(zoneId).plusDays(30);
+        } else if (time.matches(GiveawayUtils.ISO_TIME_REGEX)) {
+            // если пришла дата в формате dd.MM.yyyy HH:mm
+            localDateTime = LocalDateTime.parse(time, GiveawayUtils.FORMATTER);
+        } else {
+            // если пришли секунды
+            long seconds = GiveawayUtils.getSeconds(time);
+            localDateTime = LocalDateTime.now(zoneId).plusSeconds(seconds);
+        }
+
+        // Привязываем локальное время пользователя к его зоне
+        ZonedDateTime zonedDateTime = localDateTime.atZone(zoneId);
+
+        // Переводим в Instant (UTC)
+        return zonedDateTime.toInstant();
+    }
 }

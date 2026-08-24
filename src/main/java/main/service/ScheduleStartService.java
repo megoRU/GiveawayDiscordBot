@@ -57,13 +57,7 @@ public class ScheduleStartService {
                     Long guildId = scheduling.getGuildId();
 
                     try {
-                        Giveaway giveaway = new Giveaway(
-                                scheduling.getGuildId(),
-                                textChannelById.getIdLong(),
-                                scheduling.getCreatedUserId(),
-                                giveawayRepositoryService,
-                                updateController
-                        );
+                        Giveaway giveaway = new Giveaway(giveawayRepositoryService, updateController);
 
                         Instant endInstant = scheduling.getDateEndGiveaway();
                         LocalDateTime dateEndGiveaway = endInstant.atZone(offset).toLocalDateTime();
@@ -84,6 +78,8 @@ public class ScheduleStartService {
 
                         giveaway.startGiveaway(
                                 textChannelById,
+                                scheduling.getCreatedUserId(),
+                                guildId,
                                 scheduling.getTitle(),
                                 scheduling.getCountWinners(),
                                 formattedDate,

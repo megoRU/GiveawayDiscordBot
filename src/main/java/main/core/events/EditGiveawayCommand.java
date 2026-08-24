@@ -3,14 +3,14 @@ package main.core.events;
 import lombok.AllArgsConstructor;
 import main.config.BotStart;
 import main.controller.UpdateController;
-import main.giveaway.*;
+import main.giveaway.GiveawayEmbedUtils;
+import main.giveaway.GiveawayInfo;
+import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.model.entity.ActiveGiveaways;
-import main.model.entity.Participants;
 import main.model.entity.Scheduling;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.SchedulingRepository;
-import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -26,21 +26,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class EditGiveawayCommand {
+    private static final JSONParsers jsonParsers = new JSONParsers();
 
     private final ActiveGiveawayRepository activeGiveawayRepository;
     private final SchedulingRepository schedulingRepository;
-    private final GiveawayRepositoryService giveawayRepositoryService;
     private final UpdateController updateController;
-
-    private static final JSONParsers jsonParsers = new JSONParsers();
-
-    public record GiveawayInfo(String title, int countWinners, int minParticipants, Instant endGiveawayDate, long userIdLong) {}
 
     @Transactional
     public void editGiveaway(@NotNull SlashCommandInteractionEvent event) {
@@ -63,13 +57,13 @@ public class EditGiveawayCommand {
         String giveawayEditEnds = jsonParsers.getLocale("giveaway_edit_ends", guildId);
         String listMenuParticipants = jsonParsers.getLocale("list_menu_participants", guildId);
 
-        GiveawayInfo giveawayData = handleGiveaway(event);
-        if (giveawayData == null) return;
+        GiveawayInfo giveawayInfo = handleGiveaway(event);
+        if (giveawayInfo == null) return;
 
-        int minParticipants = giveawayData.minParticipants();
+        int minParticipants = giveawayInfo.getMinParticipants();
 
-        Instant endGiveaway = giveawayData.endGiveawayDate();
-        long userIdLong = giveawayData.userIdLong();
+        Instant endGiveaway = giveawayInfo.getEndGiveawayDate();
+        long userIdLong = giveawayInfo.getUserIdLong();
 
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
         ZoneId userOffset = ZoneId.of(zonesIdByUser);
@@ -86,8 +80,8 @@ public class EditGiveawayCommand {
                             %s `%s`
                             %s `%s`
                             """,
-                    giveawayEditTitle, giveawayData.title(),
-                    giveawayEditWinners, giveawayData.countWinners(),
+                    giveawayEditTitle, giveawayInfo.getTitle(),
+                    giveawayEditWinners, giveawayInfo.getCountWinners(),
                     listMenuParticipants, minParticipants
             ));
 
@@ -101,8 +95,8 @@ public class EditGiveawayCommand {
                             %s `%s`
                             %s <t:%s:R> (<t:%s:f>)
                             """,
-                    giveawayEditTitle, giveawayData.title(),
-                    giveawayEditWinners, giveawayData.countWinners(),
+                    giveawayEditTitle, giveawayInfo.getTitle(),
+                    giveawayEditWinners, giveawayInfo.getCountWinners(),
                     listMenuParticipants, minParticipants,
                     giveawayEditEnds, endTime, endTime));
         }
@@ -164,85 +158,45 @@ public class EditGiveawayCommand {
         var urlImage = image != null ? image.getUrl() : null;
         Integer minParticipants = event.getOption("min-participants", OptionMapping::getAsInt);
 
-        Set<Long> participantsList = activeGiveaways.getParticipants() != null ? activeGiveaways.getParticipants()
-                .stream()
-                .map(Participants::getUserId)
-                .collect(Collectors.toSet()) : Collections.emptySet();
-
-        Giveaway giveaway = new Giveaway(
-                activeGiveaways.getGuildId(),
-                activeGiveaways.getChannelId(),
-                activeGiveaways.getCreatedUserId(),
-                activeGiveaways.isFinish(),
-                activeGiveaways.getMessageId(),
-                activeGiveaways.getCountWinners(),
-                activeGiveaways.getRoleId(),
-                activeGiveaways.getIsForSpecificRole(),
-                activeGiveaways.getUrlImage(),
-                activeGiveaways.getTitle(),
-                activeGiveaways.getEndGiveawayDate(),
-                activeGiveaways.getMinParticipants() == null ? 1 : activeGiveaways.getMinParticipants(),
-                giveawayRepositoryService,
-                updateController
-        );
-        giveaway.setParticipantsList(participantsList);
 
         if (title != null) {
-            giveaway.setTitle(title);
+            activeGiveaways.setTitle(title);
         }
 
         if (winners != -1) {
-            giveaway.setCountWinners(winners);
+            activeGiveaways.setCountWinners(winners);
         }
 
         if (time != null) {
-            giveaway.updateTime(time);
+            Long createdUserId = activeGiveaways.getCreatedUserId();
+            Instant instant = GiveawayUtils.updateTime(time, createdUserId);
+
+            activeGiveaways.setEndGiveawayDate(instant);
         }
 
         if (urlImage != null) {
-            giveaway.setUrlImage(urlImage);
+            activeGiveaways.setUrlImage(urlImage);
         }
 
         if (minParticipants != null) {
-            giveaway.setMinParticipants(minParticipants);
+            activeGiveaways.setMinParticipants(minParticipants);
         }
 
-        updateGiveaway(giveaway);
-
-        EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayPattern(giveaway);
-        updateController.setView(embedBuilder.build(), giveaway.getGuildId(), giveaway.getTextChannelId(), giveaway.getMessageId());
-
-        return new GiveawayInfo(giveaway.getTitle(), giveaway.getCountWinners(), giveaway.getMinParticipants(), giveaway.getEndGiveawayDate(), giveaway.getUserIdLong());
-    }
-
-    private void updateGiveaway(Giveaway giveaway) {
-        long messageId = giveaway.getMessageId();
-        String title = giveaway.getTitle();
-        Instant endGiveawayDate = giveaway.getEndGiveawayDate();
-        long textChannelId = giveaway.getTextChannelId();
-        int countWinners = giveaway.getCountWinners();
-        long guildId = giveaway.getGuildId();
-        long userIdLong = giveaway.getUserIdLong();
-        int minParticipants = giveaway.getMinParticipants();
-        Long roleId = giveaway.getRoleId();
-        String urlImage = giveaway.getUrlImage();
-        boolean forSpecificRole = giveaway.isForSpecificRole();
-
-        ActiveGiveaways activeGiveaways = new ActiveGiveaways();
-        activeGiveaways.setMessageId(messageId);
-        activeGiveaways.setTitle(title);
-        activeGiveaways.setGuildId(guildId);
-        activeGiveaways.setChannelId(textChannelId);
-        activeGiveaways.setCountWinners(countWinners);
-        activeGiveaways.setFinish(false);
-        activeGiveaways.setIsForSpecificRole(forSpecificRole);
-        activeGiveaways.setMinParticipants(minParticipants);
-        activeGiveaways.setEndGiveawayDate(endGiveawayDate);
-        activeGiveaways.setRoleId(roleId);
-        activeGiveaways.setUrlImage(urlImage);
-        activeGiveaways.setCreatedUserId(userIdLong);
-
         activeGiveawayRepository.save(activeGiveaways);
+
+        EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayPattern(activeGiveaways);
+
+        updateController.setView(embedBuilder.build(),
+                activeGiveaways.getGuildId(),
+                activeGiveaways.getChannelId(),
+                activeGiveaways.getMessageId());
+
+        return new GiveawayInfo(
+                activeGiveaways.getTitle(),
+                activeGiveaways.getCountWinners(),
+                activeGiveaways.getMinParticipants(),
+                activeGiveaways.getEndGiveawayDate(),
+                activeGiveaways.getCreatedUserId());
     }
 
     private GiveawayInfo updateSchedulingGiveaway(@NotNull SlashCommandInteractionEvent event, @NotNull Scheduling scheduling) {
@@ -296,4 +250,5 @@ public class EditGiveawayCommand {
 
         return new GiveawayInfo(scheduling.getTitle(), scheduling.getCountWinners(), scheduling.getMinParticipants() == null ? 1 : scheduling.getMinParticipants(), scheduling.getDateEndGiveaway(), scheduling.getCreatedUserId());
     }
+
 }

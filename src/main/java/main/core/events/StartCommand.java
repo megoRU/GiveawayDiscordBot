@@ -104,11 +104,7 @@ public class StartCommand {
                 event.reply(giftNotificationForThisRole).queue();
             }
 
-            Giveaway giveaway = new Giveaway(guildIdLong,
-                    event.getChannel().getIdLong(),
-                    userIdLong,
-                    giveawayRepositoryService,
-                    updateController);
+            Giveaway giveaway = new Giveaway(giveawayRepositoryService, updateController);
 
             if (!event.getInteraction().isAcknowledged()) {
                 try {
@@ -120,6 +116,8 @@ public class StartCommand {
 
             giveaway.startGiveaway(
                     event.getGuildChannel(),
+                    userIdLong,
+                    guildId,
                     title,
                     winners,
                     time,

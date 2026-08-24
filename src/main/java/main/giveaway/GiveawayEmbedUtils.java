@@ -163,7 +163,7 @@ public class GiveawayEmbedUtils {
             if (Boolean.TRUE.equals(activeGiveaways.getIsForSpecificRole())) {
                 Long roleId = activeGiveaways.getRoleId();
 
-                if (roleId != null && roleId != guildId) {
+                if (roleId != null && !roleId.equals(guildId)) {
                     String giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", guildId), roleId);
                     embedBuilder.appendDescription(giftOnlyFor);
                 }

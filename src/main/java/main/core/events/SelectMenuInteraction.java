@@ -6,7 +6,6 @@ import main.giveaway.Giveaway;
 import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.model.entity.ActiveGiveaways;
-import main.model.entity.Participants;
 import main.model.entity.Scheduling;
 import main.model.repository.ActiveGiveawayRepository;
 import main.model.repository.SchedulingRepository;
@@ -25,8 +24,6 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -109,10 +106,11 @@ public class SelectMenuInteraction {
         ActiveGiveaways activeGiveaways = activeGiveawayRepository.findByMessageId(Long.parseLong(messageId));
 
         if (activeGiveaways != null && activeGiveaways.getGuildId().equals(guildId)) {
+            int countWinners = activeGiveaways.getCountWinners();
+            Giveaway giveaway = new Giveaway(giveawayRepositoryService, updateController);
 
+            giveaway.stopGiveaway(activeGiveaways, countWinners);
 
-
-            giveaway.stopGiveaway(giveaway.getCountWinners());
             handleBackSelection(event, guildId);
         } else {
             event.editMessage(jsonParsers.getLocale("giveaway_not_found_by_id", guildId)).queue();
@@ -253,8 +251,7 @@ public class SelectMenuInteraction {
     }
 
     private void removeActiveGiveaway(ActiveGiveaways activeGiveaways) {
-
-
-        giveaway.cancelGiveaway();
+        Giveaway giveaway = new Giveaway(giveawayRepositoryService, updateController);
+        giveaway.cancelGiveaway(activeGiveaways);
     }
 }

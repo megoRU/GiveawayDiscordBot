@@ -5,7 +5,6 @@ import main.controller.UpdateController;
 import main.giveaway.Giveaway;
 import main.jsonparser.JSONParsers;
 import main.model.entity.ActiveGiveaways;
-import main.model.entity.Participants;
 import main.model.repository.ActiveGiveawayRepository;
 import main.service.GiveawayRepositoryService;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -18,11 +17,8 @@ import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -76,7 +72,7 @@ public class StopCommand {
         }
     }
 
-    private void handleStopCommand(SlashCommandInteractionEvent event, ActiveGiveaways activeGiveaways, long winners) {
+    private void handleStopCommand(SlashCommandInteractionEvent event, ActiveGiveaways activeGiveaways, int winners) {
         long guildId = activeGiveaways.getGuildId();
 
         if (activeGiveaways.isFinish()) {
@@ -92,47 +88,8 @@ public class StopCommand {
             return;
         }
 
-        Set<Long> participantsList = activeGiveaways.getParticipants() != null ? activeGiveaways.getParticipants()
-                .stream()
-                .map(Participants::getUserId)
-                .collect(Collectors.toSet()) : Collections.emptySet();
+        Giveaway giveaway = new Giveaway(giveawayRepositoryService, updateController);
 
-        Giveaway giveaway = new Giveaway(
-                activeGiveaways.getGuildId(),
-                activeGiveaways.getChannelId(),
-                activeGiveaways.getCreatedUserId(),
-                activeGiveaways.isFinish(),
-                activeGiveaways.getMessageId(),
-                activeGiveaways.getCountWinners(),
-                activeGiveaways.getRoleId(),
-                activeGiveaways.getIsForSpecificRole(),
-                activeGiveaways.getUrlImage(),
-                activeGiveaways.getTitle(),
-                activeGiveaways.getEndGiveawayDate(),
-                activeGiveaways.getMinParticipants() == null ? 1 : activeGiveaways.getMinParticipants(),
-                giveawayRepositoryService,
-                updateController
-        );
-        giveaway.setParticipantsList(participantsList);
-
-        int countWinners = giveaway.getCountWinners();
-        int participantSize = giveaway.getParticipantSize();
-
-        if (winners == -1) {
-            stop(event, giveaway, countWinners, guildId, countWinners, participantSize);
-        } else {
-            stop(event, giveaway, winners, guildId, countWinners, participantSize);
-        }
-    }
-
-    private void stop(SlashCommandInteractionEvent event, Giveaway giveaway, long winners, long guildId, int countWinners, int participantSize) {
-        if (winners <= participantSize) {
-            giveaway.stopGiveaway(countWinners);
-            String slashStopNoHas = jsonParsers.getLocale("slash_stop", guildId);
-            event.reply(slashStopNoHas).setEphemeral(true).queue();
-        } else {
-            String giftNotEnoughUsers = jsonParsers.getLocale("gift_not_enough_users", guildId);
-            event.reply(giftNotEnoughUsers).setEphemeral(true).queue();
-        }
+        giveaway.stopGiveaway(activeGiveaways, winners);
     }
 }

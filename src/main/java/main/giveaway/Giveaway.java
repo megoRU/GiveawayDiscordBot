@@ -31,8 +31,8 @@ public class Giveaway {
     }
 
     public void startGiveaway(GuildMessageChannel textChannel,
-                              long guildId,
-                              long userIdLong,
+                              Long userIdLong,
+                              Long guildId,
                               String title,
                               int countWinners,
                               String time,
@@ -48,8 +48,25 @@ public class Giveaway {
         minParticipants = minParticipants == 0 ? 1 : minParticipants;
 
         try {
+            //Чисто по рофлу
+            ActiveGiveaways activeGiveaways = new ActiveGiveaways();
+
+            activeGiveaways.setGuildId(guildId);
+            activeGiveaways.setCreatedUserId(userIdLong);
+            activeGiveaways.setTitle(title);
+            activeGiveaways.setCountWinners(countWinners);
+            activeGiveaways.setEndGiveawayDate(endGiveawayDate);
+            activeGiveaways.setRoleId(role);
+            activeGiveaways.setIsForSpecificRole(isOnlyForSpecificRole);
+            activeGiveaways.setUrlImage(urlImage);
+            activeGiveaways.setMinParticipants(minParticipants);
+            activeGiveaways.setChannelId(textChannel.getIdLong());
+            activeGiveaways.setFinish(false);
+
+            EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayPattern(activeGiveaways);
+
             Message message = textChannel
-                    .sendMessageEmbeds(GiveawayEmbedUtils.giveawayPattern().build())
+                    .sendMessageEmbeds(embedBuilder.build())
                     .submit()
                     .get();
 

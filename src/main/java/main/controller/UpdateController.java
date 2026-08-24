@@ -137,7 +137,7 @@ public class UpdateController {
                 rerollCommand.reroll(event);
             }
             case "edit" -> {
-                EditGiveawayCommand editGiveawayCommand = new EditGiveawayCommand(activeGiveawayRepository, schedulingRepository, giveawayRepositoryService, this);
+                EditGiveawayCommand editGiveawayCommand = new EditGiveawayCommand(activeGiveawayRepository, schedulingRepository, this);
                 editGiveawayCommand.editGiveaway(event);
             }
             case "scheduling" -> {

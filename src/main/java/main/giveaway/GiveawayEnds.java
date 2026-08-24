@@ -117,7 +117,7 @@ public class GiveawayEnds {
 
                 JDA jda = BotStart.getJda();
 
-                EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, guildId, messageId, activeGiveaways);
+                EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayEnd(winnerArray, countWinner, activeGiveaways);
 
                 if (embedBuilder == null) {
                     giveawayRepositoryService.deleteGiveaway(messageId);

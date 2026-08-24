@@ -85,15 +85,13 @@ public class PredefinedCommand {
             }
         }
 
-        Giveaway giveaway = new Giveaway(guildIdLong,
-                textChannel.getIdLong(),
-                userIdLong,
-                giveawayRepositoryService,
-                updateController);
+        Giveaway giveaway = new Giveaway(giveawayRepositoryService, updateController);
 
         //TODO: Возможно будет проблема когда Guild слишком большая
         giveaway.startGiveaway(
                 textChannel,
+                userIdLong,
+                guildId,
                 title,
                 Integer.parseInt(winners),
                 "20s",
