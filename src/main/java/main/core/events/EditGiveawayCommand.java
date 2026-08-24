@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -33,6 +34,7 @@ public class EditGiveawayCommand {
 
     private static final JSONParsers jsonParsers = new JSONParsers();
 
+    @Transactional
     public void editGiveaway(@NotNull SlashCommandInteractionEvent event) {
         var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
 
@@ -119,7 +121,8 @@ public class EditGiveawayCommand {
                 event.getHook().sendMessage(selectMenuGiveawayNotFound).setEphemeral(true).queue();
             }
         } catch (NumberFormatException ignored) {
-            Scheduling scheduling = instance.getScheduling(giveawayId);
+            Scheduling scheduling = schedulingRepository.findByIdSalt(giveawayId);
+
             if (scheduling != null) {
                 return updateSchedulingGiveaway(event, scheduling);
             } else {
@@ -132,7 +135,7 @@ public class EditGiveawayCommand {
 
     private GiveawayData handleGiveawayByGuild(@NotNull SlashCommandInteractionEvent event, long guildId, GiveawayRegistry instance) {
         List<Giveaway> giveawayList = instance.getGiveawaysByGuild(guildId);
-        List<Scheduling> schedulingList = instance.getSchedulingByGuild(guildId);
+        List<Scheduling> schedulingList = schedulingRepository.findByGuildId(guildId);
 
         if (giveawayList.size() == 1 && schedulingList.isEmpty()) {
             return updateActiveGiveaway(event, giveawayList.getFirst());
@@ -270,7 +273,6 @@ public class EditGiveawayCommand {
             scheduling.setMinParticipants(minParticipants);
         }
 
-        instance.putScheduling(idSalt, scheduling);
         schedulingRepository.save(scheduling);
 
         return GiveawayData.builder()

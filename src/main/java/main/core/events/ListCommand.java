@@ -5,6 +5,7 @@ import main.giveaway.Giveaway;
 import main.giveaway.GiveawayRegistry;
 import main.jsonparser.JSONParsers;
 import main.model.entity.Scheduling;
+import main.model.repository.SchedulingRepository;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -20,12 +21,14 @@ import java.util.stream.Collectors;
 public class ListCommand {
 
     private static final JSONParsers jsonParsers = new JSONParsers();
+    private final SchedulingRepository schedulingRepository;
 
     public void handle(@NotNull SlashCommandInteractionEvent event) {
         var guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
+        event.deferReply().queue();
 
         GiveawayRegistry instance = GiveawayRegistry.getInstance();
-        List<Scheduling> schedulingList = instance.getSchedulingByGuild(guildId);
+        List<Scheduling> schedulingList = schedulingRepository.findByGuildId(guildId);
         List<Giveaway> giveawayList = instance.getGiveawaysByGuild(guildId);
 
         // Формируем сообщение
@@ -33,11 +36,11 @@ public class ListCommand {
         var menuBuilder = formatListMenuMessage(schedulingList, giveawayList, guildId);
 
         if (menuBuilder.getOptions().isEmpty()) {
-            event.reply(formatListMessage).queue();
+            event.getHook().sendMessage(formatListMessage).queue();
         } else {
             var menu = menuBuilder.build();
             var actionRow = ActionRow.of(menu);
-            event.reply(formatListMessage).setComponents(actionRow).queue();
+            event.getHook().sendMessage(formatListMessage).setComponents(actionRow).queue();
         }
     }
 

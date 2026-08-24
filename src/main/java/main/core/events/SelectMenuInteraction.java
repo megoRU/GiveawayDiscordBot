@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -28,6 +29,7 @@ public class SelectMenuInteraction {
     private static final JSONParsers jsonParsers = new JSONParsers();
     private final SchedulingRepository schedulingRepository;
 
+    @Transactional
     public void handle(@NotNull StringSelectInteractionEvent event) {
         long guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
 
@@ -53,7 +55,7 @@ public class SelectMenuInteraction {
         if (selectedValue.startsWith("giveaway_")) {
             handleGiveawaySelection(event, selectedValue, guildId, instance);
         } else if (selectedValue.startsWith("scheduling_")) {
-            handleSchedulingSelection(event, selectedValue, guildId, instance);
+            handleSchedulingSelection(event, selectedValue, guildId);
         } else if (selectedValue.startsWith("stop_")) {
             handleStopGiveaway(event, selectedValue, guildId, instance);
         } else if (selectedValue.startsWith("back_")) {
@@ -80,9 +82,9 @@ public class SelectMenuInteraction {
         }
     }
 
-    private void handleSchedulingSelection(StringSelectInteractionEvent event, String selectedValue, long guildId, GiveawayRegistry instance) {
+    private void handleSchedulingSelection(StringSelectInteractionEvent event, String selectedValue, long guildId) {
         String messageId = selectedValue.replace("scheduling_", "");
-        Scheduling scheduling = instance.getScheduling(messageId);
+        Scheduling scheduling = schedulingRepository.findByIdSalt(messageId);
 
         if (scheduling != null) {
             String message = formatSchedulingMessage(scheduling, guildId);
@@ -107,7 +109,7 @@ public class SelectMenuInteraction {
     }
 
     private void handleBackSelection(StringSelectInteractionEvent event, long guildId, GiveawayRegistry instance) {
-        List<Scheduling> schedulingList = instance.getSchedulingByGuild(guildId);
+        List<Scheduling> schedulingList = schedulingRepository.findByGuildId(guildId);
         List<Giveaway> giveawayList = instance.getGiveawaysByGuild(guildId);
 
         // Формируем сообщение
@@ -138,7 +140,7 @@ public class SelectMenuInteraction {
                 handleBackSelection(event, guildId, instance);
             }
         } else {
-            Scheduling scheduling = instance.getScheduling(messageId);
+            Scheduling scheduling = schedulingRepository.findByIdSalt(messageId);
 
             if (scheduling == null) {
                 String giveawayNotFoundById = jsonParsers.getLocale("giveaway_not_found_by_id", guildId);
@@ -236,9 +238,6 @@ public class SelectMenuInteraction {
     }
 
     private void removeScheduling(String giveawayId) {
-        GiveawayRegistry instance = GiveawayRegistry.getInstance();
-        instance.removeScheduling(giveawayId);
-
         schedulingRepository.deleteByIdSalt(giveawayId);
     }
 

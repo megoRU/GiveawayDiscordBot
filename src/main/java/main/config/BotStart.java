@@ -37,6 +37,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -60,8 +63,10 @@ public class BotStart {
     private final JDABuilder jdaBuilder = JDABuilder.createDefault(Config.getTOKEN());
     private static final GiveawayRegistry instance = GiveawayRegistry.getInstance();
 
-    //REPOSITORY
+    //COMPONENT
     private final UpdateController updateController;
+
+    //REPOSITORY
     private final SchedulingRepository schedulingRepository;
     private final SettingsRepository settingsRepository;
     private final UserZoneIdRepository userZoneIdRepository;
@@ -118,7 +123,6 @@ public class BotStart {
 
             //Получаем Giveaway и пользователей. Устанавливаем данные
             uploadGiveawaysService.uploadGiveaways(updateController);
-            getSchedulingFromDB();
 
             //Обновить команды
             slashService.updateSlash(jda);
@@ -149,39 +153,45 @@ public class BotStart {
         }
     }
 
-    @Scheduled(fixedDelay = 5, initialDelay = 1, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = 60, initialDelay = 60, timeUnit = TimeUnit.SECONDS)
     private void schStartGiveaway() {
-        try {
-            scheduleStartService.scheduleStart(updateController, jda);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-    }
-
-    @Scheduled(fixedDelay = 5, initialDelay = 1, timeUnit = TimeUnit.SECONDS)
-    private void stopGiveawayTimer() {
-        List<Giveaway> giveawayDataList = new LinkedList<>(instance.getAllGiveaway());
-        StopGiveawayHandler stopGiveawayHandler = new StopGiveawayHandler();
-
-        for (Giveaway giveaway : giveawayDataList) {
-            try {
-                stopGiveawayHandler.handleGiveaway(giveaway);
-            } catch (Exception e) {
-                LOGGER.error(e.getMessage(), e);
-            }
-        }
-    }
-
-    private void getSchedulingFromDB() {
         try {
             List<Scheduling> schedulingList = schedulingRepository.findAll();
 
             for (Scheduling scheduling : schedulingList) {
                 String idSalt = scheduling.getIdSalt();
-                instance.putScheduling(idSalt, scheduling);
+
+                Long createdUserId = scheduling.getCreatedUserId();
+                String zonesIdByUser = BotStart.getZonesIdByUser(createdUserId);
+
+                ZoneId offset = ZoneId.of(zonesIdByUser);
+                ZonedDateTime odt = Instant.now().atZone(offset);
+                Instant instant = odt.toInstant();
+
+                Instant dateCreateGiveaway = scheduling.getDateCreateGiveaway();
+
+                if (!instant.isAfter(dateCreateGiveaway)) {
+                    continue;
+                }
+
+                scheduleStartService.scheduleStart(idSalt, updateController, jda);
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
+        }
+    }
+
+    @Scheduled(fixedDelay = 60, initialDelay = 60, timeUnit = TimeUnit.SECONDS)
+    private void stopGiveawayTimer() {
+        List<Giveaway> giveawayDataList = new LinkedList<>(instance.getAllGiveaway());
+
+        for (Giveaway giveaway : giveawayDataList) {
+            try {
+                StopGiveawayHandler stopGiveawayHandler = new StopGiveawayHandler();
+                stopGiveawayHandler.handleGiveaway(giveaway);
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
+            }
         }
     }
 

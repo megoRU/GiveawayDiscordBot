@@ -134,7 +134,7 @@ public class Giveaway {
             if (predefined) {
                 updateCollections(message);
             } else {
-                message.addReaction(Emoji.fromUnicode(ReactionEvent.TADA)).queue();
+                message.addReaction(Emoji.fromUnicode(ReactionEvent.TADA)).submit().get();
                 updateCollections(message);
             }
 

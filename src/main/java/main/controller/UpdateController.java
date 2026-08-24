@@ -112,7 +112,7 @@ public class UpdateController {
                 helpCommand.help(event);
             }
             case "list" -> {
-                ListCommand listCommand = new ListCommand();
+                ListCommand listCommand = new ListCommand(schedulingRepository);
                 listCommand.handle(event);
             }
             case "endmessage" -> {

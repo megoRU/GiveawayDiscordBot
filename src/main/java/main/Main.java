@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class Main {
 
-    public static void main(String[] args) {
+    static void main() {
         SpringApplication application = new SpringApplication(Main.class);
         application.run();
     }

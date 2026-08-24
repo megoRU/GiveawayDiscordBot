@@ -1,7 +1,6 @@
 package main.core.events;
 
 import main.config.BotStart;
-import main.giveaway.GiveawayRegistry;
 import main.giveaway.GiveawayUtils;
 import main.jsonparser.JSONParsers;
 import main.model.entity.Scheduling;
@@ -116,9 +115,6 @@ public class SchedulingCommand {
                 scheduling.setMinParticipants(minParticipants);
 
                 schedulingRepository.save(scheduling);
-
-                GiveawayRegistry instance = GiveawayRegistry.getInstance();
-                instance.putScheduling(salt, scheduling);
             } catch (ZoneRulesException z) {
                 LOGGER.error(z.getMessage(), z);
                 String startWithBrokenZone = jsonParsers.getLocale("start_with_broken_zone", guildId);

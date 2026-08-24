@@ -3,37 +3,30 @@ package main.threads;
 import main.config.BotStart;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayData;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.*;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public final class StopGiveawayHandler {
+public class StopGiveawayHandler {
 
     private static final Logger LOGGER = Logger.getLogger(StopGiveawayHandler.class.getName());
-    private static final Set<Long> startingStopGiveaways = ConcurrentHashMap.newKeySet();
 
+    @Transactional
     public void handleGiveaway(Giveaway giveaway) {
         if (giveaway != null) {
+
             GiveawayData giveawayData = giveaway.getGiveawayData();
-            long messageId = giveawayData.getMessageId();
 
             try {
                 int countWinners = giveawayData.getCountWinners();
-
-                if (!startingStopGiveaways.add(messageId)) {
-                    return;
-                }
 
                 if (shouldFinishGiveaway(giveaway)) {
                     giveaway.stopGiveaway(countWinners);
                 }
             } catch (Exception e) {
                 logError(e);
-            } finally {
-                startingStopGiveaways.remove(messageId);
             }
         }
     }
