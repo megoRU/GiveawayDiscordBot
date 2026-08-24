@@ -45,6 +45,9 @@ public class ActiveGiveaways {
     @Column(name = "created_user_id", nullable = false)
     private Long createdUserId;
 
+    @Column(name = "is_predefined", nullable = false)
+    private boolean isPredefined;
+
     @Column(name = "url_image")
     private String urlImage;
 

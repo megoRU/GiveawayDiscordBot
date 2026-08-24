@@ -139,7 +139,7 @@ public class BotStart {
         }
     }
 
-    @Scheduled(fixedDelay = 60, initialDelay = 60, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = 30, initialDelay = 60, timeUnit = TimeUnit.SECONDS)
     private void schStartGiveaway() {
         try {
             List<Scheduling> schedulingList = schedulingRepository.findAll();
@@ -167,7 +167,7 @@ public class BotStart {
         }
     }
 
-    @Scheduled(fixedDelay = 60, initialDelay = 60, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = 30, initialDelay = 60, timeUnit = TimeUnit.SECONDS)
     private void stopGiveawayTimer() {
         try {
             List<ActiveGiveaways> activeGiveawaysList = activeGiveawayRepository.findAll();

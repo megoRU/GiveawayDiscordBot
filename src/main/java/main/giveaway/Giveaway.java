@@ -39,7 +39,7 @@ public class Giveaway {
                                        Long role,
                                        Boolean isOnlyForSpecificRole,
                                        String urlImage,
-                                       boolean predefined,
+                                       boolean isPredefined,
                                        int minParticipants) {
 
         Instant endGiveawayDate = calculateEndGiveawayDate(userIdLong, time);
@@ -62,6 +62,7 @@ public class Giveaway {
             activeGiveaways.setMinParticipants(minParticipants);
             activeGiveaways.setChannelId(textChannel.getIdLong());
             activeGiveaways.setFinish(false);
+            activeGiveaways.setPredefined(isPredefined);
 
             EmbedBuilder embedBuilder = GiveawayEmbedUtils.giveawayPattern(activeGiveaways);
 
@@ -70,7 +71,7 @@ public class Giveaway {
                     .submit()
                     .get();
 
-            if (!predefined) {
+            if (!isPredefined) {
                 message.addReaction(Emoji.fromUnicode(GiveawayUtils.TADA))
                         .submit()
                         .get();
@@ -86,7 +87,8 @@ public class Giveaway {
                     isOnlyForSpecificRole,
                     urlImage,
                     endGiveawayDate,
-                    minParticipants
+                    minParticipants,
+                    isPredefined
             );
 
             LOGGER.info(
@@ -95,7 +97,7 @@ public class Giveaway {
                     message.getChannel().getIdLong(),
                     message.getIdLong(),
                     title,
-                    predefined,
+                    isPredefined,
                     countWinners,
                     time,
                     role,
@@ -118,8 +120,8 @@ public class Giveaway {
                                                  Boolean isForSpecificRole,
                                                  String urlImage,
                                                  Instant endGiveawayDate,
-                                                 int minParticipants) {
-
+                                                 int minParticipants,
+                                                 boolean isPredefined) {
         ActiveGiveaways activeGiveaways = new ActiveGiveaways();
 
         activeGiveaways.setMessageId(message.getIdLong());
@@ -133,6 +135,7 @@ public class Giveaway {
         activeGiveaways.setUrlImage(urlImage);
         activeGiveaways.setCreatedUserId(userIdLong);
         activeGiveaways.setEndGiveawayDate(endGiveawayDate);
+        activeGiveaways.setPredefined(isPredefined);
 
         giveawayRepositoryService.saveGiveaway(activeGiveaways);
         return activeGiveaways;

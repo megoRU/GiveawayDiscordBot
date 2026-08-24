@@ -88,8 +88,15 @@ public class StopCommand {
             return;
         }
 
+        String slashStopNoHas = jsonParsers.getLocale("slash_stop", guildId);
+        event.reply(slashStopNoHas).setEphemeral(true).queue();
+
         Giveaway giveaway = new Giveaway(giveawayRepositoryService, updateController);
 
-        giveaway.stopGiveaway(activeGiveaways, winners);
+        if (winners == -1) {
+            giveaway.stopGiveaway(activeGiveaways, activeGiveaways.getCountWinners());
+        } else {
+            giveaway.stopGiveaway(activeGiveaways, winners);
+        }
     }
 }
