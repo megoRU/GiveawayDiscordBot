@@ -15,7 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,82 +31,76 @@ public class ParticipantsGrabber {
     public Set<Participant> get(@NotNull ActiveGiveaways activeGiveaway) throws Exception {
         long guildId = activeGiveaway.getGuildId();
         long channelId = activeGiveaway.getChannelId();
-        boolean isForSpecificRole = activeGiveaway.getIsForSpecificRole();
         long messageId = activeGiveaway.getMessageId();
 
         JDA jda = BotStart.getJda();
 
-        if (jda != null) {
-            try {
-                Guild guildById = jda.getGuildById(guildId);
-
-                if (guildById == null) {
-                    giveawayRepositoryService.deleteGiveaway(messageId);
-                    return new HashSet<>();
-                } else {
-                    TextChannel textChannelById = guildById.getTextChannelById(channelId);
-
-                    if (textChannelById == null) {
-                        giveawayRepositoryService.deleteGiveaway(messageId);
-                        return new HashSet<>();
-                    } else {
-                        Message message = textChannelById.retrieveMessageById(messageId).complete(true);
-                        List<MessageReaction> reactions = message.getReactions()
-                                .stream()
-                                .filter(messageReaction -> messageReaction.getEmoji().getName().equals(GiveawayUtils.TADA))
-                                .toList();
-
-                        if (reactions.isEmpty()) {
-                            return Collections.emptySet();
-                        }
-
-                        MessageReaction reaction = reactions.getFirst();
-
-                        final Role roleGiveaway = jda.getRoleById(activeGiveaway.getRoleId());
-
-                        return reaction.retrieveUsers()
-                                .stream()
-                                .filter(user -> !user.isBot())
-                                .filter(user -> {
-                                    if (!isForSpecificRole) {
-                                        return true;
-                                    }
-
-                                    if (roleGiveaway == null) {
-                                        return true;
-                                    }
-
-                                    try {
-                                        Member member = guildById.retrieveMemberById(user.getId()).complete();
-                                        return member != null && member.getRoles().contains(roleGiveaway);
-                                    } catch (Exception e) {
-                                        LOGGER.error("Error retrieving member {}", user.getId(), e);
-                                        return false;
-                                    }
-                                })
-                                .map(user -> new Participant(user.getIdLong(), user.getName()))
-                                .collect(Collectors.toSet());
-                    }
-                }
-            } catch (Exception e) {
-                if (e instanceof ErrorResponseException ex) {
-                    ErrorResponse error = ex.getErrorResponse();
-
-                    if (error == ErrorResponse.UNKNOWN_MESSAGE ||
-                            error == ErrorResponse.MISSING_ACCESS ||
-                            error == ErrorResponse.MISSING_PERMISSIONS ||
-                            error == ErrorResponse.UNKNOWN_CHANNEL) {
-
-                        LOGGER.info("GiveawayUpdateList: {} удаляем", error);
-                        giveawayRepositoryService.deleteGiveaway(messageId);
-                    }
-                }
-
-                LOGGER.warn("Не удалось обновить участников Giveaway, повторим позже", e);
-            }
-        } else {
+        if (jda == null) {
             throw new Exception("JDA is NULL");
         }
-        throw new Exception("JDA is NULL");
+
+        try {
+            Guild guild = jda.getGuildById(guildId);
+
+            if (guild == null) {
+                giveawayRepositoryService.deleteGiveaway(messageId);
+                return Collections.emptySet();
+            }
+
+            TextChannel textChannel = guild.getTextChannelById(channelId);
+
+            if (textChannel == null) {
+                giveawayRepositoryService.deleteGiveaway(messageId);
+                return Collections.emptySet();
+            }
+
+            Message message = textChannel.retrieveMessageById(messageId).complete(true);
+
+            List<MessageReaction> reactions = message.getReactions()
+                    .stream()
+                    .filter(reaction -> reaction.getEmoji().getName().equals(GiveawayUtils.TADA))
+                    .toList();
+
+            if (reactions.isEmpty()) {
+                return Collections.emptySet();
+            }
+
+            Role roleGiveaway = jda.getRoleById(activeGiveaway.getRoleId());
+
+            return reactions.getFirst()
+                    .retrieveUsers()
+                    .stream()
+                    .filter(user -> !user.isBot())
+                    .filter(user -> {
+                        if (!activeGiveaway.getIsForSpecificRole() || roleGiveaway == null) {
+                            return true;
+                        }
+
+                        try {
+                            Member member = guild.retrieveMemberById(user.getId()).complete();
+                            return member != null && member.getRoles().contains(roleGiveaway);
+                        } catch (Exception e) {
+                            LOGGER.error("Error retrieving member {}", user.getId(), e);
+                            return false;
+                        }
+                    })
+                    .map(user -> new Participant(user.getIdLong(), user.getName()))
+                    .collect(Collectors.toSet());
+        } catch (Exception e) {
+            if (e instanceof ErrorResponseException ex) {
+                ErrorResponse error = ex.getErrorResponse();
+
+                if (error == ErrorResponse.UNKNOWN_MESSAGE
+                        || error == ErrorResponse.MISSING_ACCESS
+                        || error == ErrorResponse.MISSING_PERMISSIONS
+                        || error == ErrorResponse.UNKNOWN_CHANNEL) {
+
+                    LOGGER.info("GiveawayUpdateList: {} удаляем", error);
+                    giveawayRepositoryService.deleteGiveaway(messageId);
+                }
+            }
+            LOGGER.warn("Не удалось обновить участников Giveaway, повторим позже", e);
+            throw e;
+        }
     }
 }
