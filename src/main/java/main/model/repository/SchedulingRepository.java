@@ -30,12 +30,6 @@ public interface SchedulingRepository extends JpaRepository<Scheduling, Long> {
 
     List<Scheduling> findSchedulingByCreatedUserId(Long createdUserId);
 
-    @Nullable
-    Scheduling findByCreatedUserIdAndGuildId(Long createdUserId, Long guildLongId);
-
-    @Nullable
-    Scheduling findByCreatedUserIdAndIdSalt(Long createdUserId, String idSalt);
-
     @Transactional
     @Modifying
     @Query("DELETE FROM Scheduling s WHERE s.idSalt = :idSalt")

@@ -44,7 +44,7 @@ public class EditGiveawayCommand {
         String time = event.getOption("duration", OptionMapping::getAsString);
 
         if (time != null) {
-            if (!GiveawayUtils.isISOTimeCorrect(time) && !GiveawayUtils.isTimeCorrect(time)) {
+            if (!GiveawayUtils.isTimeISOStandard(time) && !GiveawayUtils.isTimeCorrect(time)) {
                 String changeDuration = jsonParsers.getLocale("wrong_date", guildId);
                 event.getHook().sendMessage(changeDuration).setEphemeral(true).queue();
                 return;
@@ -60,10 +60,10 @@ public class EditGiveawayCommand {
         GiveawayInfo giveawayInfo = handleGiveaway(event);
         if (giveawayInfo == null) return;
 
-        int minParticipants = giveawayInfo.getMinParticipants();
+        int minParticipants = giveawayInfo.minParticipants();
 
-        Instant endGiveaway = giveawayInfo.getEndGiveawayDate();
-        long userIdLong = giveawayInfo.getUserIdLong();
+        Instant endGiveaway = giveawayInfo.endGiveawayDate();
+        long userIdLong = giveawayInfo.userIdLong();
 
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
         ZoneId userOffset = ZoneId.of(zonesIdByUser);
@@ -80,8 +80,8 @@ public class EditGiveawayCommand {
                             %s `%s`
                             %s `%s`
                             """,
-                    giveawayEditTitle, giveawayInfo.getTitle(),
-                    giveawayEditWinners, giveawayInfo.getCountWinners(),
+                    giveawayEditTitle, giveawayInfo.title(),
+                    giveawayEditWinners, giveawayInfo.countWinners(),
                     listMenuParticipants, minParticipants
             ));
 
@@ -95,8 +95,8 @@ public class EditGiveawayCommand {
                             %s `%s`
                             %s <t:%s:R> (<t:%s:f>)
                             """,
-                    giveawayEditTitle, giveawayInfo.getTitle(),
-                    giveawayEditWinners, giveawayInfo.getCountWinners(),
+                    giveawayEditTitle, giveawayInfo.title(),
+                    giveawayEditWinners, giveawayInfo.countWinners(),
                     listMenuParticipants, minParticipants,
                     giveawayEditEnds, endTime, endTime));
         }

@@ -72,7 +72,7 @@ public class StartCommand {
             }
 
             if (time != null) {
-                if (!GiveawayUtils.isISOTimeCorrect(time) && !GiveawayUtils.isTimeCorrect(time)) {
+                if (!GiveawayUtils.isTimeISOStandard(time) && !GiveawayUtils.isTimeCorrect(time)) {
                     String wrongDate = jsonParsers.getLocale("wrong_date", guildId);
                     EmbedBuilder builder = new EmbedBuilder();
                     builder.setColor(Color.RED);

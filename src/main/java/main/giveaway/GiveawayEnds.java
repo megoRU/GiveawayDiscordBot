@@ -70,14 +70,14 @@ public class GiveawayEnds {
 
         try {
             GiveawayUserHandler giveawayUserHandler = new GiveawayUserHandler(giveawayRepositoryService);
-            Set<ParticipantDTO> participantSet;
+            Set<Participant> participantSet;
 
             if (predefined) {
                 List<Participants> participants = giveawayRepositoryService.findAllParticipants(messageId);
 
                 participantSet = participants
                         .stream()
-                        .map(p -> new ParticipantDTO(p.getUserId(), p.getNickName()))
+                        .map(p -> new Participant(p.getUserId(), p.getNickName()))
                         .collect(Collectors.toSet());
             } else {
                 ParticipantsGrabber participantsGrabber = new ParticipantsGrabber(giveawayRepositoryService);
@@ -86,7 +86,7 @@ public class GiveawayEnds {
 
             List<Long> participants = participantSet
                     .stream()
-                    .map(ParticipantDTO::getUserId)
+                    .map(Participant::userId)
                     .toList();
 
             final Set<String> uniqueWinners = new LinkedHashSet<>();

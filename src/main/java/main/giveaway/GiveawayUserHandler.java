@@ -15,15 +15,15 @@ public class GiveawayUserHandler {
     private final GiveawayRepositoryService giveawayRepositoryService;
 
     @Transactional
-    public void saveUser(ActiveGiveaways activeGiveaways, List<ParticipantDTO> user) {
+    public void saveUser(ActiveGiveaways activeGiveaways, List<Participant> user) {
         boolean finish = activeGiveaways.isFinish();
 
         if (!finish && !user.isEmpty()) {
             List<Participants> participantsList = new ArrayList<>(user.size() + 1);
 
-            for (ParticipantDTO users : user) {
-                String nickname = users.getNickname();
-                long userId = users.getUserId();
+            for (Participant users : user) {
+                String nickname = users.nickname();
+                long userId = users.userId();
 
                 Participants participants = new Participants();
                 participants.setUserId(userId);

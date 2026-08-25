@@ -27,10 +27,12 @@ public class GiveawayUtils {
     // пример: 29.04.2025 15:00
     public static final String ISO_TIME_REGEX = "^\\d{2}\\.\\d{2}\\.\\d{4}\\s\\d{2}:\\d{2}$";
 
-    //Что поддерживает:
-    //Дата/время в русском формате: 07.08.2025 15:00
-    //Интервалы: 5м, 10с, 2ч, 1д, 10m 2h, 5с 1м, и т.п.
-    //Поддерживает как кириллицу, так и латиницу для единиц измерения.
+    /*
+     * Что поддерживает:
+     * Дата/время в русском формате: 07.08.2025 15:00
+     * Интервалы: 5м, 10с, 2ч, 1д, 10m 2h, 5с 1м, и т.п.
+     * Поддерживает как кириллицу, так и латиницу для единиц измерения.
+     */
     public static final String TIME_REGEX = "^(\\d{2}\\.\\d{2}\\.\\d{4}\\s\\d{2}:\\d{2})|((\\d+([смчдsmhd]))\\s*)+$";
 
     public static final JSONParsers jsonParsers = new JSONParsers();
@@ -125,14 +127,17 @@ public class GiveawayUtils {
         return localDateTime.atZone(zoneId).toInstant();
     }
 
-    public static boolean isISOTimeCorrect(@NotNull String time) {
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public static boolean isTimeISOStandard(@NotNull String time) {
         return time.matches(GiveawayUtils.ISO_TIME_REGEX);
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean isTimeCorrect(@NotNull String time) {
         return time.matches(GiveawayUtils.TIME_REGEX);
     }
 
+    @SuppressWarnings("unused")
     public static boolean isTimeBefore(String time, long userIdLong) throws ZoneRulesException {
         String zonesIdByUser = BotStart.getZonesIdByUser(userIdLong);
         ZoneId offset = ZoneId.of(zonesIdByUser);

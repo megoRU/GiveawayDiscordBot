@@ -70,69 +70,6 @@ public class GiveawayEmbedUtils {
     }
 
     @Nullable
-    public static EmbedBuilder giveawayEnd(final String winners, ActiveGiveaways activeGiveaways) {
-
-        if (activeGiveaways != null) {
-            Long guildId = activeGiveaways.getGuildId();
-            Long messageId = activeGiveaways.getMessageId();
-
-            EmbedBuilder embedBuilder = new EmbedBuilder();
-
-            Color userColor = GiveawayUtils.getUserColor(guildId);
-            int countWinners = activeGiveaways.getCountWinners();
-
-            String title = activeGiveaways.getTitle();
-            long createdUserId = activeGiveaways.getCreatedUserId();
-
-            embedBuilder.setColor(userColor);
-            embedBuilder.setTitle(title);
-
-            if (countWinners == 1) {
-                String giftWinner = String.format(jsonParsers.getLocale("gift_winner", guildId), winners);
-                embedBuilder.appendDescription(giftWinner);
-            } else {
-                String giftWinners = String.format(jsonParsers.getLocale("gift_winners", guildId), winners);
-                embedBuilder.appendDescription(giftWinners);
-            }
-
-            String footer = countWinners + " " + GiveawayUtils.setEndingWord(countWinners, guildId);
-            embedBuilder.setTimestamp(Instant.now());
-            String giftEnds = String.format(jsonParsers.getLocale("gift_ends", guildId), footer);
-            embedBuilder.setFooter(giftEnds);
-
-            if (activeGiveaways.getIsForSpecificRole()) {
-                Long roleId = activeGiveaways.getRoleId();
-
-                if (roleId != null && !roleId.equals(guildId)) {
-                    String giftOnlyFor = String.format(jsonParsers.getLocale("gift_only_for", guildId), roleId);
-                    embedBuilder.appendDescription(giftOnlyFor);
-                }
-            }
-
-            String giftHosted = String.format(jsonParsers.getLocale("gift_hosted", guildId), createdUserId);
-            String rerollParsers = String.format(jsonParsers.getLocale("reroll", guildId), createdUserId);
-            Long reroll = SlashService.getCommandId("reroll");
-
-            String giveawayIdDescription = String.format("\n\nGiveaway ID: `%s`", messageId);
-            String giveawayReroll = String.format("\n%s </reroll:%s>", rerollParsers, reroll);
-
-            //Hosted By
-            embedBuilder.appendDescription(giftHosted);
-            //Giveaway ID
-            embedBuilder.appendDescription(giveawayIdDescription);
-            //Reroll
-            embedBuilder.appendDescription(giveawayReroll);
-
-            String urlImage = activeGiveaways.getUrlImage();
-
-            if (urlImage != null) embedBuilder.setImage(urlImage);
-            return embedBuilder;
-        } else {
-            return null;
-        }
-    }
-
-    @Nullable
     public static EmbedBuilder giveawayEnd(final String winners, int countWinners, ActiveGiveaways activeGiveaways) {
         if (activeGiveaways != null) {
             Long guildId = activeGiveaways.getGuildId();

@@ -4,7 +4,7 @@ import main.controller.UpdateController;
 import main.giveaway.Giveaway;
 import main.giveaway.GiveawayUserHandler;
 import main.giveaway.GiveawayUtils;
-import main.giveaway.ParticipantDTO;
+import main.giveaway.Participant;
 import main.jsonparser.JSONParsers;
 import main.model.entity.ActiveGiveaways;
 import main.service.GiveawayRepositoryService;
@@ -120,19 +120,19 @@ public class PredefinedCommand {
                     }
 
                     if (role.getIdLong() == guildIdLong) {
-                        List<ParticipantDTO> userList = members.stream()
+                        List<Participant> userList = members.stream()
                                 .map(Member::getUser)
                                 .filter(user -> !user.isBot())
-                                .map(user -> new ParticipantDTO(user.getIdLong(), user.getName()))
+                                .map(user -> new Participant(user.getIdLong(), user.getName()))
                                 .toList();
 
                         giveawayUserHandler.saveUser(activeGiveaways, userList);
                     } else {
-                        List<ParticipantDTO> userList = members.stream()
+                        List<Participant> userList = members.stream()
                                 .filter(member -> member.getRoles().contains(role))
                                 .map(Member::getUser)
                                 .filter(user -> !user.isBot())
-                                .map(user -> new ParticipantDTO(user.getIdLong(), user.getName()))
+                                .map(user -> new Participant(user.getIdLong(), user.getName()))
                                 .toList();
 
                         giveawayUserHandler.saveUser(activeGiveaways, userList);

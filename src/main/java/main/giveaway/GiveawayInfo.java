@@ -1,19 +1,7 @@
 package main.giveaway;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.time.Instant;
 
-@Getter
-@Setter
-@AllArgsConstructor
-public class GiveawayInfo {
+public record GiveawayInfo(String title, int countWinners, int minParticipants, Instant endGiveawayDate, long userIdLong) {
 
-    private final String title;
-    private final int countWinners;
-    private final int minParticipants;
-    private final Instant endGiveawayDate;
-    private final long userIdLong;
 }
