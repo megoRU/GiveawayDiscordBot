@@ -14,6 +14,8 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.requests.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,14 +51,18 @@ public class GiveawayEnds {
         cancel.setTitle(giveawayWasCanceled);
         cancel.setDescription(giftGiveawayDeleted);
 
-        giveawayRepositoryService.deleteGiveaway(messageId);
-
         try {
-            CompletableFuture<Message> ignored = updateController
-                    .setViewRest(cancel.build(), guildId, textChannelId, messageId)
-                    .submit();
+            updateController.setViewRest(cancel.build(), guildId, textChannelId, messageId).queue(
+                    unused -> giveawayRepositoryService.deleteGiveaway(messageId),
+                    throwable -> {
+                        LOGGER.warn("Не удалось отправить сообщение об отмене розыгрыша", throwable);
+                        if (isPermanentDiscordError(throwable)) {
+                            giveawayRepositoryService.deleteGiveaway(messageId);
+                        }
+                    }
+            );
         } catch (Exception e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error(e.getMessage(), e);
         }
     }
 
@@ -144,21 +150,28 @@ public class GiveawayEnds {
                 }
 
                 updateController.setViewRest(embedBuilder.build(), guildId, textChannelId, messageId).queue(
-                        _ -> {
+                        unusedMsg -> {
                             if (guildText != null) {
                                 String string = guildText.replaceAll("@winner", winnerArray)
                                         .replaceAll("@link", giftUrl);
 
                                 updateController.setViewRest(jda, string, guildId, textChannelId)
                                         .queue(
-                                                _ -> {
+                                                unused -> {
                                                     //Сохраняем
                                                     giveawayUserHandler.saveUser(activeGiveaways, participantSet.stream().toList());
 
                                                     giveawayRepositoryService.backupAllParticipants(messageId);
                                                     giveawayRepositoryService.deleteGiveaway(messageId);
                                                 },
-                                                throwable -> LOGGER.warn("Не удалось отправить сообщение", throwable)
+                                                throwable -> {
+                                                    LOGGER.warn("Не удалось отправить сообщение с победителями", throwable);
+                                                    if (isPermanentDiscordError(throwable)) {
+                                                        giveawayUserHandler.saveUser(activeGiveaways, participantSet.stream().toList());
+                                                        giveawayRepositoryService.backupAllParticipants(messageId);
+                                                        giveawayRepositoryService.deleteGiveaway(messageId);
+                                                    }
+                                                }
                                         );
                             } else {
                                 String winnersContent = uniqueWinners.size() == 1
@@ -167,20 +180,31 @@ public class GiveawayEnds {
 
                                 updateController.setViewRest(jda, winnersContent, guildId, textChannelId)
                                         .queue(
-                                                _ -> {
+                                                unused -> {
                                                     //Сохраняем
                                                     giveawayUserHandler.saveUser(activeGiveaways, participantSet.stream().toList());
 
                                                     giveawayRepositoryService.backupAllParticipants(messageId);
                                                     giveawayRepositoryService.deleteGiveaway(messageId);
                                                 },
-                                                throwable -> LOGGER.warn("Не удалось отправить сообщение", throwable)
+                                                throwable -> {
+                                                    LOGGER.warn("Не удалось отправить сообщение с победителями", throwable);
+                                                    if (isPermanentDiscordError(throwable)) {
+                                                        giveawayUserHandler.saveUser(activeGiveaways, participantSet.stream().toList());
+                                                        giveawayRepositoryService.backupAllParticipants(messageId);
+                                                        giveawayRepositoryService.deleteGiveaway(messageId);
+                                                    }
+                                                }
                                         );
                             }
                         },
                         throwable -> {
-                            giveawayRepositoryService.setFinishGiveaway(messageId);
                             LOGGER.warn("Не удалось обновить embed Giveaway", throwable);
+                            if (isPermanentDiscordError(throwable)) {
+                                giveawayRepositoryService.deleteGiveaway(messageId);
+                            } else {
+                                giveawayRepositoryService.setFinishGiveaway(messageId);
+                            }
                         }
                 );
             } else if (participants.isEmpty()) {
@@ -197,8 +221,13 @@ public class GiveawayEnds {
 
                     //Отправляет сообщение
                     updateController.setViewRest(notEnoughUsers.build(), guildId, textChannelId, messageId).queue(
-                            _ -> giveawayRepositoryService.deleteGiveaway(messageId),
-                            throwable -> LOGGER.warn("Не удалось отправить сообщение", throwable)
+                            unused -> giveawayRepositoryService.deleteGiveaway(messageId),
+                            throwable -> {
+                                LOGGER.warn("Не удалось отправить сообщение", throwable);
+                                if (isPermanentDiscordError(throwable)) {
+                                    giveawayRepositoryService.deleteGiveaway(messageId);
+                                }
+                            }
                     );
                 } catch (Exception e) {
                     LOGGER.error(e.getMessage(), e);
@@ -207,5 +236,17 @@ public class GiveawayEnds {
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }
+    }
+
+    private boolean isPermanentDiscordError(Throwable throwable) {
+        if (throwable instanceof ErrorResponseException ex) {
+            ErrorResponse error = ex.getErrorResponse();
+            return error == ErrorResponse.UNKNOWN_MESSAGE
+                    || error == ErrorResponse.MISSING_ACCESS
+                    || error == ErrorResponse.MISSING_PERMISSIONS
+                    || error == ErrorResponse.UNKNOWN_CHANNEL
+                    || error == ErrorResponse.UNKNOWN_GUILD;
+        }
+        return false;
     }
 }
