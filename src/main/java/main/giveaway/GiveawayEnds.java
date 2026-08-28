@@ -53,7 +53,7 @@ public class GiveawayEnds {
 
         try {
             updateController.setViewRest(cancel.build(), guildId, textChannelId, messageId).queue(
-                    unused -> giveawayRepositoryService.deleteGiveaway(messageId),
+                    _ -> giveawayRepositoryService.deleteGiveaway(messageId),
                     throwable -> {
                         LOGGER.warn("Не удалось отправить сообщение об отмене розыгрыша", throwable);
                         if (isPermanentDiscordError(throwable)) {
@@ -150,14 +150,14 @@ public class GiveawayEnds {
                 }
 
                 updateController.setViewRest(embedBuilder.build(), guildId, textChannelId, messageId).queue(
-                        unusedMsg -> {
+                        _ -> {
                             if (guildText != null) {
                                 String string = guildText.replaceAll("@winner", winnerArray)
                                         .replaceAll("@link", giftUrl);
 
                                 updateController.setViewRest(jda, string, guildId, textChannelId)
                                         .queue(
-                                                unused -> {
+                                                _ -> {
                                                     //Сохраняем
                                                     giveawayUserHandler.saveUser(activeGiveaways, participantSet.stream().toList());
 
@@ -180,7 +180,7 @@ public class GiveawayEnds {
 
                                 updateController.setViewRest(jda, winnersContent, guildId, textChannelId)
                                         .queue(
-                                                unused -> {
+                                                _ -> {
                                                     //Сохраняем
                                                     giveawayUserHandler.saveUser(activeGiveaways, participantSet.stream().toList());
 
@@ -221,7 +221,7 @@ public class GiveawayEnds {
 
                     //Отправляет сообщение
                     updateController.setViewRest(notEnoughUsers.build(), guildId, textChannelId, messageId).queue(
-                            unused -> giveawayRepositoryService.deleteGiveaway(messageId),
+                            _ -> giveawayRepositoryService.deleteGiveaway(messageId),
                             throwable -> {
                                 LOGGER.warn("Не удалось отправить сообщение", throwable);
                                 if (isPermanentDiscordError(throwable)) {

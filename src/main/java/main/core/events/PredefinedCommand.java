@@ -114,7 +114,7 @@ public class PredefinedCommand {
                         String sendSlashMessage = String.format(jsonParsers.getLocale("send_slash_message", guildId), event.getChannel().getId());
                         event.getHook().editOriginal(sendSlashMessage)
                                 .delay(5, TimeUnit.SECONDS)
-                                .flatMap(unused -> event.getHook().deleteOriginal())
+                                .flatMap(_ -> event.getHook().deleteOriginal())
                                 .queue();
                     } catch (Exception ignored) {
                     }
