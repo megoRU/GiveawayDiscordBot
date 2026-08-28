@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -52,17 +51,16 @@ public class GiveawayEnds {
         cancel.setDescription(giftGiveawayDeleted);
 
         try {
-            updateController.setViewRest(cancel.build(), guildId, textChannelId, messageId).queue(
-                    _ -> giveawayRepositoryService.deleteGiveaway(messageId),
-                    throwable -> {
-                        LOGGER.warn("Не удалось отправить сообщение об отмене розыгрыша", throwable);
-                        if (isPermanentDiscordError(throwable)) {
-                            giveawayRepositoryService.deleteGiveaway(messageId);
-                        }
-                    }
-            );
+            Message ignored = updateController
+                    .setViewRest(cancel.build(), guildId, textChannelId, messageId)
+                    .onSuccess(_ -> giveawayRepositoryService.deleteGiveaway(messageId))
+                    .complete();
         } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
+            LOGGER.warn("Не удалось отправить сообщение об отмене розыгрыша", e);
+
+            if (isPermanentDiscordError(e)) {
+                giveawayRepositoryService.deleteGiveaway(messageId);
+            }
         }
     }
 
