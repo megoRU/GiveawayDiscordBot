@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
 import java.util.Set;
@@ -39,6 +40,7 @@ public class ActiveGiveaways {
     @Column(name = "is_for_specific_role")
     private Boolean isForSpecificRole;
 
+    @Nullable
     @Column(name = "role_id")
     private Long roleId;
 

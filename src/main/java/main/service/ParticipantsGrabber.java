@@ -65,14 +65,15 @@ public class ParticipantsGrabber {
                 return Collections.emptySet();
             }
 
-            Role roleGiveaway = jda.getRoleById(activeGiveaway.getRoleId());
+            Long roleId = activeGiveaway.getRoleId();
+            Role roleGiveaway = roleId != null ? jda.getRoleById(roleId) : null;
 
             return reactions.getFirst()
                     .retrieveUsers()
                     .stream()
                     .filter(user -> !user.isBot())
                     .filter(user -> {
-                        if (!activeGiveaway.getIsForSpecificRole() || roleGiveaway == null) {
+                        if (roleGiveaway == null || !activeGiveaway.getIsForSpecificRole()) {
                             return true;
                         }
 
