@@ -99,7 +99,7 @@ public class GiveawayEnds {
             String guildText = GiveawayUtils.getGuildText(guildId);
             int participantsSize = participants.size();
 
-            if (countWinner <= participantsSize && countWinner >= minParticipants) {
+            if (countWinner <= participantsSize && participantsSize >= minParticipants) {
                 try {
                     LOGGER.info("Завершаем Giveaway: {}, Участников: {}", guildId, participantsSize);
 

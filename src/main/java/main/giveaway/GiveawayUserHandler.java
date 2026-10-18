@@ -7,7 +7,9 @@ import main.service.GiveawayRepositoryService;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @AllArgsConstructor
 public class GiveawayUserHandler {
@@ -16,22 +18,25 @@ public class GiveawayUserHandler {
 
     @Transactional
     public void saveUser(ActiveGiveaways activeGiveaways, List<Participant> user) {
-        boolean finish = activeGiveaways.isFinish();
+        if (user.isEmpty()) return;
 
-        if (!finish && !user.isEmpty()) {
-            List<Participants> participantsList = new ArrayList<>(user.size() + 1);
+        Set<Long> savedUserIds = new HashSet<>();
+        for (Participants participant : giveawayRepositoryService.findAllParticipants(activeGiveaways.getMessageId())) {
+            savedUserIds.add(participant.getUserId());
+        }
 
-            for (Participant users : user) {
-                String nickname = users.nickname();
-                long userId = users.userId();
+        List<Participants> participantsList = new ArrayList<>(user.size());
+        for (Participant userParticipant : user) {
+            if (!savedUserIds.add(userParticipant.userId())) continue;
 
-                Participants participants = new Participants();
-                participants.setUserId(userId);
-                participants.setNickName(nickname);
-                participants.setActiveGiveaways(activeGiveaways);
+            Participants participant = new Participants();
+            participant.setUserId(userParticipant.userId());
+            participant.setNickName(userParticipant.nickname());
+            participant.setActiveGiveaways(activeGiveaways);
+            participantsList.add(participant);
+        }
 
-                participantsList.add(participants);
-            }
+        if (!participantsList.isEmpty()) {
             giveawayRepositoryService.saveParticipants(participantsList);
         }
     }

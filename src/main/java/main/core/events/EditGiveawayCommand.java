@@ -200,7 +200,6 @@ public class EditGiveawayCommand {
     }
 
     private GiveawayInfo updateSchedulingGiveaway(@NotNull SlashCommandInteractionEvent event, @NotNull Scheduling scheduling) {
-        long userId = event.getUser().getIdLong();
         String time = event.getOption("duration", OptionMapping::getAsString);
         int winners = Optional.ofNullable(event.getOption("winners", OptionMapping::getAsInt)).orElse(-1);
         String title = event.getOption("title", OptionMapping::getAsString);
@@ -219,7 +218,7 @@ public class EditGiveawayCommand {
         if (time != null) {
             LocalDateTime localDateTime;
 
-            String zonesIdByUser = BotStart.getZonesIdByUser(userId);
+            String zonesIdByUser = BotStart.getZonesIdByUser(scheduling.getCreatedUserId());
             ZoneId zoneId = ZoneId.of(zonesIdByUser);
 
             if (time.matches(GiveawayUtils.ISO_TIME_REGEX)) {

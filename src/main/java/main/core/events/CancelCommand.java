@@ -49,7 +49,7 @@ public class CancelCommand {
             } else {
                 Scheduling scheduling = schedulingRepository.findByIdSalt(giveawayId);
 
-                if (scheduling == null) {
+                if (scheduling == null || !scheduling.getGuildId().equals(guildId)) {
                     String selectMenuSchedulingNotFound = jsonParsers.getLocale("select_menu_scheduling_not_found", guildId);
                     event.getHook().sendMessage(selectMenuSchedulingNotFound).setEphemeral(true).queue();
                 } else {
