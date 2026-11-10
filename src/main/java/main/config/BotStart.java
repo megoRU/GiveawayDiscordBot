@@ -1,5 +1,6 @@
 package main.config;
 
+import com.neovisionaries.ws.client.WebSocketFactory;
 import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,6 +25,7 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import okhttp3.OkHttpClient;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.slf4j.Logger;
@@ -76,6 +78,9 @@ public class BotStart {
     private final ScheduleStartService scheduleStartService;
     private final CoreBot coreBot;
 
+    private final OkHttpClient discordOkHttpClient;
+    private final WebSocketFactory discordWebSocketFactory;
+
     @PostConstruct
     public void startBot() {
         try {
@@ -111,10 +116,8 @@ public class BotStart {
             jdaBuilder.setBulkDeleteSplittingEnabled(false);
             jdaBuilder.addEventListeners(coreBot);
 
-            if (Config.IS_PROXY) {
-                System.setProperty("socksProxyHost", Config.PROXY_IP);
-                System.setProperty("socksProxyPort", "10808");
-            }
+            jdaBuilder.setHttpClient(discordOkHttpClient);
+            jdaBuilder.setWebsocketFactory(discordWebSocketFactory);
 
             jda = jdaBuilder.build();
             jda.awaitReady();
